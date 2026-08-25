@@ -1,0 +1,187 @@
+{
+  "_meta": {
+    "schema_version": 2,
+    "generated_at": "2026-08-20",
+    "note": "M1 試查樣本，已對齊 PRD v0.3 schema。未查證完成的欄位一律填 null，不得臆測填入。v0.3 變更：移除 risk_flags（主觀判斷／風水禁忌，見 PRD §7.2.1）；co_occurs_with 降為選填，M1 結束後統一補。"
+  },
+  "symbols": [
+    {
+      "id": "sprinkler_head_pendent",
+      "schema_version": 2,
+      "category": "fire_safety",
+      "name": "密閉式撒水頭（下垂型）",
+      "aliases": [
+        "灑水頭",
+        "撒水頭",
+        "消防噴頭",
+        "sprinkler"
+      ],
+      "svg_ref": "sym-sprinkler-pendent",
+      "plain_meaning": "天花板上偵測到高溫就會自動噴水的消防設備。平面圖上通常畫成小圓圈，代表這個位置的天花板會有一顆撒水頭。",
+      "caution": "法規要求撒水頭迴水板下方 45 公分內、水平方向 30 公分內必須保持淨空。這代表你之後裝潢做天花板造型、吊櫃、投影幕或輕鋼架時都必須避開它，不能包起來也不能擋住。看預售屋時可以先想想撒水頭的位置會不會卡到你想要的天花板設計。",
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": "regulation",
+      "verification_status": "verified",
+      "source_refs": [
+        {
+          "doc": "各類場所消防安全設備設置標準",
+          "clause": "自動撒水設備章節（撒水頭裝置規定）",
+          "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0120029"
+        },
+        {
+          "doc": "消防機關辦理建築物消防安全設備審查及查驗作業基準 附件三「消防圖說圖示範例」",
+          "year": 2020,
+          "url": "https://law.nfa.gov.tw/mobile/law.aspx?LSID=FL019489"
+        }
+      ],
+      "verified_at": "2026-08-20",
+      "verified_by": "hsinhui",
+      "ai_description": "天花板平面上的小圓形記號，通常成規則陣列分布於客廳、臥室、走道天花板，圓心標記管線連接點。",
+      "detection_hints": [
+        "小圓圈",
+        "規則陣列分布",
+        "多出現於天花板圖或消防圖(F)圖層"
+      ]
+    },
+    {
+      "id": "canopy_rain",
+      "schema_version": 2,
+      "category": "structure",
+      "name": "雨遮",
+      "aliases": [
+        "遮雨板",
+        "窗戶上方的板子"
+      ],
+      "svg_ref": "sym-canopy-rain",
+      "plain_meaning": "窗戶或開口上方、距離開口上緣 50 公分以內的擋雨構造物。平面圖上通常畫在外牆窗戶外側，是一塊淺淺的凸出區塊。",
+      "caution": "這是買房最容易被灌水的坪數項目。107 年（2018 年）1 月 1 日以後才申請建照的建案，雨遮一律不登記、不計價；但在那之前請照的建案不溯及既往，仍可能把雨遮登記進權狀並計入售價。看預售屋或中古屋時，務必先問「建照是哪一年請的」，再回頭看權狀坪數合不合理。",
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": "regulation",
+      "verification_status": "verified",
+      "source_refs": [
+        {
+          "doc": "地籍測量實施規則",
+          "clause": "106 年修正刪除屋簷及雨遮之附屬建物測量登記規定",
+          "year": 2017
+        },
+        {
+          "doc": "建築技術規則建築設計施工編",
+          "clause": "雨遮、花台於 1 公尺內免計入容積之規定"
+        }
+      ],
+      "verified_at": "2026-08-20",
+      "verified_by": "hsinhui",
+      "ai_description": "位於外牆窗戶或開口上方的淺凸出矩形區塊，深度通常不超過 1 公尺，與陽台的差別在於無法進入、無欄杆。",
+      "detection_hints": [
+        "外牆外側淺凸出",
+        "緊鄰窗戶上緣",
+        "無欄杆",
+        "深度小於陽台"
+      ]
+    },
+    {
+      "id": "beam_concealed",
+      "schema_version": 2,
+      "category": "structure",
+      "name": "暗樑",
+      "aliases": [
+        "樑",
+        "梁",
+        "橫樑",
+        "beam"
+      ],
+      "svg_ref": "sym-beam-concealed",
+      "plain_meaning": null,
+      "caution": null,
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": null,
+      "verification_status": "pending_purchase",
+      "source_refs": [
+        {
+          "doc": "CNS 11567 建築製圖",
+          "clause": "結構構材代號與線型規定（待購買核對）",
+          "year": 2012,
+          "url": "https://www.cnsonline.com.tw/?node=result&generalno=11567&locale=zh_TW"
+        }
+      ],
+      "verified_at": null,
+      "verified_by": null,
+      "ai_description": null,
+      "detection_hints": null,
+      "_pilot_note": "試查未完成。二手來源（室內設計媒體）普遍稱『柱為實心方格、樑為虛線』，但實際開啟原文後發現該說法無標準依據佐證。線型規定須以 CNS 11567 本文為準，等標準購入後補齊。"
+    },
+    {
+      "id": "door_single_swing",
+      "schema_version": 2,
+      "category": "door_window",
+      "name": "一般單開門",
+      "aliases": [
+        "房門",
+        "單扇門",
+        "普通門"
+      ],
+      "svg_ref": "sym-door-single-swing",
+      "plain_meaning": null,
+      "caution": null,
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": "cns",
+      "verification_status": "pending_purchase",
+      "source_refs": [
+        {
+          "doc": "CNS 11567 建築製圖",
+          "clause": "門窗圖例（普通門／防火門，待購買核對確切畫法）",
+          "year": 2012,
+          "url": "https://www.cnsonline.com.tw/?node=result&generalno=11567&locale=zh_TW"
+        }
+      ],
+      "verified_at": null,
+      "verified_by": null,
+      "ai_description": null,
+      "detection_hints": null,
+      "_pilot_note": "已確認 CNS 11567 涵蓋普通門與防火門（含 1 小時防火時效）圖例，來源明確，但確切畫法（開啟弧線角度、線寬）須購買標準後核對。"
+    },
+    {
+      "id": "outlet_socket_duplex",
+      "schema_version": 2,
+      "category": "plumbing_electric",
+      "name": "雙聯插座",
+      "aliases": [
+        "插座",
+        "電源孔",
+        "outlet"
+      ],
+      "svg_ref": "sym-outlet-duplex",
+      "plain_meaning": null,
+      "caution": null,
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": "regulation",
+      "verification_status": "partial",
+      "source_refs": [
+        {
+          "doc": "用戶用電設備裝置規則",
+          "clause": "符號與國家標準有關時應以 CNS 為準；CNS 未規定者得依 IEC 標準",
+          "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=J0030018"
+        },
+        {
+          "doc": "勞動部勞動力發展署《室內配線常用電工符號的認識》PEW-EHW0101 訓練教材",
+          "clause": "電燈、插座、電話對講機電鈴設計圖符號（公開教材，可作交叉來源）"
+        }
+      ],
+      "verified_at": null,
+      "verified_by": null,
+      "ai_description": null,
+      "detection_hints": null,
+      "_pilot_note": "法規指向 CNS，但『電氣製圖』對應的 CNS 標準總號尚未確認（CNS 11567 亦含電氣設備符號，可能已足夠）。須購買 CNS 11567 後判斷是否另需其他標準。"
+    }
+  ]
+}

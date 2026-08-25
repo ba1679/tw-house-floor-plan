@@ -1,0 +1,397 @@
+{
+  "schema_version": 1,
+  "id": "two_bed_25p",
+  "name": "25 坪兩房兩衛",
+  "note": "主臥獨立衛浴 + 客用衛浴，25 坪權狀的典型配置。兩間衛浴各約 1 坪，淋浴不做乾濕分離隔間。",
+  "area": {
+    "deed_ping": 25,
+    "public_ratio": 0.32,
+    "aspect": 1.25
+  },
+  "tree": {
+    "stack": "cols",
+    "ratios": [
+      0.45,
+      0.12,
+      0.43
+    ],
+    "children": [
+      {
+        "stack": "rows",
+        "ratios": [
+          0.52,
+          0.26,
+          0.22
+        ],
+        "children": [
+          {
+            "id": "room-living",
+            "room": "living_room"
+          },
+          {
+            "id": "room-kitchen",
+            "room": "kitchen"
+          },
+          {
+            "id": "room-balcony",
+            "room": "balcony",
+            "name": "後陽台"
+          }
+        ]
+      },
+      {
+        "id": "room-hall",
+        "room": "hallway",
+        "name": "走道"
+      },
+      {
+        "stack": "rows",
+        "ratios": [
+          0.44,
+          0.15,
+          0.25,
+          0.16
+        ],
+        "children": [
+          {
+            "id": "room-master",
+            "room": "master_bedroom"
+          },
+          {
+            "id": "room-bath-m",
+            "room": "bathroom",
+            "name": "主浴"
+          },
+          {
+            "id": "room-bed2",
+            "room": "bedroom",
+            "name": "次臥"
+          },
+          {
+            "id": "room-bath-g",
+            "room": "bathroom",
+            "name": "客浴"
+          }
+        ]
+      }
+    ]
+  },
+  "doors": [
+    {
+      "id": "door-entry",
+      "type": "single",
+      "exterior": {
+        "room": "room-hall",
+        "side": "n"
+      },
+      "width": 100,
+      "role": "entrance",
+      "opens_to": "room-hall"
+    },
+    {
+      "id": "door-living",
+      "type": "sliding",
+      "between": [
+        "room-hall",
+        "room-living"
+      ],
+      "width": 180,
+      "at": 0.3
+    },
+    {
+      "id": "door-kitchen",
+      "type": "single",
+      "between": [
+        "room-hall",
+        "room-kitchen"
+      ],
+      "width": 85
+    },
+    {
+      "id": "door-balcony",
+      "type": "sliding",
+      "between": [
+        "room-hall",
+        "room-balcony"
+      ],
+      "width": 90,
+      "role": "balcony"
+    },
+    {
+      "id": "door-master",
+      "type": "single",
+      "between": [
+        "room-hall",
+        "room-master"
+      ],
+      "width": 90,
+      "at": 0.88,
+      "opens_to": "room-master"
+    },
+    {
+      "id": "door-bath-m",
+      "type": "single",
+      "between": [
+        "room-master",
+        "room-bath-m"
+      ],
+      "width": 75,
+      "opens_to": "room-bath-m",
+      "at": 0.12
+    },
+    {
+      "id": "door-bed2",
+      "type": "single",
+      "between": [
+        "room-hall",
+        "room-bed2"
+      ],
+      "width": 90,
+      "at": 0.85,
+      "opens_to": "room-bed2"
+    },
+    {
+      "id": "door-bath-g",
+      "type": "single",
+      "between": [
+        "room-hall",
+        "room-bath-g"
+      ],
+      "width": 75,
+      "opens_to": "room-bath-g"
+    }
+  ],
+  "windows": [
+    {
+      "id": "win-living",
+      "room": "room-living",
+      "side": "n",
+      "width": 220
+    },
+    {
+      "id": "win-kitchen",
+      "room": "room-kitchen",
+      "side": "w",
+      "width": 110
+    },
+    {
+      "id": "win-master",
+      "room": "room-master",
+      "side": "e",
+      "width": 170
+    },
+    {
+      "id": "win-bath-m",
+      "room": "room-bath-m",
+      "side": "e",
+      "width": 60
+    },
+    {
+      "id": "win-bed2",
+      "room": "room-bed2",
+      "side": "e",
+      "width": 150
+    },
+    {
+      "id": "win-bath-g",
+      "room": "room-bath-g",
+      "side": "e",
+      "width": 60
+    },
+    {
+      "id": "win-balcony",
+      "room": "room-balcony",
+      "side": "s",
+      "width": 200
+    }
+  ],
+  "furniture": [
+    {
+      "id": "f-sofa",
+      "type": "sofa",
+      "room": "room-living",
+      "anchor": "w",
+      "at": 0.4
+    },
+    {
+      "id": "f-tv",
+      "type": "tv",
+      "room": "room-living",
+      "anchor": "e",
+      "at": 0.4
+    },
+    {
+      "id": "f-dining",
+      "type": "dining_table",
+      "room": "room-living",
+      "anchor": "s",
+      "at": 0.5
+    },
+    {
+      "id": "f-counter",
+      "type": "kitchen_counter",
+      "room": "room-kitchen",
+      "anchor": "s",
+      "at": 0.45
+    },
+    {
+      "id": "f-fridge",
+      "type": "refrigerator",
+      "room": "room-kitchen",
+      "anchor": "n",
+      "at": 0.12
+    },
+    {
+      "id": "f-bed-m",
+      "type": "bed",
+      "room": "room-master",
+      "anchor": "w",
+      "at": 0.4
+    },
+    {
+      "id": "f-wardrobe-m",
+      "type": "wardrobe",
+      "room": "room-master",
+      "anchor": "e",
+      "at": 0.5,
+      "width": 150
+    },
+    {
+      "id": "f-toilet-m",
+      "type": "toilet",
+      "room": "room-bath-m",
+      "anchor": "w",
+      "at": 0.3
+    },
+    {
+      "id": "f-sink-m",
+      "type": "sink",
+      "room": "room-bath-m",
+      "anchor": "e",
+      "at": 0.7
+    },
+    {
+      "id": "f-bed-2",
+      "type": "single_bed",
+      "room": "room-bed2",
+      "anchor": "w",
+      "at": 0.6
+    },
+    {
+      "id": "f-desk-2",
+      "type": "desk",
+      "room": "room-bed2",
+      "anchor": "e",
+      "at": 0.85
+    },
+    {
+      "id": "f-toilet-g",
+      "type": "toilet",
+      "room": "room-bath-g",
+      "anchor": "w",
+      "at": 0.3
+    }
+  ],
+  "hotspots": [
+    {
+      "id": "hs-sprinkler-living",
+      "symbol_id": "sprinkler_head_pendent",
+      "shape": "circle",
+      "place": {
+        "room": "room-living",
+        "rel": [
+          0.5,
+          0.35
+        ],
+        "radius": 14
+      }
+    },
+    {
+      "id": "hs-sprinkler-hall",
+      "symbol_id": "sprinkler_head_pendent",
+      "shape": "circle",
+      "place": {
+        "room": "room-hall",
+        "rel": [
+          0.5,
+          0.35
+        ],
+        "radius": 14
+      }
+    },
+    {
+      "id": "hs-sprinkler-master",
+      "symbol_id": "sprinkler_head_pendent",
+      "shape": "circle",
+      "place": {
+        "room": "room-master",
+        "rel": [
+          0.5,
+          0.5
+        ],
+        "radius": 14
+      }
+    },
+    {
+      "id": "hs-sprinkler-bed2",
+      "symbol_id": "sprinkler_head_pendent",
+      "shape": "circle",
+      "place": {
+        "room": "room-bed2",
+        "rel": [
+          0.5,
+          0.5
+        ],
+        "radius": 14
+      }
+    },
+    {
+      "id": "hs-outlet-living",
+      "symbol_id": "outlet_socket_duplex",
+      "shape": "rect",
+      "place": {
+        "room": "room-living",
+        "rel": [
+          0.05,
+          0.85
+        ],
+        "size": [
+          30,
+          20
+        ]
+      }
+    },
+    {
+      "id": "hs-outlet-master",
+      "symbol_id": "outlet_socket_duplex",
+      "shape": "rect",
+      "place": {
+        "room": "room-master",
+        "rel": [
+          0.05,
+          0.15
+        ],
+        "size": [
+          30,
+          20
+        ]
+      }
+    },
+    {
+      "id": "hs-canopy-bed2",
+      "symbol_id": "canopy_rain",
+      "shape": "rect",
+      "place": {
+        "room": "room-bed2",
+        "rel": [
+          0.95,
+          0.5
+        ],
+        "size": [
+          40,
+          150
+        ]
+      }
+    }
+  ]
+}

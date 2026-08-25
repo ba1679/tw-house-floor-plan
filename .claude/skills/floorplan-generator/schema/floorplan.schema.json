@@ -1,0 +1,538 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://tw-house-floor-plan/schema/floorplan.schema.json",
+  "title": "FloorPlan（展開後的輸出，唯一 source of truth）",
+  "description": "由 scripts/expand_layout.py 從 layout_spec 產生。模型不直接手寫這個檔案。座標單位 cm，原點左上，x 向右、y 向下。",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "name",
+    "unit",
+    "bounds",
+    "rooms",
+    "walls",
+    "doors",
+    "windows",
+    "furniture",
+    "annotations",
+    "hotspots"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "unit": {
+      "const": "cm"
+    },
+    "generated_by": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "area_meta": {
+      "type": "object",
+      "description": "坪數換算過程，必須隨圖輸出，讓使用者看得到假設。",
+      "additionalProperties": false,
+      "properties": {
+        "deed_ping": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "public_ratio": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "interior_ping": {
+          "type": "number"
+        },
+        "interior_m2": {
+          "type": "number"
+        },
+        "assumption": {
+          "type": "string"
+        }
+      }
+    },
+    "bounds": {
+      "type": "object",
+      "required": [
+        "width",
+        "height"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "party_walls": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "n",
+          "s",
+          "e",
+          "w"
+        ]
+      }
+    },
+    "rooms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "name",
+          "geometry",
+          "inner",
+          "area_m2",
+          "area_ping"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "geometry": {
+            "$ref": "#/definitions/rect"
+          },
+          "inner": {
+            "$ref": "#/definitions/rect",
+            "description": "扣掉牆厚一半後的可用淨空間，傢俱以此為界"
+          },
+          "area_m2": {
+            "type": "number"
+          },
+          "area_ping": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "walls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "start",
+          "end",
+          "thickness",
+          "type",
+          "orientation",
+          "length"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "start": {
+            "$ref": "#/definitions/point"
+          },
+          "end": {
+            "$ref": "#/definitions/point"
+          },
+          "orientation": {
+            "enum": [
+              "horizontal",
+              "vertical"
+            ],
+            "description": "水平牆一律 start→end 由左至右；垂直牆一律由上至下"
+          },
+          "length": {
+            "type": "number"
+          },
+          "thickness": {
+            "type": "number"
+          },
+          "type": {
+            "enum": [
+              "exterior",
+              "interior",
+              "party"
+            ]
+          },
+          "rooms_a": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "水平牆的上側／垂直牆的左側"
+          },
+          "rooms_b": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "水平牆的下側／垂直牆的右側"
+          }
+        }
+      }
+    },
+    "doors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "wall_id",
+          "offset",
+          "width",
+          "position",
+          "rotation"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "single",
+              "double",
+              "sliding"
+            ]
+          },
+          "wall_id": {
+            "type": "string"
+          },
+          "offset": {
+            "type": "number",
+            "description": "自 wall.start 起算到門「起點」的距離（cm）"
+          },
+          "width": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "position": {
+            "$ref": "#/definitions/point",
+            "description": "門中心的世界座標，由 wall_id + offset 推導"
+          },
+          "rotation": {
+            "type": "number"
+          },
+          "swing": {
+            "enum": [
+              "left",
+              "right",
+              "none"
+            ]
+          },
+          "opens_to": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "connects": {
+            "type": "array",
+            "items": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "description": "門兩側的房間"
+          },
+          "role": {
+            "enum": [
+              "entrance",
+              "interior",
+              "balcony"
+            ]
+          },
+          "swing_arc": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "門扇掃過的四分之一圓。renderer 與 validator 共用這份幾何，不各自重算。推拉門為 null。",
+            "additionalProperties": false,
+            "properties": {
+              "hinge": {
+                "$ref": "#/definitions/point"
+              },
+              "radius": {
+                "type": "number"
+              },
+              "along": {
+                "$ref": "#/definitions/point",
+                "description": "沿牆、指向門的另一端的單位方向"
+              },
+              "open": {
+                "$ref": "#/definitions/point",
+                "description": "垂直牆面、指向門開向那一側的單位方向"
+              }
+            }
+          }
+        }
+      }
+    },
+    "windows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "wall_id",
+          "offset",
+          "width",
+          "position",
+          "rotation"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "fixed",
+              "casement",
+              "sliding"
+            ]
+          },
+          "wall_id": {
+            "type": "string"
+          },
+          "offset": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "position": {
+            "$ref": "#/definitions/point"
+          },
+          "rotation": {
+            "type": "number"
+          },
+          "room": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "furniture": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "room_id",
+          "geometry",
+          "rotation"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "room_id": {
+            "type": "string"
+          },
+          "geometry": {
+            "$ref": "#/definitions/rect",
+            "description": "世界座標的 AABB，已含 rotation 效果"
+          },
+          "rotation": {
+            "type": "number",
+            "enum": [
+              0,
+              90,
+              180,
+              270
+            ]
+          },
+          "facing": {
+            "enum": [
+              "n",
+              "s",
+              "e",
+              "w",
+              "none"
+            ]
+          }
+        }
+      }
+    },
+    "annotations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "type"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "dimension",
+              "label"
+            ]
+          },
+          "start": {
+            "$ref": "#/definitions/point"
+          },
+          "end": {
+            "$ref": "#/definitions/point"
+          },
+          "position": {
+            "$ref": "#/definitions/point"
+          },
+          "label": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "hotspots": {
+      "type": "array",
+      "description": "與 PRD §7.3 的 layout.hotspots 同構，可直接餵給教學網站的 viewer。",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "symbol_id",
+          "shape",
+          "coords"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "symbol_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "null = 這個開口目前沒有對應的已查證符號（M1 未完成），viewer 應略過"
+          },
+          "shape": {
+            "enum": [
+              "rect",
+              "circle",
+              "polygon"
+            ]
+          },
+          "coords": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "label_position": {
+            "enum": [
+              "above",
+              "below",
+              "left",
+              "right"
+            ]
+          },
+          "source": {
+            "enum": [
+              "auto_door",
+              "auto_window",
+              "manual"
+            ]
+          },
+          "ref": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "來源 door/window id"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "point": {
+      "type": "object",
+      "required": [
+        "x",
+        "y"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      }
+    },
+    "rect": {
+      "type": "object",
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    }
+  }
+}

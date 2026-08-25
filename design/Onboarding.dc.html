@@ -1,0 +1,192 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
+  <style>
+    :root{
+      --paper:oklch(0.985 0.004 85);
+      --paper2:oklch(0.960 0.006 85);
+      --mount:oklch(0.925 0.005 260);
+      --ink:oklch(0.24 0.010 260);
+      --ink2:oklch(0.47 0.012 260);
+      --ink3:oklch(0.645 0.010 260);
+      --rule:oklch(0.865 0.006 260);
+      --rule2:oklch(0.925 0.005 260);
+      --accent:oklch(0.55 0.17 28);
+      --sans:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;
+      --serif:'Noto Serif TC','Songti TC',serif;
+      --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,monospace;
+    }
+    body{margin:0;background:var(--mount);font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;text-wrap:pretty;}
+    a{color:var(--accent);text-decoration:none;}
+    a:hover{color:oklch(0.44 0.17 28);}
+  </style>
+</helmet>
+
+<div style="padding:40px;display:flex;flex-direction:column;gap:30px;">
+
+  <div style="display:flex;flex-direction:column;gap:8px;">
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.10em;color:var(--accent);">§6.1.2 — 可點擊性提示</div>
+    <div style="font-family:var(--serif);font-size:27px;font-weight:600;">首次進入引導與熱區狀態</div>
+    <div style="font-size:13px;color:var(--ink2);line-height:1.85;max-width:700px;">這張圖本身就是學習對象，所以提示的設計原則是：<strong style="font-weight:700;">要看得出可以點，但不能搶走看圖的注意力</strong>。任何持續動態都會破壞線型辨識，因此一律禁止。</div>
+  </div>
+
+  <div style="display:flex;gap:40px;align-items:flex-start;">
+
+    <div style="display:flex;flex-direction:column;gap:12px;width:390px;">
+      <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink3);">首次進入 — 出現一次後不再顯示</div>
+      <div style="width:390px;height:844px;background:var(--paper);border:1px solid var(--rule);position:relative;overflow:hidden;">
+
+        <div style="height:44px;"></div>
+        <div style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 8px;border-bottom:1px solid var(--rule2);">
+          <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+          </div>
+          <div style="font-family:var(--mono);font-size:12px;letter-spacing:.10em;color:var(--ink2);">三房兩廳</div>
+          <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/></svg>
+          </div>
+        </div>
+
+        <div style="position:absolute;top:140px;left:0;right:0;display:flex;justify-content:center;">
+          <svg viewBox="0 0 360 292" style="width:356px;height:auto;">
+            <g fill="oklch(0.24 0.010 260 / .055)">
+              <circle cx="100" cy="62" r="24"/>
+              <circle cx="268" cy="110" r="24"/>
+              <rect x="26" y="84" width="152" height="24"/>
+              <rect x="196" y="66" width="140" height="24"/>
+              <rect x="192" y="58" width="34" height="36"/>
+              <rect x="192" y="188" width="34" height="36"/>
+              <rect x="6" y="118" width="26" height="30"/>
+              <rect x="224" y="268" width="82" height="20"/>
+            </g>
+            <g stroke="oklch(0.24 0.010 260)" stroke-width="5" fill="none" stroke-linecap="square">
+              <rect x="14" y="14" width="332" height="252"/>
+              <path d="M190 14 V60 M190 92 V190 M190 222 V266"/>
+              <path d="M190 150 H346"/>
+              <path d="M14 170 H60 M92 170 H190"/>
+              <path d="M14 266 H230 M300 266 H346"/>
+            </g>
+            <g stroke="oklch(0.24 0.010 260)" stroke-width="1.4" fill="none">
+              <path d="M190 60 H222"/><path d="M222 60 A32 32 0 0 1 190 92"/>
+              <path d="M190 222 H222"/><path d="M222 222 A32 32 0 0 0 190 190"/>
+              <path d="M60 170 V202"/><path d="M60 202 A32 32 0 0 0 92 170"/>
+              <path d="M230 263 H300 M230 269 H300"/>
+              <path d="M18 124 V142"/><path d="M18 124 a9 9 0 0 1 0 18"/>
+              <circle cx="100" cy="62" r="7"/><path d="M100 51v5M100 68v5M89 62h5M106 62h5"/>
+              <circle cx="268" cy="110" r="7"/><path d="M268 99v5M268 116v5M257 110h5M274 110h5"/>
+            </g>
+            <g stroke="oklch(0.24 0.010 260)" stroke-width="1.4" fill="none" stroke-dasharray="7 5">
+              <path d="M14 96 H190"/><path d="M190 78 H346"/><path d="M226 272 H304 V284 H226 Z"/>
+            </g>
+          </svg>
+        </div>
+
+        <div style="position:absolute;left:20px;right:20px;top:452px;background:var(--paper);border:1.5px solid var(--ink);box-shadow:0 6px 20px oklch(0.24 0.01 260 / .10);display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 11.5V5.2a1.7 1.7 0 013.4 0v6.3"/><path d="M12.4 11.2V9.6a1.6 1.6 0 013.2 0v1.6"/><path d="M15.6 11.4v-1a1.6 1.6 0 013.2 0v5.1a5.5 5.5 0 01-5.5 5.5h-1.6a5.4 5.4 0 01-4.3-2.1l-3-4a1.6 1.6 0 012.5-2l1.7 1.7"/></svg>
+          <div style="flex-grow:1;font-size:14.5px;line-height:1.7;">點擊圖上的標記，看看它代表什麼</div>
+          <div style="min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;color:var(--ink2);border-left:1px solid var(--rule2);padding-left:12px;">知道了</div>
+        </div>
+
+      </div>
+      <div style="border-top:1px dashed var(--accent);padding-top:10px;font-family:var(--mono);font-size:10.5px;line-height:2;color:var(--ink2);">
+        localStorage <span style="color:var(--ink);">seen_hint_v1</span> · 出現一次<br>
+        引導條疊在圖上，不推擠版面 → 關掉後圖不會跳動
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;width:390px;">
+      <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink3);">熱區狀態規格</div>
+      <div style="background:var(--paper);border:1px solid var(--rule);padding:22px;display:flex;flex-direction:column;gap:0;">
+
+        <div style="display:flex;align-items:center;gap:16px;padding-bottom:18px;">
+          <svg viewBox="0 0 72 72" style="width:72px;height:72px;flex-shrink:0;background:var(--paper2);">
+            <circle cx="36" cy="36" r="24" fill="oklch(0.24 0.010 260 / .055)"/>
+            <g stroke="oklch(0.24 0.010 260)" stroke-width="1.6" fill="none"><circle cx="36" cy="36" r="8"/><path d="M36 23v6M36 43v6M23 36h6M43 36h6"/></g>
+          </svg>
+          <div style="flex-grow:1;display:flex;flex-direction:column;gap:3px;">
+            <div style="font-family:var(--mono);font-size:11.5px;letter-spacing:.10em;font-weight:500;">NORMAL</div>
+            <div style="font-size:13px;line-height:1.7;color:var(--ink2);">底色 <span style="font-family:var(--mono);">ink / 5.5%</span>，無邊框。手機唯一的靜態提示，必須自身足夠明確。</div>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--rule2);"></div>
+
+        <div style="display:flex;align-items:center;gap:16px;padding:18px 0;">
+          <svg viewBox="0 0 72 72" style="width:72px;height:72px;flex-shrink:0;background:var(--paper2);">
+            <circle cx="36" cy="36" r="24" fill="oklch(0.24 0.010 260 / .11)" stroke="oklch(0.645 0.010 260)" stroke-width="1"/>
+            <g stroke="oklch(0.24 0.010 260)" stroke-width="1.6" fill="none"><circle cx="36" cy="36" r="8"/><path d="M36 23v6M36 43v6M23 36h6M43 36h6"/></g>
+          </svg>
+          <div style="flex-grow:1;display:flex;flex-direction:column;gap:3px;">
+            <div style="font-family:var(--mono);font-size:11.5px;letter-spacing:.10em;font-weight:500;">HOVER<span style="color:var(--ink3);font-weight:400;"> — 桌機限定</span></div>
+            <div style="font-size:13px;line-height:1.7;color:var(--ink2);">底色加深至 11% ＋ 1px 細框。手機沒有這一態。</div>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--rule2);"></div>
+
+        <div style="display:flex;align-items:center;gap:16px;padding:18px 0;">
+          <svg viewBox="0 0 72 72" style="width:72px;height:72px;flex-shrink:0;background:var(--paper2);">
+            <circle cx="36" cy="36" r="30" fill="none" stroke="oklch(0.55 0.17 28)" stroke-width="1" opacity=".35" stroke-dasharray="3 3"/>
+            <circle cx="36" cy="36" r="24" fill="oklch(0.955 0.028 28)" stroke="oklch(0.55 0.17 28)" stroke-width="1.5"/>
+            <g stroke="oklch(0.55 0.17 28)" stroke-width="1.8" fill="none"><circle cx="36" cy="36" r="8"/><path d="M36 23v6M36 43v6M23 36h6M43 36h6"/></g>
+          </svg>
+          <div style="flex-grow:1;display:flex;flex-direction:column;gap:3px;">
+            <div style="font-family:var(--mono);font-size:11.5px;letter-spacing:.10em;font-weight:500;">HIGHLIGHTED</div>
+            <div style="font-size:13px;line-height:1.7;color:var(--ink2);">從符號頁帶著 <span style="font-family:var(--mono);font-size:12px;">?highlight=</span> 進來時。擴散環<strong style="font-weight:700;">只播一次</strong>就停在實心紅框。</div>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--rule2);"></div>
+
+        <div style="display:flex;align-items:center;gap:16px;padding-top:18px;">
+          <svg viewBox="0 0 72 72" style="width:72px;height:72px;flex-shrink:0;background:var(--paper2);">
+            <circle cx="36" cy="36" r="24" fill="oklch(0.955 0.028 28)" stroke="oklch(0.55 0.17 28)" stroke-width="2.5"/>
+            <g stroke="oklch(0.55 0.17 28)" stroke-width="1.8" fill="none"><circle cx="36" cy="36" r="8"/><path d="M36 23v6M36 43v6M23 36h6M43 36h6"/></g>
+          </svg>
+          <div style="flex-grow:1;display:flex;flex-direction:column;gap:3px;">
+            <div style="font-family:var(--mono);font-size:11.5px;letter-spacing:.10em;font-weight:500;">SELECTED</div>
+            <div style="font-size:13px;line-height:1.7;color:var(--ink2);">說明卡正開著的那一個。粗紅框，與 highlighted 的差別只有線寬。</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="background:var(--paper);border:1px solid var(--rule);padding:22px;display:flex;flex-direction:column;gap:14px;">
+        <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--ink3);">動效規則</div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:3px;"><path d="M4 12.5l5.5 5.5L20 7"/></svg>
+          <div style="font-size:13.5px;line-height:1.8;">狀態切換用 120ms 淡入。highlighted 的擴散環播一次 600ms 後停止。</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:3px;"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          <div style="font-size:13.5px;line-height:1.8;">不得有任何循環動畫——閃爍、脈動、呼吸燈一律禁止。使用者正在辨認線的粗細與虛實，會動的東西會直接毀掉這件事。</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:3px;"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          <div style="font-size:13.5px;line-height:1.8;">熱區底色不得使用彩色。整張圖只有紅色一種強調色，它保留給「使用者現在正在關注的那一個」。</div>
+        </div>
+      </div>
+
+      <div style="border-top:1px dashed var(--accent);padding-top:10px;font-family:var(--mono);font-size:10.5px;line-height:2;color:var(--ink2);">
+        命中區與視覺區分離：視覺半徑依 SVG 座標，命中半徑依<br>
+        當前縮放比例換算成 ≥44 CSS px，執行期計算
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":900,"height":1240}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

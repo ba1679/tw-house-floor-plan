@@ -1,0 +1,203 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-110 -110 1058 891" width="100%" font-family="-apple-system, 'Noto Sans TC', sans-serif">
+<rect x="-110" y="-110" width="1058" height="891" fill="#ffffff"/>
+<g id="rooms">
+<rect id="room-living" data-room-type="living_room" x="0" y="0" width="377" height="349" fill="#f4f2ed"/>
+<rect id="room-kitchen" data-room-type="kitchen" x="0" y="349" width="377" height="174" fill="#eaf0f2"/>
+<rect id="room-balcony" data-room-type="balcony" x="0" y="523" width="377" height="148" fill="#eef1e9"/>
+<rect id="room-hall" data-room-type="hallway" x="377" y="0" width="101" height="671" fill="#f4f2ed"/>
+<rect id="room-master" data-room-type="master_bedroom" x="478" y="0" width="360" height="295" fill="#f4f2ed"/>
+<rect id="room-bath-m" data-room-type="bathroom" x="478" y="295" width="360" height="101" fill="#eaf0f2"/>
+<rect id="room-bed2" data-room-type="bedroom" x="478" y="396" width="360" height="168" fill="#f4f2ed"/>
+<rect id="room-bath-g" data-room-type="bathroom" x="478" y="564" width="360" height="107" fill="#eaf0f2"/>
+</g>
+<g id="walls">
+<rect id="wall-001" data-wall-type="exterior" x="-12.0" y="-12.0" width="862.0" height="24.0" fill="#2b2b2b"/>
+<rect id="wall-002" data-wall-type="exterior" x="-12.0" y="659.0" width="862.0" height="24.0" fill="#2b2b2b"/>
+<rect id="wall-003" data-wall-type="exterior" x="-12.0" y="-12.0" width="24.0" height="695.0" fill="#2b2b2b"/>
+<rect id="wall-004" data-wall-type="exterior" x="826.0" y="-12.0" width="24.0" height="695.0" fill="#2b2b2b"/>
+<rect id="wall-005" data-wall-type="interior" x="371.0" y="-6.0" width="12.0" height="683.0" fill="#2b2b2b"/>
+<rect id="wall-006" data-wall-type="interior" x="472.0" y="-6.0" width="12.0" height="683.0" fill="#2b2b2b"/>
+<rect id="wall-007" data-wall-type="interior" x="-6.0" y="343.0" width="389.0" height="12.0" fill="#2b2b2b"/>
+<rect id="wall-008" data-wall-type="interior" x="-6.0" y="517.0" width="389.0" height="12.0" fill="#2b2b2b"/>
+<rect id="wall-009" data-wall-type="interior" x="472.0" y="289.0" width="372.0" height="12.0" fill="#2b2b2b"/>
+<rect id="wall-010" data-wall-type="interior" x="472.0" y="390.0" width="372.0" height="12.0" fill="#2b2b2b"/>
+<rect id="wall-011" data-wall-type="interior" x="472.0" y="558.0" width="372.0" height="12.0" fill="#2b2b2b"/>
+<rect x="378.0" y="-13.0" width="100.0" height="26.0" fill="#ffffff"/>
+<rect x="370.0" y="15.0" width="14.0" height="180.0" fill="#ffffff"/>
+<rect x="370.0" y="394.0" width="14.0" height="85.0" fill="#ffffff"/>
+<rect x="370.0" y="552.0" width="14.0" height="90.0" fill="#ffffff"/>
+<rect x="471.0" y="205.0" width="14.0" height="90.0" fill="#ffffff"/>
+<rect x="484.0" y="288.0" width="75.0" height="14.0" fill="#ffffff"/>
+<rect x="471.0" y="474.0" width="14.0" height="90.0" fill="#ffffff"/>
+<rect x="471.0" y="580.0" width="14.0" height="75.0" fill="#ffffff"/>
+<rect x="79.0" y="-13.0" width="220.0" height="26.0" fill="#ffffff"/>
+<rect x="-13.0" y="381.0" width="26.0" height="110.0" fill="#ffffff"/>
+<rect x="825.0" y="63.0" width="26.0" height="170.0" fill="#ffffff"/>
+<rect x="825.0" y="316.0" width="26.0" height="60.0" fill="#ffffff"/>
+<rect x="825.0" y="405.0" width="26.0" height="150.0" fill="#ffffff"/>
+<rect x="825.0" y="588.0" width="26.0" height="60.0" fill="#ffffff"/>
+<rect x="89.0" y="658.0" width="200.0" height="26.0" fill="#ffffff"/>
+</g>
+<g id="doors" fill="none" stroke="#4a4a4a" stroke-width="4">
+<g id="door-entry" data-door-type="single">
+<line x1="478.0" y1="0.0" x2="478.0" y2="100.0"/>
+<path d="M 478.0 100.0 A 100 100 0 0 0 378.0 0.0" stroke-dasharray="14 10" stroke-width="3"/>
+</g>
+<line x1="370.4" y1="15.0" x2="370.4" y2="114.0" stroke-width="7"/>
+<line x1="383.6" y1="96.0" x2="383.6" y2="195.0" stroke-width="7"/>
+<g id="door-kitchen" data-door-type="single">
+<line x1="377.0" y1="479.0" x2="292.0" y2="479.0"/>
+<path d="M 292.0 479.0 A 85 85 0 0 0 377.0 394.0" stroke-dasharray="14 10" stroke-width="3"/>
+</g>
+<line x1="370.4" y1="552.0" x2="370.4" y2="601.5" stroke-width="7"/>
+<line x1="383.6" y1="592.5" x2="383.6" y2="642.0" stroke-width="7"/>
+<g id="door-master" data-door-type="single">
+<line x1="478.0" y1="295.0" x2="568.0" y2="295.0"/>
+<path d="M 568.0 295.0 A 90 90 0 0 1 478.0 205.0" stroke-dasharray="14 10" stroke-width="3"/>
+</g>
+<g id="door-bath-m" data-door-type="single">
+<line x1="559.0" y1="295.0" x2="559.0" y2="370.0"/>
+<path d="M 559.0 370.0 A 75 75 0 0 0 484.0 295.0" stroke-dasharray="14 10" stroke-width="3"/>
+</g>
+<g id="door-bed2" data-door-type="single">
+<line x1="478.0" y1="564.0" x2="568.0" y2="564.0"/>
+<path d="M 568.0 564.0 A 90 90 0 0 1 478.0 474.0" stroke-dasharray="14 10" stroke-width="3"/>
+</g>
+<g id="door-bath-g" data-door-type="single">
+<line x1="478.0" y1="655.0" x2="553.0" y2="655.0"/>
+<path d="M 553.0 655.0 A 75 75 0 0 1 478.0 580.0" stroke-dasharray="14 10" stroke-width="3"/>
+</g>
+</g>
+<g id="windows" stroke="#4a4a4a" fill="none">
+<g id="win-living">
+<line x1="79.0" y1="-12.0" x2="299.0" y2="-12.0" stroke-width="4"/>
+<line x1="79.0" y1="0.0" x2="299.0" y2="0.0" stroke-width="3"/>
+<line x1="79.0" y1="12.0" x2="299.0" y2="12.0" stroke-width="4"/>
+</g>
+<g id="win-kitchen">
+<line x1="-12.0" y1="381.0" x2="-12.0" y2="491.0" stroke-width="4"/>
+<line x1="0.0" y1="381.0" x2="0.0" y2="491.0" stroke-width="3"/>
+<line x1="12.0" y1="381.0" x2="12.0" y2="491.0" stroke-width="4"/>
+</g>
+<g id="win-master">
+<line x1="826.0" y1="63.0" x2="826.0" y2="233.0" stroke-width="4"/>
+<line x1="838.0" y1="63.0" x2="838.0" y2="233.0" stroke-width="3"/>
+<line x1="850.0" y1="63.0" x2="850.0" y2="233.0" stroke-width="4"/>
+</g>
+<g id="win-bath-m">
+<line x1="826.0" y1="316.0" x2="826.0" y2="376.0" stroke-width="4"/>
+<line x1="838.0" y1="316.0" x2="838.0" y2="376.0" stroke-width="3"/>
+<line x1="850.0" y1="316.0" x2="850.0" y2="376.0" stroke-width="4"/>
+</g>
+<g id="win-bed2">
+<line x1="826.0" y1="405.0" x2="826.0" y2="555.0" stroke-width="4"/>
+<line x1="838.0" y1="405.0" x2="838.0" y2="555.0" stroke-width="3"/>
+<line x1="850.0" y1="405.0" x2="850.0" y2="555.0" stroke-width="4"/>
+</g>
+<g id="win-bath-g">
+<line x1="826.0" y1="588.0" x2="826.0" y2="648.0" stroke-width="4"/>
+<line x1="838.0" y1="588.0" x2="838.0" y2="648.0" stroke-width="3"/>
+<line x1="850.0" y1="588.0" x2="850.0" y2="648.0" stroke-width="4"/>
+</g>
+<g id="win-balcony">
+<line x1="89.0" y1="659.0" x2="289.0" y2="659.0" stroke-width="4"/>
+<line x1="89.0" y1="671.0" x2="289.0" y2="671.0" stroke-width="3"/>
+<line x1="89.0" y1="683.0" x2="289.0" y2="683.0" stroke-width="4"/>
+</g>
+</g>
+<g id="furniture" fill="#ffffff" stroke="#8a8a8a" stroke-width="3">
+<g id="f-sofa" data-furniture-type="sofa">
+<rect x="12" y="34" width="90" height="220" rx="6"/>
+<line x1="34.5" y1="34" x2="34.5" y2="254"/>
+</g>
+<g id="f-tv" data-furniture-type="tv">
+<rect x="356" y="199" width="15" height="120" rx="2"/>
+</g>
+<g id="f-dining" data-furniture-type="dining_table">
+<rect x="122" y="263" width="140" height="80" rx="2"/>
+</g>
+<g id="f-counter" data-furniture-type="kitchen_counter">
+<rect x="49" y="457" width="240" height="60" rx="2"/>
+</g>
+<g id="f-fridge" data-furniture-type="refrigerator">
+<rect x="40" y="355" width="70" height="70" rx="2"/>
+</g>
+<g id="f-bed-m" data-furniture-type="bed">
+<rect x="484" y="47" width="188" height="152" rx="6"/>
+<line x1="525.4" y1="47" x2="525.4" y2="199"/>
+</g>
+<g id="f-wardrobe-m" data-furniture-type="wardrobe">
+<rect x="580" y="229" width="150" height="60" rx="2"/>
+</g>
+<g id="f-toilet-m" data-furniture-type="toilet">
+<ellipse cx="587.0" cy="336.0" rx="20.0" ry="35.0"/>
+</g>
+<g id="f-sink-m" data-furniture-type="sink">
+<ellipse cx="801.0" cy="360.0" rx="25.0" ry="30.0"/>
+</g>
+<g id="f-bed-2" data-furniture-type="single_bed">
+<rect x="638" y="450" width="188" height="91" rx="6"/>
+<line x1="784.6" y1="450" x2="784.6" y2="541"/>
+</g>
+<g id="f-desk-2" data-furniture-type="desk">
+<rect x="516" y="402" width="120" height="60" rx="2"/>
+</g>
+<g id="f-toilet-g" data-furniture-type="toilet">
+<ellipse cx="587.0" cy="605.0" rx="20.0" ry="35.0"/>
+</g>
+</g>
+<g id="room-labels" text-anchor="middle" fill="#2b2b2b" stroke="#ffffff" stroke-width="8" stroke-linejoin="round" paint-order="stroke">
+<text x="188.5" y="174.5" font-size="21" font-weight="600">客廳</text>
+<text x="188.5" y="199.7" font-size="15" fill="#7a7a7a">4.0 坪</text>
+<text x="188.5" y="436.0" font-size="21" font-weight="600">廚房</text>
+<text x="188.5" y="461.2" font-size="15" fill="#7a7a7a">2.0 坪</text>
+<text x="188.5" y="597.0" font-size="21" font-weight="600">後陽台</text>
+<text x="188.5" y="622.2" font-size="15" fill="#7a7a7a">1.7 坪</text>
+<text x="427.5" y="335.5" font-size="21" font-weight="600">走道</text>
+<text x="427.5" y="360.7" font-size="15" fill="#7a7a7a">2.0 坪</text>
+<text x="658.0" y="147.5" font-size="21" font-weight="600">主臥</text>
+<text x="658.0" y="172.7" font-size="15" fill="#7a7a7a">3.2 坪</text>
+<text x="658.0" y="345.5" font-size="21" font-weight="600">主浴</text>
+<text x="658.0" y="370.7" font-size="15" fill="#7a7a7a">1.1 坪</text>
+<text x="658.0" y="480.0" font-size="21" font-weight="600">次臥</text>
+<text x="658.0" y="505.2" font-size="15" fill="#7a7a7a">1.8 坪</text>
+<text x="658.0" y="617.5" font-size="21" font-weight="600">客浴</text>
+<text x="658.0" y="642.7" font-size="15" fill="#7a7a7a">1.2 坪</text>
+</g>
+<g id="annotations" stroke="#7a7a7a" fill="#7a7a7a" stroke-width="2">
+<line x1="0" y1="-49.5" x2="838" y2="-49.5"/>
+<line x1="0" y1="-63.5" x2="0" y2="-35.5"/>
+<line x1="838" y1="-63.5" x2="838" y2="-35.5"/>
+<text x="419.0" y="-71.5" font-size="16" text-anchor="middle" stroke="none">838 cm</text>
+<line x1="-49.5" y1="0" x2="-49.5" y2="671"/>
+<line x1="-63.5" y1="0" x2="-35.5" y2="0"/>
+<line x1="-63.5" y1="671" x2="-35.5" y2="671"/>
+<text x="-71.5" y="335.5" font-size="16" text-anchor="middle" stroke="none" transform="rotate(-90 -71.5 335.5)">671 cm</text>
+</g>
+<text x="0" y="726.0" font-size="19" font-weight="700" fill="#2b2b2b">25 坪兩房兩衛</text>
+<text x="0" y="761.2" font-size="14" fill="#7a7a7a">權狀 25 坪 ／ 公設比 32% ／ 室內 17.0 坪（56.2 m²）</text>
+<g id="hotspots" fill="transparent" stroke="none">
+<rect id="hs-door-entry" data-symbol-id="door_single_swing" data-source="auto_door" x="378" y="-12" width="100" height="24"/>
+<rect id="hs-door-living" data-symbol-id="" data-source="auto_door" x="365" y="15" width="24" height="180"/>
+<rect id="hs-door-kitchen" data-symbol-id="door_single_swing" data-source="auto_door" x="365" y="394" width="24" height="85"/>
+<rect id="hs-door-balcony" data-symbol-id="" data-source="auto_door" x="365" y="552" width="24" height="90"/>
+<rect id="hs-door-master" data-symbol-id="door_single_swing" data-source="auto_door" x="466" y="205" width="24" height="90"/>
+<rect id="hs-door-bath-m" data-symbol-id="door_single_swing" data-source="auto_door" x="484" y="283" width="75" height="24"/>
+<rect id="hs-door-bed2" data-symbol-id="door_single_swing" data-source="auto_door" x="466" y="474" width="24" height="90"/>
+<rect id="hs-door-bath-g" data-symbol-id="door_single_swing" data-source="auto_door" x="466" y="581" width="24" height="75"/>
+<rect id="hs-win-living" data-symbol-id="" data-source="auto_window" x="79" y="-12" width="220" height="24"/>
+<rect id="hs-win-kitchen" data-symbol-id="" data-source="auto_window" x="-12" y="381" width="24" height="110"/>
+<rect id="hs-win-master" data-symbol-id="" data-source="auto_window" x="826" y="63" width="24" height="170"/>
+<rect id="hs-win-bath-m" data-symbol-id="" data-source="auto_window" x="826" y="316" width="24" height="60"/>
+<rect id="hs-win-bed2" data-symbol-id="" data-source="auto_window" x="826" y="405" width="24" height="150"/>
+<rect id="hs-win-bath-g" data-symbol-id="" data-source="auto_window" x="826" y="588" width="24" height="60"/>
+<rect id="hs-win-balcony" data-symbol-id="" data-source="auto_window" x="89" y="659" width="200" height="24"/>
+<circle id="hs-sprinkler-living" data-symbol-id="sprinkler_head_pendent" data-source="manual" cx="192" cy="128" r="14"/>
+<circle id="hs-sprinkler-hall" data-symbol-id="sprinkler_head_pendent" data-source="manual" cx="428" cy="238" r="14"/>
+<circle id="hs-sprinkler-master" data-symbol-id="sprinkler_head_pendent" data-source="manual" cx="655" cy="151" r="14"/>
+<circle id="hs-sprinkler-bed2" data-symbol-id="sprinkler_head_pendent" data-source="manual" cx="655" cy="480" r="14"/>
+<rect id="hs-outlet-living" data-symbol-id="outlet_socket_duplex" data-source="manual" x="15" y="283" width="30" height="20"/>
+<rect id="hs-outlet-master" data-symbol-id="outlet_socket_duplex" data-source="manual" x="486" y="44" width="30" height="20"/>
+<rect id="hs-canopy-bed2" data-symbol-id="canopy_rain" data-source="manual" x="789" y="405" width="40" height="150"/>
+</g>
+</svg>

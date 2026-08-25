@@ -1,0 +1,9 @@
+{
+  "_note": "門窗類型 → data/symbols.*.json 的 symbol.id。PRD M1 尚未完成，未查證的一律填 null，validator 只警告不擋。不得為了湊數硬給對應（PRD §4.1「20 是目標數量，不是預先鎖死的名稱」）。",
+  "door.single": "door_single_swing",
+  "door.double": null,
+  "door.sliding": null,
+  "window.fixed": null,
+  "window.casement": null,
+  "window.sliding": null
+}

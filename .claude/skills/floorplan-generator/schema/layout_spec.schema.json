@@ -1,0 +1,449 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://tw-house-floor-plan/schema/layout_spec.schema.json",
+  "title": "Layout Spec（LLM 撰寫的輸入）",
+  "description": "這是模型唯一需要產生的檔案。它描述拓樸與比例，不描述座標。座標、牆、開口位置一律由 scripts/expand_layout.py 推導。",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "name",
+    "area",
+    "tree"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "note": {
+      "type": "string"
+    },
+    "area": {
+      "type": "object",
+      "description": "坪數輸入。預設把 deed_ping 視為「權狀坪數」（含公設），扣掉 public_ratio 後才是室內面積。",
+      "additionalProperties": false,
+      "properties": {
+        "deed_ping": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "權狀坪數（含公設）"
+        },
+        "public_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.6,
+          "default": 0.32,
+          "description": "公設比"
+        },
+        "aspect": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 1.25,
+          "description": "室內長寬比 width/height"
+        },
+        "bounds": {
+          "type": "object",
+          "description": "直接指定室內外框尺寸（cm）。給了就忽略 deed_ping/aspect。",
+          "required": [
+            "width",
+            "height"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "width": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "height": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        }
+      }
+    },
+    "wall_thickness": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "exterior": {
+          "type": "number",
+          "default": 24
+        },
+        "interior": {
+          "type": "number",
+          "default": 12
+        }
+      }
+    },
+    "party_walls": {
+      "type": "array",
+      "description": "標為共同壁（與鄰戶相接）的外框邊，該邊不得開窗。長型街屋常見 [\"w\",\"e\"]。",
+      "items": {
+        "enum": [
+          "n",
+          "s",
+          "e",
+          "w"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "tree": {
+      "$ref": "#/definitions/node"
+    },
+    "doors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "single",
+              "double",
+              "sliding"
+            ],
+            "default": "single"
+          },
+          "between": {
+            "type": "array",
+            "description": "室內門：連接的兩個房間 id。展開器會找出兩房共用的牆段。",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "exterior": {
+            "type": "object",
+            "description": "對外門（大門／陽台落地門）：房間的哪一面外牆。",
+            "required": [
+              "room",
+              "side"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "room": {
+                "type": "string"
+              },
+              "side": {
+                "enum": [
+                  "n",
+                  "s",
+                  "e",
+                  "w"
+                ]
+              }
+            }
+          },
+          "width": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "default": 90
+          },
+          "at": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5,
+            "description": "沿共用段的相對位置（門中心）"
+          },
+          "swing": {
+            "enum": [
+              "left",
+              "right",
+              "none"
+            ],
+            "default": "right"
+          },
+          "opens_to": {
+            "type": "string",
+            "description": "門扇打開後掃過的房間 id；省略則取牆的 b 側"
+          },
+          "role": {
+            "enum": [
+              "entrance",
+              "interior",
+              "balcony"
+            ],
+            "default": "interior"
+          }
+        }
+      }
+    },
+    "windows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "room",
+          "side"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "room": {
+            "type": "string"
+          },
+          "side": {
+            "enum": [
+              "n",
+              "s",
+              "e",
+              "w"
+            ]
+          },
+          "width": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "default": 150
+          },
+          "at": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5
+          },
+          "type": {
+            "enum": [
+              "fixed",
+              "casement",
+              "sliding"
+            ],
+            "default": "sliding"
+          }
+        }
+      }
+    },
+    "furniture": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "room"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "description": "見 rules/furniture.md 的型錄"
+          },
+          "room": {
+            "type": "string"
+          },
+          "anchor": {
+            "enum": [
+              "n",
+              "s",
+              "e",
+              "w",
+              "center"
+            ],
+            "default": "center",
+            "description": "傢俱背靠房間的哪一面牆。這是期望值不是命令——展開器會在避開門的開啟弧線與通行空間的前提下求解，必要時自動換一面牆。"
+          },
+          "at": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5,
+            "description": "沿該牆的期望相對位置（傢俱中心）。被門窗擋住時展開器會沿牆滑動找最近的空位。"
+          },
+          "width": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "省略則用型錄預設"
+          },
+          "depth": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "strict": {
+            "type": "boolean",
+            "default": false,
+            "description": "true = 禁止自動換牆，放不下就報錯。只在刻意示範某個擺放問題時用。"
+          }
+        }
+      }
+    },
+    "hotspots": {
+      "type": "array",
+      "description": "手動標註的 CNS 符號熱區（撒水頭／暗樑／雨遮等）。門窗熱區由展開器自動產生，不需寫在這裡。",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "symbol_id"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "symbol_id": {
+            "type": "string",
+            "description": "對應 data/symbols.*.json 的 symbol.id"
+          },
+          "shape": {
+            "enum": [
+              "rect",
+              "circle",
+              "polygon"
+            ],
+            "default": "circle"
+          },
+          "coords": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "直接給世界座標（cm）"
+          },
+          "place": {
+            "type": "object",
+            "description": "相對房間放置，展開器換算成 coords。",
+            "required": [
+              "room"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "room": {
+                "type": "string"
+              },
+              "rel": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2,
+                "default": [
+                  0.5,
+                  0.5
+                ]
+              },
+              "radius": {
+                "type": "number",
+                "default": 15
+              },
+              "size": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+              }
+            }
+          },
+          "label_position": {
+            "enum": [
+              "above",
+              "below",
+              "left",
+              "right"
+            ],
+            "default": "right"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "node": {
+      "oneOf": [
+        {
+          "type": "object",
+          "title": "Leaf（一個房間）",
+          "required": [
+            "room",
+            "id"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z0-9_-]+$"
+            },
+            "room": {
+              "enum": [
+                "living_room",
+                "dining_room",
+                "kitchen",
+                "bedroom",
+                "master_bedroom",
+                "bathroom",
+                "balcony",
+                "hallway",
+                "storage",
+                "study",
+                "entrance"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "description": "中文名，省略則用 room type 預設"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "title": "Split（切一刀）",
+          "required": [
+            "stack",
+            "ratios",
+            "children"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "stack": {
+              "enum": [
+                "rows",
+                "cols"
+              ],
+              "description": "rows = 子節點由上往下排；cols = 由左往右排"
+            },
+            "ratios": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "minItems": 2
+            },
+            "children": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/node"
+              },
+              "minItems": 2
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,29 @@
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
+  <style>
+    :root{
+      --paper:oklch(0.985 0.004 85);
+      --paper2:oklch(0.960 0.006 85);
+      --mount:oklch(0.925 0.005 260);
+      --ink:oklch(0.24 0.010 260);
+      --ink2:oklch(0.47 0.012 260);
+      --ink3:oklch(0.645 0.010 260);
+      --rule:oklch(0.865 0.006 260);
+      --rule2:oklch(0.925 0.005 260);
+      --accent:oklch(0.55 0.17 28);
+      --accent2:oklch(0.55 0.17 232);
+      --accent-soft:oklch(0.955 0.028 28);
+      --sans:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;
+      --serif:'Noto Serif TC','Songti TC',serif;
+      --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,monospace;
+    }
+    body{margin:0;background:var(--mount);font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;text-wrap:pretty;}
+    a{color:var(--accent);text-decoration:none;}
+    a:hover{color:oklch(0.44 0.17 28);}
+    .tag{font-family:var(--mono);font-size:11px;letter-spacing:.10em;color:var(--accent);}
+    .lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink3);}
+    .mono{font-family:var(--mono);}
+    .h1{font-family:var(--serif);font-size:26px;font-weight:600;letter-spacing:.01em;}
+    .note{font-size:13px;color:var(--ink2);line-height:1.85;max-width:640px;}
+    .sec{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--ink3);}
+    .body{font-size:15px;line-height:1.85;color:var(--ink);}
+  </style>

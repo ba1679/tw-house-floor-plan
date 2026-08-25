@@ -1,0 +1,337 @@
+{
+  "schema_version": 1,
+  "id": "two_bed_20p",
+  "name": "20 坪兩房一廳一衛",
+  "note": "中央走道串連公私領域，是台灣小坪數新成屋最常見的解法。衛浴約 1 坪，實際是淋浴不做乾濕分離隔間，因此不放 shower。",
+  "area": {
+    "deed_ping": 20,
+    "public_ratio": 0.32,
+    "aspect": 1.25
+  },
+  "tree": {
+    "stack": "cols",
+    "ratios": [
+      0.45,
+      0.12,
+      0.43
+    ],
+    "children": [
+      {
+        "stack": "rows",
+        "ratios": [
+          0.6,
+          0.25,
+          0.15
+        ],
+        "children": [
+          {
+            "id": "room-living",
+            "room": "living_room"
+          },
+          {
+            "id": "room-kitchen",
+            "room": "kitchen"
+          },
+          {
+            "id": "room-balcony",
+            "room": "balcony",
+            "name": "後陽台"
+          }
+        ]
+      },
+      {
+        "id": "room-hall",
+        "room": "hallway",
+        "name": "走道"
+      },
+      {
+        "stack": "rows",
+        "ratios": [
+          0.49,
+          0.2,
+          0.31
+        ],
+        "children": [
+          {
+            "id": "room-master",
+            "room": "master_bedroom"
+          },
+          {
+            "id": "room-bath",
+            "room": "bathroom"
+          },
+          {
+            "id": "room-bed2",
+            "room": "bedroom",
+            "name": "次臥"
+          }
+        ]
+      }
+    ]
+  },
+  "doors": [
+    {
+      "id": "door-entry",
+      "type": "single",
+      "exterior": {
+        "room": "room-hall",
+        "side": "n"
+      },
+      "width": 90,
+      "role": "entrance",
+      "opens_to": "room-hall"
+    },
+    {
+      "id": "door-living",
+      "type": "sliding",
+      "between": [
+        "room-hall",
+        "room-living"
+      ],
+      "width": 150,
+      "at": 0.35
+    },
+    {
+      "id": "door-kitchen",
+      "type": "single",
+      "between": [
+        "room-hall",
+        "room-kitchen"
+      ],
+      "width": 80
+    },
+    {
+      "id": "door-balcony",
+      "type": "sliding",
+      "between": [
+        "room-hall",
+        "room-balcony"
+      ],
+      "width": 90,
+      "role": "balcony"
+    },
+    {
+      "id": "door-master",
+      "type": "single",
+      "between": [
+        "room-hall",
+        "room-master"
+      ],
+      "width": 90,
+      "at": 0.85,
+      "opens_to": "room-master"
+    },
+    {
+      "id": "door-bath",
+      "type": "single",
+      "between": [
+        "room-hall",
+        "room-bath"
+      ],
+      "width": 75,
+      "opens_to": "room-bath"
+    },
+    {
+      "id": "door-bed2",
+      "type": "single",
+      "between": [
+        "room-hall",
+        "room-bed2"
+      ],
+      "width": 90,
+      "at": 0.85,
+      "opens_to": "room-bed2"
+    }
+  ],
+  "windows": [
+    {
+      "id": "win-living",
+      "room": "room-living",
+      "side": "n",
+      "width": 200
+    },
+    {
+      "id": "win-kitchen",
+      "room": "room-kitchen",
+      "side": "w",
+      "width": 100
+    },
+    {
+      "id": "win-master",
+      "room": "room-master",
+      "side": "e",
+      "width": 160
+    },
+    {
+      "id": "win-bath",
+      "room": "room-bath",
+      "side": "e",
+      "width": 60
+    },
+    {
+      "id": "win-bed2",
+      "room": "room-bed2",
+      "side": "e",
+      "width": 150
+    },
+    {
+      "id": "win-balcony",
+      "room": "room-balcony",
+      "side": "s",
+      "width": 180
+    }
+  ],
+  "furniture": [
+    {
+      "id": "f-sofa",
+      "type": "sofa",
+      "room": "room-living",
+      "anchor": "w",
+      "at": 0.45
+    },
+    {
+      "id": "f-tv",
+      "type": "tv",
+      "room": "room-living",
+      "anchor": "e",
+      "at": 0.45
+    },
+    {
+      "id": "f-dining",
+      "type": "dining_table",
+      "room": "room-living",
+      "anchor": "n",
+      "at": 0.62
+    },
+    {
+      "id": "f-counter",
+      "type": "kitchen_counter",
+      "room": "room-kitchen",
+      "anchor": "s",
+      "at": 0.5
+    },
+    {
+      "id": "f-fridge",
+      "type": "refrigerator",
+      "room": "room-kitchen",
+      "anchor": "n",
+      "at": 0.12
+    },
+    {
+      "id": "f-bed-m",
+      "type": "bed",
+      "room": "room-master",
+      "anchor": "n",
+      "at": 0.42
+    },
+    {
+      "id": "f-wardrobe-m",
+      "type": "wardrobe",
+      "room": "room-master",
+      "anchor": "e",
+      "at": 0.5
+    },
+    {
+      "id": "f-toilet",
+      "type": "toilet",
+      "room": "room-bath",
+      "anchor": "w",
+      "at": 0.28
+    },
+    {
+      "id": "f-sink",
+      "type": "sink",
+      "room": "room-bath",
+      "anchor": "w",
+      "at": 0.75
+    },
+    {
+      "id": "f-bed-2",
+      "type": "single_bed",
+      "room": "room-bed2",
+      "anchor": "w",
+      "at": 0.62
+    },
+    {
+      "id": "f-desk-2",
+      "type": "desk",
+      "room": "room-bed2",
+      "anchor": "n",
+      "at": 0.72,
+      "width": 100
+    }
+  ],
+  "hotspots": [
+    {
+      "id": "hs-sprinkler-living",
+      "symbol_id": "sprinkler_head_pendent",
+      "shape": "circle",
+      "place": {
+        "room": "room-living",
+        "rel": [
+          0.5,
+          0.4
+        ],
+        "radius": 14
+      }
+    },
+    {
+      "id": "hs-sprinkler-hall",
+      "symbol_id": "sprinkler_head_pendent",
+      "shape": "circle",
+      "place": {
+        "room": "room-hall",
+        "rel": [
+          0.5,
+          0.5
+        ],
+        "radius": 14
+      }
+    },
+    {
+      "id": "hs-sprinkler-master",
+      "symbol_id": "sprinkler_head_pendent",
+      "shape": "circle",
+      "place": {
+        "room": "room-master",
+        "rel": [
+          0.5,
+          0.5
+        ],
+        "radius": 14
+      }
+    },
+    {
+      "id": "hs-outlet-living",
+      "symbol_id": "outlet_socket_duplex",
+      "shape": "rect",
+      "place": {
+        "room": "room-living",
+        "rel": [
+          0.06,
+          0.8
+        ],
+        "size": [
+          30,
+          20
+        ]
+      }
+    },
+    {
+      "id": "hs-canopy-bed2",
+      "symbol_id": "canopy_rain",
+      "shape": "rect",
+      "place": {
+        "room": "room-bed2",
+        "rel": [
+          0.94,
+          0.5
+        ],
+        "size": [
+          40,
+          150
+        ]
+      }
+    }
+  ]
+}

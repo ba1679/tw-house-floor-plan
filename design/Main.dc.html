@@ -1,0 +1,250 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
+  <style>
+    :root{
+      --paper:oklch(0.985 0.004 85);
+      --paper2:oklch(0.960 0.006 85);
+      --mount:oklch(0.925 0.005 260);
+      --ink:oklch(0.24 0.010 260);
+      --ink2:oklch(0.47 0.012 260);
+      --ink3:oklch(0.645 0.010 260);
+      --rule:oklch(0.865 0.006 260);
+      --rule2:oklch(0.925 0.005 260);
+      --accent:oklch(0.55 0.17 28);
+      --accent-soft:oklch(0.955 0.028 28);
+      --sans:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;
+      --serif:'Noto Serif TC','Songti TC',serif;
+      --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,monospace;
+    }
+    body{margin:0;background:var(--mount);font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;text-wrap:pretty;}
+    a{color:var(--accent);text-decoration:none;}
+    a:hover{color:oklch(0.44 0.17 28);}
+  </style>
+</helmet>
+
+<div style="padding:40px;display:flex;flex-direction:column;gap:30px;">
+
+  <div style="display:flex;flex-direction:column;gap:8px;">
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.10em;color:var(--accent);">§6.1 — 說明卡 / BOTTOM SHEET</div>
+    <div style="font-family:var(--serif);font-size:27px;font-weight:600;">點擊熱區後的說明卡</div>
+    <div style="font-size:13px;color:var(--ink2);line-height:1.85;max-width:700px;">文案直接取自 <span style="font-family:var(--mono);">symbols.sample.json</span> 中 <span style="font-family:var(--mono);">verification_status: verified</span> 的實際內容，一字未改，所以量出來的高度是真的。sheet 永遠不佔滿螢幕：上緣留給平面圖，使用者才不會失去「我剛剛點的是哪裡」。</div>
+  </div>
+
+  <div style="display:flex;gap:40px;align-items:flex-start;">
+
+    <!-- ============ 狀態 A ============ -->
+    <div style="display:flex;flex-direction:column;gap:12px;width:390px;">
+      <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink3);">狀態 A — 初始高度 392PX (46%)</div>
+      <div style="width:390px;height:844px;background:var(--paper);border:1px solid var(--rule);position:relative;overflow:hidden;">
+
+        <div style="height:44px;"></div>
+
+        <div style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 8px;border-bottom:1px solid var(--rule2);">
+          <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+          </div>
+          <div style="font-family:var(--mono);font-size:12px;letter-spacing:.10em;color:var(--ink2);">三房兩廳</div>
+          <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/></svg>
+          </div>
+        </div>
+
+        <div style="position:absolute;top:100px;left:0;right:0;bottom:392px;display:flex;align-items:center;justify-content:center;">
+          <svg viewBox="0 0 360 292" style="width:330px;height:auto;">
+            <g stroke="oklch(0.24 0.010 260)" stroke-width="5" fill="none" stroke-linecap="square">
+              <rect x="14" y="14" width="332" height="252"/>
+              <path d="M190 14 V60 M190 92 V190 M190 222 V266"/>
+              <path d="M190 150 H346"/>
+              <path d="M14 170 H60 M92 170 H190"/>
+              <path d="M14 266 H230 M300 266 H346"/>
+            </g>
+            <g stroke="oklch(0.24 0.010 260)" stroke-width="1.4" fill="none">
+              <path d="M190 60 H222"/><path d="M222 60 A32 32 0 0 1 190 92"/>
+              <path d="M190 222 H222"/><path d="M222 222 A32 32 0 0 0 190 190"/>
+              <path d="M60 170 V202"/><path d="M60 202 A32 32 0 0 0 92 170"/>
+              <path d="M230 263 H300 M230 269 H300"/>
+              <path d="M18 124 V142"/><path d="M18 124 a9 9 0 0 1 0 18"/>
+            </g>
+            <g stroke="oklch(0.24 0.010 260)" stroke-width="1.4" fill="none" stroke-dasharray="7 5">
+              <path d="M14 96 H190"/>
+              <path d="M190 78 H346"/>
+              <path d="M226 272 H304 V284 H226 Z"/>
+            </g>
+            <circle cx="100" cy="62" r="26" fill="oklch(0.955 0.028 28)" stroke="oklch(0.55 0.17 28)" stroke-width="1.5"/>
+            <g stroke="oklch(0.55 0.17 28)" stroke-width="1.8" fill="none">
+              <circle cx="100" cy="62" r="7"/><path d="M100 51v5M100 68v5M89 62h5M106 62h5"/>
+            </g>
+            <g stroke="oklch(0.24 0.010 260)" stroke-width="1.4" fill="none" opacity=".55">
+              <circle cx="268" cy="110" r="7"/><path d="M268 99v5M268 116v5M257 110h5M274 110h5"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- SHEET A -->
+        <div style="position:absolute;left:0;right:0;bottom:0;height:392px;background:var(--paper);border-top:1px solid var(--ink);box-shadow:0 -14px 34px oklch(0.24 0.01 260 / .09);display:flex;flex-direction:column;">
+          <div style="display:flex;justify-content:center;padding:10px 0 4px;">
+            <div style="width:38px;height:4px;background:var(--ink3);"></div>
+          </div>
+
+          <div style="padding:6px 20px 0;display:flex;align-items:center;gap:12px;">
+            <div style="width:44px;height:44px;border:1px solid var(--rule);background:var(--paper2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="1.4"><circle cx="12" cy="12" r="6.5"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/></svg>
+            </div>
+            <div style="flex-grow:1;display:flex;flex-direction:column;gap:2px;">
+              <div style="font-family:var(--serif);font-size:19px;font-weight:600;line-height:1.35;">密閉式撒水頭（下垂型）</div>
+              <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.10em;color:var(--ink3);">消防 / FIRE SAFETY</div>
+            </div>
+            <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink2)" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </div>
+          </div>
+
+          <div style="padding:14px 20px 0;">
+            <div style="display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border:1.5px solid var(--ink);background:var(--paper2);">
+              <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="var(--ink)" stroke-width="1.4"><path d="M4 3h9l3.5 3.5V17H4z"/><path d="M12.5 3v4h4"/><path d="M6.5 11h7M6.5 14h4.5"/></svg>
+              <span style="font-family:var(--mono);font-size:11px;letter-spacing:.06em;font-weight:500;">法規依據</span>
+              <span style="width:1px;height:12px;background:var(--rule);"></span>
+              <span style="font-size:11.5px;color:var(--ink2);">各類場所消防安全設備設置標準</span>
+            </div>
+          </div>
+
+          <div style="padding:18px 20px 0;display:flex;flex-direction:column;gap:7px;">
+            <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--ink3);">白話意思</div>
+            <div style="font-size:15px;line-height:1.85;">天花板上偵測到高溫就會自動噴水的消防設備。平面圖上通常畫成小圓圈，代表這個位置的天花板會有一顆撒水頭。</div>
+          </div>
+
+          <div style="position:relative;flex-grow:1;overflow:hidden;padding:18px 20px 0;">
+            <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--ink3);margin-bottom:7px;">注意事項</div>
+            <div style="font-size:15px;line-height:1.85;">法規要求撒水頭迴水板下方 45 公分內、水平方向 30 公分內必須保持淨空。這代表你之後裝潢做天花板造型、吊櫃、投影幕或輕鋼架時都必須避開它</div>
+            <div style="position:absolute;left:0;right:0;bottom:0;height:76px;background:linear-gradient(to bottom, oklch(0.985 0.004 85 / 0), var(--paper) 72%);"></div>
+            <div style="position:absolute;left:0;right:0;bottom:10px;display:flex;justify-content:center;">
+              <div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.10em;color:var(--ink3);">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
+                上拉看完整內容
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top:1px dashed var(--accent);padding-top:10px;font-family:var(--mono);font-size:10.5px;line-height:2;color:var(--ink2);">
+        平面圖可見高度 352px · 熱區選取態＝紅環 + 淺紅底<br>
+        注意事項在此高度必然被截斷 → 漸層 + 上拉提示是必要的
+      </div>
+    </div>
+
+    <!-- ============ 狀態 B ============ -->
+    <div style="display:flex;flex-direction:column;gap:12px;width:390px;">
+      <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink3);">狀態 B — 展開高度 660PX (78%)</div>
+      <div style="width:390px;height:844px;background:var(--paper);border:1px solid var(--rule);position:relative;overflow:hidden;">
+
+        <div style="height:44px;"></div>
+
+        <div style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 8px;border-bottom:1px solid var(--rule2);">
+          <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+          </div>
+          <div style="font-family:var(--mono);font-size:12px;letter-spacing:.10em;color:var(--ink2);">三房兩廳</div>
+          <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/></svg>
+          </div>
+        </div>
+
+        <div style="position:absolute;top:100px;left:0;right:0;height:84px;display:flex;align-items:flex-start;justify-content:center;overflow:hidden;">
+          <svg viewBox="0 0 360 292" style="width:330px;height:auto;">
+            <g stroke="oklch(0.24 0.010 260)" stroke-width="5" fill="none" stroke-linecap="square">
+              <rect x="14" y="14" width="332" height="252"/>
+              <path d="M190 14 V60 M190 92 V190"/>
+              <path d="M190 150 H346"/>
+            </g>
+            <g stroke="oklch(0.24 0.010 260)" stroke-width="1.4" fill="none" stroke-dasharray="7 5">
+              <path d="M14 96 H190"/><path d="M190 78 H346"/>
+            </g>
+            <circle cx="100" cy="62" r="26" fill="oklch(0.955 0.028 28)" stroke="oklch(0.55 0.17 28)" stroke-width="1.5"/>
+            <g stroke="oklch(0.55 0.17 28)" stroke-width="1.8" fill="none">
+              <circle cx="100" cy="62" r="7"/><path d="M100 51v5M100 68v5M89 62h5M106 62h5"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- SHEET B -->
+        <div style="position:absolute;left:0;right:0;bottom:0;height:660px;background:var(--paper);border-top:1px solid var(--ink);box-shadow:0 -14px 34px oklch(0.24 0.01 260 / .09);display:flex;flex-direction:column;">
+          <div style="display:flex;justify-content:center;padding:10px 0 4px;">
+            <div style="width:38px;height:4px;background:var(--ink3);"></div>
+          </div>
+
+          <div style="padding:6px 20px 0;display:flex;align-items:center;gap:12px;">
+            <div style="width:44px;height:44px;border:1px solid var(--rule);background:var(--paper2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="1.4"><circle cx="12" cy="12" r="6.5"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/></svg>
+            </div>
+            <div style="flex-grow:1;display:flex;flex-direction:column;gap:2px;">
+              <div style="font-family:var(--serif);font-size:19px;font-weight:600;line-height:1.35;">密閉式撒水頭（下垂型）</div>
+              <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.10em;color:var(--ink3);">消防 / FIRE SAFETY</div>
+            </div>
+            <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink2)" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </div>
+          </div>
+
+          <div style="padding:14px 20px 0;">
+            <div style="display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border:1.5px solid var(--ink);background:var(--paper2);">
+              <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="var(--ink)" stroke-width="1.4"><path d="M4 3h9l3.5 3.5V17H4z"/><path d="M12.5 3v4h4"/><path d="M6.5 11h7M6.5 14h4.5"/></svg>
+              <span style="font-family:var(--mono);font-size:11px;letter-spacing:.06em;font-weight:500;">法規依據</span>
+              <span style="width:1px;height:12px;background:var(--rule);"></span>
+              <span style="font-size:11.5px;color:var(--ink2);">各類場所消防安全設備設置標準</span>
+            </div>
+          </div>
+
+          <div style="padding:18px 20px 0;display:flex;flex-direction:column;gap:7px;">
+            <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--ink3);">白話意思</div>
+            <div style="font-size:15px;line-height:1.85;">天花板上偵測到高溫就會自動噴水的消防設備。平面圖上通常畫成小圓圈，代表這個位置的天花板會有一顆撒水頭。</div>
+          </div>
+
+          <div style="padding:20px 20px 0;display:flex;flex-direction:column;gap:7px;">
+            <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--ink3);">注意事項</div>
+            <div style="font-size:15px;line-height:1.85;">法規要求撒水頭迴水板下方 45 公分內、水平方向 30 公分內必須保持淨空。這代表你之後裝潢做天花板造型、吊櫃、投影幕或輕鋼架時都必須避開它，不能包起來也不能擋住。看預售屋時可以先想想撒水頭的位置會不會卡到你想要的天花板設計。</div>
+          </div>
+
+          <div style="flex-grow:1;"></div>
+
+          <div style="border-top:1px solid var(--rule2);margin:0 20px;"></div>
+
+          <div style="min-height:56px;margin:0 20px;display:flex;align-items:center;gap:12px;cursor:pointer;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+            <div style="flex-grow:1;display:flex;flex-direction:column;gap:1px;">
+              <div style="font-size:14.5px;font-weight:500;">看它在圖上的其他位置</div>
+              <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--ink3);">這張圖上共 2 處 · 目前第 1 處</div>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+          </div>
+
+          <div style="border-top:1px solid var(--rule2);padding:12px 20px 16px;font-size:11px;line-height:1.75;color:var(--ink3);">
+            本網站符號說明為一般通用慣例，不同建商 / 設計師畫法可能有差異，實際請以個案圖說或現場人員說明為準。
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top:1px dashed var(--accent);padding-top:10px;font-family:var(--mono);font-size:10.5px;line-height:2;color:var(--ink2);">
+        平面圖僅餘 84px：足夠維持位置感，不足以繼續操作 → 這是展開上限<br>
+        「其他位置」列與關閉鍵皆 ≥44px · 免責固定在最底，不隨捲動消失
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":900,"height":1170}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

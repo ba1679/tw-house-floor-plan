@@ -1,0 +1,1502 @@
+{
+  "schema_version": 1,
+  "id": "three_bed_35p",
+  "name": "35 坪三房兩衛",
+  "unit": "cm",
+  "generated_by": "floorplan-generator/expand_layout.py",
+  "generated_at": "2026-08-25",
+  "area_meta": {
+    "deed_ping": 35,
+    "public_ratio": 0.32,
+    "interior_ping": 23.8,
+    "interior_m2": 78.67,
+    "assumption": "輸入坪數視為權狀坪數（含公設）；扣除公設比 32% 後為室內面積。本圖 bounds 為室內外框（含外牆中心線內），不含公設與雨遮。"
+  },
+  "bounds": {
+    "width": 992,
+    "height": 793
+  },
+  "party_walls": [],
+  "rooms": [
+    {
+      "id": "room-living",
+      "type": "living_room",
+      "name": "客廳",
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 436,
+        "height": 397
+      },
+      "inner": {
+        "x": 12,
+        "y": 12,
+        "width": 418,
+        "height": 379
+      },
+      "area_m2": 17.31,
+      "area_ping": 5.24
+    },
+    {
+      "id": "room-dining",
+      "type": "dining_room",
+      "name": "餐廳",
+      "geometry": {
+        "x": 436,
+        "y": 0,
+        "width": 298,
+        "height": 397
+      },
+      "inner": {
+        "x": 442,
+        "y": 12,
+        "width": 286,
+        "height": 379
+      },
+      "area_m2": 11.83,
+      "area_ping": 3.58
+    },
+    {
+      "id": "room-kitchen",
+      "type": "kitchen",
+      "name": "廚房",
+      "geometry": {
+        "x": 734,
+        "y": 0,
+        "width": 258,
+        "height": 278
+      },
+      "inner": {
+        "x": 740,
+        "y": 12,
+        "width": 240,
+        "height": 260
+      },
+      "area_m2": 7.17,
+      "area_ping": 2.17
+    },
+    {
+      "id": "room-balcony",
+      "type": "balcony",
+      "name": "後陽台",
+      "geometry": {
+        "x": 734,
+        "y": 278,
+        "width": 258,
+        "height": 119
+      },
+      "inner": {
+        "x": 740,
+        "y": 284,
+        "width": 240,
+        "height": 107
+      },
+      "area_m2": 3.07,
+      "area_ping": 0.93
+    },
+    {
+      "id": "room-hall",
+      "type": "hallway",
+      "name": "走道",
+      "geometry": {
+        "x": 0,
+        "y": 397,
+        "width": 992,
+        "height": 87
+      },
+      "inner": {
+        "x": 12,
+        "y": 403,
+        "width": 968,
+        "height": 75
+      },
+      "area_m2": 8.63,
+      "area_ping": 2.61
+    },
+    {
+      "id": "room-master",
+      "type": "master_bedroom",
+      "name": "主臥",
+      "geometry": {
+        "x": 0,
+        "y": 484,
+        "width": 327,
+        "height": 309
+      },
+      "inner": {
+        "x": 12,
+        "y": 490,
+        "width": 309,
+        "height": 291
+      },
+      "area_m2": 10.1,
+      "area_ping": 3.06
+    },
+    {
+      "id": "room-bath-m",
+      "type": "bathroom",
+      "name": "主浴",
+      "geometry": {
+        "x": 327,
+        "y": 484,
+        "width": 119,
+        "height": 309
+      },
+      "inner": {
+        "x": 333,
+        "y": 490,
+        "width": 107,
+        "height": 291
+      },
+      "area_m2": 3.68,
+      "area_ping": 1.11
+    },
+    {
+      "id": "room-bed2",
+      "type": "bedroom",
+      "name": "次臥",
+      "geometry": {
+        "x": 446,
+        "y": 484,
+        "width": 268,
+        "height": 309
+      },
+      "inner": {
+        "x": 452,
+        "y": 490,
+        "width": 256,
+        "height": 291
+      },
+      "area_m2": 8.28,
+      "area_ping": 2.51
+    },
+    {
+      "id": "room-bath-g",
+      "type": "bathroom",
+      "name": "客浴",
+      "geometry": {
+        "x": 714,
+        "y": 484,
+        "width": 109,
+        "height": 309
+      },
+      "inner": {
+        "x": 720,
+        "y": 490,
+        "width": 97,
+        "height": 291
+      },
+      "area_m2": 3.37,
+      "area_ping": 1.02
+    },
+    {
+      "id": "room-bed3",
+      "type": "bedroom",
+      "name": "小孩房",
+      "geometry": {
+        "x": 823,
+        "y": 484,
+        "width": 169,
+        "height": 309
+      },
+      "inner": {
+        "x": 829,
+        "y": 490,
+        "width": 151,
+        "height": 291
+      },
+      "area_m2": 5.22,
+      "area_ping": 1.58
+    }
+  ],
+  "walls": [
+    {
+      "id": "wall-001",
+      "start": {
+        "x": 0,
+        "y": 0
+      },
+      "end": {
+        "x": 992,
+        "y": 0
+      },
+      "orientation": "horizontal",
+      "length": 992,
+      "thickness": 24,
+      "type": "exterior",
+      "rooms_a": [],
+      "rooms_b": [
+        "room-living",
+        "room-dining",
+        "room-kitchen"
+      ]
+    },
+    {
+      "id": "wall-002",
+      "start": {
+        "x": 0,
+        "y": 793
+      },
+      "end": {
+        "x": 992,
+        "y": 793
+      },
+      "orientation": "horizontal",
+      "length": 992,
+      "thickness": 24,
+      "type": "exterior",
+      "rooms_a": [
+        "room-master",
+        "room-bath-m",
+        "room-bed2",
+        "room-bath-g",
+        "room-bed3"
+      ],
+      "rooms_b": []
+    },
+    {
+      "id": "wall-003",
+      "start": {
+        "x": 0,
+        "y": 0
+      },
+      "end": {
+        "x": 0,
+        "y": 793
+      },
+      "orientation": "vertical",
+      "length": 793,
+      "thickness": 24,
+      "type": "exterior",
+      "rooms_a": [],
+      "rooms_b": [
+        "room-living",
+        "room-hall",
+        "room-master"
+      ]
+    },
+    {
+      "id": "wall-004",
+      "start": {
+        "x": 992,
+        "y": 0
+      },
+      "end": {
+        "x": 992,
+        "y": 793
+      },
+      "orientation": "vertical",
+      "length": 793,
+      "thickness": 24,
+      "type": "exterior",
+      "rooms_a": [
+        "room-kitchen",
+        "room-balcony",
+        "room-hall",
+        "room-bed3"
+      ],
+      "rooms_b": []
+    },
+    {
+      "id": "wall-005",
+      "start": {
+        "x": 0,
+        "y": 397
+      },
+      "end": {
+        "x": 992,
+        "y": 397
+      },
+      "orientation": "horizontal",
+      "length": 992,
+      "thickness": 12,
+      "type": "interior",
+      "rooms_a": [
+        "room-living",
+        "room-dining",
+        "room-balcony"
+      ],
+      "rooms_b": [
+        "room-hall"
+      ]
+    },
+    {
+      "id": "wall-006",
+      "start": {
+        "x": 0,
+        "y": 484
+      },
+      "end": {
+        "x": 992,
+        "y": 484
+      },
+      "orientation": "horizontal",
+      "length": 992,
+      "thickness": 12,
+      "type": "interior",
+      "rooms_a": [
+        "room-hall"
+      ],
+      "rooms_b": [
+        "room-master",
+        "room-bath-m",
+        "room-bed2",
+        "room-bath-g",
+        "room-bed3"
+      ]
+    },
+    {
+      "id": "wall-007",
+      "start": {
+        "x": 436,
+        "y": 0
+      },
+      "end": {
+        "x": 436,
+        "y": 397
+      },
+      "orientation": "vertical",
+      "length": 397,
+      "thickness": 12,
+      "type": "interior",
+      "rooms_a": [
+        "room-living"
+      ],
+      "rooms_b": [
+        "room-dining"
+      ]
+    },
+    {
+      "id": "wall-008",
+      "start": {
+        "x": 734,
+        "y": 0
+      },
+      "end": {
+        "x": 734,
+        "y": 397
+      },
+      "orientation": "vertical",
+      "length": 397,
+      "thickness": 12,
+      "type": "interior",
+      "rooms_a": [
+        "room-dining"
+      ],
+      "rooms_b": [
+        "room-kitchen",
+        "room-balcony"
+      ]
+    },
+    {
+      "id": "wall-009",
+      "start": {
+        "x": 734,
+        "y": 278
+      },
+      "end": {
+        "x": 992,
+        "y": 278
+      },
+      "orientation": "horizontal",
+      "length": 258,
+      "thickness": 12,
+      "type": "interior",
+      "rooms_a": [
+        "room-kitchen"
+      ],
+      "rooms_b": [
+        "room-balcony"
+      ]
+    },
+    {
+      "id": "wall-010",
+      "start": {
+        "x": 327,
+        "y": 484
+      },
+      "end": {
+        "x": 327,
+        "y": 793
+      },
+      "orientation": "vertical",
+      "length": 309,
+      "thickness": 12,
+      "type": "interior",
+      "rooms_a": [
+        "room-master"
+      ],
+      "rooms_b": [
+        "room-bath-m"
+      ]
+    },
+    {
+      "id": "wall-011",
+      "start": {
+        "x": 446,
+        "y": 484
+      },
+      "end": {
+        "x": 446,
+        "y": 793
+      },
+      "orientation": "vertical",
+      "length": 309,
+      "thickness": 12,
+      "type": "interior",
+      "rooms_a": [
+        "room-bath-m"
+      ],
+      "rooms_b": [
+        "room-bed2"
+      ]
+    },
+    {
+      "id": "wall-012",
+      "start": {
+        "x": 714,
+        "y": 484
+      },
+      "end": {
+        "x": 714,
+        "y": 793
+      },
+      "orientation": "vertical",
+      "length": 309,
+      "thickness": 12,
+      "type": "interior",
+      "rooms_a": [
+        "room-bed2"
+      ],
+      "rooms_b": [
+        "room-bath-g"
+      ]
+    },
+    {
+      "id": "wall-013",
+      "start": {
+        "x": 823,
+        "y": 484
+      },
+      "end": {
+        "x": 823,
+        "y": 793
+      },
+      "orientation": "vertical",
+      "length": 309,
+      "thickness": 12,
+      "type": "interior",
+      "rooms_a": [
+        "room-bath-g"
+      ],
+      "rooms_b": [
+        "room-bed3"
+      ]
+    }
+  ],
+  "doors": [
+    {
+      "id": "door-entry",
+      "type": "single",
+      "wall_id": "wall-003",
+      "offset": 268,
+      "width": 100,
+      "position": {
+        "x": 0,
+        "y": 318
+      },
+      "rotation": 90,
+      "swing": "right",
+      "opens_to": "room-living",
+      "connects": [
+        null,
+        "room-living"
+      ],
+      "role": "entrance",
+      "swing_arc": {
+        "hinge": {
+          "x": 0,
+          "y": 368
+        },
+        "radius": 100,
+        "along": {
+          "x": 0.0,
+          "y": -1.0
+        },
+        "open": {
+          "x": 1.0,
+          "y": 0.0
+        }
+      }
+    },
+    {
+      "id": "door-hall-living",
+      "type": "sliding",
+      "wall_id": "wall-005",
+      "offset": 96,
+      "width": 200,
+      "position": {
+        "x": 196,
+        "y": 397
+      },
+      "rotation": 0,
+      "swing": "right",
+      "opens_to": "room-hall",
+      "connects": [
+        "room-living",
+        "room-hall"
+      ],
+      "role": "interior",
+      "swing_arc": null
+    },
+    {
+      "id": "door-hall-dining",
+      "type": "sliding",
+      "wall_id": "wall-005",
+      "offset": 495,
+      "width": 180,
+      "position": {
+        "x": 585,
+        "y": 397
+      },
+      "rotation": 0,
+      "swing": "right",
+      "opens_to": "room-hall",
+      "connects": [
+        "room-dining",
+        "room-hall"
+      ],
+      "role": "interior",
+      "swing_arc": null
+    },
+    {
+      "id": "door-dining-kitchen",
+      "type": "sliding",
+      "wall_id": "wall-008",
+      "offset": 83,
+      "width": 140,
+      "position": {
+        "x": 734,
+        "y": 153
+      },
+      "rotation": 90,
+      "swing": "right",
+      "opens_to": "room-kitchen",
+      "connects": [
+        "room-dining",
+        "room-kitchen"
+      ],
+      "role": "interior",
+      "swing_arc": null
+    },
+    {
+      "id": "door-balcony",
+      "type": "sliding",
+      "wall_id": "wall-009",
+      "offset": 148,
+      "width": 110,
+      "position": {
+        "x": 937,
+        "y": 278
+      },
+      "rotation": 0,
+      "swing": "right",
+      "opens_to": "room-balcony",
+      "connects": [
+        "room-kitchen",
+        "room-balcony"
+      ],
+      "role": "balcony",
+      "swing_arc": null
+    },
+    {
+      "id": "door-master",
+      "type": "single",
+      "wall_id": "wall-006",
+      "offset": 237,
+      "width": 90,
+      "position": {
+        "x": 282,
+        "y": 484
+      },
+      "rotation": 0,
+      "swing": "right",
+      "opens_to": "room-master",
+      "connects": [
+        "room-hall",
+        "room-master"
+      ],
+      "role": "interior",
+      "swing_arc": {
+        "hinge": {
+          "x": 327,
+          "y": 484
+        },
+        "radius": 90,
+        "along": {
+          "x": -1.0,
+          "y": 0.0
+        },
+        "open": {
+          "x": 0.0,
+          "y": 1.0
+        }
+      }
+    },
+    {
+      "id": "door-bath-m",
+      "type": "single",
+      "wall_id": "wall-010",
+      "offset": 117,
+      "width": 75,
+      "position": {
+        "x": 327,
+        "y": 639
+      },
+      "rotation": 90,
+      "swing": "right",
+      "opens_to": "room-bath-m",
+      "connects": [
+        "room-master",
+        "room-bath-m"
+      ],
+      "role": "interior",
+      "swing_arc": {
+        "hinge": {
+          "x": 327,
+          "y": 676
+        },
+        "radius": 75,
+        "along": {
+          "x": 0.0,
+          "y": -1.0
+        },
+        "open": {
+          "x": 1.0,
+          "y": 0.0
+        }
+      }
+    },
+    {
+      "id": "door-bed2",
+      "type": "single",
+      "wall_id": "wall-006",
+      "offset": 446,
+      "width": 90,
+      "position": {
+        "x": 491,
+        "y": 484
+      },
+      "rotation": 0,
+      "swing": "right",
+      "opens_to": "room-bed2",
+      "connects": [
+        "room-hall",
+        "room-bed2"
+      ],
+      "role": "interior",
+      "swing_arc": {
+        "hinge": {
+          "x": 536,
+          "y": 484
+        },
+        "radius": 90,
+        "along": {
+          "x": -1.0,
+          "y": 0.0
+        },
+        "open": {
+          "x": 0.0,
+          "y": 1.0
+        }
+      }
+    },
+    {
+      "id": "door-bath-g",
+      "type": "single",
+      "wall_id": "wall-006",
+      "offset": 731,
+      "width": 75,
+      "position": {
+        "x": 769,
+        "y": 484
+      },
+      "rotation": 0,
+      "swing": "right",
+      "opens_to": "room-bath-g",
+      "connects": [
+        "room-hall",
+        "room-bath-g"
+      ],
+      "role": "interior",
+      "swing_arc": {
+        "hinge": {
+          "x": 806,
+          "y": 484
+        },
+        "radius": 75,
+        "along": {
+          "x": -1.0,
+          "y": 0.0
+        },
+        "open": {
+          "x": 0.0,
+          "y": 1.0
+        }
+      }
+    },
+    {
+      "id": "door-bed3",
+      "type": "single",
+      "wall_id": "wall-006",
+      "offset": 823,
+      "width": 90,
+      "position": {
+        "x": 868,
+        "y": 484
+      },
+      "rotation": 0,
+      "swing": "right",
+      "opens_to": "room-bed3",
+      "connects": [
+        "room-hall",
+        "room-bed3"
+      ],
+      "role": "interior",
+      "swing_arc": {
+        "hinge": {
+          "x": 913,
+          "y": 484
+        },
+        "radius": 90,
+        "along": {
+          "x": -1.0,
+          "y": 0.0
+        },
+        "open": {
+          "x": 0.0,
+          "y": 1.0
+        }
+      }
+    }
+  ],
+  "windows": [
+    {
+      "id": "win-living",
+      "type": "sliding",
+      "wall_id": "wall-001",
+      "offset": 98,
+      "width": 240,
+      "position": {
+        "x": 218,
+        "y": 0
+      },
+      "rotation": 0,
+      "room": "room-living"
+    },
+    {
+      "id": "win-dining",
+      "type": "sliding",
+      "wall_id": "wall-001",
+      "offset": 495,
+      "width": 180,
+      "position": {
+        "x": 585,
+        "y": 0
+      },
+      "rotation": 0,
+      "room": "room-dining"
+    },
+    {
+      "id": "win-kitchen",
+      "type": "sliding",
+      "wall_id": "wall-004",
+      "offset": 79,
+      "width": 120,
+      "position": {
+        "x": 992,
+        "y": 139
+      },
+      "rotation": 90,
+      "room": "room-kitchen"
+    },
+    {
+      "id": "win-balcony",
+      "type": "sliding",
+      "wall_id": "wall-004",
+      "offset": 293,
+      "width": 90,
+      "position": {
+        "x": 992,
+        "y": 338
+      },
+      "rotation": 90,
+      "room": "room-balcony"
+    },
+    {
+      "id": "win-master",
+      "type": "sliding",
+      "wall_id": "wall-002",
+      "offset": 64,
+      "width": 200,
+      "position": {
+        "x": 164,
+        "y": 793
+      },
+      "rotation": 0,
+      "room": "room-master"
+    },
+    {
+      "id": "win-bath-m",
+      "type": "sliding",
+      "wall_id": "wall-002",
+      "offset": 357,
+      "width": 60,
+      "position": {
+        "x": 387,
+        "y": 793
+      },
+      "rotation": 0,
+      "room": "room-bath-m"
+    },
+    {
+      "id": "win-bed2",
+      "type": "sliding",
+      "wall_id": "wall-002",
+      "offset": 480,
+      "width": 200,
+      "position": {
+        "x": 580,
+        "y": 793
+      },
+      "rotation": 0,
+      "room": "room-bed2"
+    },
+    {
+      "id": "win-bath-g",
+      "type": "sliding",
+      "wall_id": "wall-002",
+      "offset": 739,
+      "width": 60,
+      "position": {
+        "x": 769,
+        "y": 793
+      },
+      "rotation": 0,
+      "room": "room-bath-g"
+    },
+    {
+      "id": "win-bed3",
+      "type": "sliding",
+      "wall_id": "wall-002",
+      "offset": 838,
+      "width": 140,
+      "position": {
+        "x": 908,
+        "y": 793
+      },
+      "rotation": 0,
+      "room": "room-bed3"
+    }
+  ],
+  "furniture": [
+    {
+      "id": "f-sofa",
+      "type": "sofa",
+      "room_id": "room-living",
+      "geometry": {
+        "x": 111,
+        "y": 12,
+        "width": 220,
+        "height": 90
+      },
+      "rotation": 0,
+      "facing": "s"
+    },
+    {
+      "id": "f-tv",
+      "type": "tv",
+      "room_id": "room-living",
+      "geometry": {
+        "x": 415,
+        "y": 142,
+        "width": 15,
+        "height": 120
+      },
+      "rotation": 270,
+      "facing": "w"
+    },
+    {
+      "id": "f-dining",
+      "type": "dining_table",
+      "room_id": "room-dining",
+      "geometry": {
+        "x": 515,
+        "y": 162,
+        "width": 140,
+        "height": 80
+      },
+      "rotation": 0,
+      "facing": "none"
+    },
+    {
+      "id": "f-counter",
+      "type": "kitchen_counter",
+      "room_id": "room-kitchen",
+      "geometry": {
+        "x": 740,
+        "y": 12,
+        "width": 240,
+        "height": 60
+      },
+      "rotation": 0,
+      "facing": "s"
+    },
+    {
+      "id": "f-fridge",
+      "type": "refrigerator",
+      "room_id": "room-kitchen",
+      "geometry": {
+        "x": 796,
+        "y": 202,
+        "width": 70,
+        "height": 70
+      },
+      "rotation": 180,
+      "facing": "n"
+    },
+    {
+      "id": "f-bed-m",
+      "type": "bed",
+      "room_id": "room-master",
+      "geometry": {
+        "x": 75,
+        "y": 490,
+        "width": 152,
+        "height": 188
+      },
+      "rotation": 0,
+      "facing": "s"
+    },
+    {
+      "id": "f-wardrobe-m",
+      "type": "wardrobe",
+      "room_id": "room-master",
+      "geometry": {
+        "x": 12,
+        "y": 546,
+        "width": 60,
+        "height": 180
+      },
+      "rotation": 90,
+      "facing": "e"
+    },
+    {
+      "id": "f-toilet-m",
+      "type": "toilet",
+      "room_id": "room-bath-m",
+      "geometry": {
+        "x": 367,
+        "y": 490,
+        "width": 40,
+        "height": 70
+      },
+      "rotation": 0,
+      "facing": "s"
+    },
+    {
+      "id": "f-sink-m",
+      "type": "sink",
+      "room_id": "room-bath-m",
+      "geometry": {
+        "x": 357,
+        "y": 731,
+        "width": 60,
+        "height": 50
+      },
+      "rotation": 180,
+      "facing": "n"
+    },
+    {
+      "id": "f-bed-2",
+      "type": "bed",
+      "room_id": "room-bed2",
+      "geometry": {
+        "x": 536,
+        "y": 490,
+        "width": 152,
+        "height": 188
+      },
+      "rotation": 0,
+      "facing": "s"
+    },
+    {
+      "id": "f-desk-2",
+      "type": "desk",
+      "room_id": "room-bed2",
+      "geometry": {
+        "x": 584,
+        "y": 721,
+        "width": 120,
+        "height": 60
+      },
+      "rotation": 180,
+      "facing": "n"
+    },
+    {
+      "id": "f-toilet-g",
+      "type": "toilet",
+      "room_id": "room-bath-g",
+      "geometry": {
+        "x": 747,
+        "y": 616,
+        "width": 70,
+        "height": 40
+      },
+      "rotation": 270,
+      "facing": "w"
+    },
+    {
+      "id": "f-shower-g",
+      "type": "shower",
+      "room_id": "room-bath-g",
+      "geometry": {
+        "x": 724,
+        "y": 691,
+        "width": 90,
+        "height": 90
+      },
+      "rotation": 180,
+      "facing": "n"
+    },
+    {
+      "id": "f-bed-3",
+      "type": "single_bed",
+      "room_id": "room-bed3",
+      "geometry": {
+        "x": 829,
+        "y": 593,
+        "width": 91,
+        "height": 188
+      },
+      "rotation": 180,
+      "facing": "n"
+    },
+    {
+      "id": "f-desk-3",
+      "type": "desk",
+      "room_id": "room-bed3",
+      "geometry": {
+        "x": 920,
+        "y": 576,
+        "width": 60,
+        "height": 120
+      },
+      "rotation": 270,
+      "facing": "w"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "dim-overall-w",
+      "type": "dimension",
+      "start": {
+        "x": 0,
+        "y": 0
+      },
+      "end": {
+        "x": 992,
+        "y": 0
+      },
+      "label": "992 cm"
+    },
+    {
+      "id": "dim-overall-h",
+      "type": "dimension",
+      "start": {
+        "x": 0,
+        "y": 0
+      },
+      "end": {
+        "x": 0,
+        "y": 793
+      },
+      "label": "793 cm"
+    }
+  ],
+  "hotspots": [
+    {
+      "id": "hs-door-entry",
+      "symbol_id": "door_single_swing",
+      "shape": "rect",
+      "coords": [
+        -12,
+        268,
+        24,
+        100
+      ],
+      "label_position": "below",
+      "source": "auto_door",
+      "ref": "door-entry"
+    },
+    {
+      "id": "hs-door-hall-living",
+      "symbol_id": null,
+      "shape": "rect",
+      "coords": [
+        96,
+        385,
+        200,
+        24
+      ],
+      "label_position": "below",
+      "source": "auto_door",
+      "ref": "door-hall-living"
+    },
+    {
+      "id": "hs-door-hall-dining",
+      "symbol_id": null,
+      "shape": "rect",
+      "coords": [
+        495,
+        385,
+        180,
+        24
+      ],
+      "label_position": "below",
+      "source": "auto_door",
+      "ref": "door-hall-dining"
+    },
+    {
+      "id": "hs-door-dining-kitchen",
+      "symbol_id": null,
+      "shape": "rect",
+      "coords": [
+        722,
+        83,
+        24,
+        140
+      ],
+      "label_position": "below",
+      "source": "auto_door",
+      "ref": "door-dining-kitchen"
+    },
+    {
+      "id": "hs-door-balcony",
+      "symbol_id": null,
+      "shape": "rect",
+      "coords": [
+        882,
+        266,
+        110,
+        24
+      ],
+      "label_position": "below",
+      "source": "auto_door",
+      "ref": "door-balcony"
+    },
+    {
+      "id": "hs-door-master",
+      "symbol_id": "door_single_swing",
+      "shape": "rect",
+      "coords": [
+        237,
+        472,
+        90,
+        24
+      ],
+      "label_position": "below",
+      "source": "auto_door",
+      "ref": "door-master"
+    },
+    {
+      "id": "hs-door-bath-m",
+      "symbol_id": "door_single_swing",
+      "shape": "rect",
+      "coords": [
+        315,
+        602,
+        24,
+        75
+      ],
+      "label_position": "below",
+      "source": "auto_door",
+      "ref": "door-bath-m"
+    },
+    {
+      "id": "hs-door-bed2",
+      "symbol_id": "door_single_swing",
+      "shape": "rect",
+      "coords": [
+        446,
+        472,
+        90,
+        24
+      ],
+      "label_position": "below",
+      "source": "auto_door",
+      "ref": "door-bed2"
+    },
+    {
+      "id": "hs-door-bath-g",
+      "symbol_id": "door_single_swing",
+      "shape": "rect",
+      "coords": [
+        732,
+        472,
+        75,
+        24
+      ],
+      "label_position": "below",
+      "source": "auto_door",
+      "ref": "door-bath-g"
+    },
+    {
+      "id": "hs-door-bed3",
+      "symbol_id": "door_single_swing",
+      "shape": "rect",
+      "coords": [
+        823,
+        472,
+        90,
+        24
+      ],
+      "label_position": "below",
+      "source": "auto_door",
+      "ref": "door-bed3"
+    },
+    {
+      "id": "hs-win-living",
+      "symbol_id": null,
+      "shape": "rect",
+      "coords": [
+        98,
+        -12,
+        240,
+        24
+      ],
+      "label_position": "above",
+      "source": "auto_window",
+      "ref": "win-living"
+    },
+    {
+      "id": "hs-win-dining",
+      "symbol_id": null,
+      "shape": "rect",
+      "coords": [
+        495,
+        -12,
+        180,
+        24
+      ],
+      "label_position": "above",
+      "source": "auto_window",
+      "ref": "win-dining"
+    },
+    {
+      "id": "hs-win-kitchen",
+      "symbol_id": null,
+      "shape": "rect",
+      "coords": [
+        980,
+        79,
+        24,
+        120
+      ],
+      "label_position": "above",
+      "source": "auto_window",
+      "ref": "win-kitchen"
+    },
+    {
+      "id": "hs-win-balcony",
+      "symbol_id": null,
+      "shape": "rect",
+      "coords": [
+        980,
+        293,
+        24,
+        90
+      ],
+      "label_position": "above",
+      "source": "auto_window",
+      "ref": "win-balcony"
+    },
+    {
+      "id": "hs-win-master",
+      "symbol_id": null,
+      "shape": "rect",
+      "coords": [
+        64,
+        781,
+        200,
+        24
+      ],
+      "label_position": "above",
+      "source": "auto_window",
+      "ref": "win-master"
+    },
+    {
+      "id": "hs-win-bath-m",
+      "symbol_id": null,
+      "shape": "rect",
+      "coords": [
+        357,
+        781,
+        60,
+        24
+      ],
+      "label_position": "above",
+      "source": "auto_window",
+      "ref": "win-bath-m"
+    },
+    {
+      "id": "hs-win-bed2",
+      "symbol_id": null,
+      "shape": "rect",
+      "coords": [
+        480,
+        781,
+        200,
+        24
+      ],
+      "label_position": "above",
+      "source": "auto_window",
+      "ref": "win-bed2"
+    },
+    {
+      "id": "hs-win-bath-g",
+      "symbol_id": null,
+      "shape": "rect",
+      "coords": [
+        739,
+        781,
+        60,
+        24
+      ],
+      "label_position": "above",
+      "source": "auto_window",
+      "ref": "win-bath-g"
+    },
+    {
+      "id": "hs-win-bed3",
+      "symbol_id": null,
+      "shape": "rect",
+      "coords": [
+        838,
+        781,
+        140,
+        24
+      ],
+      "label_position": "above",
+      "source": "auto_window",
+      "ref": "win-bed3"
+    },
+    {
+      "id": "hs-sprinkler-living",
+      "symbol_id": "sprinkler_head_pendent",
+      "shape": "circle",
+      "coords": [
+        179,
+        145,
+        14
+      ],
+      "label_position": "right",
+      "source": "manual",
+      "ref": null
+    },
+    {
+      "id": "hs-sprinkler-dining",
+      "symbol_id": "sprinkler_head_pendent",
+      "shape": "circle",
+      "coords": [
+        585,
+        145,
+        14
+      ],
+      "label_position": "right",
+      "source": "manual",
+      "ref": null
+    },
+    {
+      "id": "hs-sprinkler-hall",
+      "symbol_id": "sprinkler_head_pendent",
+      "shape": "circle",
+      "coords": [
+        351,
+        441,
+        14
+      ],
+      "label_position": "right",
+      "source": "manual",
+      "ref": null
+    },
+    {
+      "id": "hs-sprinkler-master",
+      "symbol_id": "sprinkler_head_pendent",
+      "shape": "circle",
+      "coords": [
+        167,
+        665,
+        14
+      ],
+      "label_position": "right",
+      "source": "manual",
+      "ref": null
+    },
+    {
+      "id": "hs-sprinkler-bed2",
+      "symbol_id": "sprinkler_head_pendent",
+      "shape": "circle",
+      "coords": [
+        580,
+        665,
+        14
+      ],
+      "label_position": "right",
+      "source": "manual",
+      "ref": null
+    },
+    {
+      "id": "hs-outlet-living",
+      "symbol_id": "outlet_socket_duplex",
+      "shape": "rect",
+      "coords": [
+        206,
+        25,
+        30,
+        20
+      ],
+      "label_position": "right",
+      "source": "manual",
+      "ref": null
+    },
+    {
+      "id": "hs-outlet-master",
+      "symbol_id": "outlet_socket_duplex",
+      "shape": "rect",
+      "coords": [
+        43,
+        497,
+        30,
+        20
+      ],
+      "label_position": "right",
+      "source": "manual",
+      "ref": null
+    },
+    {
+      "id": "hs-canopy-living",
+      "symbol_id": "canopy_rain",
+      "shape": "rect",
+      "coords": [
+        101,
+        3,
+        240,
+        40
+      ],
+      "label_position": "right",
+      "source": "manual",
+      "ref": null
+    }
+  ]
+}
