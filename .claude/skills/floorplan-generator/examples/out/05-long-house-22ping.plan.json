@@ -4,7 +4,7 @@
   "name": "22 坪長型街屋",
   "unit": "cm",
   "generated_by": "floorplan-generator/expand_layout.py",
-  "generated_at": "2026-08-25",
+  "generated_at": "2026-08-26",
   "area_meta": {
     "deed_ping": 22,
     "public_ratio": 0.32,
@@ -390,21 +390,23 @@
         "room-balcony-f"
       ],
       "role": "entrance",
-      "swing_arc": {
-        "hinge": {
-          "x": 122,
-          "y": 0
-        },
-        "radius": 100,
-        "along": {
-          "x": -1.0,
-          "y": 0.0
-        },
-        "open": {
-          "x": 0.0,
-          "y": 1.0
+      "swing_arcs": [
+        {
+          "hinge": {
+            "x": 122,
+            "y": 0
+          },
+          "radius": 100,
+          "along": {
+            "x": -1.0,
+            "y": 0.0
+          },
+          "open": {
+            "x": 0.0,
+            "y": 1.0
+          }
         }
-      }
+      ]
     },
     {
       "id": "door-balcony",
@@ -424,7 +426,7 @@
         "room-living"
       ],
       "role": "balcony",
-      "swing_arc": null
+      "swing_arcs": []
     },
     {
       "id": "door-master",
@@ -444,21 +446,23 @@
         "room-master"
       ],
       "role": "interior",
-      "swing_arc": {
-        "hinge": {
-          "x": 165,
-          "y": 395
-        },
-        "radius": 90,
-        "along": {
-          "x": -1.0,
-          "y": 0.0
-        },
-        "open": {
-          "x": 0.0,
-          "y": 1.0
+      "swing_arcs": [
+        {
+          "hinge": {
+            "x": 165,
+            "y": 395
+          },
+          "radius": 90,
+          "along": {
+            "x": -1.0,
+            "y": 0.0
+          },
+          "open": {
+            "x": 0.0,
+            "y": 1.0
+          }
         }
-      }
+      ]
     },
     {
       "id": "door-hall",
@@ -478,21 +482,23 @@
         "room-hall"
       ],
       "role": "interior",
-      "swing_arc": {
-        "hinge": {
-          "x": 345,
-          "y": 642
-        },
-        "radius": 90,
-        "along": {
-          "x": -1.0,
-          "y": 0.0
-        },
-        "open": {
-          "x": 0.0,
-          "y": 1.0
+      "swing_arcs": [
+        {
+          "hinge": {
+            "x": 345,
+            "y": 642
+          },
+          "radius": 90,
+          "along": {
+            "x": -1.0,
+            "y": 0.0
+          },
+          "open": {
+            "x": 0.0,
+            "y": 1.0
+          }
         }
-      }
+      ]
     },
     {
       "id": "door-bath",
@@ -512,21 +518,23 @@
         "room-bath"
       ],
       "role": "interior",
-      "swing_arc": {
-        "hinge": {
-          "x": 200,
-          "y": 766
-        },
-        "radius": 75,
-        "along": {
-          "x": 0.0,
-          "y": -1.0
-        },
-        "open": {
-          "x": -1.0,
-          "y": 0.0
+      "swing_arcs": [
+        {
+          "hinge": {
+            "x": 200,
+            "y": 766
+          },
+          "radius": 75,
+          "along": {
+            "x": 0.0,
+            "y": -1.0
+          },
+          "open": {
+            "x": -1.0,
+            "y": 0.0
+          }
         }
-      }
+      ]
     },
     {
       "id": "door-bed2",
@@ -546,21 +554,23 @@
         "room-bed2"
       ],
       "role": "interior",
-      "swing_arc": {
-        "hinge": {
-          "x": 345,
-          "y": 815
-        },
-        "radius": 90,
-        "along": {
-          "x": -1.0,
-          "y": 0.0
-        },
-        "open": {
-          "x": 0.0,
-          "y": 1.0
+      "swing_arcs": [
+        {
+          "hinge": {
+            "x": 345,
+            "y": 815
+          },
+          "radius": 90,
+          "along": {
+            "x": -1.0,
+            "y": 0.0
+          },
+          "open": {
+            "x": 0.0,
+            "y": 1.0
+          }
         }
-      }
+      ]
     },
     {
       "id": "door-kitchen",
@@ -580,7 +590,7 @@
         "room-kitchen"
       ],
       "role": "interior",
-      "swing_arc": null
+      "swing_arcs": []
     }
   ],
   "windows": [
@@ -920,20 +930,6 @@
         172,
         30,
         20
-      ],
-      "label_position": "right",
-      "source": "manual",
-      "ref": null
-    },
-    {
-      "id": "hs-beam-living",
-      "symbol_id": "beam_concealed",
-      "shape": "rect",
-      "coords": [
-        12,
-        149,
-        376,
-        40
       ],
       "label_position": "right",
       "source": "manual",

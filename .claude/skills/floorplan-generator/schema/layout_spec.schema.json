@@ -116,9 +116,11 @@
             "enum": [
               "single",
               "double",
-              "sliding"
+              "sliding",
+              "opening"
             ],
-            "default": "single"
+            "default": "single",
+            "description": "opening = 出入口，牆斷開但沒有門扇（p23 表 8）。開放式廚房、走道通客廳這種「寬開口」要用它，不要用加寬的 sliding——那會畫出兩片不存在的門扇。"
           },
           "between": {
             "type": "array",

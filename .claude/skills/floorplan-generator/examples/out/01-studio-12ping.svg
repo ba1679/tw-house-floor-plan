@@ -1,108 +1,150 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-110 -110 801 685" width="100%" font-family="-apple-system, 'Noto Sans TC', sans-serif">
 <rect x="-110" y="-110" width="801" height="685" fill="#ffffff"/>
-<g id="rooms">
+<g id="rooms" data-layer="FL">
 <rect id="room-living" data-room-type="living_room" x="0" y="0" width="430" height="316" fill="#f4f2ed"/>
 <rect id="room-kitchen" data-room-type="kitchen" x="0" y="316" width="430" height="149" fill="#eaf0f2"/>
 <rect id="room-bath" data-room-type="bathroom" x="430" y="0" width="151" height="256" fill="#eaf0f2"/>
 <rect id="room-balcony" data-room-type="balcony" x="430" y="256" width="151" height="209" fill="#eef1e9"/>
 </g>
-<g id="walls">
-<rect id="wall-001" data-wall-type="exterior" x="-12.0" y="-12.0" width="605.0" height="24.0" fill="#2b2b2b"/>
-<rect id="wall-002" data-wall-type="exterior" x="-12.0" y="453.0" width="605.0" height="24.0" fill="#2b2b2b"/>
-<rect id="wall-003" data-wall-type="exterior" x="-12.0" y="-12.0" width="24.0" height="489.0" fill="#2b2b2b"/>
-<rect id="wall-004" data-wall-type="exterior" x="569.0" y="-12.0" width="24.0" height="489.0" fill="#2b2b2b"/>
-<rect id="wall-005" data-wall-type="interior" x="424.0" y="-6.0" width="12.0" height="477.0" fill="#2b2b2b"/>
-<rect id="wall-006" data-wall-type="interior" x="-6.0" y="310.0" width="442.0" height="12.0" fill="#2b2b2b"/>
-<rect id="wall-007" data-wall-type="interior" x="424.0" y="250.0" width="163.0" height="12.0" fill="#2b2b2b"/>
-<rect x="36.0" y="-13.0" width="100.0" height="26.0" fill="#ffffff"/>
-<rect x="310.0" y="309.0" width="120.0" height="14.0" fill="#ffffff"/>
-<rect x="423.0" y="152.0" width="14.0" height="80.0" fill="#ffffff"/>
-<rect x="423.0" y="341.0" width="14.0" height="100.0" fill="#ffffff"/>
-<rect x="211.0" y="-13.0" width="180.0" height="26.0" fill="#ffffff"/>
-<rect x="-13.0" y="346.0" width="26.0" height="90.0" fill="#ffffff"/>
-<rect x="568.0" y="98.0" width="26.0" height="60.0" fill="#ffffff"/>
-<rect x="446.0" y="452.0" width="120.0" height="26.0" fill="#ffffff"/>
+<g id="walls" data-layer="WL">
+<rect id="wall-001" data-wall-type="exterior" x="-12.0" y="-12.0" width="605.0" height="24.0" fill="#a8a8a8"/>
+<rect id="wall-002" data-wall-type="exterior" x="-12.0" y="453.0" width="605.0" height="24.0" fill="#a8a8a8"/>
+<rect id="wall-003" data-wall-type="exterior" x="-12.0" y="-12.0" width="24.0" height="489.0" fill="#a8a8a8"/>
+<rect id="wall-004" data-wall-type="exterior" x="569.0" y="-12.0" width="24.0" height="489.0" fill="#a8a8a8"/>
+<rect id="wall-005" data-wall-type="interior" x="424.0" y="-6.0" width="12.0" height="477.0" fill="#a8a8a8"/>
+<rect id="wall-006" data-wall-type="interior" x="-6.0" y="310.0" width="442.0" height="12.0" fill="#a8a8a8"/>
+<rect id="wall-007" data-wall-type="interior" x="424.0" y="250.0" width="163.0" height="12.0" fill="#a8a8a8"/>
+<rect x="-12.0" y="-12.0" width="605.0" height="489.0" fill="none" stroke="#2b2b2b" stroke-width="7.50"/>
+<rect x="36.0" y="-16.8" width="100.0" height="33.5" fill="#ffffff"/>
+<rect x="310.0" y="305.2" width="120.0" height="21.5" fill="#ffffff"/>
+<rect x="419.2" y="152.0" width="21.5" height="80.0" fill="#ffffff"/>
+<rect x="419.2" y="341.0" width="21.5" height="100.0" fill="#ffffff"/>
+<rect x="211.0" y="-16.8" width="180.0" height="33.5" fill="#ffffff"/>
+<rect x="-16.8" y="346.0" width="33.5" height="90.0" fill="#ffffff"/>
+<rect x="564.2" y="98.0" width="33.5" height="60.0" fill="#ffffff"/>
+<rect x="446.0" y="448.2" width="120.0" height="33.5" fill="#ffffff"/>
 </g>
-<g id="doors" fill="none" stroke="#4a4a4a" stroke-width="4">
+<g id="doors" data-layer="DR" fill="none" stroke="#4a4a4a">
 <g id="door-entry" data-door-type="single">
-<line x1="136.0" y1="0.0" x2="136.0" y2="100.0"/>
-<path d="M 136.0 100.0 A 100 100 0 0 0 36.0 0.0" stroke-dasharray="14 10" stroke-width="3"/>
+<line x1="36.0" y1="-12.0" x2="36.0" y2="12.0" stroke-width="2.50"/>
+<line x1="136.0" y1="-12.0" x2="136.0" y2="12.0" stroke-width="2.50"/>
+<line x1="136.0" y1="0.0" x2="136.0" y2="100.0" stroke-width="2.50"/>
+<path d="M 136.0 100.0 A 100 100 0 0 1 36.0 0.0" stroke-dasharray="14 10" stroke-width="1.25"/>
 </g>
-<line x1="310.0" y1="309.4" x2="376.0" y2="309.4" stroke-width="7"/>
-<line x1="364.0" y1="322.6" x2="430.0" y2="322.6" stroke-width="7"/>
-<line x1="423.4" y1="152.0" x2="423.4" y2="196.0" stroke-width="7"/>
-<line x1="436.6" y1="188.0" x2="436.6" y2="232.0" stroke-width="7"/>
-<line x1="423.4" y1="341.0" x2="423.4" y2="396.0" stroke-width="7"/>
-<line x1="436.6" y1="386.0" x2="436.6" y2="441.0" stroke-width="7"/>
+<g id="door-kitchen" data-door-type="sliding">
+<line x1="310.0" y1="310.0" x2="310.0" y2="322.0" stroke-width="2.50"/>
+<line x1="430.0" y1="310.0" x2="430.0" y2="322.0" stroke-width="2.50"/>
+<line x1="310.0" y1="309.4" x2="376.0" y2="309.4" stroke-width="3.75"/>
+<line x1="364.0" y1="322.6" x2="430.0" y2="322.6" stroke-width="3.75"/>
+<circle cx="370.0" cy="316.0" r="1.9" fill="#4a4a4a" stroke-width="1.25"/>
 </g>
-<g id="windows" stroke="#4a4a4a" fill="none">
-<g id="win-living">
-<line x1="211.0" y1="-12.0" x2="391.0" y2="-12.0" stroke-width="4"/>
-<line x1="211.0" y1="0.0" x2="391.0" y2="0.0" stroke-width="3"/>
-<line x1="211.0" y1="12.0" x2="391.0" y2="12.0" stroke-width="4"/>
+<g id="door-bath" data-door-type="sliding">
+<line x1="424.0" y1="152.0" x2="436.0" y2="152.0" stroke-width="2.50"/>
+<line x1="424.0" y1="232.0" x2="436.0" y2="232.0" stroke-width="2.50"/>
+<line x1="423.4" y1="152.0" x2="423.4" y2="196.0" stroke-width="3.75"/>
+<line x1="436.6" y1="188.0" x2="436.6" y2="232.0" stroke-width="3.75"/>
+<circle cx="430.0" cy="192.0" r="1.9" fill="#4a4a4a" stroke-width="1.25"/>
 </g>
-<g id="win-kitchen">
-<line x1="-12.0" y1="346.0" x2="-12.0" y2="436.0" stroke-width="4"/>
-<line x1="0.0" y1="346.0" x2="0.0" y2="436.0" stroke-width="3"/>
-<line x1="12.0" y1="346.0" x2="12.0" y2="436.0" stroke-width="4"/>
-</g>
-<g id="win-bath">
-<line x1="569.0" y1="98.0" x2="569.0" y2="158.0" stroke-width="4"/>
-<line x1="581.0" y1="98.0" x2="581.0" y2="158.0" stroke-width="3"/>
-<line x1="593.0" y1="98.0" x2="593.0" y2="158.0" stroke-width="4"/>
-</g>
-<g id="win-balcony">
-<line x1="446.0" y1="453.0" x2="566.0" y2="453.0" stroke-width="4"/>
-<line x1="446.0" y1="465.0" x2="566.0" y2="465.0" stroke-width="3"/>
-<line x1="446.0" y1="477.0" x2="566.0" y2="477.0" stroke-width="4"/>
+<g id="door-balcony" data-door-type="sliding">
+<line x1="424.0" y1="341.0" x2="436.0" y2="341.0" stroke-width="2.50"/>
+<line x1="424.0" y1="441.0" x2="436.0" y2="441.0" stroke-width="2.50"/>
+<line x1="423.4" y1="341.0" x2="423.4" y2="396.0" stroke-width="3.75"/>
+<line x1="436.6" y1="386.0" x2="436.6" y2="441.0" stroke-width="3.75"/>
+<circle cx="430.0" cy="391.0" r="1.9" fill="#4a4a4a" stroke-width="1.25"/>
 </g>
 </g>
-<g id="furniture" fill="#ffffff" stroke="#8a8a8a" stroke-width="3">
-<g id="f-sofa" data-furniture-type="sofa">
-<rect x="138" y="12" width="220" height="90" rx="6"/>
+<g id="windows" data-layer="WI" stroke="#4a4a4a" fill="none">
+<g id="win-living" data-window-type="sliding">
+<line x1="211.0" y1="-12.0" x2="391.0" y2="-12.0" stroke-width="2.50"/>
+<line x1="211.0" y1="12.0" x2="391.0" y2="12.0" stroke-width="2.50"/>
+<line x1="211.0" y1="-12.0" x2="211.0" y2="12.0" stroke-width="2.50"/>
+<line x1="391.0" y1="-12.0" x2="391.0" y2="12.0" stroke-width="2.50"/>
+<line x1="211.0" y1="-4.0" x2="310.0" y2="-4.0" stroke-width="1.25"/>
+<line x1="292.0" y1="4.0" x2="391.0" y2="4.0" stroke-width="1.25"/>
+<circle cx="301.0" cy="0.0" r="3.4" fill="#4a4a4a" stroke="none"/>
+</g>
+<g id="win-kitchen" data-window-type="sliding">
+<line x1="-12.0" y1="346.0" x2="-12.0" y2="436.0" stroke-width="2.50"/>
+<line x1="12.0" y1="346.0" x2="12.0" y2="436.0" stroke-width="2.50"/>
+<line x1="-12.0" y1="346.0" x2="12.0" y2="346.0" stroke-width="2.50"/>
+<line x1="-12.0" y1="436.0" x2="12.0" y2="436.0" stroke-width="2.50"/>
+<line x1="-4.0" y1="346.0" x2="-4.0" y2="395.5" stroke-width="1.25"/>
+<line x1="4.0" y1="386.5" x2="4.0" y2="436.0" stroke-width="1.25"/>
+<circle cx="0.0" cy="391.0" r="3.4" fill="#4a4a4a" stroke="none"/>
+</g>
+<g id="win-bath" data-window-type="sliding">
+<line x1="569.0" y1="98.0" x2="569.0" y2="158.0" stroke-width="2.50"/>
+<line x1="593.0" y1="98.0" x2="593.0" y2="158.0" stroke-width="2.50"/>
+<line x1="569.0" y1="98.0" x2="593.0" y2="98.0" stroke-width="2.50"/>
+<line x1="569.0" y1="158.0" x2="593.0" y2="158.0" stroke-width="2.50"/>
+<line x1="577.0" y1="98.0" x2="577.0" y2="131.0" stroke-width="1.25"/>
+<line x1="585.0" y1="125.0" x2="585.0" y2="158.0" stroke-width="1.25"/>
+<circle cx="581.0" cy="128.0" r="3.4" fill="#4a4a4a" stroke="none"/>
+</g>
+<g id="win-balcony" data-window-type="sliding">
+<line x1="446.0" y1="453.0" x2="566.0" y2="453.0" stroke-width="2.50"/>
+<line x1="446.0" y1="477.0" x2="566.0" y2="477.0" stroke-width="2.50"/>
+<line x1="446.0" y1="453.0" x2="446.0" y2="477.0" stroke-width="2.50"/>
+<line x1="566.0" y1="453.0" x2="566.0" y2="477.0" stroke-width="2.50"/>
+<line x1="446.0" y1="461.0" x2="512.0" y2="461.0" stroke-width="1.25"/>
+<line x1="500.0" y1="469.0" x2="566.0" y2="469.0" stroke-width="1.25"/>
+<circle cx="506.0" cy="465.0" r="3.4" fill="#4a4a4a" stroke="none"/>
+</g>
+</g>
+<g id="furniture" fill="#ffffff" stroke="#8a8a8a" stroke-width="1.25">
+<g id="f-sofa" data-furniture-type="sofa" data-layer="FUM">
+<rect x="138" y="12" width="220" height="90" rx="6" stroke-width="3.75"/>
 <line x1="138" y1="34.5" x2="358" y2="34.5"/>
 </g>
-<g id="f-bed" data-furniture-type="bed">
-<rect x="142" y="122" width="152" height="188" rx="6"/>
+<g id="f-bed" data-furniture-type="bed" data-layer="FUM">
+<rect x="142" y="122" width="152" height="188" rx="6" stroke-width="3.75"/>
 <line x1="142" y1="268.6" x2="294" y2="268.6"/>
 </g>
-<g id="f-tv" data-furniture-type="tv">
-<rect x="409" y="31" width="15" height="120" rx="2"/>
+<g id="f-tv" data-furniture-type="tv" data-layer="FUM">
+<rect x="409" y="31" width="15" height="120" rx="2" stroke-width="3.75" stroke-dasharray="10 8"/>
 </g>
-<g id="f-counter" data-furniture-type="kitchen_counter">
-<rect x="65" y="322" width="240" height="60" rx="2"/>
+<g id="f-counter" data-furniture-type="kitchen_counter" data-layer="FUF">
+<rect x="65" y="322" width="240" height="60" rx="2" stroke-width="3.75"/>
 </g>
-<g id="f-fridge" data-furniture-type="refrigerator">
-<rect x="183" y="383" width="70" height="70" rx="2"/>
+<g id="f-fridge" data-furniture-type="refrigerator" data-layer="FUM">
+<rect x="183" y="383" width="70" height="70" rx="2" stroke-width="3.75"/>
+<line x1="183" y1="383" x2="253" y2="453"/>
+<line x1="253" y1="383" x2="183" y2="453"/>
 </g>
-<g id="f-toilet" data-furniture-type="toilet">
-<ellipse cx="471.0" cy="72.0" rx="35.0" ry="20.0"/>
+<g id="f-toilet" data-furniture-type="toilet" data-layer="FUF">
+<ellipse cx="471.0" cy="72.0" rx="35.0" ry="20.0" stroke-width="3.75"/>
 </g>
-<g id="f-sink" data-furniture-type="sink">
-<ellipse cx="536.0" cy="37.0" rx="30.0" ry="25.0"/>
+<g id="f-sink" data-furniture-type="sink" data-layer="FUF">
+<ellipse cx="536.0" cy="37.0" rx="30.0" ry="25.0" stroke-width="3.75"/>
 </g>
 </g>
-<g id="room-labels" text-anchor="middle" fill="#2b2b2b" stroke="#ffffff" stroke-width="8" stroke-linejoin="round" paint-order="stroke">
-<text x="215.0" y="158.0" font-size="20" font-weight="600">客廳兼臥室</text>
+<g id="room-labels" data-layer="TE" text-anchor="middle" fill="#2b2b2b" stroke="#ffffff" stroke-width="8" stroke-linejoin="round" paint-order="stroke">
+<text x="215.0" y="158.0" font-size="20" font-weight="600">客廳兼臥室 L</text>
 <text x="215.0" y="182.0" font-size="14" fill="#7a7a7a">4.1 坪</text>
-<text x="215.0" y="390.5" font-size="20" font-weight="600">廚房</text>
+<text x="215.0" y="390.5" font-size="20" font-weight="600">廚房 K</text>
 <text x="215.0" y="414.5" font-size="14" fill="#7a7a7a">1.9 坪</text>
-<text x="505.5" y="128.0" font-size="20" font-weight="600">衛浴</text>
+<text x="505.5" y="128.0" font-size="20" font-weight="600">衛浴 W.C</text>
 <text x="505.5" y="152.0" font-size="14" fill="#7a7a7a">1.2 坪</text>
-<text x="505.5" y="360.5" font-size="20" font-weight="600">後陽台</text>
+<text x="505.5" y="360.5" font-size="20" font-weight="600">後陽台 BAL</text>
 <text x="505.5" y="384.5" font-size="14" fill="#7a7a7a">0.9 坪</text>
 </g>
-<g id="annotations" stroke="#7a7a7a" fill="#7a7a7a" stroke-width="2">
+<g id="annotations" data-layer="SI" stroke="#7a7a7a" fill="#7a7a7a" stroke-width="1.25">
 <line x1="0" y1="-49.5" x2="581" y2="-49.5"/>
-<line x1="0" y1="-63.5" x2="0" y2="-35.5"/>
-<line x1="581" y1="-63.5" x2="581" y2="-35.5"/>
+<line x1="-12.0" y1="-37.5" x2="12.0" y2="-61.5"/>
+<line x1="569.0" y1="-37.5" x2="593.0" y2="-61.5"/>
 <text x="290.5" y="-71.5" font-size="15" text-anchor="middle" stroke="none">581 cm</text>
 <line x1="-49.5" y1="0" x2="-49.5" y2="465"/>
-<line x1="-63.5" y1="0" x2="-35.5" y2="0"/>
-<line x1="-63.5" y1="465" x2="-35.5" y2="465"/>
+<line x1="-61.5" y1="12.0" x2="-37.5" y2="-12.0"/>
+<line x1="-61.5" y1="477.0" x2="-37.5" y2="453.0"/>
 <text x="-71.5" y="232.5" font-size="15" text-anchor="middle" stroke="none" transform="rotate(-90 -71.5 232.5)">465 cm</text>
 </g>
-<text x="0" y="520.0" font-size="19" font-weight="700" fill="#2b2b2b">12 坪套房</text>
+<g id="north-arrow" stroke="#2b2b2b" stroke-width="1.25">
+<circle cx="630.5" cy="-49.5" r="26.4" fill="#ffffff"/>
+<polygon points="630.5,-70.1 619.9,-30.5 630.5,-40.5" fill="#2b2b2b"/>
+<polygon points="630.5,-70.1 641.1,-30.5 630.5,-40.5" fill="#ffffff"/>
+<text x="630.5" y="-83.9" font-size="12" text-anchor="middle" stroke="none" fill="#2b2b2b" font-weight="700">N</text>
+</g>
+<text x="0" y="520.0" font-size="19" font-weight="700" fill="#2b2b2b">12 坪套房 平面配置圖<tspan font-size="13" font-weight="400" fill="#7a7a7a">　S:1/50　單位：cm</tspan></text>
 <text x="0" y="555.2" font-size="13" fill="#7a7a7a">權狀 12 坪 ／ 公設比 32% ／ 室內 8.2 坪（27.0 m²）</text>
 <g id="hotspots" fill="transparent" stroke="none">
 <rect id="hs-door-entry" data-symbol-id="door_single_swing" data-source="auto_door" x="36" y="-12" width="100" height="24"/>

@@ -218,7 +218,8 @@
             "enum": [
               "single",
               "double",
-              "sliding"
+              "sliding",
+              "opening"
             ]
           },
           "wall_id": {
@@ -269,27 +270,27 @@
               "balcony"
             ]
           },
-          "swing_arc": {
-            "type": [
-              "object",
-              "null"
-            ],
-            "description": "門扇掃過的四分之一圓。renderer 與 validator 共用這份幾何，不各自重算。推拉門為 null。",
-            "additionalProperties": false,
-            "properties": {
-              "hinge": {
-                "$ref": "#/definitions/point"
-              },
-              "radius": {
-                "type": "number"
-              },
-              "along": {
-                "$ref": "#/definitions/point",
-                "description": "沿牆、指向門的另一端的單位方向"
-              },
-              "open": {
-                "$ref": "#/definitions/point",
-                "description": "垂直牆面、指向門開向那一側的單位方向"
+          "swing_arcs": {
+            "type": "array",
+            "description": "門扇掃過的四分之一圓，一片門扇一個。單開門 1 個、雙開門 2 個（各半個門寬，從兩側門樘向中央開）、推拉門 0 個。renderer 與 validator 共用這份幾何，不各自重算。",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "hinge": {
+                  "$ref": "#/definitions/point"
+                },
+                "radius": {
+                  "type": "number"
+                },
+                "along": {
+                  "$ref": "#/definitions/point",
+                  "description": "沿牆、指向該門扇另一端的單位方向"
+                },
+                "open": {
+                  "$ref": "#/definitions/point",
+                  "description": "垂直牆面、指向門開向那一側的單位方向"
+                }
               }
             }
           }

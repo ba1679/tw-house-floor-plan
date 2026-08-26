@@ -4,7 +4,7 @@
   "name": "25 坪兩房兩衛",
   "unit": "cm",
   "generated_by": "floorplan-generator/expand_layout.py",
-  "generated_at": "2026-08-25",
+  "generated_at": "2026-08-26",
   "area_meta": {
     "deed_ping": 25,
     "public_ratio": 0.32,
@@ -429,25 +429,27 @@
         "room-hall"
       ],
       "role": "entrance",
-      "swing_arc": {
-        "hinge": {
-          "x": 478,
-          "y": 0
-        },
-        "radius": 100,
-        "along": {
-          "x": -1.0,
-          "y": 0.0
-        },
-        "open": {
-          "x": 0.0,
-          "y": 1.0
+      "swing_arcs": [
+        {
+          "hinge": {
+            "x": 478,
+            "y": 0
+          },
+          "radius": 100,
+          "along": {
+            "x": -1.0,
+            "y": 0.0
+          },
+          "open": {
+            "x": 0.0,
+            "y": 1.0
+          }
         }
-      }
+      ]
     },
     {
       "id": "door-living",
-      "type": "sliding",
+      "type": "opening",
       "wall_id": "wall-005",
       "offset": 15,
       "width": 180,
@@ -463,7 +465,7 @@
         "room-living"
       ],
       "role": "interior",
-      "swing_arc": null
+      "swing_arcs": []
     },
     {
       "id": "door-kitchen",
@@ -483,21 +485,23 @@
         "room-kitchen"
       ],
       "role": "interior",
-      "swing_arc": {
-        "hinge": {
-          "x": 377,
-          "y": 479
-        },
-        "radius": 85,
-        "along": {
-          "x": 0.0,
-          "y": -1.0
-        },
-        "open": {
-          "x": -1.0,
-          "y": 0.0
+      "swing_arcs": [
+        {
+          "hinge": {
+            "x": 377,
+            "y": 479
+          },
+          "radius": 85,
+          "along": {
+            "x": 0.0,
+            "y": -1.0
+          },
+          "open": {
+            "x": -1.0,
+            "y": 0.0
+          }
         }
-      }
+      ]
     },
     {
       "id": "door-balcony",
@@ -517,7 +521,7 @@
         "room-balcony"
       ],
       "role": "balcony",
-      "swing_arc": null
+      "swing_arcs": []
     },
     {
       "id": "door-master",
@@ -537,21 +541,23 @@
         "room-master"
       ],
       "role": "interior",
-      "swing_arc": {
-        "hinge": {
-          "x": 478,
-          "y": 295
-        },
-        "radius": 90,
-        "along": {
-          "x": 0.0,
-          "y": -1.0
-        },
-        "open": {
-          "x": 1.0,
-          "y": 0.0
+      "swing_arcs": [
+        {
+          "hinge": {
+            "x": 478,
+            "y": 295
+          },
+          "radius": 90,
+          "along": {
+            "x": 0.0,
+            "y": -1.0
+          },
+          "open": {
+            "x": 1.0,
+            "y": 0.0
+          }
         }
-      }
+      ]
     },
     {
       "id": "door-bath-m",
@@ -571,21 +577,23 @@
         "room-bath-m"
       ],
       "role": "interior",
-      "swing_arc": {
-        "hinge": {
-          "x": 559,
-          "y": 295
-        },
-        "radius": 75,
-        "along": {
-          "x": -1.0,
-          "y": 0.0
-        },
-        "open": {
-          "x": 0.0,
-          "y": 1.0
+      "swing_arcs": [
+        {
+          "hinge": {
+            "x": 559,
+            "y": 295
+          },
+          "radius": 75,
+          "along": {
+            "x": -1.0,
+            "y": 0.0
+          },
+          "open": {
+            "x": 0.0,
+            "y": 1.0
+          }
         }
-      }
+      ]
     },
     {
       "id": "door-bed2",
@@ -605,21 +613,23 @@
         "room-bed2"
       ],
       "role": "interior",
-      "swing_arc": {
-        "hinge": {
-          "x": 478,
-          "y": 564
-        },
-        "radius": 90,
-        "along": {
-          "x": 0.0,
-          "y": -1.0
-        },
-        "open": {
-          "x": 1.0,
-          "y": 0.0
+      "swing_arcs": [
+        {
+          "hinge": {
+            "x": 478,
+            "y": 564
+          },
+          "radius": 90,
+          "along": {
+            "x": 0.0,
+            "y": -1.0
+          },
+          "open": {
+            "x": 1.0,
+            "y": 0.0
+          }
         }
-      }
+      ]
     },
     {
       "id": "door-bath-g",
@@ -639,21 +649,23 @@
         "room-bath-g"
       ],
       "role": "interior",
-      "swing_arc": {
-        "hinge": {
-          "x": 478,
-          "y": 655
-        },
-        "radius": 75,
-        "along": {
-          "x": 0.0,
-          "y": -1.0
-        },
-        "open": {
-          "x": 1.0,
-          "y": 0.0
+      "swing_arcs": [
+        {
+          "hinge": {
+            "x": 478,
+            "y": 655
+          },
+          "radius": 75,
+          "along": {
+            "x": 0.0,
+            "y": -1.0
+          },
+          "open": {
+            "x": 1.0,
+            "y": 0.0
+          }
         }
-      }
+      ]
     }
   ],
   "windows": [

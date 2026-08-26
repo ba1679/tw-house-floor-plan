@@ -83,7 +83,7 @@
     },
     {
       "id": "door-living",
-      "type": "sliding",
+      "type": "opening",
       "between": [
         "room-hall",
         "room-living"

@@ -35,6 +35,10 @@ TALL = {"wardrobe", "refrigerator"}          # 高度會擋住窗戶採光；廚
 WALL_MOUNTED = {"tv"}                        # 掛在牆上，不佔地面通行空間
 FREESTANDING = {"dining_table", "chair"}     # 只有這些可以擺在房間中央；其餘一律靠牆
 
+# 沒有門扇軌跡的門型別：推拉門沿牆滑，出入口根本沒有門扇（p23 表 8）。
+# 兩者都仍然要留開口兩側的通行空間——人還是要走過去。
+NO_SWING = {"sliding", "opening"}
+
 ROOM_NAMES = {
     "living_room": "客廳", "dining_room": "餐廳", "kitchen": "廚房",
     "bedroom": "臥室", "master_bedroom": "主臥", "bathroom": "衛浴",
@@ -335,16 +339,31 @@ def resolve_doors(spec, walls, rooms, bounds):
             "offset": offset, "width": width, "position": pos, "rotation": rot,
             "swing": swing, "opens_to": opens_to,
             "connects": connects, "role": role,
-            "swing_arc": None,
+            "swing_arcs": swing_arcs(wl, offset, width, dtype, swing, rooms, opens_to),
         }
-        if dtype != "sliding":
-            rec["swing_arc"] = swing_arc(wl, offset, width, swing, rooms, opens_to)
         out.append(rec)
     return out
 
 
-def swing_arc(wl, offset, width, swing, rooms, opens_to):
-    """門扇掃過的四分之一圓：鉸鏈位置 + 兩個單位方向。
+def swing_arcs(wl, offset, width, dtype, swing, rooms, opens_to):
+    """一片門扇一道弧。沒有門扇軌跡的型別（推拉門、出入口）回傳空陣列。
+
+    雙開門是**兩扇等寬**，各自從兩側門樘向中央開、兩道弧在中央相接（p23 表 8）——
+    不是一道半徑等於整個門寬的大弧。這個差別不只是畫法：build_blocked 直接拿
+    這份幾何當障礙物，算成一道大弧會讓單側禁區超估、另一側漏算。
+    """
+    if dtype in NO_SWING:
+        return []
+    if dtype == "double":
+        half = width / 2.0
+        # 每片門扇鉸鏈在自己那一端的門樘上：左扇 hinge 在 offset，右扇在 offset+width
+        return [_arc(wl, offset, half, "left", rooms, opens_to),
+                _arc(wl, offset + half, half, "right", rooms, opens_to)]
+    return [_arc(wl, offset, width, swing, rooms, opens_to)]
+
+
+def _arc(wl, offset, width, swing, rooms, opens_to):
+    """單一門扇掃過的四分之一圓：鉸鏈位置 + 兩個單位方向。
 
     renderer 與 validator 都讀這份資料，不各自重算，避免三邊定義漂移。
     """
@@ -456,8 +475,9 @@ def build_blocked(rooms, doors, windows, walls):
         for rid in [c for c in d["connects"] if c and c in geom]:
             hard[rid].append(("rect", passage_rect(wl, d["offset"], d["width"], geom[rid])))
             mount[rid].append(("rect", passage_rect(wl, d["offset"], d["width"], geom[rid], D_MOUNT)))
-        if d["swing_arc"] and d["opens_to"] in hard:
-            hard[d["opens_to"]].append(("sector", d["swing_arc"]))
+        if d["opens_to"] in hard:
+            for arc in d["swing_arcs"]:
+                hard[d["opens_to"]].append(("sector", arc))
 
     for wn in windows:
         rid = wn.get("room")

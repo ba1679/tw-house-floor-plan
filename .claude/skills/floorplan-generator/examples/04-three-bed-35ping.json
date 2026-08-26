@@ -110,7 +110,7 @@
     },
     {
       "id": "door-hall-living",
-      "type": "sliding",
+      "type": "opening",
       "between": [
         "room-living",
         "room-hall"
@@ -120,7 +120,7 @@
     },
     {
       "id": "door-hall-dining",
-      "type": "sliding",
+      "type": "opening",
       "between": [
         "room-dining",
         "room-hall"

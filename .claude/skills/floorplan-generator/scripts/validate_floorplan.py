@@ -122,6 +122,32 @@ def main():
     entrances = [d for d in plan["doors"] if d["role"] == "entrance"]
     if not check(len(entrances) >= 1, "沒有任何 role=entrance 的大門"):
         pass
+
+    for d in entrances:
+        if d["type"] == "opening":
+            warnings.append("大門 %s 的 type 是 opening（無門扇的出入口）——住宅大門不會沒有門扇，"
+                            "應改成 single 或 double" % d["id"])
+
+    # 製圖慣例（p16 §10(b)）：「作圖時出入口應置於圖面下方或右方為原則」。
+    # 真實建案平面圖大多如此，所以這關係到生成的圖「像不像使用者在外面看到的圖」。
+    #
+    # 但它與 §10(a)「以圖之上方為北方」天生會打架：本 skill 的座標系固定北方朝上，
+    # 大門開哪一側是格局決定的，不是排版決定的。因此這是 warning 而非 error——
+    # 要修就是改切割樹讓玄關／客廳貼到南側或東側外牆，不是把圖轉過來。
+    for d in entrances:
+        wl = wall_by_id.get(d["wall_id"])
+        if not wl:
+            continue
+        if wl["orientation"] == "horizontal":
+            side = "n" if wl["start"]["y"] < B["height"] / 2.0 else "s"
+        else:
+            side = "w" if wl["start"]["x"] < B["width"] / 2.0 else "e"
+        if side not in ("s", "e"):
+            warnings.append("大門 %s 開在圖面 %s 側。製圖慣例是出入口置於下方（s）或右方（e），"
+                            "真實建案平面圖多半如此；要對齊就得改切割樹讓該房貼到 s／e 側外牆。"
+                            "若這棟房子本來就朝 %s，保留即可（北方固定朝上）。"
+                            "見 docs/reference/naid-symbols.md §2.7"
+                            % (d["id"], side, side))
     adj = collections.defaultdict(set)
     reachable = set()
     for d in plan["doors"]:
@@ -201,8 +227,7 @@ def main():
         wl = wall_by_id.get(d["wall_id"])
         if not wl:
             continue
-        arc = d.get("swing_arc")
-        if arc:
+        for arc in d.get("swing_arcs") or []:
             for f in furn_by_room.get(d.get("opens_to"), []):
                 if sector_hits(arc, f["geometry"]):
                     errors.append("門 %s 開啟時會撞到 %s（%s）"

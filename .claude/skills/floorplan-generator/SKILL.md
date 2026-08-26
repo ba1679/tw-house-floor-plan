@@ -105,7 +105,7 @@ SVG 座標 = 世界座標（cm），靠 viewBox 縮放，所以 `hotspot.coords`
 （`id` / `symbol_id` / `shape` / `coords` / `label_position`），可以直接餵給 viewer。
 
 - 每一道門、每一扇窗**自動**產生一個熱區（`source: "auto_door"` / `"auto_window"`）
-- 撒水頭、暗樑、雨遮這類 CNS 符號用 spec 的 `hotspots` 手動標，`place` 可以相對房間下座標
+- 撒水頭、雨遮這類 CNS 符號用 spec 的 `hotspots` 手動標，`place` 可以相對房間下座標
 - `symbol_id: null` 代表 M1 查證未完成，viewer 應略過
 
 因此這個 skill 對 PRD 的用途是 **M2 的製圖工具**：快速試不同格局，驗證
@@ -127,6 +127,9 @@ python3 scripts/run_examples.py
 | 20 坪兩房一廳一衛 | 7 / 10 / 7 / 6 / 18 |
 | 25 坪兩房兩衛 | 8 / 11 / 8 / 7 / 22 |
 | 35 坪三房兩衛 | 10 / 13 / 10 / 9 / 27 |
-| 22 坪長型街屋 | 7 / 10 / 7 / 2 / 12 |
+| 22 坪長型街屋 | 7 / 10 / 7 / 2 / 11 |
 
-全部 0 errors。長型街屋刻意保留 6 個 warning（暗房與穿越動線），那是該格局的真實缺點，不是待修的 bug。
+全部 0 errors。五份範例目前各有一個「大門不在圖面下方或右方」的 warning——那是製圖編排慣例
+（見 `docs/reference/naid-symbols.md` §2.7）與本 skill「北方固定朝上」的座標系天生會打架，
+不是 bug；要消掉得改切割樹讓玄關貼到南側或東側外牆。
+長型街屋另外刻意保留 6 個 warning（暗房與穿越動線），那是該格局的真實缺點。

@@ -46,7 +46,6 @@
   ],
   "hotspots": [
     { "id": "hs-sprinkler-living", "symbol_id": "sprinkler_head_pendent", "shape": "circle", "place": { "room": "room-living", "rel": [0.5, 0.5], "radius": 14 } },
-    { "id": "hs-outlet-living", "symbol_id": "outlet_socket_duplex", "shape": "rect", "place": { "room": "room-living", "rel": [0.06, 0.2], "size": [30, 20] } },
-    { "id": "hs-beam-living", "symbol_id": "beam_concealed", "shape": "rect", "place": { "room": "room-living", "rel": [0.5, 0.15], "size": [376, 40] } }
+    { "id": "hs-outlet-living", "symbol_id": "outlet_socket_duplex", "shape": "rect", "place": { "room": "room-living", "rel": [0.06, 0.2], "size": [30, 20] } }
   ]
 }
