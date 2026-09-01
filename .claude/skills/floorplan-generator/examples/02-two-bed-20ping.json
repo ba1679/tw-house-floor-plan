@@ -263,61 +263,6 @@
   ],
   "hotspots": [
     {
-      "id": "hs-sprinkler-living",
-      "symbol_id": "sprinkler_head_pendent",
-      "shape": "circle",
-      "place": {
-        "room": "room-living",
-        "rel": [
-          0.5,
-          0.4
-        ],
-        "radius": 14
-      }
-    },
-    {
-      "id": "hs-sprinkler-hall",
-      "symbol_id": "sprinkler_head_pendent",
-      "shape": "circle",
-      "place": {
-        "room": "room-hall",
-        "rel": [
-          0.5,
-          0.5
-        ],
-        "radius": 14
-      }
-    },
-    {
-      "id": "hs-sprinkler-master",
-      "symbol_id": "sprinkler_head_pendent",
-      "shape": "circle",
-      "place": {
-        "room": "room-master",
-        "rel": [
-          0.5,
-          0.5
-        ],
-        "radius": 14
-      }
-    },
-    {
-      "id": "hs-outlet-living",
-      "symbol_id": "outlet_socket_duplex",
-      "shape": "rect",
-      "place": {
-        "room": "room-living",
-        "rel": [
-          0.06,
-          0.8
-        ],
-        "size": [
-          30,
-          20
-        ]
-      }
-    },
-    {
       "id": "hs-canopy-bed2",
       "symbol_id": "canopy_rain",
       "shape": "rect",

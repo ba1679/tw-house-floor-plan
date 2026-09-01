@@ -1,9 +1,18 @@
 {
-  "_note": "門窗類型 → data/symbols.*.json 的 symbol.id。PRD M1 尚未完成，未查證的一律填 null，validator 只警告不擋。不得為了湊數硬給對應（PRD §4.1「20 是目標數量，不是預先鎖死的名稱」）。",
+  "_note": "圖面元素 → data/symbols.json 的 symbol.id。畫法依據見 docs/reference/naid-symbols.md。門窗（表 8／9）為公會規範 convention 級，非 CNS 原文——PRD Q4 決議不購買 CNS 11567，故不得標 cns。查不到對應就是 null，不臆測（硬規則 5）。",
   "door.single": "door_single_swing",
-  "door.double": null,
-  "door.sliding": null,
-  "window.fixed": null,
-  "window.casement": null,
-  "window.sliding": null
+  "door.double": "door_double_swing",
+  "door.sliding": "door_sliding",
+  "door.opening": "entrance_opening",
+  "window.fixed": "window",
+  "window.casement": "window",
+  "window.sliding": "window",
+  "column": "column",
+  "canopy": "canopy_rain",
+  "_window_note": "階段一「窗」是單一符號，三種畫法（固定／平開／橫拉）共用它。三者畫法確實不同，已滿足 PRD §7.4 的拆分觸發條件，但階段一先不拆。",
+  "furniture.toilet": "toilet",
+  "furniture.sink": "washbasin",
+  "furniture.kitchen_counter": "kitchen_counter",
+  "furniture.bathtub": "bathtub",
+  "room.pipe_shaft": "pipe_shaft"
 }

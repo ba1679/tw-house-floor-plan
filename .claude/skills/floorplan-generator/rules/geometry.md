@@ -16,7 +16,7 @@ LLM 很會決定「廚房應該挨著餐廳」，很不會做**必須剛好閉�
 語意（門通到哪、窗開哪面）     開口的 wall_id 與 offset
 ```
 
-**你寫 layout_spec，不寫 floorplan。** floorplan 由 `expand_layout.py` 產生。
+**你寫 layout（格局），不寫 floorplan（平面圖）。** floorplan 由 `expand_layout.py` 產生。
 
 ## 平面圖是什麼：離地 120~150cm 平切下視
 

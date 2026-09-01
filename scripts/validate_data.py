@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """
-資料完整性驗證（PRD v0.3 §10.1 ③ 的原型）
+資料完整性驗證（PRD v0.3.1 §10.1 ③ 的原型）
 
 這是 Python 原型，用來在 Next.js 專案建起來之前先驗證資料檔。
 正式版應以 zod 實作並掛進 build，任一項失敗即中斷建置。
 
 用法: python3 scripts/validate_data.py
 """
-import json, io, sys
+import json, io, sys, glob, os
 from collections import Counter
 
 REQUIRED_WHEN_VERIFIED = ["plain_meaning", "caution", "source_refs", "verified_at", "verified_by"]
 VALID_TIERS = {"cns", "regulation", "convention", "varies"}
 VALID_STATUS = {"verified", "partial", "pending_purchase", "blocked"}
 VALID_CATEGORIES = {"structure", "door_window", "plumbing_electric", "fire_safety", "furniture"}
+VALID_HOTSPOT_SOURCES = set(['auto_door', 'auto_window', 'auto_column', 'auto_canopy', 'auto_furniture', 'auto_room', 'manual'])
 
 errors, warnings = [], []
 
@@ -25,7 +26,11 @@ def check(cond, msg, bucket=errors):
 
 
 symbols = json.load(io.open("data/symbols.sample.json", encoding="utf-8"))["symbols"]
-layouts = json.load(io.open("data/layouts.sample.json", encoding="utf-8"))["layouts"]
+# Q3(b)：floorplan 是 commit 進 repo 的產物，由 layout spec 經 expand_layout.py 生成。
+# 這裡讀的就是網站要吃的那份檔案，不是另一份樣本——樣本與正式檔分家正是內容雙份維護的開端。
+floorplans = [json.load(io.open(p, encoding="utf-8"))
+              for p in sorted(glob.glob("data/layouts/*.floorplan.json"))]
+check(bool(floorplans), "data/layouts/ 底下找不到任何 *.floorplan.json")
 
 # --- symbol.id unique ---
 ids = [s["id"] for s in symbols]
@@ -59,37 +64,60 @@ for s in symbols:
             check(s.get(f), "%s: 標記 verified 但 %s 為空" % (s["id"], f))
         check(s.get("source_tier"), "%s: 標記 verified 但無 source_tier" % s["id"])
 
-# --- layout / hotspot ---
-layout_ids = [l["id"] for l in layouts]
-for lid, n in Counter(layout_ids).items():
-    check(n == 1, "layout.id 重複: %s" % lid)
+# --- floorplan / hotspot ---
+floorplan_ids = [f["id"] for f in floorplans]
+for fid, n in Counter(floorplan_ids).items():
+    check(n == 1, "floorplan.id 重複: %s" % fid)
 
 hotspot_ids, broken_refs = [], 0
-for l in layouts:
-    for h in l["hotspots"]:
+for f in floorplans:
+    for h in f["hotspots"]:
         hotspot_ids.append(h["id"])
         if h["symbol_id"] not in symbol_ids:
             broken_refs += 1
             errors.append("hotspot %s 指向不存在的 symbol_id: %s" % (h["id"], h["symbol_id"]))
+        check(h.get("source") in VALID_HOTSPOT_SOURCES,
+              "hotspot %s: source 非法值 %r（PRD v0.3.1 §7.3）" % (h["id"], h.get("source")))
 for hid, n in Counter(hotspot_ids).items():
     check(n == 1, "hotspot.id 重複: %s" % hid)
 
+# --- confused_with 必須雙向登錄（PRD §7.2）---
+# 「撒水頭跟偵煙器很像」與「偵煙器跟撒水頭很像」是同一件事。單向登錄遲早會兩邊不同步，
+# 而答錯回饋兩個方向都會用到，所以這裡是 error 不是 warning。
+cw = {}
+for s in symbols:
+    for pair in s.get("confused_with") or []:
+        check(isinstance(pair, dict) and pair.get("symbol_id") and pair.get("difference"),
+              "%s: confused_with 每一項都要有 symbol_id 與 difference" % s["id"])
+        if isinstance(pair, dict) and pair.get("symbol_id"):
+            cw.setdefault(s["id"], set()).add(pair["symbol_id"])
+            check(pair["symbol_id"] in symbol_ids,
+                  "%s: confused_with 指向不存在的 symbol_id: %s" % (s["id"], pair["symbol_id"]))
+            check(pair["symbol_id"] != s["id"], "%s: confused_with 不能指向自己" % s["id"])
+for a, targets in cw.items():
+    for b in targets:
+        check(a in cw.get(b, set()),
+              "confused_with 只登錄了單向: %s → %s，但 %s 沒有指回 %s" % (a, b, b, a))
+
 # --- 雙向一致性: symbol.related_layouts vs 實際 hotspot ---
+# related_layouts 存的是 layout.id，而 floorplan.id 與 layout.id 相同，故可直接比對。
 actual = {}
-for l in layouts:
-    for h in l["hotspots"]:
-        actual.setdefault(h["symbol_id"], set()).add(l["id"])
+for f in floorplans:
+    for h in f["hotspots"]:
+        actual.setdefault(h["symbol_id"], set()).add(f["id"])
 for s in symbols:
     declared = set(s.get("related_layouts") or [])
     real = actual.get(s["id"], set())
     for lid in declared - real:
-        warnings.append("%s 宣稱出現在 %s，但該圖沒有對應 hotspot" % (s["id"], lid))
+        warnings.append("%s 宣稱出現在 %s，但該圖沒有對應 hotspot——"
+                        "若是刻意的（例如「樑」：建案平面圖不畫樑，只做符號頁），"
+                        "這條警告就是預期行為；否則代表圖或清單少了東西" % (s["id"], lid))
 
 # --- 報告 ---
 verified = sum(1 for s in symbols if s["verification_status"] == "verified")
 rate = verified / len(symbols) if symbols else 0
 
-print("\n資料驗證報告 (PRD v0.3)")
+print("\n資料驗證報告 (PRD v0.3.1)")
 print("=" * 46)
 for w in warnings:
     print("  ⚠  %s" % w)
@@ -99,12 +127,14 @@ if not errors:
     print("  ✓ symbol.id unique")
     print("  ✓ hotspot.id unique")
     print("  ✓ hotspot.symbol_id 全部存在")
+    print("  ✓ hotspot.source 合法")
+    print("  ✓ confused_with 雙向一致")
     print("  ✓ enum 值合法")
     print("  ✓ risk_flags 已移除")
     print("  ✓ verified 符號內容完整")
 print("-" * 46)
 print("  %d symbols validated" % len(symbols))
-print("  %d layouts validated" % len(layouts))
+print("  %d floorplans validated" % len(floorplans))
 print("  %d hotspots validated" % len(hotspot_ids))
 print("  %d broken references" % broken_refs)
 print("  查證率 %d/%d = %.0f%%  (上線門檻 80%%) %s"

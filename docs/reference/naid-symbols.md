@@ -579,7 +579,7 @@ renderer 的 `<g id>` 與 `data-layer` 建議直接對齊這套代號，圖才�
 
 `L` 客廳｜`D` 餐廳｜`K` 廚房｜`B.R` 臥室｜**`M.B.R` 主臥室**｜`BAL` 陽台｜`T` 露臺｜`G` 車庫｜`I.P` 管道間｜`W.C` 廁所｜`BATH` 浴室｜`ENTRY` 入口｜`LB` 玄關｜`S` 儲藏室｜`O` 辦公室｜`R` 接待室｜`RF` 屋頂｜`P.H` 屋頂突出物／閣樓｜`M` 夾層｜`B` 地下室
 
-> 本專案 `layout_spec` 的 `room` enum 幾乎一一對應：`living_room`→`L`、`dining_room`→`D`、`kitchen`→`K`、`bedroom`→`B.R`、`master_bedroom`→`M.B.R`、`bathroom`→`W.C`/`BATH`、`balcony`→`BAL`、`storage`→`S`、`entrance`→`ENTRY`。
+> 本專案 `layout`（格局）的 `room` enum 幾乎一一對應：`living_room`→`L`、`dining_room`→`D`、`kitchen`→`K`、`bedroom`→`B.R`、`master_bedroom`→`M.B.R`、`bathroom`→`W.C`/`BATH`、`balcony`→`BAL`、`storage`→`S`、`entrance`→`ENTRY`。
 > 缺對應的只有 `hallway`（走道）與 `study`（書房）。
 
 ### 13.2 尺寸與位置（表 26）

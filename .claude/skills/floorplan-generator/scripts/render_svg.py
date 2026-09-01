@@ -72,10 +72,11 @@ FIXED_FURNITURE = {"kitchen_counter", "wardrobe", "toilet", "sink", "bathtub", "
 
 # 空間代號（p48 表 25）。真實建案平面圖上就是這樣標，認得代號本身就是教學目標。
 # hallway（走道）與 study（書房）在表 25 沒有對應代號，留空。
+# 管道間：表 25 作 I.P、表 28 作 PS（Pipe Shaft）；建案平面圖上普遍寫 PS。
 ROOM_CODES = {
     "living_room": "L", "dining_room": "D", "kitchen": "K",
     "bedroom": "B.R", "master_bedroom": "M.B.R", "bathroom": "W.C",
-    "balcony": "BAL", "storage": "S", "entrance": "ENTRY",
+    "balcony": "BAL", "storage": "S", "entrance": "ENTRY", "pipe_shaft": "PS",
 }
 # 表 25 把 W.C（廁所）與 BATH（浴室）列為兩個代號，差別在有沒有洗澡的設備。
 # 台灣習慣統稱「衛浴」，但標代號時要照實際配置分，否則等於教錯。
@@ -188,6 +189,13 @@ def render(plan, show_hotspots=False):
         else:
             side = "w" if wl["start"]["x"] < W / 2.0 else "e"
         pad[side] = max(pad[side], wn["width"] + wl["thickness"] / 2.0 + M)
+    # 雨遮整個在建物之外，不算進留白就會被 viewBox 裁掉。
+    for cp in plan.get("canopies", []):
+        g = cp["geometry"]
+        pad["n"] = max(pad["n"], -g["y"] + M) if g["y"] < 0 else pad["n"]
+        pad["w"] = max(pad["w"], -g["x"] + M) if g["x"] < 0 else pad["w"]
+        pad["s"] = max(pad["s"], g["y"] + g["height"] - H + M) if g["y"] + g["height"] > H else pad["s"]
+        pad["e"] = max(pad["e"], g["x"] + g["width"] - W + M) if g["x"] + g["width"] > W else pad["e"]
     vx, vy = -pad["w"], -pad["n"]
     vw, vh = W + pad["w"] + pad["e"], H + pad["n"] + pad["s"]
 
@@ -196,6 +204,19 @@ def render(plan, show_hotspots=False):
       % (vx, vy, vw, vh))
     a('<rect x="%d" y="%d" width="%d" height="%d" fill="%s"/>'
       % (vx, vy, vw, vh, PALETTE["paper"]))
+
+    # --- 雨遮：外牆之外的外挑構造 ---
+    # ⚠ 這個畫法沒有標準來源。法規（建築技術規則、地籍測量實施規則）定義的是
+    # 「雨遮是什麼、算不算坪數」，不是圖上怎麼畫。細實線矩形是台灣建案平面圖的
+    # 普遍做法，屬 convention——不要在 symbol 上把它標成有標準明文。
+    if plan.get("canopies"):
+        a('<g id="canopies" fill="none" stroke="%s" stroke-width="%.2f">'
+          % (PALETTE["muted"], lw("frame")))
+        for cp in plan["canopies"]:
+            g = cp["geometry"]
+            a('<rect id="%s" x="%d" y="%d" width="%d" height="%d"/>'
+              % (cp["id"], g["x"], g["y"], g["width"], g["height"]))
+        a('</g>')
 
     # --- 房間（圖層 06 地板）---
     a('<g id="rooms" data-layer="%s">' % LAYER["floor"])
@@ -228,6 +249,17 @@ def render(plan, show_hotspots=False):
         a('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="%s"/>'
           % (x, y, ww, hh, PALETTE["paper"]))
     a('</g>')
+
+    # --- 柱（圖層 02，與牆同層）---
+    # 表 24 筆號 8：柱填深灰；筆號 9：牆填淺灰。差別在填色深淺，不在形狀——
+    # 這正是「柱不能打掉、牆有些可以」那一課在圖上唯一看得出來的地方。
+    if plan.get("columns"):
+        a('<g id="columns" data-layer="%s">' % LAYER["wall"])
+        for col in plan["columns"]:
+            g = col["geometry"]
+            a('<rect id="%s" x="%d" y="%d" width="%d" height="%d" fill="%s"/>'
+              % (col["id"], g["x"], g["y"], g["width"], g["height"], PALETTE["column"]))
+        a('</g>')
 
     # --- 門（圖層 04）---
     a('<g id="doors" data-layer="%s" fill="none" stroke="%s">' % (LAYER["door"], PALETTE["line"]))

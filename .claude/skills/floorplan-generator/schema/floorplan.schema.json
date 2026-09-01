@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://tw-house-floor-plan/schema/floorplan.schema.json",
   "title": "FloorPlan（展開後的輸出，唯一 source of truth）",
-  "description": "由 scripts/expand_layout.py 從 layout_spec 產生。模型不直接手寫這個檔案。座標單位 cm，原點左上，x 向右、y 向下。",
+  "description": "由 scripts/expand_layout.py 從 layout（格局）產生。模型不直接手寫這個檔案。座標單位 cm，原點左上，x 向右、y 向下。",
   "type": "object",
   "required": [
     "schema_version",
@@ -432,7 +432,7 @@
     },
     "hotspots": {
       "type": "array",
-      "description": "與 PRD §7.3 的 layout.hotspots 同構，可直接餵給教學網站的 viewer。",
+      "description": "與 PRD §7.3 的 floorplan.hotspots 同構，可直接餵給教學網站的 viewer。",
       "items": {
         "type": "object",
         "required": [
@@ -478,6 +478,10 @@
             "enum": [
               "auto_door",
               "auto_window",
+              "auto_column",
+              "auto_canopy",
+              "auto_furniture",
+              "auto_room",
               "manual"
             ]
           },
@@ -486,7 +490,7 @@
               "string",
               "null"
             ],
-            "description": "來源 door/window id"
+            "description": "來源元素 id（door / window / column / canopy / furniture / room）。manual 為 null。"
           }
         }
       }

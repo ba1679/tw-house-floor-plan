@@ -4,7 +4,7 @@
   "name": "12 坪套房",
   "unit": "cm",
   "generated_by": "floorplan-generator/expand_layout.py",
-  "generated_at": "2026-08-26",
+  "generated_at": "2026-09-01",
   "area_meta": {
     "deed_ping": 12,
     "public_ratio": 0.32,
@@ -487,6 +487,8 @@
       "facing": "s"
     }
   ],
+  "columns": [],
+  "canopies": [],
   "annotations": [
     {
       "id": "dim-overall-w",
@@ -532,7 +534,7 @@
     },
     {
       "id": "hs-door-kitchen",
-      "symbol_id": null,
+      "symbol_id": "door_sliding",
       "shape": "rect",
       "coords": [
         310,
@@ -546,7 +548,7 @@
     },
     {
       "id": "hs-door-bath",
-      "symbol_id": null,
+      "symbol_id": "door_sliding",
       "shape": "rect",
       "coords": [
         418,
@@ -560,7 +562,7 @@
     },
     {
       "id": "hs-door-balcony",
-      "symbol_id": null,
+      "symbol_id": "door_sliding",
       "shape": "rect",
       "coords": [
         418,
@@ -574,7 +576,7 @@
     },
     {
       "id": "hs-win-living",
-      "symbol_id": null,
+      "symbol_id": "window",
       "shape": "rect",
       "coords": [
         211,
@@ -588,7 +590,7 @@
     },
     {
       "id": "hs-win-kitchen",
-      "symbol_id": null,
+      "symbol_id": "window",
       "shape": "rect",
       "coords": [
         -12,
@@ -602,7 +604,7 @@
     },
     {
       "id": "hs-win-bath",
-      "symbol_id": null,
+      "symbol_id": "window",
       "shape": "rect",
       "coords": [
         569,
@@ -616,7 +618,7 @@
     },
     {
       "id": "hs-win-balcony",
-      "symbol_id": null,
+      "symbol_id": "window",
       "shape": "rect",
       "coords": [
         446,
@@ -629,44 +631,46 @@
       "ref": "win-balcony"
     },
     {
-      "id": "hs-sprinkler-living",
-      "symbol_id": "sprinkler_head_pendent",
-      "shape": "circle",
-      "coords": [
-        218,
-        116,
-        14
-      ],
-      "label_position": "right",
-      "source": "manual",
-      "ref": null
-    },
-    {
-      "id": "hs-sprinkler-kitchen",
-      "symbol_id": "sprinkler_head_pendent",
-      "shape": "circle",
-      "coords": [
-        218,
-        388,
-        14
-      ],
-      "label_position": "right",
-      "source": "manual",
-      "ref": null
-    },
-    {
-      "id": "hs-outlet-living",
-      "symbol_id": "outlet_socket_duplex",
+      "id": "hs-f-counter",
+      "symbol_id": "kitchen_counter",
       "shape": "rect",
       "coords": [
-        30,
-        226,
-        30,
-        20
+        65,
+        322,
+        240,
+        60
       ],
       "label_position": "right",
-      "source": "manual",
-      "ref": null
+      "source": "auto_furniture",
+      "ref": "f-counter"
+    },
+    {
+      "id": "hs-f-toilet",
+      "symbol_id": "toilet",
+      "shape": "rect",
+      "coords": [
+        436,
+        52,
+        70,
+        40
+      ],
+      "label_position": "right",
+      "source": "auto_furniture",
+      "ref": "f-toilet"
+    },
+    {
+      "id": "hs-f-sink",
+      "symbol_id": "washbasin",
+      "shape": "rect",
+      "coords": [
+        506,
+        12,
+        60,
+        50
+      ],
+      "label_position": "right",
+      "source": "auto_furniture",
+      "ref": "f-sink"
     }
   ]
 }

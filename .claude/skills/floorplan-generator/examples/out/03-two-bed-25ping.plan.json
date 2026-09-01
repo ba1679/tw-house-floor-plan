@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "id": "two_bed_25p",
-  "name": "25 坪兩房兩衛",
+  "name": "25 坪兩房一廳兩衛",
   "unit": "cm",
   "generated_by": "floorplan-generator/expand_layout.py",
-  "generated_at": "2026-08-26",
+  "generated_at": "2026-09-01",
   "area_meta": {
     "deed_ping": 25,
     "public_ratio": 0.32,
@@ -919,6 +919,8 @@
       "facing": "s"
     }
   ],
+  "columns": [],
+  "canopies": [],
   "annotations": [
     {
       "id": "dim-overall-w",
@@ -964,7 +966,7 @@
     },
     {
       "id": "hs-door-living",
-      "symbol_id": null,
+      "symbol_id": "entrance_opening",
       "shape": "rect",
       "coords": [
         365,
@@ -992,7 +994,7 @@
     },
     {
       "id": "hs-door-balcony",
-      "symbol_id": null,
+      "symbol_id": "door_sliding",
       "shape": "rect",
       "coords": [
         365,
@@ -1062,7 +1064,7 @@
     },
     {
       "id": "hs-win-living",
-      "symbol_id": null,
+      "symbol_id": "window",
       "shape": "rect",
       "coords": [
         79,
@@ -1076,7 +1078,7 @@
     },
     {
       "id": "hs-win-kitchen",
-      "symbol_id": null,
+      "symbol_id": "window",
       "shape": "rect",
       "coords": [
         -12,
@@ -1090,7 +1092,7 @@
     },
     {
       "id": "hs-win-master",
-      "symbol_id": null,
+      "symbol_id": "window",
       "shape": "rect",
       "coords": [
         826,
@@ -1104,7 +1106,7 @@
     },
     {
       "id": "hs-win-bath-m",
-      "symbol_id": null,
+      "symbol_id": "window",
       "shape": "rect",
       "coords": [
         826,
@@ -1118,7 +1120,7 @@
     },
     {
       "id": "hs-win-bed2",
-      "symbol_id": null,
+      "symbol_id": "window",
       "shape": "rect",
       "coords": [
         826,
@@ -1132,7 +1134,7 @@
     },
     {
       "id": "hs-win-bath-g",
-      "symbol_id": null,
+      "symbol_id": "window",
       "shape": "rect",
       "coords": [
         826,
@@ -1146,7 +1148,7 @@
     },
     {
       "id": "hs-win-balcony",
-      "symbol_id": null,
+      "symbol_id": "window",
       "shape": "rect",
       "coords": [
         89,
@@ -1159,84 +1161,60 @@
       "ref": "win-balcony"
     },
     {
-      "id": "hs-sprinkler-living",
-      "symbol_id": "sprinkler_head_pendent",
-      "shape": "circle",
-      "coords": [
-        192,
-        128,
-        14
-      ],
-      "label_position": "right",
-      "source": "manual",
-      "ref": null
-    },
-    {
-      "id": "hs-sprinkler-hall",
-      "symbol_id": "sprinkler_head_pendent",
-      "shape": "circle",
-      "coords": [
-        428,
-        238,
-        14
-      ],
-      "label_position": "right",
-      "source": "manual",
-      "ref": null
-    },
-    {
-      "id": "hs-sprinkler-master",
-      "symbol_id": "sprinkler_head_pendent",
-      "shape": "circle",
-      "coords": [
-        655,
-        151,
-        14
-      ],
-      "label_position": "right",
-      "source": "manual",
-      "ref": null
-    },
-    {
-      "id": "hs-sprinkler-bed2",
-      "symbol_id": "sprinkler_head_pendent",
-      "shape": "circle",
-      "coords": [
-        655,
-        480,
-        14
-      ],
-      "label_position": "right",
-      "source": "manual",
-      "ref": null
-    },
-    {
-      "id": "hs-outlet-living",
-      "symbol_id": "outlet_socket_duplex",
+      "id": "hs-f-counter",
+      "symbol_id": "kitchen_counter",
       "shape": "rect",
       "coords": [
-        15,
-        283,
-        30,
-        20
+        49,
+        457,
+        240,
+        60
       ],
       "label_position": "right",
-      "source": "manual",
-      "ref": null
+      "source": "auto_furniture",
+      "ref": "f-counter"
     },
     {
-      "id": "hs-outlet-master",
-      "symbol_id": "outlet_socket_duplex",
+      "id": "hs-f-toilet-m",
+      "symbol_id": "toilet",
       "shape": "rect",
       "coords": [
-        486,
-        44,
-        30,
-        20
+        567,
+        301,
+        40,
+        70
       ],
       "label_position": "right",
-      "source": "manual",
-      "ref": null
+      "source": "auto_furniture",
+      "ref": "f-toilet-m"
+    },
+    {
+      "id": "hs-f-sink-m",
+      "symbol_id": "washbasin",
+      "shape": "rect",
+      "coords": [
+        776,
+        330,
+        50,
+        60
+      ],
+      "label_position": "right",
+      "source": "auto_furniture",
+      "ref": "f-sink-m"
+    },
+    {
+      "id": "hs-f-toilet-g",
+      "symbol_id": "toilet",
+      "shape": "rect",
+      "coords": [
+        567,
+        570,
+        40,
+        70
+      ],
+      "label_position": "right",
+      "source": "auto_furniture",
+      "ref": "f-toilet-g"
     },
     {
       "id": "hs-canopy-bed2",

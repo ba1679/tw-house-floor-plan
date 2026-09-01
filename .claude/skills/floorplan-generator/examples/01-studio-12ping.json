@@ -175,49 +175,5 @@
       "anchor": "n",
       "at": 0.75
     }
-  ],
-  "hotspots": [
-    {
-      "id": "hs-sprinkler-living",
-      "symbol_id": "sprinkler_head_pendent",
-      "shape": "circle",
-      "place": {
-        "room": "room-living",
-        "rel": [
-          0.5,
-          0.35
-        ],
-        "radius": 14
-      }
-    },
-    {
-      "id": "hs-sprinkler-kitchen",
-      "symbol_id": "sprinkler_head_pendent",
-      "shape": "circle",
-      "place": {
-        "room": "room-kitchen",
-        "rel": [
-          0.5,
-          0.5
-        ],
-        "radius": 14
-      }
-    },
-    {
-      "id": "hs-outlet-living",
-      "symbol_id": "outlet_socket_duplex",
-      "shape": "rect",
-      "place": {
-        "room": "room-living",
-        "rel": [
-          0.08,
-          0.75
-        ],
-        "size": [
-          30,
-          20
-        ]
-      }
-    }
   ]
 }

@@ -1,53 +1,422 @@
 {
   "_meta": {
-    "schema_version": 2,
-    "generated_at": "2026-08-20",
-    "note": "M1 試查樣本，已對齊 PRD v0.3 schema。未查證完成的欄位一律填 null，不得臆測填入。v0.3 變更：移除 risk_flags（主觀判斷／風水禁忌，見 PRD §7.2.1）；co_occurs_with 降為選填，M1 結束後統一補。"
+    "schema_version": 3,
+    "generated_at": "2026-08-31",
+    "note": "PRD v0.4 §4.1 的階段一符號清單。Q1 決議砍掉水電與消防類，Q4 決議不購買 CNS 11567，故門窗與結構改以《室內設計裝修製圖規範》為主來源、tier 為 convention，依 §7.1 步驟 5 上線前各需補第 2 個交叉來源。標 cns 的四筆是該規範轉載自 CNS 11567 的表 14，source_refs 以 via 欄位註明未核對標準原文。未查證完成的欄位一律 null，不得臆測填入。",
+    "out_of_scope": "撒水頭與插座的查證成果保留在 git 歷史（commit 8905034 之前的版本）——它們是階段一範圍外（消防／水電），但內容已完成，日後開放設備圖層時可直接取回。"
   },
   "symbols": [
     {
-      "id": "sprinkler_head_pendent",
-      "schema_version": 2,
-      "category": "fire_safety",
-      "name": "密閉式撒水頭（下垂型）",
+      "id": "wall",
+      "schema_version": 3,
+      "category": "structure",
+      "name": "牆",
       "aliases": [
-        "灑水頭",
-        "撒水頭",
-        "消防噴頭",
-        "sprinkler"
+        "隔間牆",
+        "外牆",
+        "牆壁"
       ],
-      "svg_ref": "sym-sprinkler-pendent",
-      "plain_meaning": "天花板上偵測到高溫就會自動噴水的消防設備。平面圖上通常畫成小圓圈，代表這個位置的天花板會有一顆撒水頭。",
-      "caution": "法規要求撒水頭迴水板下方 45 公分內、水平方向 30 公分內必須保持淨空。這代表你之後裝潢做天花板造型、吊櫃、投影幕或輕鋼架時都必須避開它，不能包起來也不能擋住。看預售屋時可以先想想撒水頭的位置會不會卡到你想要的天花板設計。",
+      "svg_ref": "sym-wall",
+      "plain_meaning": null,
+      "caution": null,
       "related_layouts": [
         "3b2l_standard"
       ],
-      "source_tier": "regulation",
-      "verification_status": "verified",
+      "source_tier": "convention",
+      "verification_status": "partial",
       "source_refs": [
         {
-          "doc": "各類場所消防安全設備設置標準",
-          "clause": "自動撒水設備章節（撒水頭裝置規定）",
-          "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=D0120029"
-        },
-        {
-          "doc": "消防機關辦理建築物消防安全設備審查及查驗作業基準 附件三「消防圖說圖示範例」",
-          "year": 2020,
-          "url": "https://law.nfa.gov.tw/mobile/law.aspx?LSID=FL019489"
+          "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
+          "clause": "p28-29 表 12 材料構造剖面；p47 表 24 筆號 9 牆填淺灰"
         }
       ],
-      "verified_at": "2026-08-20",
-      "verified_by": "hsinhui",
-      "ai_description": "天花板平面上的小圓形記號，通常成規則陣列分布於客廳、臥室、走道天花板，圓心標記管線連接點。",
-      "detection_hints": [
-        "小圓圈",
-        "規則陣列分布",
-        "多出現於天花板圖或消防圖(F)圖層"
-      ]
+      "verified_at": null,
+      "verified_by": null,
+      "ai_description": null,
+      "detection_hints": null,
+      "confused_with": null,
+      "_pilot_note": "表 12 備考 2：各種材料之牆身均須註明厚度。牆與柱的差別在填色深淺，不在形狀。"
+    },
+    {
+      "id": "column",
+      "schema_version": 3,
+      "category": "structure",
+      "name": "柱",
+      "aliases": [
+        "柱子",
+        "樑柱",
+        "結構柱"
+      ],
+      "svg_ref": "sym-column",
+      "plain_meaning": null,
+      "caution": null,
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": "convention",
+      "verification_status": "partial",
+      "source_refs": [
+        {
+          "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
+          "clause": "p47 表 24 筆號 8 柱填深灰；p28 表 12 木構造牆之柱／間柱"
+        }
+      ],
+      "verified_at": null,
+      "verified_by": null,
+      "ai_description": null,
+      "detection_hints": null,
+      "confused_with": null,
+      "_pilot_note": "與牆同為實心，唯一差別是填色深淺。這是「柱不能打掉、牆有些可以」在圖上唯一看得出來的地方。"
+    },
+    {
+      "id": "beam",
+      "schema_version": 3,
+      "category": "structure",
+      "name": "樑",
+      "aliases": [
+        "梁",
+        "暗樑",
+        "暗梁",
+        "橫樑",
+        "大樑",
+        "beam"
+      ],
+      "svg_ref": "sym-beam",
+      "plain_meaning": null,
+      "caution": null,
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": "convention",
+      "verification_status": "partial",
+      "source_refs": [
+        {
+          "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
+          "clause": "p18 表 6 長虛線：表示平面圖上部之主結構投影線，如梁線"
+        }
+      ],
+      "verified_at": null,
+      "verified_by": null,
+      "ai_description": null,
+      "detection_hints": null,
+      "confused_with": null,
+      "_pilot_note": "兩件事要寫進內容：（1）規範只說「梁線」，不區分明樑／暗樑——「暗樑」是房產與室內設計圈的用語，不是製圖標準用語，故合併為單一符號、暗樑收進 aliases。（2）**建案平面圖通常不畫樑**，樑屬施工圖與結構圖，因此本站主圖上沒有樑的熱區。這正是這個符號要教的事：你看不到它，所以要問。"
+    },
+    {
+      "id": "pipe_shaft",
+      "schema_version": 3,
+      "category": "structure",
+      "name": "管道間",
+      "aliases": [
+        "管道",
+        "PS",
+        "管道井",
+        "水管間"
+      ],
+      "svg_ref": "sym-pipe-shaft",
+      "plain_meaning": null,
+      "caution": null,
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": "convention",
+      "verification_status": "partial",
+      "source_refs": [
+        {
+          "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
+          "clause": "p48 表 25 代號 I.P；p51 表 28 代號 PS（Pipe Shaft）"
+        }
+      ],
+      "verified_at": null,
+      "verified_by": null,
+      "ai_description": null,
+      "detection_hints": null,
+      "confused_with": null,
+      "_pilot_note": "規範只給代號，沒有圖例——圖上就是一個標了 PS 的小房間，沒有門、進不去。畫法本身無標準來源。"
+    },
+    {
+      "id": "door_single_swing",
+      "schema_version": 3,
+      "category": "door_window",
+      "name": "一般單開門",
+      "aliases": [
+        "房門",
+        "單扇門",
+        "普通門"
+      ],
+      "svg_ref": "sym-door-single-swing",
+      "plain_meaning": null,
+      "caution": null,
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": "convention",
+      "verification_status": "partial",
+      "source_refs": [
+        {
+          "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
+          "clause": "p23 表 8 單開門"
+        }
+      ],
+      "verified_at": null,
+      "verified_by": null,
+      "ai_description": null,
+      "detection_hints": null,
+      "confused_with": null,
+      "_pilot_note": "Q4 決議不購買 CNS 11567，故改以公會規範為主來源，tier 由 cns 降為 convention（表 8 未標示引用 CNS）。依 PRD §7.1 步驟 5，上線前仍須補第 2 個交叉來源。"
+    },
+    {
+      "id": "door_double_swing",
+      "schema_version": 3,
+      "category": "door_window",
+      "name": "雙開門",
+      "aliases": [
+        "雙扇門",
+        "對開門"
+      ],
+      "svg_ref": "sym-door-double-swing",
+      "plain_meaning": null,
+      "caution": null,
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": "convention",
+      "verification_status": "partial",
+      "source_refs": [
+        {
+          "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
+          "clause": "p23 表 8 雙開門"
+        }
+      ],
+      "verified_at": null,
+      "verified_by": null,
+      "ai_description": null,
+      "detection_hints": null,
+      "confused_with": null,
+      "_pilot_note": "表 8 另有「子母門」（一大一小），是台灣公寓大門最常見的形式，日後可考慮獨立成符號。"
+    },
+    {
+      "id": "door_sliding",
+      "schema_version": 3,
+      "category": "door_window",
+      "name": "推拉門",
+      "aliases": [
+        "拉門",
+        "橫拉門",
+        "滑門"
+      ],
+      "svg_ref": "sym-door-sliding",
+      "plain_meaning": null,
+      "caution": null,
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": "convention",
+      "verification_status": "partial",
+      "source_refs": [
+        {
+          "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
+          "clause": "p23 表 8 單拉門／雙拉門／雙向拉門／拉進門"
+        }
+      ],
+      "verified_at": null,
+      "verified_by": null,
+      "ai_description": null,
+      "detection_hints": null,
+      "confused_with": null,
+      "_pilot_note": "一個 PRD 符號對應表 8 的四種畫法。其中「拉進門」（口袋門）門扇收進牆體，畫法與一般拉門不同。"
+    },
+    {
+      "id": "entrance_opening",
+      "schema_version": 3,
+      "category": "door_window",
+      "name": "出入口（無門扇）",
+      "aliases": [
+        "開口",
+        "無門",
+        "開放式開口",
+        "過樑口"
+      ],
+      "svg_ref": "sym-entrance-opening",
+      "plain_meaning": null,
+      "caution": null,
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": "convention",
+      "verification_status": "partial",
+      "source_refs": [
+        {
+          "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
+          "clause": "p23 表 8 第一項 出入口"
+        }
+      ],
+      "verified_at": null,
+      "verified_by": null,
+      "ai_description": null,
+      "detection_hints": null,
+      "confused_with": null,
+      "_pilot_note": "牆斷開、不畫門扇、開口中央一個小三角記號。主圖上有 3 處（玄關通走道、走道通客廳、走道通餐廳）。Q7 清單原本沒有它，但圖上畫得出來就該點得開——見報告。"
+    },
+    {
+      "id": "window",
+      "schema_version": 3,
+      "category": "door_window",
+      "name": "窗",
+      "aliases": [
+        "窗戶",
+        "落地窗",
+        "氣窗",
+        "window"
+      ],
+      "svg_ref": "sym-window",
+      "plain_meaning": null,
+      "caution": null,
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": "convention",
+      "verification_status": "partial",
+      "source_refs": [
+        {
+          "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
+          "clause": "p24 表 9（18 種窗）"
+        }
+      ],
+      "verified_at": null,
+      "verified_by": null,
+      "ai_description": null,
+      "detection_hints": null,
+      "confused_with": null,
+      "_pilot_note": "主圖上實際畫出三種：固定窗、雙橫拉窗、平開窗，三者畫法不同。這已滿足 PRD §7.4 的拆分觸發條件（同一概念 3 個以上變體），但階段一先不拆，落地窗依 Q7 決議收進 aliases。"
+    },
+    {
+      "id": "toilet",
+      "schema_version": 3,
+      "category": "furniture",
+      "name": "馬桶",
+      "aliases": [
+        "坐式馬桶",
+        "便器",
+        "廁所"
+      ],
+      "svg_ref": "sym-toilet",
+      "plain_meaning": null,
+      "caution": null,
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": "cns",
+      "verification_status": "partial",
+      "source_refs": [
+        {
+          "doc": "CNS 11567 建築製圖（類號 A1042）",
+          "clause": "p32 表 14 坐式馬桶（平面＋立面）",
+          "via": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會） p32 表 14 坐式馬桶（平面＋立面）（該表標題註明「引用 CNS11567，A1042 建築製圖」，本專案未核對標準原文）"
+        }
+      ],
+      "verified_at": null,
+      "verified_by": null,
+      "ai_description": null,
+      "detection_hints": null,
+      "confused_with": null
+    },
+    {
+      "id": "washbasin",
+      "schema_version": 3,
+      "category": "furniture",
+      "name": "洗手台",
+      "aliases": [
+        "洗臉盆",
+        "面盆",
+        "洗手槽"
+      ],
+      "svg_ref": "sym-washbasin",
+      "plain_meaning": null,
+      "caution": null,
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": "cns",
+      "verification_status": "partial",
+      "source_refs": [
+        {
+          "doc": "CNS 11567 建築製圖（類號 A1042）",
+          "clause": "p32 表 14 洗臉盆（掛牆式／嵌台式／立柱式）",
+          "via": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會） p32 表 14 洗臉盆（掛牆式／嵌台式／立柱式）（該表標題註明「引用 CNS11567，A1042 建築製圖」，本專案未核對標準原文）"
+        }
+      ],
+      "verified_at": null,
+      "verified_by": null,
+      "ai_description": null,
+      "detection_hints": null,
+      "confused_with": null
+    },
+    {
+      "id": "kitchen_counter",
+      "schema_version": 3,
+      "category": "furniture",
+      "name": "廚具",
+      "aliases": [
+        "流理台",
+        "流理檯",
+        "洗槽",
+        "檯面"
+      ],
+      "svg_ref": "sym-kitchen-counter",
+      "plain_meaning": null,
+      "caution": null,
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": "cns",
+      "verification_status": "partial",
+      "source_refs": [
+        {
+          "doc": "CNS 11567 建築製圖（類號 A1042）",
+          "clause": "p32 表 14 流理檯洗槽",
+          "via": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會） p32 表 14 流理檯洗槽（該表標題註明「引用 CNS11567，A1042 建築製圖」，本專案未核對標準原文）"
+        }
+      ],
+      "verified_at": null,
+      "verified_by": null,
+      "ai_description": null,
+      "detection_hints": null,
+      "confused_with": null
+    },
+    {
+      "id": "bathtub",
+      "schema_version": 3,
+      "category": "furniture",
+      "name": "浴缸",
+      "aliases": [
+        "浴池",
+        "泡澡缸"
+      ],
+      "svg_ref": "sym-bathtub",
+      "plain_meaning": null,
+      "caution": null,
+      "related_layouts": [
+        "3b2l_standard"
+      ],
+      "source_tier": "cns",
+      "verification_status": "partial",
+      "source_refs": [
+        {
+          "doc": "CNS 11567 建築製圖（類號 A1042）",
+          "clause": "p32 表 14 浴缸（平面＋立面）",
+          "via": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會） p32 表 14 浴缸（平面＋立面）（該表標題註明「引用 CNS11567，A1042 建築製圖」，本專案未核對標準原文）"
+        }
+      ],
+      "verified_at": null,
+      "verified_by": null,
+      "ai_description": null,
+      "detection_hints": null,
+      "confused_with": null
     },
     {
       "id": "canopy_rain",
-      "schema_version": 2,
+      "schema_version": 3,
       "category": "structure",
       "name": "雨遮",
       "aliases": [
@@ -81,107 +450,8 @@
         "緊鄰窗戶上緣",
         "無欄杆",
         "深度小於陽台"
-      ]
-    },
-    {
-      "id": "beam_concealed",
-      "schema_version": 2,
-      "category": "structure",
-      "name": "暗樑",
-      "aliases": [
-        "樑",
-        "梁",
-        "橫樑",
-        "beam"
       ],
-      "svg_ref": "sym-beam-concealed",
-      "plain_meaning": null,
-      "caution": null,
-      "related_layouts": [
-        "3b2l_standard"
-      ],
-      "source_tier": null,
-      "verification_status": "pending_purchase",
-      "source_refs": [
-        {
-          "doc": "CNS 11567 建築製圖",
-          "clause": "結構構材代號與線型規定（待購買核對）",
-          "year": 2012,
-          "url": "https://www.cnsonline.com.tw/?node=result&generalno=11567&locale=zh_TW"
-        }
-      ],
-      "verified_at": null,
-      "verified_by": null,
-      "ai_description": null,
-      "detection_hints": null,
-      "_pilot_note": "試查未完成。二手來源（室內設計媒體）普遍稱『柱為實心方格、樑為虛線』，但實際開啟原文後發現該說法無標準依據佐證。線型規定須以 CNS 11567 本文為準，等標準購入後補齊。"
-    },
-    {
-      "id": "door_single_swing",
-      "schema_version": 2,
-      "category": "door_window",
-      "name": "一般單開門",
-      "aliases": [
-        "房門",
-        "單扇門",
-        "普通門"
-      ],
-      "svg_ref": "sym-door-single-swing",
-      "plain_meaning": null,
-      "caution": null,
-      "related_layouts": [
-        "3b2l_standard"
-      ],
-      "source_tier": "cns",
-      "verification_status": "pending_purchase",
-      "source_refs": [
-        {
-          "doc": "CNS 11567 建築製圖",
-          "clause": "門窗圖例（普通門／防火門，待購買核對確切畫法）",
-          "year": 2012,
-          "url": "https://www.cnsonline.com.tw/?node=result&generalno=11567&locale=zh_TW"
-        }
-      ],
-      "verified_at": null,
-      "verified_by": null,
-      "ai_description": null,
-      "detection_hints": null,
-      "_pilot_note": "已確認 CNS 11567 涵蓋普通門與防火門（含 1 小時防火時效）圖例，來源明確，但確切畫法（開啟弧線角度、線寬）須購買標準後核對。"
-    },
-    {
-      "id": "outlet_socket_duplex",
-      "schema_version": 2,
-      "category": "plumbing_electric",
-      "name": "雙聯插座",
-      "aliases": [
-        "插座",
-        "電源孔",
-        "outlet"
-      ],
-      "svg_ref": "sym-outlet-duplex",
-      "plain_meaning": null,
-      "caution": null,
-      "related_layouts": [
-        "3b2l_standard"
-      ],
-      "source_tier": "regulation",
-      "verification_status": "partial",
-      "source_refs": [
-        {
-          "doc": "用戶用電設備裝置規則",
-          "clause": "符號與國家標準有關時應以 CNS 為準；CNS 未規定者得依 IEC 標準",
-          "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=J0030018"
-        },
-        {
-          "doc": "勞動部勞動力發展署《室內配線常用電工符號的認識》PEW-EHW0101 訓練教材",
-          "clause": "電燈、插座、電話對講機電鈴設計圖符號（公開教材，可作交叉來源）"
-        }
-      ],
-      "verified_at": null,
-      "verified_by": null,
-      "ai_description": null,
-      "detection_hints": null,
-      "_pilot_note": "法規指向 CNS，但『電氣製圖』對應的 CNS 標準總號尚未確認（CNS 11567 亦含電氣設備符號，可能已足夠）。須購買 CNS 11567 後判斷是否另需其他標準。"
+      "confused_with": null
     }
   ]
 }

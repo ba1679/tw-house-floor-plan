@@ -213,22 +213,21 @@
 <text x="0" y="690.2" font-size="13" fill="#7a7a7a">權狀 20 坪 ／ 公設比 32% ／ 室內 13.6 坪（45.0 m²）</text>
 <g id="hotspots" fill="transparent" stroke="none">
 <rect id="hs-door-entry" data-symbol-id="door_single_swing" data-source="auto_door" x="338" y="-12" width="90" height="24"/>
-<rect id="hs-door-living" data-symbol-id="" data-source="auto_door" x="326" y="51" width="24" height="150"/>
+<rect id="hs-door-living" data-symbol-id="entrance_opening" data-source="auto_door" x="326" y="51" width="24" height="150"/>
 <rect id="hs-door-kitchen" data-symbol-id="door_single_swing" data-source="auto_door" x="326" y="395" width="24" height="80"/>
-<rect id="hs-door-balcony" data-symbol-id="" data-source="auto_door" x="326" y="510" width="24" height="90"/>
+<rect id="hs-door-balcony" data-symbol-id="door_sliding" data-source="auto_door" x="326" y="510" width="24" height="90"/>
 <rect id="hs-door-master" data-symbol-id="door_single_swing" data-source="auto_door" x="416" y="204" width="24" height="90"/>
 <rect id="hs-door-bath" data-symbol-id="door_single_swing" data-source="auto_door" x="416" y="317" width="24" height="75"/>
 <rect id="hs-door-bed2" data-symbol-id="door_single_swing" data-source="auto_door" x="416" y="510" width="24" height="90"/>
-<rect id="hs-win-living" data-symbol-id="" data-source="auto_window" x="69" y="-12" width="200" height="24"/>
-<rect id="hs-win-kitchen" data-symbol-id="" data-source="auto_window" x="-12" y="385" width="24" height="100"/>
-<rect id="hs-win-master" data-symbol-id="" data-source="auto_window" x="738" y="67" width="24" height="160"/>
-<rect id="hs-win-bath" data-symbol-id="" data-source="auto_window" x="738" y="324" width="24" height="60"/>
-<rect id="hs-win-bed2" data-symbol-id="" data-source="auto_window" x="738" y="432" width="24" height="150"/>
-<rect id="hs-win-balcony" data-symbol-id="" data-source="auto_window" x="79" y="588" width="180" height="24"/>
-<circle id="hs-sprinkler-living" data-symbol-id="sprinkler_head_pendent" data-source="manual" cx="172" cy="149" r="14"/>
-<circle id="hs-sprinkler-hall" data-symbol-id="sprinkler_head_pendent" data-source="manual" cx="383" cy="300" r="14"/>
-<circle id="hs-sprinkler-master" data-symbol-id="sprinkler_head_pendent" data-source="manual" cx="586" cy="150" r="14"/>
-<rect id="hs-outlet-living" data-symbol-id="outlet_socket_duplex" data-source="manual" x="16" y="276" width="30" height="20"/>
+<rect id="hs-win-living" data-symbol-id="window" data-source="auto_window" x="69" y="-12" width="200" height="24"/>
+<rect id="hs-win-kitchen" data-symbol-id="window" data-source="auto_window" x="-12" y="385" width="24" height="100"/>
+<rect id="hs-win-master" data-symbol-id="window" data-source="auto_window" x="738" y="67" width="24" height="160"/>
+<rect id="hs-win-bath" data-symbol-id="window" data-source="auto_window" x="738" y="324" width="24" height="60"/>
+<rect id="hs-win-bed2" data-symbol-id="window" data-source="auto_window" x="738" y="432" width="24" height="150"/>
+<rect id="hs-win-balcony" data-symbol-id="window" data-source="auto_window" x="79" y="588" width="180" height="24"/>
+<rect id="hs-f-counter" data-symbol-id="kitchen_counter" data-source="auto_furniture" x="17" y="444" width="240" height="60"/>
+<rect id="hs-f-toilet" data-symbol-id="toilet" data-source="auto_furniture" x="504" y="300" width="40" height="70"/>
+<rect id="hs-f-sink" data-symbol-id="washbasin" data-source="auto_furniture" x="632" y="300" width="60" height="50"/>
 <rect id="hs-canopy-bed2" data-symbol-id="canopy_rain" data-source="manual" x="700" y="429" width="40" height="150"/>
 </g>
 </svg>

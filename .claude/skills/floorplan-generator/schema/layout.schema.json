@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://tw-house-floor-plan/schema/layout_spec.schema.json",
-  "title": "Layout Spec（LLM 撰寫的輸入）",
+  "$id": "https://tw-house-floor-plan/schema/layout.schema.json",
+  "title": "Layout 格局（LLM 撰寫的輸入）",
   "description": "這是模型唯一需要產生的檔案。它描述拓樸與比例，不描述座標。座標、牆、開口位置一律由 scripts/expand_layout.py 推導。",
   "type": "object",
   "required": [
@@ -372,6 +372,75 @@
           }
         }
       }
+    },
+    "columns": {
+      "type": "array",
+      "description": "柱（選填）。被切面切到的實心結構，填**深灰**與牆的淺灰區分（p47 表 24 筆號 8／9）。柱佔地板，會把傢俱推開。給 room + corner，或直接給 coords。",
+      "items": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "room": {
+            "type": "string",
+            "description": "柱所在的房間。與 coords 二擇一。"
+          },
+          "corner": {
+            "enum": [
+              "nw",
+              "ne",
+              "sw",
+              "se"
+            ],
+            "description": "落在房間哪個角，預設 nw。"
+          },
+          "size": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "柱寬（cm），預設 40。台灣 RC 住宅常見 40–60。"
+          },
+          "coords": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 4,
+            "maxItems": 4,
+            "description": "[x, y, width, height] 世界座標，完全自訂時用。"
+          }
+        }
+      }
+    },
+    "canopies": {
+      "type": "array",
+      "description": "雨遮（選填）。掛在某扇窗外側的外挑構造。⚠ 法規定義的是「雨遮是什麼、算不算坪數」，**不是平面圖上怎麼畫**——畫法屬 convention，不要標成有標準明文。",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "window"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "window": {
+            "type": "string",
+            "description": "掛在哪一扇窗上（window.id）。窗必須在外牆。"
+          },
+          "depth": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "外挑深度（cm），預設 90。建築技術規則的免計容積範圍是 1 公尺以內。"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -402,8 +471,10 @@
                 "hallway",
                 "storage",
                 "study",
-                "entrance"
-              ]
+                "entrance",
+                "pipe_shaft"
+              ],
+              "description": "pipe_shaft = 管道間（p48 表 25 代號 I.P／p51 表 28 PS）：沒有門、進不去，因此不參與動線連通與暗房檢查。"
             },
             "name": {
               "type": "string",

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-layout_spec.json  →  floorplan.json
+layout.json  →  floorplan.json
 
 把模型撰寫的「拓樸 + 比例」展開成確定性的幾何。
 
@@ -39,11 +39,14 @@ FREESTANDING = {"dining_table", "chair"}     # 只有這些可以擺在房間中
 # 兩者都仍然要留開口兩側的通行空間——人還是要走過去。
 NO_SWING = {"sliding", "opening"}
 
+COLUMN_SZ = 40   # RC 住宅常見柱寬 (cm)。柱與牆的差別在填色深淺，不在形狀（p47 表 24 筆號 8／9）
+CANOPY_D = 90    # 雨遮外挑深度 (cm)。建築技術規則的免計容積範圍是 1 公尺以內，故預設不到 1m
+
 ROOM_NAMES = {
     "living_room": "客廳", "dining_room": "餐廳", "kitchen": "廚房",
     "bedroom": "臥室", "master_bedroom": "主臥", "bathroom": "衛浴",
     "balcony": "陽台", "hallway": "走道", "storage": "儲藏室",
-    "study": "書房", "entrance": "玄關",
+    "study": "書房", "entrance": "玄關", "pipe_shaft": "管道間",
 }
 
 # 型錄尺寸 (width, depth) cm；width 為靠牆的那一邊
@@ -458,7 +461,7 @@ def passage_rect(wl, offset, width, room_geom, depth=D_PASS):
     return {"x": x, "y": s["y"] + offset, "width": depth, "height": width}
 
 
-def build_blocked(rooms, doors, windows, walls):
+def build_blocked(rooms, doors, windows, walls, columns=()):
     """每個房間的禁區：門的開啟弧線、開口兩側的通行空間、窗前的採光帶。
 
     傢俱在這些區域裡就等於「門打不開」或「走不過去」。與其事後驗證，
@@ -478,6 +481,15 @@ def build_blocked(rooms, doors, windows, walls):
         if d["opens_to"] in hard:
             for arc in d["swing_arcs"]:
                 hard[d["opens_to"]].append(("sector", arc))
+
+    # 柱是實心結構，從地板一路到天花板：落地傢俱擺不進去，壁掛物也掛不上。
+    for col in columns:
+        rid = col.get("room_id")
+        if rid in hard:
+            g = col["geometry"]
+            rect = {"x": g["x"], "y": g["y"], "width": g["width"], "height": g["height"]}
+            hard[rid].append(("rect", rect))
+            mount[rid].append(("rect", rect))
 
     for wn in windows:
         rid = wn.get("room")
@@ -650,6 +662,82 @@ def resolve_furniture(spec, rooms, hard, soft, mount):
 
 
 # --------------------------------------------------------------------------
+# 5.5 柱與雨遮：兩個都是結構，但一個在室內、一個在室外
+# --------------------------------------------------------------------------
+def resolve_columns(spec, rooms):
+    """柱。給 room + corner 讓它落在房間角落，或直接給 coords。
+
+    柱被切面切到，所以是實心的（p47 表 24 筆號 8：柱填深灰、筆號 9：牆填淺灰）。
+    它跟樑最大的差別是**柱佔地板**——所以它進 build_blocked 的 hard 區，會把傢俱
+    推開。這正是它值得畫的理由：買房者最該知道的是「柱不能打掉，牆有些可以」。
+    """
+    geom = dict((rm["id"], rm["geometry"]) for rm in rooms)
+    out = []
+    for c in spec.get("columns", []):
+        cid = c["id"]
+        if c.get("coords"):
+            coords = list(c["coords"])
+        else:
+            g = geom.get(c.get("room"))
+            if g is None:
+                errors.append("柱 %s: 找不到房間 %s" % (cid, c.get("room")))
+                continue
+            sz = c.get("size", COLUMN_SZ)
+            corner = c.get("corner", "nw")
+            x = g["x"] if corner in ("nw", "sw") else g["x"] + g["width"] - sz
+            y = g["y"] if corner in ("nw", "ne") else g["y"] + g["height"] - sz
+            coords = [x, y, sz, sz]
+        if coords[2] <= 0 or coords[3] <= 0:
+            errors.append("柱 %s: 尺寸必須為正" % cid)
+            continue
+        out.append({
+            "id": cid, "room_id": c.get("room"),
+            "geometry": {"x": r(coords[0]), "y": r(coords[1]),
+                         "width": r(coords[2]), "height": r(coords[3])},
+        })
+    return out
+
+
+def resolve_canopies(spec, windows, walls, bounds):
+    """雨遮。掛在某扇窗的外側——這是它的定義，所以 spec 只要指定 window。
+
+    ⚠ 畫法沒有標準來源：法規（建築技術規則、地籍測量實施規則）定義的是「雨遮是什麼、
+    算不算坪數」，不是「平面圖上怎麼畫」。這裡畫成外牆外側的細線矩形，是台灣建案
+    平面圖的普遍做法，屬 convention。不要在 symbol 上把它標成有標準明文。
+    """
+    wall_by_id = dict((w["id"], w) for w in walls)
+    win_by_id = dict((w["id"], w) for w in windows)
+    W, H = bounds["width"], bounds["height"]
+    out = []
+    for c in spec.get("canopies", []):
+        cid = c["id"]
+        wn = win_by_id.get(c.get("window"))
+        if wn is None:
+            errors.append("雨遮 %s: 找不到窗 %s" % (cid, c.get("window")))
+            continue
+        wl = wall_by_id[wn["wall_id"]]
+        if wl["type"] != "exterior":
+            errors.append("雨遮 %s: 窗 %s 不在外牆上，雨遮只能掛在外牆" % (cid, wn["id"]))
+            continue
+        d = c.get("depth", CANOPY_D)
+        half_t = wl["thickness"] / 2.0
+        px, py = wn["position"]["x"], wn["position"]["y"]
+        # 外牆只會落在圖面的四個邊上，所以「哪一側是室外」由窗心座標對半分即可判定。
+        if wl["orientation"] == "horizontal":       # 北／南向外牆：往圖面上或下挑出
+            y = py - half_t - d if py < H / 2.0 else py + half_t
+            coords = [px - wn["width"] / 2.0, y, wn["width"], d]
+        else:                                       # 西／東向外牆：往圖面左或右挑出
+            x = px - half_t - d if px < W / 2.0 else px + half_t
+            coords = [x, py - wn["width"] / 2.0, d, wn["width"]]
+        out.append({
+            "id": cid, "window_id": wn["id"], "room_id": wn.get("room"),
+            "geometry": {"x": r(coords[0]), "y": r(coords[1]),
+                         "width": r(coords[2]), "height": r(coords[3])},
+        })
+    return out
+
+
+# --------------------------------------------------------------------------
 # 6. hotspots：門窗自動生成 + 手動 CNS 符號
 # --------------------------------------------------------------------------
 def load_symbol_map(base):
@@ -669,7 +757,12 @@ def opening_hotspot_rect(op, walls, min_depth=24):
             r(depth), r(op["width"])]
 
 
-def build_hotspots(spec, doors, windows, walls, rooms, symmap):
+def build_hotspots(spec, doors, windows, walls, rooms, columns, canopies, symmap):
+    """圖上畫得出來的東西都要點得開，否則教學圖上會有一個沒人能解釋的記號。
+
+    所以熱區不只來自門窗：傢俱（馬桶、廚具…）與某些房間本身（管道間）也是符號。
+    對應一律查 rules/symbol_map.json，查不到就是 null——不臆測（硬規則 5）。
+    """
     hs = []
     for d in doors:
         hs.append({
@@ -682,6 +775,42 @@ def build_hotspots(spec, doors, windows, walls, rooms, symmap):
             "id": "hs-%s" % w["id"], "symbol_id": symmap.get("window." + w.get("type", "sliding")),
             "shape": "rect", "coords": opening_hotspot_rect(w, walls),
             "label_position": "above", "source": "auto_window", "ref": w["id"],
+        })
+    for col in columns:
+        g = col["geometry"]
+        hs.append({
+            "id": "hs-%s" % col["id"], "symbol_id": symmap.get("column"),
+            "shape": "rect",
+            "coords": [g["x"], g["y"], g["width"], g["height"]],
+            "label_position": "right", "source": "auto_column", "ref": col["id"],
+        })
+    for cp in canopies:
+        g = cp["geometry"]
+        hs.append({
+            "id": "hs-%s" % cp["id"], "symbol_id": symmap.get("canopy"),
+            "shape": "rect",
+            "coords": [g["x"], g["y"], g["width"], g["height"]],
+            "label_position": "above", "source": "auto_canopy", "ref": cp["id"],
+        })
+    for fn in spec.get("_resolved_furniture", []):
+        sid = symmap.get("furniture." + fn["type"])
+        if sid is None:
+            continue
+        g = fn["geometry"]
+        hs.append({
+            "id": "hs-%s" % fn["id"], "symbol_id": sid, "shape": "rect",
+            "coords": [g["x"], g["y"], g["width"], g["height"]],
+            "label_position": "right", "source": "auto_furniture", "ref": fn["id"],
+        })
+    for rm in rooms:
+        sid = symmap.get("room." + rm["type"])
+        if sid is None:
+            continue
+        g = rm["inner"]
+        hs.append({
+            "id": "hs-%s" % rm["id"], "symbol_id": sid, "shape": "rect",
+            "coords": [g["x"], g["y"], g["width"], g["height"]],
+            "label_position": "right", "source": "auto_room", "ref": rm["id"],
         })
     inner_by_id = dict((rm["id"], rm["inner"]) for rm in rooms)
     for h in spec.get("hotspots", []):
@@ -751,9 +880,14 @@ def main():
     doors = resolve_doors(spec, walls, rooms, bounds)
     windows = resolve_windows(spec, walls, rooms, bounds)
     die_if_errors()
-    hard, soft, mount = build_blocked(rooms, doors, windows, walls)
+    columns = resolve_columns(spec, rooms)
+    canopies = resolve_canopies(spec, windows, walls, bounds)
+    die_if_errors()
+    hard, soft, mount = build_blocked(rooms, doors, windows, walls, columns)
     furniture, moved = resolve_furniture(spec, rooms, hard, soft, mount)
-    hotspots = build_hotspots(spec, doors, windows, walls, rooms, load_symbol_map(base))
+    spec["_resolved_furniture"] = furniture
+    hotspots = build_hotspots(spec, doors, windows, walls, rooms, columns, canopies,
+                              load_symbol_map(base))
     die_if_errors()
 
     annotations = [
@@ -778,15 +912,17 @@ def main():
         "bounds": bounds,
         "party_walls": party,
         "rooms": rooms, "walls": walls, "doors": doors, "windows": windows,
-        "furniture": furniture, "annotations": annotations, "hotspots": hotspots,
+        "furniture": furniture, "columns": columns, "canopies": canopies,
+        "annotations": annotations, "hotspots": hotspots,
     }
 
     text = json.dumps(plan, ensure_ascii=False, indent=2)
     if args.out:
         io.open(args.out, "w", encoding="utf-8").write(text + "\n")
-        sys.stderr.write("✓ %s → %s（%d 房 / %d 牆 / %d 門 / %d 窗 / %d 熱區）\n" % (
+        sys.stderr.write("✓ %s → %s（%d 房 / %d 牆 / %d 門 / %d 窗 / %d 柱 / %d 雨遮 / %d 熱區）\n" % (
             os.path.basename(args.spec), args.out,
-            len(rooms), len(walls), len(doors), len(windows), len(hotspots)))
+            len(rooms), len(walls), len(doors), len(windows),
+            len(columns), len(canopies), len(hotspots)))
     else:
         sys.stdout.write(text + "\n")
 

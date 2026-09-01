@@ -1,33 +1,85 @@
 {
   "artboards": [
-    { "file": "Main.dc.html",       "title": "① 說明卡 / bottom sheet", "x": 0,    "y": 0,    "w": 900,  "h": 1170 },
-    { "file": "Badges.dc.html",     "title": "② 來源徽章",              "x": 960,  "y": 0,    "w": 980,  "h": 1180 },
-    { "file": "Onboarding.dc.html", "title": "③ 首次進入與熱區狀態",     "x": 2000, "y": 0,    "w": 900,  "h": 1240 },
-    { "file": "Quiz.dc.html",       "title": "④ 找找看",                "x": 0,    "y": 1340, "w": 2190, "h": 1160 },
-    { "file": "Progress.dc.html",   "title": "⑤ 學習進度",              "x": 0,    "y": 2580, "w": 480,  "h": 1400 },
-    { "file": "SymbolPage.dc.html", "title": "⑥ 符號頁 / SEO 落地頁",   "x": 560,  "y": 2580, "w": 480,  "h": 2340 }
+    {
+      "file": "Main.dc.html",
+      "title": "① 說明卡 / bottom sheet",
+      "x": 0,
+      "y": 0,
+      "w": 900,
+      "h": 1170
+    },
+    {
+      "file": "Badges.dc.html",
+      "title": "② 來源徽章",
+      "x": 960,
+      "y": 0,
+      "w": 980,
+      "h": 1180
+    },
+    {
+      "file": "Onboarding.dc.html",
+      "title": "③ 首次進入與熱區狀態",
+      "x": 2000,
+      "y": 0,
+      "w": 900,
+      "h": 1240
+    },
+    {
+      "file": "Quiz.dc.html",
+      "title": "④ 找找看",
+      "x": 0,
+      "y": 1340,
+      "w": 2190,
+      "h": 1160
+    },
+    {
+      "file": "Progress.dc.html",
+      "title": "⑤ 學習進度",
+      "x": 0,
+      "y": 2580,
+      "w": 480,
+      "h": 1400
+    },
+    {
+      "file": "SymbolPage.dc.html",
+      "title": "⑥ 符號頁 / SEO 落地頁",
+      "x": 560,
+      "y": 2580,
+      "w": 480,
+      "h": 2340
+    }
   ],
   "annotations": [
     {
       "id": "note-content-source",
-      "x": -330, "y": 40, "w": 270,
-      "text": "文案沒有一個字是編的。\n\n撒水頭與雨遮是 symbols.sample.json 裡僅有的兩筆 verification_status: verified，直接拿來排版。\n\n暗樑、單開門、插座的 plain_meaning 目前是 null（CNS 11567 未購入），所以這批畫面裡它們只出現名稱，不出現內容。"
+      "x": -330,
+      "y": 40,
+      "w": 270,
+      "text": "⚠ 這批畫面已過期（PRD v0.4）。\n\n示範內容用的撒水頭，在 v0.4 §4.1 被砍出階段一範圍——設備類符號不畫在平面配置圖上。\n\n目前清單 14 個符號裡只有「雨遮」是 verified，其餘 13 個內容還沒寫。在 M1 把內容補起來之前，這幾張稿沒辦法誠實地換一個符號重排——「文案沒有一個字是編的」這條原則不為了更新設計稿而破例。"
     },
     {
       "id": "note-badge-emoji",
-      "x": 960, "y": -210, "w": 320,
-      "text": "兩處偏離 PRD，請確認：\n\n1. emoji 徽章（📘📗🏗⚠️）改成 SVG。emoji 在各平台長相不同，一個主打精準的產品不該把品牌主張交給平台字型。\n\n2. 可信度階梯用實線→虛線表達，不用顏色。這正好是網站在教的線型語彙。"
+      "x": 960,
+      "y": -210,
+      "w": 320,
+      "text": "✅ 已採納，寫進 PRD v0.4。\n\n1. emoji 徽章改 SVG。\n2. 可信度階梯用實線→虛線，不用顏色。\n\nv0.4 追加一件事：tier = cns 但屬轉載時，大尺寸徽章要多印一行 source_refs.via（「經公會規範轉載，未核對標準原文」）。馬桶／洗手台／廚具／浴缸四個都是這種。"
     },
     {
       "id": "note-quiz-gap",
-      "x": 2250, "y": 1360, "w": 300,
-      "text": "答錯畫面缺一個 schema 欄位。\n\n最有價值的一句是「你點的是偵煙器——差別在中間有沒有十字」，但 symbol 目前沒有記錄符號之間的易混淆關係。\n\n選項：新增 confused_with?: string[]，或是先只顯示正確答案、不指出使用者點了什麼。這題會影響 generateQuiz 的簽名。"
+      "x": 2250,
+      "y": 1360,
+      "w": 300,
+      "text": "✅ 已解決：confused_with 進 schema（PRD v0.4 §7.2.2）。\n\n定案的形狀不是 string[] 而是 [{ symbol_id, difference }]——答錯回饋需要的不只是「誰跟誰像」，還需要那句差異描述本身。build 驗證強制雙向登錄。\n\n但這張稿的示範題（撒水頭 vs 偵煙器）兩個符號都已出範圍，換題要等 M1 內容。\n\n⚠ 另一個必須修的錯：這張稿寫「第一段容錯半徑 46 SVG 單位」。SVG 單位就是公分，46cm 在全圖檢視下只有 14px——比手指還小，等於沒有容錯。PRD v0.5 §6.1.1 已改為 46 CSS px，依當前縮放換算回圖面座標。"
     },
     {
       "id": "note-unverified",
-      "x": 1120, "y": 2600, "w": 300,
-      "text": "還沒定的狀態：查證未完成的符號。\n\n5 筆樣本裡有 3 筆是 pending_purchase / partial。這批畫面預設它們不上線（依 §5 的 ≥80% 門檻）。\n\n如果要讓它們以降級形式上線，就需要第五種徽章狀態，說明卡也要能在 plain_meaning 為 null 時有東西可顯示。"
+      "x": 1120,
+      "y": 2600,
+      "w": 300,
+      "text": "✅ 已解決：PRD v0.4 §5。\n\nverified 與 cns 是兩條軸——不買 CNS 不代表上不了線。一個符號可以是 verified + convention（「我查完了，結論是沒有標準明文」）。所以不需要第五種徽章。\n\n真正卡住的是 §7.1 步驟 5 要求的第 2 個交叉來源：9 個 convention 符號各欠一份。目前查證率 1/14。"
     }
   ],
-  "launch": { "view": "canvas" }
+  "launch": {
+    "view": "canvas"
+  }
 }

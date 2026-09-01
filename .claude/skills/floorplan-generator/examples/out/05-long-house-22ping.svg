@@ -174,15 +174,15 @@
 <text x="0" y="1325.2" font-size="13" fill="#7a7a7a">權狀 22 坪 ／ 公設比 32% ／ 室內 14.9 坪（49.4 m²）</text>
 <g id="hotspots" fill="transparent" stroke="none">
 <rect id="hs-door-entry" data-symbol-id="door_single_swing" data-source="auto_door" x="22" y="-12" width="100" height="24"/>
-<rect id="hs-door-balcony" data-symbol-id="" data-source="auto_door" x="110" y="112" width="180" height="24"/>
+<rect id="hs-door-balcony" data-symbol-id="door_sliding" data-source="auto_door" x="110" y="112" width="180" height="24"/>
 <rect id="hs-door-master" data-symbol-id="door_single_swing" data-source="auto_door" x="75" y="383" width="90" height="24"/>
 <rect id="hs-door-hall" data-symbol-id="door_single_swing" data-source="auto_door" x="255" y="630" width="90" height="24"/>
 <rect id="hs-door-bath" data-symbol-id="door_single_swing" data-source="auto_door" x="188" y="692" width="24" height="75"/>
 <rect id="hs-door-bed2" data-symbol-id="door_single_swing" data-source="auto_door" x="255" y="803" width="90" height="24"/>
-<rect id="hs-door-kitchen" data-symbol-id="" data-source="auto_door" x="140" y="1050" width="120" height="24"/>
-<rect id="hs-win-balcony-f" data-symbol-id="" data-source="auto_window" x="172" y="-12" width="200" height="24"/>
-<rect id="hs-win-kitchen" data-symbol-id="" data-source="auto_window" x="110" y="1223" width="180" height="24"/>
-<circle id="hs-sprinkler-living" data-symbol-id="sprinkler_head_pendent" data-source="manual" cx="200" cy="260" r="14"/>
-<rect id="hs-outlet-living" data-symbol-id="outlet_socket_duplex" data-source="manual" x="20" y="172" width="30" height="20"/>
+<rect id="hs-door-kitchen" data-symbol-id="door_sliding" data-source="auto_door" x="140" y="1050" width="120" height="24"/>
+<rect id="hs-win-balcony-f" data-symbol-id="window" data-source="auto_window" x="172" y="-12" width="200" height="24"/>
+<rect id="hs-win-kitchen" data-symbol-id="window" data-source="auto_window" x="110" y="1223" width="180" height="24"/>
+<rect id="hs-f-toilet" data-symbol-id="toilet" data-source="auto_furniture" x="83" y="648" width="40" height="70"/>
+<rect id="hs-f-counter" data-symbol-id="kitchen_counter" data-source="auto_furniture" x="80" y="1163" width="240" height="60"/>
 </g>
 </svg>

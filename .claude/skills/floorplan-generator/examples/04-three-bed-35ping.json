@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "id": "three_bed_35p",
-  "name": "35 坪三房兩衛",
-  "note": "公私分離：客餐廚在前段，走道橫貫，三房兩衛在後段。對應 PRD 的三房兩廳主圖。",
+  "name": "35 坪三房兩廳兩衛",
+  "note": "公私分離：客餐廚在前段，走道橫貫，三間臥室與兩套衛浴在後段。客廳＋餐廳＝兩廳，這是 PRD 所說的「三房兩廳」。",
   "area": {
     "deed_ping": 35,
     "public_ratio": 0.32,
@@ -367,103 +367,6 @@
     }
   ],
   "hotspots": [
-    {
-      "id": "hs-sprinkler-living",
-      "symbol_id": "sprinkler_head_pendent",
-      "shape": "circle",
-      "place": {
-        "room": "room-living",
-        "rel": [
-          0.4,
-          0.35
-        ],
-        "radius": 14
-      }
-    },
-    {
-      "id": "hs-sprinkler-dining",
-      "symbol_id": "sprinkler_head_pendent",
-      "shape": "circle",
-      "place": {
-        "room": "room-dining",
-        "rel": [
-          0.5,
-          0.35
-        ],
-        "radius": 14
-      }
-    },
-    {
-      "id": "hs-sprinkler-hall",
-      "symbol_id": "sprinkler_head_pendent",
-      "shape": "circle",
-      "place": {
-        "room": "room-hall",
-        "rel": [
-          0.35,
-          0.5
-        ],
-        "radius": 14
-      }
-    },
-    {
-      "id": "hs-sprinkler-master",
-      "symbol_id": "sprinkler_head_pendent",
-      "shape": "circle",
-      "place": {
-        "room": "room-master",
-        "rel": [
-          0.5,
-          0.6
-        ],
-        "radius": 14
-      }
-    },
-    {
-      "id": "hs-sprinkler-bed2",
-      "symbol_id": "sprinkler_head_pendent",
-      "shape": "circle",
-      "place": {
-        "room": "room-bed2",
-        "rel": [
-          0.5,
-          0.6
-        ],
-        "radius": 14
-      }
-    },
-    {
-      "id": "hs-outlet-living",
-      "symbol_id": "outlet_socket_duplex",
-      "shape": "rect",
-      "place": {
-        "room": "room-living",
-        "rel": [
-          0.5,
-          0.06
-        ],
-        "size": [
-          30,
-          20
-        ]
-      }
-    },
-    {
-      "id": "hs-outlet-master",
-      "symbol_id": "outlet_socket_duplex",
-      "shape": "rect",
-      "place": {
-        "room": "room-master",
-        "rel": [
-          0.15,
-          0.06
-        ],
-        "size": [
-          30,
-          20
-        ]
-      }
-    },
     {
       "id": "hs-canopy-living",
       "symbol_id": "canopy_rain",

@@ -165,6 +165,9 @@ def main():
                 reachable.add(nxt)
                 queue.append(nxt)
     for r in rooms:
+        # 管道間沒有門、本來就進不去（表 28 PS），不納入動線檢查。
+        if r["type"] == "pipe_shaft":
+            continue
         check(r["id"] in reachable,
               "房間 %s（%s）從大門走不到——缺門或動線斷開" % (r["id"], r["name"]))
 
@@ -184,6 +187,26 @@ def main():
     for r in rooms:
         if r["type"] in NEED_WINDOW and r["id"] not in win_rooms:
             warnings.append("房間 %s（%s）沒有窗戶，屬於暗房" % (r["id"], r["name"]))
+
+    # ---------------- 柱與雨遮 ----------------
+    envelope = {"x": 0, "y": 0,
+                "width": plan["bounds"]["width"], "height": plan["bounds"]["height"]}
+    struct_ids = collections.Counter()
+    for col in plan.get("columns", []):
+        struct_ids[col["id"]] += 1
+        g = col["geometry"]
+        check(g["width"] > 0 and g["height"] > 0, "柱 %s: 尺寸必須為正" % col["id"])
+        check(contains(envelope, g, tol=1),
+              "柱 %s 落在建物範圍外" % col["id"])
+    for cp in plan.get("canopies", []):
+        struct_ids[cp["id"]] += 1
+        g = cp["geometry"]
+        check(g["width"] > 0 and g["height"] > 0, "雨遮 %s: 尺寸必須為正" % cp["id"])
+        # 雨遮**應該**在建物之外——在裡面代表掛錯側了。
+        check(not contains(envelope, g, tol=-1),
+              "雨遮 %s 落在建物範圍內，應該挑出到外牆之外" % cp["id"])
+    for sid, n in struct_ids.items():
+        check(n == 1, "柱／雨遮 id 重複: %s" % sid)
 
     # ---------------- 傢俱 ----------------
     for f in plan["furniture"]:

@@ -11,7 +11,7 @@ description: 由自然語言需求生成台灣住宅平面圖的結構化 JSON �
 任何時候都不要手改 SVG，也不要手改展開後的 `floorplan.json`——改 spec，重跑管線。
 
 ```
-你寫 layout_spec.json      ← 拓樸 + 比例 + 語意
+你寫 layout.json           ← 格局：拓樸 + 比例 + 語意
         ↓  expand_layout.py
    floorplan.json          ← 座標 / 牆 / 開口 / 熱區（確定性推導）
         ↓  validate_floorplan.py
@@ -36,9 +36,9 @@ description: 由自然語言需求生成台灣住宅平面圖的結構化 JSON �
 
 坪數預設當**權狀坪數**，公設比 0.32。這是最容易搞錯的一步。
 
-### 2. 寫 layout_spec.json
+### 2. 寫 layout.json（格局）
 
-照 `schema/layout_spec.schema.json`。最快的方式是挑一個最接近的範例改：
+照 `schema/layout.schema.json`。最快的方式是挑一個最接近的範例改：
 
 | 需求 | 從哪個範例開始 |
 |---|---|
@@ -101,12 +101,14 @@ SVG 座標 = 世界座標（cm），靠 viewBox 縮放，所以 `hotspot.coords`
 
 ## 與教學網站 PRD 的接點
 
-`floorplan.json` 的 `hotspots` 與 PRD §7.3 的 `layout.hotspots` 同構
+`floorplan.json` 的 `hotspots` 與 PRD §7.3 的 `floorplan.hotspots` 同構
 （`id` / `symbol_id` / `shape` / `coords` / `label_position`），可以直接餵給 viewer。
 
-- 每一道門、每一扇窗**自動**產生一個熱區（`source: "auto_door"` / `"auto_window"`）
-- 撒水頭、雨遮這類 CNS 符號用 spec 的 `hotspots` 手動標，`place` 可以相對房間下座標
-- `symbol_id: null` 代表 M1 查證未完成，viewer 應略過
+- **圖上畫得出來的東西都會自動產生熱區**：門、窗、柱、雨遮、傢俱、以及本身就是符號的房間
+  （管道間），`source` 分別是 `auto_door` / `auto_window` / `auto_column` / `auto_canopy` /
+  `auto_furniture` / `auto_room`。對應一律查 `rules/symbol_map.json`
+- 牆這種「整張圖都是」的符號用 spec 的 `hotspots` 手動標，`coords` 或 `place` 二擇一
+- `symbol_id: null` 代表還沒有對應的已查證符號，viewer 應略過
 
 因此這個 skill 對 PRD 的用途是 **M2 的製圖工具**：快速試不同格局，驗證
 「20 個符號塞不塞得進同一張圖」（PRD §12 列為未驗證風險），而不是另一條產品線。
@@ -124,12 +126,13 @@ python3 scripts/run_examples.py
 | 範例 | 房 / 牆 / 門 / 窗 / 熱區 |
 |---|---|
 | 12 坪套房 | 4 / 7 / 4 / 4 / 11 |
-| 20 坪兩房一廳一衛 | 7 / 10 / 7 / 6 / 18 |
-| 25 坪兩房兩衛 | 8 / 11 / 8 / 7 / 22 |
-| 35 坪三房兩衛 | 10 / 13 / 10 / 9 / 27 |
+| 20 坪兩房一廳一衛 | 7 / 10 / 7 / 6 / 17 |
+| 25 坪兩房一廳兩衛 | 8 / 11 / 8 / 7 / 20 |
+| 35 坪三房兩廳兩衛 | 10 / 13 / 10 / 9 / 24 |
 | 22 坪長型街屋 | 7 / 10 / 7 / 2 / 11 |
 
-全部 0 errors。五份範例目前各有一個「大門不在圖面下方或右方」的 warning——那是製圖編排慣例
+全部 0 errors。產品主圖 `data/layouts/3b2l_standard.layout.json`（34 坪三房兩廳）是 0 errors **0 warnings**——
+它的玄關貼東側外牆，大門因此開在圖面右方，符合製圖慣例。五份範例則各有一個「大門不在圖面下方或右方」的 warning——那是製圖編排慣例
 （見 `docs/reference/naid-symbols.md` §2.7）與本 skill「北方固定朝上」的座標系天生會打架，
 不是 bug；要消掉得改切割樹讓玄關貼到南側或東側外牆。
 長型街屋另外刻意保留 6 個 warning（暗房與穿越動線），那是該格局的真實缺點。
