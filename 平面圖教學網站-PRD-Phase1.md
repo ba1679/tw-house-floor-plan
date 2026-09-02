@@ -3,13 +3,14 @@
 
 | 項目 | 內容 |
 |---|---|
-| 版本 | v0.5（互動模型定案：兩段式點擊成為全站基礎操作） |
+| 版本 | v0.5.1（符號 sprite 完成） |
 | 狀態 | 範圍已定案，可進入 M1 |
 | 適用範圍 | 僅涵蓋三階段規劃中的「階段一」，AI 平面圖分析與地點歷史分析**不在此文件範圍內** |
 | v0.2 變更 | 內容來源定為 CNS 正式規範核對、找找看小遊戲納入階段一、格局範例圖首發 1 張、資料結構預留階段二擴充 |
 | v0.2.1 變更 | 依 M1 試查結果修正 §7.1 的 CNS 取得方式與權威來源地圖 |
 | v0.3 變更 | 符號數砍至 15–25 個、pan/zoom 升為核心功能、刪除 `risk_flags`、UI 狀態改掛 Hotspot、補上 SEO→核心體驗的轉換設計 |
 | v0.3.1 變更 | `layout` 收斂為「格局」單一語意、圖面座標層改稱 `floorplan`、`hotspot.source` 補進 schema、格局名稱一律用「N 房 M 廳」（見 §7.3、[`CONTEXT.md`](CONTEXT.md)） |
+| v0.5.1 變更 | 14 個符號 sprite 完成（`data/symbols.sprite.svg`）；`validate_data.py` 補上 `svg_ref` 對 sprite 的存在性檢查；記錄衛浴廚具 4 個符號的圖例／renderer 畫法落差（§12） |
 | v0.5 變更 | **兩段式點擊由找找看專用升級為全站基礎操作**（§6.1.1）、熱區命中優先序、找找看一局 6 題、「已認識」定義與 localStorage schema 定案（§6.6.1） |
 | v0.4 變更 | **決議不購買 CNS 11567**（見 [ADR-0001](docs/adr/0001-not-buying-cns-11567.md)）、砍掉水電與消防類符號、符號數 20 → 14、主圖定案為 34 坪三房兩廳、新增 `confused_with` 與 `source_refs.via`、找找看判定規則明確化 |
 
@@ -371,7 +372,7 @@ symbol {
   category: enum [structure, door_window, plumbing_electric, fire_safety, furniture]
   name: string                // 正式名稱，例如「暗樑」
   aliases: string[]           // 同義詞／俗稱／錯字，供搜尋比對
-  svg_ref: string             // 對應的 SVG 圖形識別（symbol sprite id）
+  svg_ref: string             // 對應的 SVG 圖形識別（`data/symbols.sprite.svg` 的 <symbol id>）
   plain_meaning: string       // 白話意思
   caution: string             // 該注意的地方
   related_layouts: string[]   // 出現在哪些格局範例中（layout id）
@@ -642,6 +643,13 @@ Symbol Dataset ──┼── Symbol Page (SEO)
 - **內容與程式的排程競爭**：M1（純查規範寫文案）不會產出任何可 demo 的畫面，容易失去動能。緩解方式見 §13 的兩線並行安排；符號數砍半後此風險已大幅降低。
 - ~~**20 個符號的圖面容納度未驗證**~~ → **已驗證，而且答案是塞不下**。依當初訂好的規則調整了符號清單而非硬塞（§4.1）。
   主圖 `data/layouts/3b2l_standard` 現在是 14 個符號中的 13 個、共 37 個 hotspot，0 errors 0 warnings。
+- **圖例與主圖的畫法必須一致**：本站的核心承諾是「符號頁認得的形狀，回到平面圖上找得到」。
+  sprite 與 `render_svg.py` 是兩套獨立的畫圖程式，一旦分岔，這個承諾就破了。
+  目前結構與門窗兩類 8 個符號逐一比對一致；**衛浴廚具 4 個不一致**——
+  sprite 依表 14 畫（馬桶有水箱、洗臉盆有牆線與落水十字、流理檯有洗槽、浴缸有內框），
+  而 `render_svg.py` 自稱冒煙測試 renderer，一律簡化成橢圓或矩形。
+  修法是把 renderer 補齊到表 14（會動到 `run_examples.py` 的基準數字），不是把 sprite 改簡略。
+
 - **找找看的題庫深度有限**：13 個可出題符號 × 1 張圖，重玩價值天然受限（比 v0.3 預估的更淺）。
   v0.5 已據此把一局定為 **6 題**（§6.3）：兩局剛好覆蓋全部 13 個，第三局才開始重複。
   階段一接受這個限制（§6.6 已以 layout 為單位的進度設計緩解），不為此增加內容量。
@@ -653,6 +661,7 @@ Symbol Dataset ──┼── Symbol Page (SEO)
 | ~~M0~~ | ~~下單購買 CNS 11567~~ → **取消**（ADR-0001） | — |
 | M1 | 14 個符號的內容：以公會規範為主來源，9 個 `convention` 各補第 2 個交叉來源，4 個 `cns`（轉載）填 `via` | 符號資料檔通過 schema 驗證，查證率 ≥ 80% |
 | ~~M2a~~ | ~~三房兩廳格局圖 SVG 繪製 + hotspot~~ → **已完成**：`data/layouts/3b2l_standard.*`，37 hotspot、0 errors | ✅ |
+| ~~M2b~~ | ~~14 個符號 sprite 繪製~~ → **已完成**：`data/symbols.sprite.svg`，viewBox 統一 0 0 140 140，`validate_data.py` 檢查 `svg_ref` 是否存在 | ✅ |
 | M2 | 檢視器：說明卡片 + **pan/zoom** + 可點擊性提示 | 手機實機可完整操作，觸控目標達 44px |
 | M3 | 符號頁（SEO）+ 分類瀏覽 + 搜尋 + 來源徽章 + **符號頁→平面圖轉換點** | 每個符號有獨立可索引 URL 且能高亮跳轉 |
 | M4 | 找找看小遊戲（含 §6.3.1 的縮放規則）+ 學習進度 | 由符號資料自動出題，無獨立題庫 |
@@ -668,6 +677,8 @@ Symbol Dataset ──┼── Symbol Page (SEO)
 *v0.3：範圍收斂至 20 個符號，pan/zoom 升為核心功能，刪除主觀判斷欄位，補上 SEO 入站與轉換設計。*
 
 *v0.4：決議不購買 CNS 11567，砍掉設備類符號收斂至 14 個，主圖定案並實際產出，補上 `confused_with` 與 `via`。*
+
+*v0.5.1：14 個符號 sprite 完成（`data/symbols.sprite.svg`）；記錄圖例與主圖 renderer 在衛浴廚具 4 個符號上的畫法落差。*
 
 *v0.5：兩段式點擊升為全站基礎操作（實測 37/37 熱區不達 44px），熱區命中採小面積優先，
 找找看一局 6 題，「已認識」定義與 localStorage schema 定案。*

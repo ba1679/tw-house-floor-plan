@@ -1,0 +1,233 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+<!--
+  符號 sprite — 階段一 14 個符號（PRD §4.1）
+
+  ▍這不是圖示（icon），是平面圖的放大局部。
+  每個 symbol 用的線型、填色、記號都與 data/layouts/*.svg 上畫的同一套，
+  使用者在符號頁認得的形狀，回到平面圖上必須是同一個形狀。
+  畫法出處逐項見 data-source，總表見 docs/reference/naid-symbols.md。
+
+  ▍座標
+  viewBox 一律 0 0 140 140（沿用 design/SymbolPage.dc.html 的英雄圖尺寸）。
+  單位是「示意單位」不是公分：sprite 是局部放大，牆厚被放大、開口被裁短，
+  比例不可拿來量。真正帶尺寸語意的只有兩件事，兩者都照實畫：
+    外牆 32 單位 ／ 隔間牆 16 單位  —— 外牆比隔間牆厚一倍（圖上實為 24cm / 12cm）
+    柱 48 單位，比它所在的牆更寬     —— 所以柱會凸進室內
+
+  ▍開口類符號共用同一組牆體幾何（門 ×3、出入口、窗、雨遮）
+    開口 x=30..110、牆段 x=4..30 與 x=110..136。
+    六個符號排在一起時只有「開口裡面畫了什麼」不同——那正是要學會分辨的東西。
+    新增開口類符號請沿用這組數字，不要各憑感覺。
+
+  ▍線寬
+  階層照 p47 表 24（特粗 → 中粗 → 中實 → 細實），但**壓縮過**：
+  表 24 的 0.6:0.3:0.2:0.1 是給 1/50 圖紙列印用的，照搬到 40px 的清單圖示
+  上，細實線會細到不足一個裝置像素而消失。這裡只壓縮相對差距、不改變順序。
+  正式站上若要列印符號卡，改回 render_svg.py 的 LW × LINE_SCALE。
+
+  ▍填色語意（p47 表 24 筆號 8／9）
+  柱填深灰、牆填淺灰。**牆與柱的差別在填色深淺，不在形狀**——
+  sym-wall 與 sym-column 因此刻意畫成同一個形狀家族，只有顏色不同。
+
+  ▍顏色可覆寫
+  值取自 render_svg.py 的 PALETTE，並包成 CSS 變數（有 fallback）。
+  外部 <use href="sprite.svg#id"> 在 Chrome／Safari 不會載入，
+  這份檔案必須**內嵌**進 DOM 再 <use>。內嵌後 var() 會從 <use> 的祖先繼承，
+  所以要換色是改 CSS、不是改這個檔。
+-->
+
+<!-- 牆：外牆（厚）與隔間牆（薄）交會的 T 字。買房會用到的一課就在這裡：
+     外牆是結構、動不了；隔間牆薄，有些可以打。形狀相同、厚度不同。 -->
+<symbol id="sym-wall" viewBox="0 0 140 140" data-source="NAID p28-29 表 12；p47 表 24 筆號 9">
+  <title>牆</title>
+  <rect x="4" y="14" width="132" height="32" fill="var(--fp-wall,#a8a8a8)"/>
+  <rect x="62" y="46" width="16" height="80" fill="var(--fp-wall,#a8a8a8)"/>
+  <line x1="4" y1="14" x2="136" y2="14" stroke="var(--fp-structure,#2b2b2b)" stroke-width="3.2"/>
+</symbol>
+
+<!-- 柱：與牆同為實心方塊，唯一差別是填色更深（表 24 筆號 8）。
+     柱比牆寬，所以會凸進室內——那塊凸出來的量是拆不掉的。 -->
+<symbol id="sym-column" viewBox="0 0 140 140" data-source="NAID p47 表 24 筆號 8；p28 表 12">
+  <title>柱</title>
+  <rect x="4" y="46" width="132" height="32" fill="var(--fp-wall,#a8a8a8)"/>
+  <rect x="46" y="46" width="48" height="48" fill="var(--fp-column,#585858)"/>
+  <line x1="4" y1="46" x2="136" y2="46" stroke="var(--fp-structure,#2b2b2b)" stroke-width="3.2"/>
+</symbol>
+
+<!-- 樑：長虛線（p18 表 6「平面圖上部之主結構投影線，如：梁線」）。
+     虛線＝頭頂上的東西。畫兩條＝樑有寬度，兩線之間就是壓在你頭上的那一段。
+     ⚠ 建案平面圖通常不畫樑，所以主圖上沒有它的熱區（PRD §4.2）。 -->
+<symbol id="sym-beam" viewBox="0 0 140 140" data-source="NAID p18 表 6 長虛線">
+  <title>樑</title>
+  <rect x="22" y="6" width="96" height="128" fill="var(--fp-room,#f4f2ed)"/>
+  <rect x="6" y="6" width="16" height="128" fill="var(--fp-wall,#a8a8a8)"/>
+  <rect x="118" y="6" width="16" height="128" fill="var(--fp-wall,#a8a8a8)"/>
+  <g stroke="var(--fp-line,#4a4a4a)" stroke-width="2.2" stroke-dasharray="18 10">
+    <line x1="6" y1="56" x2="134" y2="56"/>
+    <line x1="6" y1="84" x2="134" y2="84"/>
+  </g>
+</symbol>
+
+<!-- 管道間：規範只給代號、沒有圖例（p48 表 25 I.P／p51 表 28 PS），
+     所以「畫法」本身沒有標準來源——圖上就是一個標了 PS、四面封死、沒有門的小房間。
+     代號本身就是符號：不標 PS 就認不出來。 -->
+<symbol id="sym-pipe-shaft" viewBox="0 0 140 140" data-source="NAID p48 表 25 I.P；p51 表 28 PS（僅代號，畫法無標準來源）">
+  <title>管道間</title>
+  <rect x="26" y="26" width="88" height="88" fill="var(--fp-wall,#a8a8a8)"/>
+  <rect x="42" y="42" width="56" height="56" fill="var(--fp-room,#f4f2ed)"/>
+  <text x="70" y="80" text-anchor="middle" font-size="30" font-weight="600"
+        font-family="-apple-system, 'Noto Sans TC', sans-serif"
+        fill="var(--fp-text,#2b2b2b)">PS</text>
+</symbol>
+
+<!-- 一般單開門：牆斷開、門扇垂直牆面（90° 全開）、自扇端畫四分之一圓弧回門樘，半徑＝門寬。
+     弧畫虛線是語意不是美術：p23 表 8 備考「軌跡線以虛線表示則不可遮蔽」地板材質線。
+     這道弧就是門的迴轉空間，家具不能放進去。 -->
+<symbol id="sym-door-single-swing" viewBox="0 0 140 140" data-source="NAID p23 表 8 單開門">
+  <title>一般單開門</title>
+  <rect x="4" y="22" width="26" height="16" fill="var(--fp-wall,#a8a8a8)"/>
+  <rect x="110" y="22" width="26" height="16" fill="var(--fp-wall,#a8a8a8)"/>
+  <g stroke="var(--fp-line,#4a4a4a)" fill="none">
+    <line x1="30" y1="22" x2="30" y2="38" stroke-width="1.6"/>
+    <line x1="110" y1="22" x2="110" y2="38" stroke-width="1.6"/>
+    <line x1="30" y1="38" x2="30" y2="118" stroke-width="1.6"/>
+    <path d="M 30 118 A 80 80 0 0 0 110 38" stroke-width="1" stroke-dasharray="9 6"/>
+  </g>
+</symbol>
+
+<!-- 雙開門：兩扇等寬，各自從兩側門樘向中央開，兩道弧在中央相接（p23 表 8）。
+     台灣公寓大門更常見的是「子母門」（一大一小），表 8 也有，階段一先不拆。 -->
+<symbol id="sym-door-double-swing" viewBox="0 0 140 140" data-source="NAID p23 表 8 雙開門">
+  <title>雙開門</title>
+  <rect x="4" y="41" width="26" height="16" fill="var(--fp-wall,#a8a8a8)"/>
+  <rect x="110" y="41" width="26" height="16" fill="var(--fp-wall,#a8a8a8)"/>
+  <g stroke="var(--fp-line,#4a4a4a)" fill="none">
+    <line x1="30" y1="41" x2="30" y2="57" stroke-width="1.6"/>
+    <line x1="110" y1="41" x2="110" y2="57" stroke-width="1.6"/>
+    <line x1="30" y1="57" x2="30" y2="97" stroke-width="1.6"/>
+    <line x1="110" y1="57" x2="110" y2="97" stroke-width="1.6"/>
+    <path d="M 30 97 A 40 40 0 0 0 70 57" stroke-width="1" stroke-dasharray="9 6"/>
+    <path d="M 110 97 A 40 40 0 0 1 70 57" stroke-width="1" stroke-dasharray="9 6"/>
+  </g>
+</symbol>
+
+<!-- 推拉門：兩片門扇分別偏向兩端、平行牆面，中央一個小圓點表示交會（p23 表 8 雙拉門）。
+     沒有弧＝不佔迴轉空間，這是拉門相對於開門最實際的差別。 -->
+<symbol id="sym-door-sliding" viewBox="0 0 140 140" data-source="NAID p23 表 8 單拉門／雙拉門／雙向拉門／拉進門">
+  <title>推拉門</title>
+  <rect x="4" y="62" width="26" height="16" fill="var(--fp-wall,#a8a8a8)"/>
+  <rect x="110" y="62" width="26" height="16" fill="var(--fp-wall,#a8a8a8)"/>
+  <g stroke="var(--fp-line,#4a4a4a)" fill="none">
+    <line x1="30" y1="62" x2="30" y2="78" stroke-width="1.6"/>
+    <line x1="110" y1="62" x2="110" y2="78" stroke-width="1.6"/>
+    <line x1="30" y1="61.2" x2="74" y2="61.2" stroke-width="2.2"/>
+    <line x1="66" y1="78.8" x2="110" y2="78.8" stroke-width="2.2"/>
+  </g>
+  <circle cx="70" cy="70" r="3.4" fill="var(--fp-line,#4a4a4a)"/>
+</symbol>
+
+<!-- 出入口（無門扇）：牆斷開留空、**不畫門扇**，開口中央一個小三角記號（p23 表 8 第一項）。
+     開放式廚房、走道通客廳那種寬開口就是它——不是「加寬的拉門」。
+     ⚠ 三角記號相對牆厚已放大（圖上約 0.6 倍牆厚，這裡 0.85 倍），否則 40px 下會消失。 -->
+<symbol id="sym-entrance-opening" viewBox="0 0 140 140" data-source="NAID p23 表 8 出入口">
+  <title>出入口（無門扇）</title>
+  <rect x="4" y="62" width="26" height="16" fill="var(--fp-wall,#a8a8a8)"/>
+  <rect x="110" y="62" width="26" height="16" fill="var(--fp-wall,#a8a8a8)"/>
+  <g stroke="var(--fp-line,#4a4a4a)" fill="none">
+    <line x1="30" y1="62" x2="30" y2="78" stroke-width="1.6"/>
+    <line x1="110" y1="62" x2="110" y2="78" stroke-width="1.6"/>
+  </g>
+  <polygon points="56.4,70 83.6,70 70,81.5" fill="var(--fp-line,#4a4a4a)"/>
+</symbol>
+
+<!-- 窗：牆在開口處斷開，開口以一條「窗框帶」橫跨，兩端窗樘（p24 表 9 共同構造）。
+     框帶內兩條平行細實線＝玻璃，這是固定窗，也是 18 種窗共用的骨架；
+     其他類型的差別只在框帶裡面畫幾條線、是實是虛、有沒有開啟弧。
+     窗只開在外牆，所以這裡的牆是厚的，外側那條特粗線是建物輪廓。 -->
+<symbol id="sym-window" viewBox="0 0 140 140" data-source="NAID p24 表 9 固定窗">
+  <title>窗</title>
+  <rect x="4" y="54" width="26" height="32" fill="var(--fp-wall,#a8a8a8)"/>
+  <rect x="110" y="54" width="26" height="32" fill="var(--fp-wall,#a8a8a8)"/>
+  <g stroke="var(--fp-structure,#2b2b2b)" stroke-width="3.2">
+    <line x1="4" y1="54" x2="30" y2="54"/>
+    <line x1="110" y1="54" x2="136" y2="54"/>
+  </g>
+  <g stroke="var(--fp-line,#4a4a4a)" fill="none">
+    <line x1="30" y1="54" x2="110" y2="54" stroke-width="1.6"/>
+    <line x1="30" y1="86" x2="110" y2="86" stroke-width="1.6"/>
+    <line x1="30" y1="54" x2="30" y2="86" stroke-width="1.6"/>
+    <line x1="110" y1="54" x2="110" y2="86" stroke-width="1.6"/>
+    <line x1="30" y1="64.7" x2="110" y2="64.7" stroke-width="1"/>
+    <line x1="30" y1="75.3" x2="110" y2="75.3" stroke-width="1"/>
+  </g>
+</symbol>
+
+<!-- 雨遮：窗戶外側、建物輪廓線**之外**的一塊淺凸出。認它就是認「線在輪廓外面」。
+     ⚠ 畫法（細線矩形）是台灣建案的普遍做法，屬 convention，沒有標準明文。
+     法規管的是「雨遮算不算坪數」，不是圖上怎麼畫——不要在 symbol 上標成有標準依據。 -->
+<symbol id="sym-canopy-rain" viewBox="0 0 140 140" data-source="畫法無標準來源（convention）；定義見地籍測量實施規則、建築技術規則">
+  <title>雨遮</title>
+  <rect x="22" y="35" width="96" height="38" fill="none"
+        stroke="var(--fp-muted,#7a7a7a)" stroke-width="1.6"/>
+  <rect x="4" y="73" width="26" height="32" fill="var(--fp-wall,#a8a8a8)"/>
+  <rect x="110" y="73" width="26" height="32" fill="var(--fp-wall,#a8a8a8)"/>
+  <g stroke="var(--fp-structure,#2b2b2b)" stroke-width="3.2">
+    <line x1="4" y1="73" x2="30" y2="73"/>
+    <line x1="110" y1="73" x2="136" y2="73"/>
+  </g>
+  <g stroke="var(--fp-line,#4a4a4a)" fill="none">
+    <line x1="30" y1="73" x2="110" y2="73" stroke-width="1.6"/>
+    <line x1="30" y1="105" x2="110" y2="105" stroke-width="1.6"/>
+    <line x1="30" y1="73" x2="30" y2="105" stroke-width="1.6"/>
+    <line x1="110" y1="73" x2="110" y2="105" stroke-width="1.6"/>
+    <line x1="30" y1="83.7" x2="110" y2="83.7" stroke-width="1"/>
+    <line x1="30" y1="94.3" x2="110" y2="94.3" stroke-width="1"/>
+  </g>
+</symbol>
+
+<!-- 坐式馬桶：上方圓角矩形（水箱）＋下方橢圓（馬桶座）。p32 表 14，該表標題註明引用 CNS 11567。 -->
+<symbol id="sym-toilet" viewBox="0 0 140 140" data-source="CNS 11567（經 NAID p32 表 14 轉載）坐式馬桶">
+  <title>馬桶</title>
+  <g fill="var(--fp-furn,#ffffff)" stroke="var(--fp-furn-line,#8a8a8a)" stroke-width="2.2">
+    <ellipse cx="70" cy="82" rx="26" ry="34"/>
+    <rect x="42" y="22" width="56" height="26" rx="3"/>
+  </g>
+</symbol>
+
+<!-- 洗臉盆（掛牆式）：半圓／橢圓盆，後緣一條牆線，盆內十字＝落水頭。p32 表 14（引用 CNS 11567）。 -->
+<symbol id="sym-washbasin" viewBox="0 0 140 140" data-source="CNS 11567（經 NAID p32 表 14 轉載）洗臉盆（掛牆式）">
+  <title>洗手台</title>
+  <rect x="14" y="40" width="112" height="16" fill="var(--fp-wall,#a8a8a8)"/>
+  <path d="M 34 56 L 106 56 A 36 42 0 0 1 34 56 Z"
+        fill="var(--fp-furn,#ffffff)" stroke="var(--fp-furn-line,#8a8a8a)" stroke-width="2.2"/>
+  <g stroke="var(--fp-furn-line,#8a8a8a)" stroke-width="1">
+    <line x1="61" y1="76" x2="79" y2="76"/>
+    <line x1="70" y1="67" x2="70" y2="85"/>
+  </g>
+</symbol>
+
+<!-- 流理檯洗槽：長矩形檯面，內含圓角方槽＋小圓（龍頭）。p32 表 14（引用 CNS 11567）。
+     瓦斯爐在表 14 是另一個符號，這裡刻意不畫——一個 id 只對一個圖例。 -->
+<symbol id="sym-kitchen-counter" viewBox="0 0 140 140" data-source="CNS 11567（經 NAID p32 表 14 轉載）流理檯洗槽">
+  <title>廚具</title>
+  <rect x="14" y="44" width="112" height="52" rx="2"
+        fill="var(--fp-furn,#ffffff)" stroke="var(--fp-furn-line,#8a8a8a)" stroke-width="2.2"/>
+  <g fill="none" stroke="var(--fp-furn-line,#8a8a8a)" stroke-width="1">
+    <rect x="30" y="54" width="46" height="32" rx="3"/>
+    <circle cx="53" cy="50" r="4"/>
+  </g>
+</symbol>
+
+<!-- 浴缸：圓角長方形，內再一個圓角長方形，一端一個小圓（落水）。p32 表 14（引用 CNS 11567）。
+     有浴缸或淋浴的房間代號標 BATH，只有馬桶洗手台的才標 W.C（p48 表 25）。 -->
+<symbol id="sym-bathtub" viewBox="0 0 140 140" data-source="CNS 11567（經 NAID p32 表 14 轉載）浴缸">
+  <title>浴缸</title>
+  <rect x="30" y="14" width="80" height="112" rx="8"
+        fill="var(--fp-furn,#ffffff)" stroke="var(--fp-furn-line,#8a8a8a)" stroke-width="2.2"/>
+  <g fill="none" stroke="var(--fp-furn-line,#8a8a8a)" stroke-width="1">
+    <rect x="39" y="24" width="62" height="88" rx="7"/>
+    <circle cx="70" cy="100" r="5"/>
+  </g>
+</symbol>
+
+</svg>

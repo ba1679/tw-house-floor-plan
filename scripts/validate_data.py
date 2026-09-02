@@ -8,12 +8,15 @@
 用法: python3 scripts/validate_data.py
 """
 import json, io, sys, glob, os
+import xml.etree.ElementTree as ET
 from collections import Counter
 
 REQUIRED_WHEN_VERIFIED = ["plain_meaning", "caution", "source_refs", "verified_at", "verified_by"]
 VALID_TIERS = {"cns", "regulation", "convention", "varies"}
 VALID_STATUS = {"verified", "partial", "pending_purchase", "blocked"}
 VALID_CATEGORIES = {"structure", "door_window", "plumbing_electric", "fire_safety", "furniture"}
+SPRITE_PATH = "data/symbols.sprite.svg"
+SPRITE_VIEWBOX = "0 0 140 140"
 VALID_HOTSPOT_SOURCES = set(['auto_door', 'auto_window', 'auto_column', 'auto_canopy', 'auto_furniture', 'auto_room', 'manual'])
 
 errors, warnings = [], []
@@ -63,6 +66,35 @@ for s in symbols:
         for f in REQUIRED_WHEN_VERIFIED:
             check(s.get(f), "%s: 標記 verified 但 %s 為空" % (s["id"], f))
         check(s.get("source_tier"), "%s: 標記 verified 但無 source_tier" % s["id"])
+
+# --- svg_ref exists in sprite（PRD §10.1）---
+# sprite 是「符號畫成什麼樣」的唯一來源。svg_ref 斷掉的後果不是報錯而是靜默留白：
+# 符號頁與清單就少一格圖，看起來像設計沒做完，所以這裡是 error。
+SVG_NS = "{http://www.w3.org/2000/svg}"
+sprite_ids = set()
+try:
+    root = ET.parse(SPRITE_PATH).getroot()
+    for node in root.findall(SVG_NS + "symbol"):
+        sid = node.get("id")
+        sprite_ids.add(sid)
+        # viewBox 不一致 = 同一排圖示大小會跳動。這是 sprite 唯一的跨檔約定，照實檢查。
+        check(node.get("viewBox") == SPRITE_VIEWBOX,
+              "sprite %s: viewBox 應為 %r，實際 %r" % (sid, SPRITE_VIEWBOX, node.get("viewBox")))
+        # <title> 是螢幕閱讀器唸出來的名字（PRD §9）
+        check(node.find(SVG_NS + "title") is not None, "sprite %s: 缺 <title>" % sid)
+except (IOError, OSError):
+    errors.append("找不到 sprite: %s" % SPRITE_PATH)
+except ET.ParseError as exc:
+    errors.append("sprite 不是合法 XML: %s" % exc)
+
+for s in symbols:
+    check(s.get("svg_ref"), "%s: 缺 svg_ref" % s["id"])
+    if s.get("svg_ref") and sprite_ids:
+        check(s["svg_ref"] in sprite_ids,
+              "%s: svg_ref %r 在 %s 找不到" % (s["id"], s["svg_ref"], SPRITE_PATH))
+used = set(s.get("svg_ref") for s in symbols)
+for orphan in sorted(sprite_ids - used):
+    warnings.append("sprite 有 %s，但沒有任何 symbol 指向它——多畫的還是 id 打錯？" % orphan)
 
 # --- floorplan / hotspot ---
 floorplan_ids = [f["id"] for f in floorplans]
@@ -132,8 +164,10 @@ if not errors:
     print("  ✓ enum 值合法")
     print("  ✓ risk_flags 已移除")
     print("  ✓ verified 符號內容完整")
+    print("  ✓ svg_ref 全部存在於 sprite")
 print("-" * 46)
 print("  %d symbols validated" % len(symbols))
+print("  %d sprite symbols" % len(sprite_ids))
 print("  %d floorplans validated" % len(floorplans))
 print("  %d hotspots validated" % len(hotspot_ids))
 print("  %d broken references" % broken_refs)

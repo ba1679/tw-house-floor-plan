@@ -3,7 +3,8 @@
     "schema_version": 3,
     "generated_at": "2026-08-31",
     "note": "PRD v0.4 §4.1 的階段一符號清單。Q1 決議砍掉水電與消防類，Q4 決議不購買 CNS 11567，故門窗與結構改以《室內設計裝修製圖規範》為主來源、tier 為 convention，依 §7.1 步驟 5 上線前各需補第 2 個交叉來源。標 cns 的四筆是該規範轉載自 CNS 11567 的表 14，source_refs 以 via 欄位註明未核對標準原文。未查證完成的欄位一律 null，不得臆測填入。",
-    "out_of_scope": "撒水頭與插座的查證成果保留在 git 歷史（commit 8905034 之前的版本）——它們是階段一範圍外（消防／水電），但內容已完成，日後開放設備圖層時可直接取回。"
+    "out_of_scope": "撒水頭與插座的查證成果保留在 git 歷史（commit 8905034 之前的版本）——它們是階段一範圍外（消防／水電），但內容已完成，日後開放設備圖層時可直接取回。",
+    "content_state": "plain_meaning：14/14 已寫（依各筆 source_refs 已載明的來源改寫，非轉錄）。ai_description / detection_hints：14/14 已寫，描述的是真實建案平面圖上的樣子（＝標準的畫法），不是本專案 render_svg.py 的簡化版——階段二要分析的是別人的圖。confused_with：9 組、18 筆，雙向登錄，build 時檢查（§7.2.2）。caution：僅 canopy_rain 有，其餘 13 筆仍 null——需要的是建築技術規則、防火門 A/B 分級、採光通風規定這類**法規**來源，與畫法來源是兩回事，不能從製圖規範推導。co_occurs_with：依 §7.2.1 降為選填，M1 結束後一次補齊。verification_status 一律維持 partial：內容寫完不等於查證完成，9 個 convention 仍缺第 2 個交叉來源。"
   },
   "symbols": [
     {
@@ -17,7 +18,7 @@
         "牆壁"
       ],
       "svg_ref": "sym-wall",
-      "plain_meaning": null,
+      "plain_meaning": "隔開空間的實體構造。平面圖上畫成填了淺灰的實心帶狀，外牆通常畫得比室內的隔間牆厚。",
       "caution": null,
       "related_layouts": [
         "3b2l_standard"
@@ -32,9 +33,23 @@
       ],
       "verified_at": null,
       "verified_by": null,
-      "ai_description": null,
-      "detection_hints": null,
-      "confused_with": null,
+      "ai_description": "填淺灰的實心帶狀，兩端接到其他牆或柱；外牆的帶寬明顯大於室內隔間牆。與柱同為實心，差別在填色較淺。",
+      "detection_hints": [
+        "實心填淺灰",
+        "連續帶狀",
+        "外牆較厚",
+        "端點接牆或柱"
+      ],
+      "confused_with": [
+        {
+          "symbol_id": "column",
+          "difference": "兩者都是實心填色，差別在深淺——牆是淺灰，柱是深灰而且會凸出牆面。"
+        },
+        {
+          "symbol_id": "beam",
+          "difference": "兩者都是橫跨的長條，差別在線型——牆是實線填淺灰，樑是兩條長虛線、中間不填色。"
+        }
+      ],
       "_pilot_note": "表 12 備考 2：各種材料之牆身均須註明厚度。牆與柱的差別在填色深淺，不在形狀。"
     },
     {
@@ -48,7 +63,7 @@
         "結構柱"
       ],
       "svg_ref": "sym-column",
-      "plain_meaning": null,
+      "plain_meaning": "支撐整棟建築重量的結構體。平面圖上畫成填了深灰的方塊，顏色比牆深，而且通常比牆寬、會凸進室內。",
       "caution": null,
       "related_layouts": [
         "3b2l_standard"
@@ -63,9 +78,23 @@
       ],
       "verified_at": null,
       "verified_by": null,
-      "ai_description": null,
-      "detection_hints": null,
-      "confused_with": null,
+      "ai_description": "填深灰的實心方塊，多出現在建物轉角或牆的交會處，寬度大於所在的牆，因此會突出於牆面之外。",
+      "detection_hints": [
+        "實心填深灰",
+        "近正方形",
+        "比相鄰牆寬",
+        "突出牆面"
+      ],
+      "confused_with": [
+        {
+          "symbol_id": "wall",
+          "difference": "兩者都是實心填色，差別在深淺——柱是深灰、比牆寬，牆是淺灰的連續帶狀。"
+        },
+        {
+          "symbol_id": "pipe_shaft",
+          "difference": "兩者都是小方塊，差別在中間實不實心——柱整塊填深灰，管道間四周有牆、中間空白並標 PS。"
+        }
+      ],
       "_pilot_note": "與牆同為實心，唯一差別是填色深淺。這是「柱不能打掉、牆有些可以」在圖上唯一看得出來的地方。"
     },
     {
@@ -82,7 +111,7 @@
         "beam"
       ],
       "svg_ref": "sym-beam",
-      "plain_meaning": null,
+      "plain_meaning": "在天花板高度橫跨、撐住上層樓板的結構體。製圖標準用長虛線畫它——虛線代表這東西在你頭頂上；不過建案平面圖多半不會畫出來。",
       "caution": null,
       "related_layouts": [
         "3b2l_standard"
@@ -97,9 +126,19 @@
       ],
       "verified_at": null,
       "verified_by": null,
-      "ai_description": null,
-      "detection_hints": null,
-      "confused_with": null,
+      "ai_description": "兩條平行的長虛線橫跨室內，兩端落在牆或柱上；長虛線代表位於平面切面上方的結構投影，線間不填色。",
+      "detection_hints": [
+        "長虛線",
+        "成對平行",
+        "橫跨房間",
+        "兩端接牆或柱"
+      ],
+      "confused_with": [
+        {
+          "symbol_id": "wall",
+          "difference": "兩者都是橫跨的長條，差別在線型——樑畫長虛線代表在你頭頂上，牆是實線填淺灰。"
+        }
+      ],
       "_pilot_note": "兩件事要寫進內容：（1）規範只說「梁線」，不區分明樑／暗樑——「暗樑」是房產與室內設計圈的用語，不是製圖標準用語，故合併為單一符號、暗樑收進 aliases。（2）**建案平面圖通常不畫樑**，樑屬施工圖與結構圖，因此本站主圖上沒有樑的熱區。這正是這個符號要教的事：你看不到它，所以要問。"
     },
     {
@@ -114,7 +153,7 @@
         "水管間"
       ],
       "svg_ref": "sym-pipe-shaft",
-      "plain_meaning": null,
+      "plain_meaning": "讓水管、電線這類管線上下貫穿樓層的垂直空間。平面圖上通常是一個標著 PS 的小方格，四周封閉、人進不去。",
       "caution": null,
       "related_layouts": [
         "3b2l_standard"
@@ -129,9 +168,19 @@
       ],
       "verified_at": null,
       "verified_by": null,
-      "ai_description": null,
-      "detection_hints": null,
-      "confused_with": null,
+      "ai_description": "四周由牆圍成的小方形空間，內部標註 PS 或 I.P，周圍牆上沒有門開口，面積遠小於一般房間。",
+      "detection_hints": [
+        "小方框",
+        "標註 PS",
+        "四周無門開口",
+        "面積遠小於房間"
+      ],
+      "confused_with": [
+        {
+          "symbol_id": "column",
+          "difference": "兩者都是小方塊，差別在中間實不實心——管道間中空且標 PS，柱是整塊填深灰。"
+        }
+      ],
       "_pilot_note": "規範只給代號，沒有圖例——圖上就是一個標了 PS 的小房間，沒有門、進不去。畫法本身無標準來源。"
     },
     {
@@ -145,7 +194,7 @@
         "普通門"
       ],
       "svg_ref": "sym-door-single-swing",
-      "plain_meaning": null,
+      "plain_meaning": "一片門扇、往單邊推開的門，住宅室內最常見。平面圖上牆會斷開，並畫一道四分之一圓弧——那道弧就是門打開時掃過的範圍。",
       "caution": null,
       "related_layouts": [
         "3b2l_standard"
@@ -160,9 +209,19 @@
       ],
       "verified_at": null,
       "verified_by": null,
-      "ai_description": null,
-      "detection_hints": null,
-      "confused_with": null,
+      "ai_description": "牆在開口處斷開，開口一端有一條垂直牆面的門扇線，自門扇端點畫一道四分之一圓弧回到另一端，弧半徑等於開口寬度。",
+      "detection_hints": [
+        "牆斷開",
+        "一道四分之一圓弧",
+        "門扇線垂直牆面",
+        "弧半徑＝開口寬"
+      ],
+      "confused_with": [
+        {
+          "symbol_id": "door_double_swing",
+          "difference": "兩者都有開啟弧，差別在幾道——單開門一道弧，雙開門兩道弧在開口中央相接。"
+        }
+      ],
       "_pilot_note": "Q4 決議不購買 CNS 11567，故改以公會規範為主來源，tier 由 cns 降為 convention（表 8 未標示引用 CNS）。依 PRD §7.1 步驟 5，上線前仍須補第 2 個交叉來源。"
     },
     {
@@ -175,7 +234,7 @@
         "對開門"
       ],
       "svg_ref": "sym-door-double-swing",
-      "plain_meaning": null,
+      "plain_meaning": "兩片等寬的門扇、各自往兩側開的門。平面圖上會在開口兩端各畫一道弧，兩道弧在中央相接。",
       "caution": null,
       "related_layouts": [
         "3b2l_standard"
@@ -190,9 +249,19 @@
       ],
       "verified_at": null,
       "verified_by": null,
-      "ai_description": null,
-      "detection_hints": null,
-      "confused_with": null,
+      "ai_description": "牆在開口處斷開，兩端各有一條垂直牆面的門扇線並各自畫一道四分之一圓弧，兩弧在開口中央相接，弧半徑約為開口半寬。",
+      "detection_hints": [
+        "牆斷開",
+        "兩道弧",
+        "兩弧在中央相接",
+        "弧半徑≈開口半寬"
+      ],
+      "confused_with": [
+        {
+          "symbol_id": "door_single_swing",
+          "difference": "兩者都有開啟弧，差別在幾道——雙開門兩道弧在中央相接，單開門只有一道。"
+        }
+      ],
       "_pilot_note": "表 8 另有「子母門」（一大一小），是台灣公寓大門最常見的形式，日後可考慮獨立成符號。"
     },
     {
@@ -206,7 +275,7 @@
         "滑門"
       ],
       "svg_ref": "sym-door-sliding",
-      "plain_meaning": null,
+      "plain_meaning": "門扇沿著軌道左右滑動、不往前後推開的門。平面圖上畫成兩條錯開的平行線，而且沒有弧線——因為它不佔開門要讓出來的空間。",
       "caution": null,
       "related_layouts": [
         "3b2l_standard"
@@ -221,9 +290,23 @@
       ],
       "verified_at": null,
       "verified_by": null,
-      "ai_description": null,
-      "detection_hints": null,
-      "confused_with": null,
+      "ai_description": "牆在開口處斷開，開口內兩條與牆平行的門扇線分別偏向兩端、在中央錯開，交會處有一個小圓點；沒有開啟弧。",
+      "detection_hints": [
+        "無開啟弧",
+        "兩條平行線中央錯開",
+        "中央小圓點",
+        "門扇線在牆面外側"
+      ],
+      "confused_with": [
+        {
+          "symbol_id": "window",
+          "difference": "畫法很像，差別在窗框帶——拉門的門扇線在牆面外側、開口是空的，窗的開口被一條框帶填滿。"
+        },
+        {
+          "symbol_id": "entrance_opening",
+          "difference": "兩者都沒有開啟弧，差別在開口裡有沒有門扇線——拉門有兩條錯開的平行線，出入口完全空白。"
+        }
+      ],
       "_pilot_note": "一個 PRD 符號對應表 8 的四種畫法。其中「拉進門」（口袋門）門扇收進牆體，畫法與一般拉門不同。"
     },
     {
@@ -238,7 +321,7 @@
         "過樑口"
       ],
       "svg_ref": "sym-entrance-opening",
-      "plain_meaning": null,
+      "plain_meaning": "牆斷開、沒有裝門扇的開口，開放式廚房或走道通客廳常是這樣。平面圖上不畫門扇，只在開口中央留一個小三角記號。",
       "caution": null,
       "related_layouts": [
         "3b2l_standard"
@@ -253,9 +336,19 @@
       ],
       "verified_at": null,
       "verified_by": null,
-      "ai_description": null,
-      "detection_hints": null,
-      "confused_with": null,
+      "ai_description": "牆在開口處斷開，開口內不畫任何門扇線，僅在開口中央有一個小三角形記號。",
+      "detection_hints": [
+        "牆斷開",
+        "開口內無門扇線",
+        "中央小三角記號",
+        "無開啟弧"
+      ],
+      "confused_with": [
+        {
+          "symbol_id": "door_sliding",
+          "difference": "兩者都沒有開啟弧，差別在開口裡有沒有門扇線——出入口只有一個小三角，拉門有兩條錯開的平行線。"
+        }
+      ],
       "_pilot_note": "牆斷開、不畫門扇、開口中央一個小三角記號。主圖上有 3 處（玄關通走道、走道通客廳、走道通餐廳）。Q7 清單原本沒有它，但圖上畫得出來就該點得開——見報告。"
     },
     {
@@ -270,7 +363,7 @@
         "window"
       ],
       "svg_ref": "sym-window",
-      "plain_meaning": null,
+      "plain_meaning": "採光和通風用的開口，多半開在外牆。平面圖上牆會斷開、以一條窗框帶橫跨，框帶裡的線條畫法不同，開窗方式也不同。",
       "caution": null,
       "related_layouts": [
         "3b2l_standard"
@@ -285,9 +378,23 @@
       ],
       "verified_at": null,
       "verified_by": null,
-      "ai_description": null,
-      "detection_hints": null,
-      "confused_with": null,
+      "ai_description": "牆在開口處斷開，開口以一條與牆等厚的窗框帶橫跨、兩端有窗樘端線；框帶內另有平行細線、中央錯開的線段或開啟弧，視窗型而定。多開在外牆。",
+      "detection_hints": [
+        "窗框帶橫跨開口",
+        "兩端窗樘端線",
+        "框帶內有細線",
+        "位於外牆"
+      ],
+      "confused_with": [
+        {
+          "symbol_id": "door_sliding",
+          "difference": "畫法很像，差別在窗框帶——窗的開口被一條與牆等厚的框帶填滿，拉門沒有，門扇線落在牆面外側。"
+        },
+        {
+          "symbol_id": "canopy_rain",
+          "difference": "雨遮就畫在窗的正外側，差別在建物輪廓線——窗嵌在牆裡，雨遮整個在輪廓線外面。"
+        }
+      ],
       "_pilot_note": "主圖上實際畫出三種：固定窗、雙橫拉窗、平開窗，三者畫法不同。這已滿足 PRD §7.4 的拆分觸發條件（同一概念 3 個以上變體），但階段一先不拆，落地窗依 Q7 決議收進 aliases。"
     },
     {
@@ -301,7 +408,7 @@
         "廁所"
       ],
       "svg_ref": "sym-toilet",
-      "plain_meaning": null,
+      "plain_meaning": "坐式馬桶。平面圖上畫成上方一個圓角矩形（水箱）加下方一個橢圓（座體），是判斷一個空間是不是廁所最直接的線索。",
       "caution": null,
       "related_layouts": [
         "3b2l_standard"
@@ -317,9 +424,19 @@
       ],
       "verified_at": null,
       "verified_by": null,
-      "ai_description": null,
-      "detection_hints": null,
-      "confused_with": null
+      "ai_description": "上方一個較小的圓角矩形（水箱）與下方一個橢圓（座體）相接組成，水箱側短邊貼牆。",
+      "detection_hints": [
+        "圓角矩形＋橢圓相接",
+        "上小下大",
+        "水箱側貼牆",
+        "尺寸明顯小於浴缸"
+      ],
+      "confused_with": [
+        {
+          "symbol_id": "washbasin",
+          "difference": "兩者都是衛浴裡的圓弧狀器具，差別在有沒有水箱——馬桶上方多一個圓角矩形。"
+        }
+      ]
     },
     {
       "id": "washbasin",
@@ -332,7 +449,7 @@
         "洗手槽"
       ],
       "svg_ref": "sym-washbasin",
-      "plain_meaning": null,
+      "plain_meaning": "洗臉洗手用的臉盆。平面圖上畫成貼著牆的半圓或橢圓形，盆內的十字就是排水孔的位置。",
       "caution": null,
       "related_layouts": [
         "3b2l_standard"
@@ -348,9 +465,19 @@
       ],
       "verified_at": null,
       "verified_by": null,
-      "ai_description": null,
-      "detection_hints": null,
-      "confused_with": null
+      "ai_description": "貼著牆線的半圓形或橢圓形盆體，後緣為直線並與牆重合，盆內中央有一個十字記號表示落水頭。",
+      "detection_hints": [
+        "後緣呈直線貼牆",
+        "半圓或橢圓盆",
+        "盆內十字",
+        "尺寸小於馬桶"
+      ],
+      "confused_with": [
+        {
+          "symbol_id": "toilet",
+          "difference": "兩者都是衛浴裡的圓弧狀器具，差別在後緣——洗手台後緣是貼牆直線、盆內有十字。"
+        }
+      ]
     },
     {
       "id": "kitchen_counter",
@@ -364,7 +491,7 @@
         "檯面"
       ],
       "svg_ref": "sym-kitchen-counter",
-      "plain_meaning": null,
+      "plain_meaning": "廚房的檯面與水槽。平面圖上畫成一條長矩形檯面，裡面的圓角方框是水槽，旁邊的小圓是水龍頭。",
       "caution": null,
       "related_layouts": [
         "3b2l_standard"
@@ -380,9 +507,19 @@
       ],
       "verified_at": null,
       "verified_by": null,
-      "ai_description": null,
-      "detection_hints": null,
-      "confused_with": null
+      "ai_description": "沿牆配置的長矩形檯面，內含一個圓角方形水槽，檯面後緣有一個小圓表示水龍頭；檯面長度遠大於寬度。",
+      "detection_hints": [
+        "長矩形沿牆",
+        "內含圓角方槽",
+        "小圓（龍頭）",
+        "長寬比懸殊"
+      ],
+      "confused_with": [
+        {
+          "symbol_id": "bathtub",
+          "difference": "兩者都是「矩形裡再一個圓角矩形」，差別在內框大小——廚具的水槽只佔檯面一小段。"
+        }
+      ]
     },
     {
       "id": "bathtub",
@@ -394,7 +531,7 @@
         "泡澡缸"
       ],
       "svg_ref": "sym-bathtub",
-      "plain_meaning": null,
+      "plain_meaning": "泡澡用的浴缸。平面圖上畫成一個圓角長方形、裡面再套一個圓角長方形，一端的小圓是排水孔。",
       "caution": null,
       "related_layouts": [
         "3b2l_standard"
@@ -410,9 +547,19 @@
       ],
       "verified_at": null,
       "verified_by": null,
-      "ai_description": null,
-      "detection_hints": null,
-      "confused_with": null
+      "ai_description": "圓角長方形外框內再套一個圓角長方形，內框幾乎填滿外框，一端有一個小圓表示落水；通常一長邊貼牆。",
+      "detection_hints": [
+        "圓角長方形雙層",
+        "內框幾乎填滿外框",
+        "一端小圓（落水）",
+        "長邊貼牆"
+      ],
+      "confused_with": [
+        {
+          "symbol_id": "kitchen_counter",
+          "difference": "兩者都是「矩形裡再一個圓角矩形」，差別在內框大小——浴缸的內框幾乎填滿外框。"
+        }
+      ]
     },
     {
       "id": "canopy_rain",
@@ -451,7 +598,12 @@
         "無欄杆",
         "深度小於陽台"
       ],
-      "confused_with": null
+      "confused_with": [
+        {
+          "symbol_id": "window",
+          "difference": "雨遮就畫在窗的正外側，差別在建物輪廓線——雨遮整個在輪廓線外，窗嵌在牆裡。"
+        }
+      ]
     }
   ]
 }
