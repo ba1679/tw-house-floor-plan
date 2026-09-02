@@ -7,7 +7,7 @@
 
 用法: python3 scripts/validate_data.py
 """
-import json, io, sys, glob, os
+import json, io, sys, glob, os, subprocess
 import xml.etree.ElementTree as ET
 from collections import Counter
 
@@ -31,8 +31,8 @@ def check(cond, msg, bucket=errors):
 symbols = json.load(io.open("data/symbols.sample.json", encoding="utf-8"))["symbols"]
 # Q3(b)：floorplan 是 commit 進 repo 的產物，由 layout spec 經 expand_layout.py 生成。
 # 這裡讀的就是網站要吃的那份檔案，不是另一份樣本——樣本與正式檔分家正是內容雙份維護的開端。
-floorplans = [json.load(io.open(p, encoding="utf-8"))
-              for p in sorted(glob.glob("data/layouts/*.floorplan.json"))]
+floorplan_paths = sorted(glob.glob("data/layouts/*.floorplan.json"))
+floorplans = [json.load(io.open(p, encoding="utf-8")) for p in floorplan_paths]
 check(bool(floorplans), "data/layouts/ 底下找不到任何 *.floorplan.json")
 
 # --- symbol.id unique ---
@@ -113,6 +113,45 @@ for f in floorplans:
 for hid, n in Counter(hotspot_ids).items():
     check(n == 1, "hotspot.id 重複: %s" % hid)
 
+# --- 檔名與 floorplan.id 一致 ---
+# 網站以檔名決定網址（data/layouts/<id>.floorplan.json → /layouts/<id>）。
+# 對不上就是有一邊被手改過，而格局 id 一旦上線不得更改（CONTEXT.md）。
+for path, f in zip(floorplan_paths, floorplans):
+    stem = os.path.basename(path)[:-len(".floorplan.json")]
+    check(f["id"] == stem, "%s 裡的 id 是 %r，與檔名 %r 對不上——網址由檔名決定，"
+                           "而格局 id 一旦上線不得更改" % (os.path.basename(path), f["id"], stem))
+
+# --- 圖面產物與 floorplan 同步（檢視器直接顯示這個產物）---
+# data/layouts/*.svg 是 floorplan-generator 從同一份 floorplan 資料畫出來的產物，網站顯示的就是它，
+# 而熱區是檢視器另外依 floorplan.hotspots 畫的。兩份東西一旦不同步，使用者會看著一張畫錯的圖、
+# 點在錯的位置——而畫面上看不出來。所以這裡把產生器重跑一次，逐字比對：
+# 只要有人手改了 SVG，或改了 floorplan 卻忘記重跑產生器，建置就停下來。
+RENDERER = ".claude/skills/floorplan-generator/scripts/render_svg.py"
+
+if not os.path.exists(RENDERER):
+    errors.append("找不到 %s——沒有它就無從確認網站顯示的圖面還跟資料一致，"
+                  "而圖面過期在畫面上看不出來" % RENDERER)
+else:
+    for path, f in zip(floorplan_paths, floorplans):
+        svg_path = path.replace(".floorplan.json", ".svg")
+        if not os.path.exists(svg_path):
+            errors.append("%s 沒有對應的圖面 %s——檢視器就是顯示這個檔案，缺了整頁只剩空白"
+                          % (os.path.basename(path), os.path.basename(svg_path)))
+            continue
+        proc = subprocess.Popen([sys.executable, RENDERER, path],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        rendered, stderr = proc.communicate()
+        if proc.returncode != 0:
+            errors.append("%s 畫不出 %s: %s"
+                          % (RENDERER, os.path.basename(path), stderr.decode("utf-8", "replace").strip()))
+            continue
+        committed = io.open(svg_path, "rb").read()
+        check(rendered == committed,
+              "%s 與重跑產生器的結果不一致——不是有人手改了 SVG，就是改了 floorplan 卻沒重跑產生器。"
+              "圖面是 floorplan 的投影，不是資料（CONTEXT.md）；修法：\n"
+              "       python3 %s %s -o %s" % (os.path.basename(svg_path), RENDERER, path, svg_path))
+
+
 # --- confused_with 必須雙向登錄（PRD §7.2）---
 # 「撒水頭跟偵煙器很像」與「偵煙器跟撒水頭很像」是同一件事。單向登錄遲早會兩邊不同步，
 # 而答錯回饋兩個方向都會用到，所以這裡是 error 不是 warning。
@@ -165,6 +204,7 @@ if not errors:
     print("  ✓ risk_flags 已移除")
     print("  ✓ verified 符號內容完整")
     print("  ✓ svg_ref 全部存在於 sprite")
+    print("  ✓ 圖面產物與 floorplan 同步（重跑產生器逐字比對）")
 print("-" * 46)
 print("  %d symbols validated" % len(symbols))
 print("  %d sprite symbols" % len(sprite_ids))
