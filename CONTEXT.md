@@ -41,8 +41,21 @@ floorplan 上一個可點擊的區域，指向一個 symbol。一個 symbol 在�
 _Avoid_: 標記、marker、annotation（`annotation` 在 floorplan 裡另有所指：尺寸標註）
 
 **State（互動狀態）**：
-使用者此刻正在跟某個 hotspot 做什麼（`normal` / `highlighted` / `quiz-target` / `discovered`）。純執行期資料，**不進任何資料檔**。
-_Avoid_: 模式、mode
+單一 hotspot 此刻的狀態（`normal` / `candidate` / `selected` / `highlighted` / `quiz-target` / `discovered`）。純執行期資料，**不進任何資料檔**。
+`candidate` 是兩段式點擊第一段圈出的候選之一，`selected` 是第二段確認的那一個——兩件不同的事，
+不可用 `highlighted` 概括；`highlighted` 留給 M3「符號頁 → 平面圖」的自動高亮（PRD §6.2.1）。
+_Avoid_: 模式、mode、idle（要說「沒有在互動」就用 `normal`）
+
+**Stage（互動階段）**：
+兩段式點擊走到哪一段（`browsing` / `candidates` / `confirmed`）。它描述**整個檢視器**，
+State 描述**單一 hotspot**，兩者不可互換：`candidates` 階段裡有一群 `candidate` 狀態的 hotspot。
+_Avoid_: 步驟、step、模式
+
+**View（視野）**：
+畫面現在看著圖面的哪一塊——中心點（圖面 cm）與放大倍率。純執行期資料。
+容錯半徑一律以 CSS px 定義，判定時依當前 View 換算回圖面 cm。這兩個單位混用是本 repo 壞過兩次的地方
+（PRD v0.5 的「46 SVG 單位」、原型放大後重算容錯圈）。
+_Avoid_: viewBox（那是 SVG 屬性，固定是整張圖、不隨操作改變）、鏡頭、視角
 
 ### 符號層的爭議詞
 

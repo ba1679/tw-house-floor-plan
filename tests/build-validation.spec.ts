@@ -27,6 +27,9 @@ function runValidator(cwd: string): { code: number; output: string } {
 
 const FLOORPLAN = "data/layouts/3b2l_standard.floorplan.json";
 const ARTWORK = "data/layouts/3b2l_standard.svg";
+// 與 scripts/validate_data.py 的 RENDERER 是同一條路徑的第二份。產生器搬家時兩處都要改，
+// 清單記在 docs/adr/0002。這裡沒有共用的辦法——一邊是 Python，一邊是 TS。
+const RENDERER = ".claude/skills/floorplan-generator/scripts/render_svg.py";
 
 test.describe("build 時的資料驗證", () => {
   test("資料完好時通過", () => {
@@ -51,6 +54,20 @@ test.describe("build 時的資料驗證", () => {
     writeFileSync(join(dir, FLOORPLAN), JSON.stringify(plan));
 
     expect(runValidator(dir).code).not.toBe(0);
+  });
+
+  // schema 明寫 symbol_id 可以是 null：「這個開口目前沒有對應的已查證符號（M1 未完成），
+  // viewer 應略過」。M1 的內容查證與 M2 並行，不互相阻塞——查證還沒做完也要能先上線看圖。
+  test("hotspot 的 symbol_id 為 null 時，建置照樣過", () => {
+    const dir = sandbox();
+    const plan = JSON.parse(readFileSync(join(dir, FLOORPLAN), "utf8"));
+    plan.hotspots[0].symbol_id = null;
+    writeFileSync(join(dir, FLOORPLAN), JSON.stringify(plan, null, 2));
+    // 改了 floorplan 就要重跑產生器，這是這個 repo 記錄在案的兩步流程。
+    execFileSync("python3", [RENDERER, FLOORPLAN, "-o", ARTWORK], { cwd: dir });
+
+    const { code, output } = runValidator(dir);
+    expect(code, output).toBe(0);
   });
 
   // 網址由檔名決定（data/layouts/<id>.floorplan.json → /layouts/<id>）。

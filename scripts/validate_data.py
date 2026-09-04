@@ -105,7 +105,10 @@ hotspot_ids, broken_refs = [], 0
 for f in floorplans:
     for h in f["hotspots"]:
         hotspot_ids.append(h["id"])
-        if h["symbol_id"] not in symbol_ids:
+        # symbol_id 為 None 是合法的：schema 寫著「這個開口目前沒有對應的已查證符號
+        # （M1 未完成），viewer 應略過」。M1 的內容查證與 M2 並行，把 None 當成斷掉的參照
+        # 會讓查證還沒做完的圖整張上不了線——那正是 null 要避免的事。
+        if h["symbol_id"] is not None and h["symbol_id"] not in symbol_ids:
             broken_refs += 1
             errors.append("hotspot %s 指向不存在的 symbol_id: %s" % (h["id"], h["symbol_id"]))
         check(h.get("source") in VALID_HOTSPOT_SOURCES,
@@ -126,6 +129,8 @@ for path, f in zip(floorplan_paths, floorplans):
 # 而熱區是檢視器另外依 floorplan.hotspots 畫的。兩份東西一旦不同步，使用者會看著一張畫錯的圖、
 # 點在錯的位置——而畫面上看不出來。所以這裡把產生器重跑一次，逐字比對：
 # 只要有人手改了 SVG，或改了 floorplan 卻忘記重跑產生器，建置就停下來。
+# 產生器搬家時這條路徑要跟著改，而且不只這一處——tests/build-validation.spec.ts
+# 也有一份（它要重跑產生器才驗得出 null symbol_id 的案子）。清單在 docs/adr/0002。
 RENDERER = ".claude/skills/floorplan-generator/scripts/render_svg.py"
 
 if not os.path.exists(RENDERER):
@@ -175,6 +180,8 @@ for a, targets in cw.items():
 actual = {}
 for f in floorplans:
     for h in f["hotspots"]:
+        if h["symbol_id"] is None:
+            continue  # 還沒指向任何符號，不算任何 symbol 的一次出現
         actual.setdefault(h["symbol_id"], set()).add(f["id"])
 for s in symbols:
     declared = set(s.get("related_layouts") or [])
@@ -197,7 +204,7 @@ for e in errors:
 if not errors:
     print("  ✓ symbol.id unique")
     print("  ✓ hotspot.id unique")
-    print("  ✓ hotspot.symbol_id 全部存在")
+    print("  ✓ hotspot.symbol_id 指到的 symbol 都存在（null = 查證未完成，合法）")
     print("  ✓ hotspot.source 合法")
     print("  ✓ confused_with 雙向一致")
     print("  ✓ enum 值合法")

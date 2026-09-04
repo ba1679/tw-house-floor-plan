@@ -1,12 +1,27 @@
 // FloorPlan 是由 layout 展開出來的具體圖面（CONTEXT.md）：座標、牆、開口、傢俱、熱區，
 // 由 floorplan-generator 產生、commit 進 repo、不得手改。這裡只宣告檢視器現在真的會讀的欄位——
 // 把整份 schema 抄成 TS 型別，抄來的那一份不會跟著產生器走。
-// 熱區的型別等 02 真的畫熱區層時再加，那時它的形狀由命中判定決定，不由 JSON 決定。
+
+/**
+ * Hotspot（熱區）：floorplan 上一個可點擊的區域，指向一個 symbol。
+ * 一個 symbol 在同一張圖上可以有多個 hotspot，每個 hotspot 有自己的全檔唯一 id。
+ *
+ * `symbol_id` 可以是 null——熱區位置已知、但還沒決定指向哪個符號（PRD §7.3）。
+ * 檢視器對這種熱區安靜略過，M1 的內容查證還沒做完也能先上線看圖。
+ */
+export type Hotspot = {
+  id: string;
+  symbol_id: string | null;
+  /** 目前資料只有 rect 一種；coords 是 [x, y, width, height]，單位 cm。 */
+  shape: "rect";
+  coords: [number, number, number, number];
+};
 
 export type FloorPlan = {
   id: string;
   /** 給人看的格局名稱，例如「三房兩廳」。 */
   name: string;
+  hotspots: Hotspot[];
 };
 
 export type ViewBox = { x: number; y: number; width: number; height: number };

@@ -4,7 +4,8 @@ import { parseFloorPlanArtwork } from "./artwork";
 import type { FloorPlan, FloorPlanArtwork } from "./types";
 
 // 資料在 build 時讀入，執行期不打 API、不連資料庫（PRD §10）。
-// 這個模組是整個檢視器唯一碰檔案系統的地方；頁面與元件只看得到 FloorPlanBundle。
+// 圖面資料只有這個模組讀得到檔案系統；頁面與元件只看得到 FloorPlanBundle。
+// （symbol 是內容、與任何一張圖無關，它自己的載入器在 lib/symbols/data.ts。）
 
 const LAYOUTS_DIR = join(process.cwd(), "data", "layouts");
 const FLOORPLAN_SUFFIX = ".floorplan.json";

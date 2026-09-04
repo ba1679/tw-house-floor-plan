@@ -7,16 +7,3 @@
   font-size: 20px;
   font-weight: 700;
 }
-
-/* 圖在手機寬度下必須整張放得進來：寬度吃滿容器、高度依 viewBox 自己算，不橫向捲動。 */
-.stage {
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-}
-
-.stage :global(.floorplan) {
-  display: block;
-  width: 100%;
-  height: auto;
-}

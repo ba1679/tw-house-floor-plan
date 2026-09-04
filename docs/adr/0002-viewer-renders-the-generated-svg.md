@@ -50,7 +50,9 @@ PRD §12 記著 sprite 與 `render_svg.py` 在衛浴廚具 4 個符號上畫法�
   因此 `validate_data.py` 在 build 前**把產生器重跑一次，與 commit 進 repo 的 SVG 逐字比對**
   （產出是可重現的，實測一致）。有人手改了 SVG、或改了 floorplan 卻忘記重跑產生器，兩個方向都擋得住，
   錯誤訊息直接附上修復指令。這條檢查因此讓網站的建置依賴 `.claude/skills/` 底下的產生器；
-  產生器搬家時，`RENDERER` 這個常數要跟著改。
+  產生器搬家時，`RENDERER` 這個常數要跟著改——**兩處**：`scripts/validate_data.py`
+  與 `tests/build-validation.spec.ts`（後者要重跑產生器才驗得出 `symbol_id` 為 null 的案子）。
+  一邊 Python 一邊 TS，沒有共用的辦法，所以清單記在這裡。
 - **產物裡的 `<g id="hotspots">` 在渲染時被拿掉**（`lib/floorplan/artwork.ts`）。
   熱區層必須由檢視器自己畫，才管得到 `symbol_id` 為 null 要略過、命中優先序、焦點狀態這些事；
   留著產物那一份只會讓同一組 id 在 DOM 裡出現兩次。

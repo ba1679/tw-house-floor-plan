@@ -1,0 +1,87 @@
+/* 可視區域：固定的一個框，圖在框裡被 transform 推來推去。
+   長寬比由 viewBox 給（inline style），zoom 1 時整張圖剛好放得下。 */
+.viewport {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  background: #fff;
+  cursor: pointer;
+}
+
+/* 縮放與平移走 CSS transform，不是每幀重設 viewBox（PRD §9）。 */
+.canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.canvas .floorplan {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* 熱區層由檢視器依 floorplan.hotspots 自己畫，不是產物裡那一份（docs/adr/0002）。
+   它跟圖面在同一個 <svg> 底下，座標同為 cm，所以疊上去不需要換算。 */
+.hotspots rect {
+  fill: transparent;
+  stroke: none;
+  /* 點擊收在可視區域上：兩段式點的是「圖上一個位置」，不是「這個熱區」。 */
+  pointer-events: none;
+  /* 線寬不隨縮放變粗——它是畫面上的標示，不是圖面上的東西。 */
+  vector-effect: non-scaling-stroke;
+}
+
+/* 「我剛剛看的是這一圈」。使用者沒點準時，這圈解釋了為什麼是這幾個東西亮起來。 */
+.hotspots circle {
+  fill: none;
+  stroke: oklch(0.55 0.17 232 / 0.45);
+  stroke-width: 1.5;
+  stroke-dasharray: 8 6;
+  pointer-events: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.hotspots rect[data-state="candidate"] {
+  fill: oklch(0.55 0.17 232 / 0.16);
+  stroke: oklch(0.55 0.17 232);
+  stroke-width: 3;
+}
+
+.hotspots rect[data-state="selected"] {
+  fill: oklch(0.55 0.17 28 / 0.22);
+  stroke: oklch(0.55 0.17 28);
+  stroke-width: 3.5;
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* 手機優先：使用情境是站在接待中心單手操作，控制元件一律點得到。 */
+.reselect {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 16px;
+  font: inherit;
+  font-size: 14px;
+  border: 1px solid oklch(0.865 0.006 260);
+  border-radius: 6px;
+  background: oklch(0.96 0.006 85);
+  color: inherit;
+  cursor: pointer;
+}
+
+.status {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
