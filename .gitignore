@@ -6,3 +6,18 @@ next-env.d.ts
 test-results/
 playwright-report/
 .DS_Store
+
+# Local agent settings
+.claude/settings.local.json
+
+# Vendored third-party reference — the NAID《室內設計裝修製圖規範》 (70pp, 15MB).
+# Not ours to redistribute. docs/reference/naid-symbols.md carries the page and
+# table references we actually work from.
+平面圖符號.pdf
+
+# Published Claude Design canvas bundle (2.3MB, editor code inlined).
+# Build output — design/*.dc.html + canvas.json are the source.
+design/floorplan-screens.html
+
+# Manual PRD snapshots superseded by git history
+*.bak.md
