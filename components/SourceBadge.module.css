@@ -39,11 +39,13 @@
   background: var(--ink);
   color: var(--paper);
 }
+/* 反白時的次要文字與分隔線就是「淡一點的 --paper」，
+   所以從 token 調出來，不另外抄一次色值——抄的那一份不會跟著 token 走。 */
 .badge[data-tier="cns"] .note {
-  color: oklch(0.985 0.004 85 / 0.82);
+  color: color-mix(in oklch, var(--paper) 82%, transparent);
 }
 .badge[data-tier="cns"] .divider {
-  background: oklch(0.985 0.004 85 / 0.35);
+  background: color-mix(in oklch, var(--paper) 35%, transparent);
 }
 
 /* 法規：實線粗框、淺底。 */

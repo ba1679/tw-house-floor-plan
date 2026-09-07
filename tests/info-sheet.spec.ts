@@ -73,7 +73,7 @@ test("「共 N 處」由 floorplan 算出來，與資料一致", async ({ page }
   await select(page, "hs-col-sw");
   await expect(page.locator(SHEET)).toContainText("這張圖上共 5 處");
 
-  // 只有一處的符號沒有「其他位置」可看，整列不出現。
+  // 只有一處的符號沒有「其他位置」可看，整列不出現（決議 2）。
   await page.reload();
   await select(page, "hs-door-entry");
   await expect(page.getByRole("button", { name: /其他位置/ })).toBeHidden();

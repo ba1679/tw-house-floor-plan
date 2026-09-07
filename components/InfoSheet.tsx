@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SourceBadge } from "./SourceBadge";
+import type { Occurrence } from "@/lib/viewer/interaction";
 import type { SymbolRecord } from "@/lib/symbols/types";
 import {
   CATEGORY_LABELS,
@@ -27,10 +28,20 @@ type Props = {
   /** 整份符號表。容易搞混區塊要顯示對方的名字，而 confused_with 裡只有 id。 */
   symbols: Record<string, SymbolRecord>;
   /** 這個符號在這張圖上共 N 處、現在看的是第 M 處。由 floorplan 算出來，不得寫死。 */
-  occurrence: { total: number; index: number };
+  occurrence: Occurrence;
   onClose: () => void;
   onNextOccurrence: () => void;
 };
+
+/** 圖上那個十字準星，兩種呈現共用。 */
+function OccurrenceMark() {
+  return (
+    <svg className={styles.occurrenceMark} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+    </svg>
+  );
+}
 
 export function InfoSheet({
   symbol,
@@ -141,13 +152,13 @@ export function InfoSheet({
         )}
       </div>
 
-      {/* N 為 1 時整列不出現：只有一處的符號沒有「其他位置」可看。 */}
+      {/* N 為 1 時**整列**不出現（決議 2）：只有一處的符號沒有「其他位置」可去。
+          代價是「共 1 處」這個事實也跟著不見——那是 spec user story 17 想說的話，
+          而這一列量起來約 43px，卡片離 46vh 的上限只剩 14px，補不回來。
+          要不要為它挪位置是內容決策，記在票 03 的 comments 裡等作者裁示。 */}
       {occurrence.total > 1 && (
         <button type="button" className={styles.occurrences} onClick={onNextOccurrence}>
-          <svg className={styles.occurrenceMark} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
-          </svg>
+          <OccurrenceMark />
           <span className={styles.occurrenceText}>
             <span className={styles.occurrenceTitle}>{SHEET_CONTROLS.otherOccurrences}</span>
             <span className={styles.occurrenceCount}>

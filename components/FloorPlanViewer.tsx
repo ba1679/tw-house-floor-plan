@@ -123,8 +123,9 @@ export function FloorPlanViewer({ floorplan, artwork, symbols }: Props) {
         </div>
       </div>
 
-      {/* confirmed 時「重選」由說明卡的關閉鍵擔任（同一個 action）——
-          在卡片後面再擺一顆一模一樣的按鈕，只會多一個按不到的控制元件。 */}
+      {/* confirmed 時「重選」由說明卡的關閉鍵擔任：關卡片＝回到 browsing，
+          是同一個 action（票 03）。這裡再擺一顆一模一樣的按鈕，
+          等於從平面圖那條可視帶挖走 56px 去養一個重複的控制元件。 */}
       {state.stage === "candidates" && (
         <div className={styles.controls}>
           <button type="button" className={styles.reselect} onClick={close}>

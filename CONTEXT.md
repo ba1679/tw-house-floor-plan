@@ -38,6 +38,8 @@ _Avoid_: 單講「圖面」（FloorPlan 詞條裡的「具體圖面」指的是�
 
 **Hotspot（熱區）**：
 floorplan 上一個可點擊的區域，指向一個 symbol。一個 symbol 在同一張圖上可以有多個 hotspot，每個 hotspot 有自己的全檔唯一 id。
+說明卡上的「這張圖上共 N 處 · 目前第 M 處」數的就是這些 hotspot（PRD §6.3.2）；
+程式裡把「同一個 symbol 的第幾個 hotspot」這件事叫 **occurrence**，它是 hotspot 的一個面向，不是另一種東西。
 _Avoid_: 標記、marker、annotation（`annotation` 在 floorplan 裡另有所指：尺寸標註）
 
 **State（互動狀態）**：

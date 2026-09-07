@@ -217,25 +217,25 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
         viewportWidth: action.viewportWidth,
         viewportHeight: action.viewportHeight,
       };
+      // 框變了，「整張圖剛好放得下」是幾倍也跟著變。視野的倍率照這個比例調整，
+      // 而不是一律跳回全圖——第一段的 3× 因此在框變之後仍然是「fit 的三倍」。
+      const ratio = fitZoom(resized) / fitZoom(s);
+      const rescale = (v: View): View => ({ ...v, zoom: v.zoom * ratio });
 
-      // 只有高度變：這是說明卡自己升起或收起造成的（票 03 決議 3）。
+      // 只有高度變：這是說明卡自己升起或收起造成的（票 03 決議 3、docs/adr/0003）。
       // **不能退回第一段**——退回就等於卡片一開就把自己關掉。
-      // 圖改以新的可視帶等比縮小：zoom 依 fit 的變化比例調整，所以第一段的 3×
-      // 在卡片開著的時候仍然是「fit 的三倍」，而不是突然變成別的倍率。
       if (!widthChanged) {
-        const ratio = fitZoom(resized) / fitZoom(s);
         return {
           ...resized,
-          view: clampView(s.viewBox, { ...s.view, zoom: s.view.zoom * ratio }),
-          savedView: s.savedView && {
-            ...s.savedView,
-            zoom: s.savedView.zoom * ratio,
-          },
+          view: clampView(s.viewBox, rescale(s.view)),
+          savedView: s.savedView && rescale(s.savedView),
         };
       }
 
       // 寬度變了，px ↔ cm 的比例尺跟著變。已經算出來的候選是用舊比例尺挑的，
       // 留著它們會讓畫面上的圈與實際命中範圍對不起來，所以退回第一段重來。
+      // 但**視野不作廢**：它是圖面座標，換一個框仍然講得通，
+      // 跳回全圖等於把使用者自己調好的縮放丟掉（與 RESELECT 同一個理由）。
       return {
         ...resized,
         stage: "browsing",
@@ -244,7 +244,10 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
         lastTap: null,
         tolCmAtTap: null,
         confirmMissed: false,
-        view: fitView(resized),
+        view: clampView(
+          s.viewBox,
+          s.stage === "browsing" ? rescale(s.view) : rescale(s.savedView ?? s.view),
+        ),
         savedView: null,
       };
     }
@@ -260,12 +263,15 @@ export function occurrencesOf(s: ViewerState, symbolId: string | null): Hotspot[
   return symbolId === null ? [] : s.hotspots.filter((h) => h.symbol_id === symbolId);
 }
 
+/** 「這張圖上共 N 處 · 目前第 M 處」的 N 與 M。兩個數字永遠一起走，所以綁成一個值。 */
+export type Occurrence = { total: number; index: number };
+
 /**
- * 「這張圖上共 N 處 · 目前第 M 處」的 N 與 M。
+ * 選中的 hotspot 是它那個 symbol 的第幾個、那個 symbol 在這張圖上共有幾個。
  * N 由 hotspots 算出來、不得寫死；symbol_id 為 null 者在 createViewerState 就濾掉了，
  * 所以這裡不會把它們算進去（PRD §7.3）。
  */
-export function selectedOccurrence(s: ViewerState): { total: number; index: number } | null {
+export function selectedOccurrence(s: ViewerState): Occurrence | null {
   if (!s.selected) return null;
   const siblings = occurrencesOf(s, s.selected.symbol_id);
   return { total: siblings.length, index: siblings.indexOf(s.selected) + 1 };
