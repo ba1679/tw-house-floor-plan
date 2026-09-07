@@ -125,8 +125,17 @@ test("最壞情況：主臥衛浴一次圈出 9 個候選，9 個都選得到", 
     await page.mouse.click((visible.left + visible.right) / 2, (visible.top + visible.bottom) / 2);
     await expect(target, `${id} 在 9 個候選裡選不到`).toHaveAttribute("data-state", "selected");
 
-    // 確認之後視野已經還原，同一個點會圈出同一組候選——回到第一段做下一個。
-    await page.mouse.click(worstTap.x, worstTap.y);
+    // 說明卡是版面裡的一格，升起來會把圖收進上方那條可視帶（票 03 決議 3）——
+    // 圖上同一個位置因此換了螢幕座標。關掉卡片讓視野還原，再重新量一次那個位置，
+    // 回到第一段做下一個。（照抄迴圈外量到的 worstTap 會點到別的地方去。）
+    await page.locator("#info-sheet").getByRole("button", { name: "關閉說明" }).click();
+    // 等圖真的長回全圖再量：卡片收起到圖回到原尺寸中間隔著一次版面回流，
+    // 量在回流當中就會拿到一個下一刻已經不成立的座標。
+    await expect
+      .poll(async () => Math.round((await plan.boundingBox())!.height))
+      .toBe(Math.round(frame.height));
+    const room = (await page.locator("#room-bath-m").boundingBox())!;
+    await page.mouse.click(room.x + room.width * 0.5, room.y + room.height * 0.75);
   }
 });
 

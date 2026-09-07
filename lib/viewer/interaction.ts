@@ -1,5 +1,5 @@
 import type { Hotspot, ViewBox } from "@/lib/floorplan/types";
-import { clampView, fitView, pxToCm, type Projection, type View } from "./view";
+import { clampView, fitView, fitZoom, pxToCm, type Projection, type View } from "./view";
 
 // 兩段式點擊的狀態機：(state, action) => state，不碰 DOM、不讀 document。
 //
@@ -22,6 +22,8 @@ export type ViewerState = {
   readonly hotspots: Hotspot[];
   readonly viewBox: ViewBox;
   viewportWidth: number;
+  /** 可視區域的高度（CSS px）。說明卡是版面裡的一格，它升起來這個數字就變小。 */
+  viewportHeight: number;
   stage: Stage;
   view: View;
   /** 第一段自動放大之前的視野。確認後要回到這裡，使用者才不會失去方向感。 */
@@ -49,12 +51,14 @@ export type ViewerState = {
 export type ViewerAction =
   | { type: "TAP"; x: number; y: number }
   | { type: "RESELECT" }
-  | { type: "RESIZE"; viewportWidth: number };
+  | { type: "NEXT_OCCURRENCE" }
+  | { type: "RESIZE"; viewportWidth: number; viewportHeight: number };
 
 export type ViewerConfig = {
   hotspots: Hotspot[];
   viewBox: ViewBox;
   viewportWidth: number;
+  viewportHeight: number;
   fitLocked?: boolean;
 };
 
@@ -63,8 +67,9 @@ export function createViewerState(config: ViewerConfig): ViewerState {
     hotspots: config.hotspots.filter((h) => h.symbol_id !== null),
     viewBox: config.viewBox,
     viewportWidth: config.viewportWidth,
+    viewportHeight: config.viewportHeight,
     stage: "browsing",
-    view: fitView(config.viewBox),
+    view: fitView(config),
     savedView: null,
     candidates: [],
     selected: null,
@@ -172,6 +177,17 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
         ? confirmTap(s, action.x, action.y)
         : firstTap(s, action.x, action.y);
 
+    case "NEXT_OCCURRENCE": {
+      // 「看它在圖上的其他位置」：換看同一個 symbol 的下一處，循環回第 1 處。
+      // 卡片不關、視野不動、stage 維持 confirmed——按這一列是「換看一處」，
+      // 不是「重新選一個符號」，畫面跳動會讓使用者失去剛建立起來的方向感。
+      if (s.stage !== "confirmed" || !s.selected) return s;
+      const siblings = occurrencesOf(s, s.selected.symbol_id);
+      if (siblings.length < 2) return s;
+      const next = siblings[(siblings.indexOf(s.selected) + 1) % siblings.length];
+      return { ...s, selected: next };
+    }
+
     case "RESELECT":
       if (s.stage === "browsing") return s;
       return {
@@ -185,27 +201,72 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
         // 從 candidates 退回：還原第一段之前的視野。
         // 從 confirmed 退回：視野在確認時就已經還原了，savedView 是 null——
         // 這時該留在當下的視野，跳回全圖等於把使用者自己調好的縮放丟掉。
-        // 全圖之外的視野要等票 04 的 pan/zoom 才可能出現，所以今天看不出差別。
+        // 說明卡收起來之後可視帶變高，圖跟著長回來——那是接在後面的 RESIZE 做的，
+        // 不在這裡：這個 action 只負責「回到 browsing」，不負責版面。
         view: s.savedView ?? s.view,
         savedView: null,
       };
 
     case "RESIZE": {
-      // 版面寬度變了，px ↔ cm 的比例尺跟著變。已經算出來的候選是用舊比例尺挑的，
-      // 留著它們會讓畫面上的圈與實際命中範圍對不起來，所以退回第一段重來。
-      if (action.viewportWidth === s.viewportWidth) return s;
-      return {
+      const widthChanged = action.viewportWidth !== s.viewportWidth;
+      const heightChanged = action.viewportHeight !== s.viewportHeight;
+      if (!widthChanged && !heightChanged) return s;
+
+      const resized = {
         ...s,
         viewportWidth: action.viewportWidth,
+        viewportHeight: action.viewportHeight,
+      };
+
+      // 只有高度變：這是說明卡自己升起或收起造成的（票 03 決議 3）。
+      // **不能退回第一段**——退回就等於卡片一開就把自己關掉。
+      // 圖改以新的可視帶等比縮小：zoom 依 fit 的變化比例調整，所以第一段的 3×
+      // 在卡片開著的時候仍然是「fit 的三倍」，而不是突然變成別的倍率。
+      if (!widthChanged) {
+        const ratio = fitZoom(resized) / fitZoom(s);
+        return {
+          ...resized,
+          view: clampView(s.viewBox, { ...s.view, zoom: s.view.zoom * ratio }),
+          savedView: s.savedView && {
+            ...s.savedView,
+            zoom: s.savedView.zoom * ratio,
+          },
+        };
+      }
+
+      // 寬度變了，px ↔ cm 的比例尺跟著變。已經算出來的候選是用舊比例尺挑的，
+      // 留著它們會讓畫面上的圈與實際命中範圍對不起來，所以退回第一段重來。
+      return {
+        ...resized,
         stage: "browsing",
         candidates: [],
         selected: null,
         lastTap: null,
         tolCmAtTap: null,
         confirmMissed: false,
-        view: s.stage === "browsing" ? s.view : (s.savedView ?? fitView(s.viewBox)),
+        view: fitView(resized),
         savedView: null,
       };
     }
   }
+}
+
+/**
+ * 同一個 symbol 在這張圖上的所有熱區，**依 floorplan.hotspots 的出現順序**。
+ * 順序取檔案順序：floorplan 由程式產生、順序穩定，不必等票 06 的房間歸屬算出來。
+ * （票 06 的鍵盤順序是「依房間、房間內依類別」，與這裡不同；等 06 落地後再評估要不要統一。）
+ */
+export function occurrencesOf(s: ViewerState, symbolId: string | null): Hotspot[] {
+  return symbolId === null ? [] : s.hotspots.filter((h) => h.symbol_id === symbolId);
+}
+
+/**
+ * 「這張圖上共 N 處 · 目前第 M 處」的 N 與 M。
+ * N 由 hotspots 算出來、不得寫死；symbol_id 為 null 者在 createViewerState 就濾掉了，
+ * 所以這裡不會把它們算進去（PRD §7.3）。
+ */
+export function selectedOccurrence(s: ViewerState): { total: number; index: number } | null {
+  if (!s.selected) return null;
+  const siblings = occurrencesOf(s, s.selected.symbol_id);
+  return { total: siblings.length, index: siblings.indexOf(s.selected) + 1 };
 }

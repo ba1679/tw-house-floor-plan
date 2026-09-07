@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { FloorPlanView } from "./FloorPlanView";
+import { InfoSheet } from "./InfoSheet";
 import type { FloorPlan, FloorPlanArtwork } from "@/lib/floorplan/types";
-import { createViewerState, reduceViewer } from "@/lib/viewer/interaction";
+import type { SymbolRecord } from "@/lib/symbols/types";
+import { createViewerState, reduceViewer, selectedOccurrence } from "@/lib/viewer/interaction";
 import { canvasTransform, screenToPlan } from "@/lib/viewer/view";
 import styles from "./FloorPlanViewer.module.css";
 
@@ -14,28 +16,39 @@ import styles from "./FloorPlanViewer.module.css";
 type Props = {
   floorplan: FloorPlan;
   artwork: FloorPlanArtwork;
-  /** symbol id → 名稱。畫面上的字取自 symbol 資料，不在元件裡寫死。 */
-  symbolNames: Record<string, string>;
+  /** symbol id → 該符號的內容。畫面上的字取自 symbol 資料，不在元件裡寫死。 */
+  symbols: Record<string, SymbolRecord>;
 };
 
-export function FloorPlanViewer({ floorplan, artwork, symbolNames }: Props) {
+export function FloorPlanViewer({ floorplan, artwork, symbols }: Props) {
   const { viewBox } = artwork;
   const viewportRef = useRef<HTMLDivElement>(null);
 
-  // 初始寬度先給一個占位值：zoom 1 的 transform 是 translate(0,0) scale(1)，
-  // 與寬度無關，所以 SSR 出來的靜態頁面就已經是正確的全圖，掛載後不會跳動。
+  // 初始尺寸先給一個占位值：zoom 1 的 transform 是 translate(0,0) scale(1)，
+  // 與尺寸無關，所以 SSR 出來的靜態頁面就已經是正確的全圖，掛載後不會跳動。
   const [state, dispatch] = useReducer(
     reduceViewer,
-    { hotspots: floorplan.hotspots, viewBox, viewportWidth: 375 },
+    {
+      hotspots: floorplan.hotspots,
+      viewBox,
+      viewportWidth: 375,
+      viewportHeight: (375 * viewBox.height) / viewBox.width,
+    },
     createViewerState,
   );
 
-  // 真正的寬度只有瀏覽器知道。它同時是 px ↔ cm 的比例尺，所以量錯就整條命中判定都錯。
+  // 真正的尺寸只有瀏覽器知道。寬度同時是 px ↔ cm 的比例尺，所以量錯就整條命中判定都錯；
+  // 高度則是說明卡升起來之後圖能用的那條可視帶（票 03 決議 3）。
+  // 兩個數字來自**同一次觀測的同一個框**——不是分兩處各量一次。
   useEffect(() => {
     const el = viewportRef.current;
     if (!el) return;
     const observer = new ResizeObserver(([entry]) => {
-      dispatch({ type: "RESIZE", viewportWidth: entry.contentRect.width });
+      dispatch({
+        type: "RESIZE",
+        viewportWidth: entry.contentRect.width,
+        viewportHeight: entry.contentRect.height,
+      });
     });
     observer.observe(el);
     return () => observer.disconnect();
@@ -52,9 +65,16 @@ export function FloorPlanViewer({ floorplan, artwork, symbolNames }: Props) {
     [state],
   );
 
+  const close = useCallback(() => dispatch({ type: "RESELECT" }), []);
+  const nextOccurrence = useCallback(() => dispatch({ type: "NEXT_OCCURRENCE" }), []);
+
   const candidateIds = new Set(state.candidates.map((h) => h.id));
+  const selectedSymbol = state.selected?.symbol_id
+    ? (symbols[state.selected.symbol_id] ?? null)
+    : null;
+  const occurrence = selectedOccurrence(state);
   const nameOf = (symbolId: string | null) =>
-    (symbolId && symbolNames[symbolId]) || symbolId || "";
+    (symbolId && symbols[symbolId]?.name) || symbolId || "";
 
   return (
     <>
@@ -103,13 +123,15 @@ export function FloorPlanViewer({ floorplan, artwork, symbolNames }: Props) {
         </div>
       </div>
 
-      <div className={styles.controls}>
-        {state.stage !== "browsing" && (
-          <button type="button" className={styles.reselect} onClick={() => dispatch({ type: "RESELECT" })}>
+      {/* confirmed 時「重選」由說明卡的關閉鍵擔任（同一個 action）——
+          在卡片後面再擺一顆一模一樣的按鈕，只會多一個按不到的控制元件。 */}
+      {state.stage === "candidates" && (
+        <div className={styles.controls}>
+          <button type="button" className={styles.reselect} onClick={close}>
             重選
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       <p className={styles.status} role="status">
         {state.stage === "confirmed"
@@ -124,6 +146,16 @@ export function FloorPlanViewer({ floorplan, artwork, symbolNames }: Props) {
                    只出現一次。先放在這裡的話，回訪的人每次都會看到（user story 23）。 */
                 ""}
       </p>
+
+      {selectedSymbol && occurrence && (
+        <InfoSheet
+          symbol={selectedSymbol}
+          symbols={symbols}
+          occurrence={occurrence}
+          onClose={close}
+          onNextOccurrence={nextOccurrence}
+        />
+      )}
     </>
   );
 }

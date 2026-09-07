@@ -1,8 +1,14 @@
-/* 可視區域：固定的一個框，圖在框裡被 transform 推來推去。
-   長寬比由 viewBox 給（inline style），zoom 1 時整張圖剛好放得下。 */
+/* 可視區域：一個框，圖在框裡被 transform 推來推去。
+   長寬比由 viewBox 給（inline style），空間夠時 zoom 1 整張圖剛好放得下。
+
+   `flex: 0 1 auto` + `min-height: 0`：說明卡升起來時，版面裡只有這一格會被壓縮，
+   壓出來的高度就是圖能用的那條可視帶。寬度不受影響——寬度是 px ↔ cm 的比例尺，
+   它一變，已經算出來的候選就得作廢重來。 */
 .viewport {
   position: relative;
   width: 100%;
+  flex: 0 1 auto;
+  min-height: 0;
   overflow: hidden;
   touch-action: manipulation;
   user-select: none;
@@ -61,6 +67,7 @@
 }
 
 .controls {
+  flex: 0 0 auto;
   display: flex;
   gap: 8px;
   margin-top: 12px;
@@ -81,7 +88,9 @@
 }
 
 .status {
+  flex: 0 0 auto;
   margin: 12px 0 0;
   font-size: 14px;
   line-height: 1.7;
+  color: var(--ink2);
 }

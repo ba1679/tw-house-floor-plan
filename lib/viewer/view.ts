@@ -13,22 +13,40 @@ import type { ViewBox } from "@/lib/floorplan/types";
 export type View = { cx: number; cy: number; zoom: number };
 
 /**
- * 換算一個點所需要的全部東西。三者必須來自同一個時刻——拿舊的視野配新量到的寬度，
+ * 換算一個點所需要的全部東西。四者必須來自同一個時刻——拿舊的視野配新量到的寬度，
  * 算出來的座標會安靜地偏掉，而畫面上看不出來。綁成一個值就沒有配錯的機會。
  */
 export type Projection = {
   viewBox: ViewBox;
   /** 可視區域的寬度（CSS px）。它就是 px ↔ cm 的比例尺。 */
   viewportWidth: number;
+  /**
+   * 可視區域的高度（CSS px）。說明卡升起來時它會變小——卡片是版面裡的一格，
+   * 圖被擠進卡片上方那條可視帶（票 03 決議 3）。
+   *
+   * 這個數字與 viewportWidth 來自**同一個框的同一次觀測**（一個 ResizeObserver entry），
+   * 不是另外量的第二份。票 02 那條「量兩次會得到兩個互相矛盾的數字」的顧慮講的正是
+   * 「一邊由寬度乘長寬比推出高度、一邊又去 getBoundingClientRect 量高度」；
+   * 現在高度由版面決定、只有一個來源，顧慮不再成立。
+   */
+  viewportHeight: number;
   view: View;
 };
 
-/**
- * 可視區域的高度由寬度與 viewBox 的長寬比推出來，不另外量。
- * 量兩次會得到兩個互相矛盾的數字，而「zoom 1 剛好放得下整張圖」這件事就不再成立。
- */
-function viewportHeight({ viewBox, viewportWidth }: Projection): number {
+/** 框（不含視野）。fit 只跟框有關，跟現在看著哪裡無關。 */
+type Frame = Omit<Projection, "view">;
+
+/** 圖面在 zoom 1 下畫出來有多高（CSS px）。zoom 1 的定義是「寬度剛好放得下」。 */
+function naturalHeight({ viewBox, viewportWidth }: Frame): number {
   return (viewportWidth * viewBox.height) / viewBox.width;
+}
+
+/**
+ * 整張圖剛好塞進當前框的倍率。
+ * 框比圖矮時（說明卡升起來）小於 1；框夠高時就是 1——放大到超過寬度沒有意義。
+ */
+export function fitZoom(frame: Frame): number {
+  return Math.min(1, frame.viewportHeight / naturalHeight(frame));
 }
 
 /** 當前縮放下 1cm 畫成幾個 CSS px。 */
@@ -44,24 +62,32 @@ export function pxToCm(projection: Projection, px: number): number {
   return px / pxPerCm(projection);
 }
 
-/** 整張圖剛好放得下的視野。 */
-export function fitView(viewBox: ViewBox): View {
+/** 整張圖剛好放得下的視野：中心對中心，倍率取當前框放得下的最大值。 */
+export function fitView(frame: Frame): View {
+  const { viewBox } = frame;
   return {
     cx: viewBox.x + viewBox.width / 2,
     cy: viewBox.y + viewBox.height / 2,
-    zoom: 1,
+    zoom: fitZoom(frame),
   };
 }
 
-/** 把視野的中心拉回來，讓可視範圍不會跑出圖外（圖邊之外沒有東西可看）。 */
+/**
+ * 把視野的中心拉回來，讓可視範圍不會跑出圖外（圖邊之外沒有東西可看）。
+ * 可視範圍比圖還大時（zoom < 1，說明卡升起來的那條可視帶）沒有東西需要夾——
+ * 這時要的是置中，不是貼邊。少了這一條，圖會在卡片升起的瞬間往左上角偏過去。
+ */
 export function clampView(viewBox: ViewBox, view: View): View {
   const visibleW = viewBox.width / view.zoom;
   const visibleH = viewBox.height / view.zoom;
-  const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);
+  const axis = (center: number, origin: number, extent: number, visible: number) =>
+    visible >= extent
+      ? origin + extent / 2
+      : Math.min(Math.max(center, origin + visible / 2), origin + extent - visible / 2);
   return {
     zoom: view.zoom,
-    cx: clamp(view.cx, viewBox.x + visibleW / 2, viewBox.x + viewBox.width - visibleW / 2),
-    cy: clamp(view.cy, viewBox.y + visibleH / 2, viewBox.y + viewBox.height - visibleH / 2),
+    cx: axis(view.cx, viewBox.x, viewBox.width, visibleW),
+    cy: axis(view.cy, viewBox.y, viewBox.height, visibleH),
   };
 }
 
@@ -75,7 +101,7 @@ function originOffset(projection: Projection) {
   return {
     scale,
     tx: viewportWidth / 2 - (view.cx - viewBox.x) * scale,
-    ty: viewportHeight(projection) / 2 - (view.cy - viewBox.y) * scale,
+    ty: projection.viewportHeight / 2 - (view.cy - viewBox.y) * scale,
   };
 }
 

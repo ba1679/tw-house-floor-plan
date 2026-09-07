@@ -1,0 +1,77 @@
+/* 四種徽章的差別在**線型與填色**，不在顏色：實線＝有明文依據，虛線＝畫法分歧
+   （design/Badges.dc.html）。權威感由填色深淺疊上去。 */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  max-width: 100%;
+  font-family: var(--sans);
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.divider {
+  width: 1px;
+  height: 12px;
+  flex-shrink: 0;
+  background: var(--rule);
+}
+
+.note {
+  font-size: 11.5px;
+  min-width: 0;
+}
+
+/* CNS：實心反白，階梯最上層。 */
+.badge[data-tier="cns"] {
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+.badge[data-tier="cns"] .note {
+  color: oklch(0.985 0.004 85 / 0.82);
+}
+.badge[data-tier="cns"] .divider {
+  background: oklch(0.985 0.004 85 / 0.35);
+}
+
+/* 法規：實線粗框、淺底。 */
+.badge[data-tier="regulation"] {
+  border: 1.5px solid var(--ink);
+  background: var(--paper2);
+  color: var(--ink);
+}
+.badge[data-tier="regulation"] .note {
+  color: var(--ink2);
+}
+
+/* 業界慣例：實線細框、無底色。 */
+.badge[data-tier="convention"] {
+  border: 1px solid var(--ink3);
+  background: transparent;
+  color: var(--ink2);
+}
+.badge[data-tier="convention"] .note {
+  color: var(--ink3);
+}
+
+/* 畫法不一：**虛線框，不是警告色**。它不是錯誤，是誠實揭露。 */
+.badge[data-tier="varies"] {
+  border: 1px dashed var(--ink3);
+  background: transparent;
+  color: var(--ink2);
+}
+.badge[data-tier="varies"] .note {
+  color: var(--ink3);
+}

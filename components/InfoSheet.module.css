@@ -1,0 +1,230 @@
+/* 高度以 vh 定義。設計稿的 392 / 660px 是 846px 高的手機上量出來的基準值
+   （392/846 ≈ 46%、660/846 ≈ 78%），**不寫死成 px**——換一支手機就不對了。
+   660 那一段的依據是「平面圖僅餘 84px」：足夠維持位置感，不足以繼續操作。
+
+   `height: auto` + `max-height` 就是票 03 決議 1 要的「內容高度與上限的較小者」：
+   392 是上限不是初始。13/14 個符號沒有 caution，照設計稿固定 392 會開出一大片空白。 */
+.sheet {
+  --sheet-max: 46dvh;
+
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  max-height: var(--sheet-max);
+  /* 卡片滿版出血：它是從螢幕底部升起來的一張卡，不是內文裡的一個方塊。 */
+  margin: 12px -16px -16px;
+  background: var(--paper);
+  border-top: 1px solid var(--ink);
+  box-shadow: 0 -14px 34px oklch(0.24 0.01 260 / 0.09);
+}
+
+.sheet[data-expanded="true"] {
+  --sheet-max: 78dvh;
+}
+
+/* 桌機：卡片不跟著螢幕一起變寬。說明是拿來讀的，一行 1200px 讀不下去。 */
+@media (min-width: 600px) {
+  .sheet {
+    align-self: center;
+    width: 100%;
+    max-width: 560px;
+    margin-inline: auto;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+}
+
+.header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 8px 10px 20px;
+}
+
+.identity {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.name {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.category {
+  margin: 2px 0 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--ink3);
+}
+
+/* 手機優先：關閉鍵是 M2 完成定義裡「44px」那一條真正指涉的東西。 */
+.close {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink2);
+  cursor: pointer;
+}
+
+.bodyWrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 20px 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.badgeRow {
+  display: flex;
+}
+
+.section {
+  margin-top: 16px;
+}
+
+.sectionLabel {
+  margin: 0 0 6px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  color: var(--ink3);
+}
+
+.prose {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.confusedList {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.confusedItem {
+  border-left: 2px solid var(--rule);
+  padding-left: 10px;
+}
+
+.confusedName {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.confusedText {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--ink2);
+}
+
+/* 內容超出上限時才出現。漸層讓「下面還有東西」看得出來，
+   提示本身就是展開的按鈕——點一下，不是拖曳。 */
+.expand {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 76px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  padding-bottom: 10px;
+  border: none;
+  background: linear-gradient(to bottom, oklch(0.985 0.004 85 / 0), var(--paper) 72%);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--ink3);
+  cursor: pointer;
+}
+
+/* 「其他位置」列與關閉鍵同樣是 44px 那一條指涉的控制元件。 */
+.occurrences {
+  flex: 0 0 auto;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 20px;
+  padding: 6px 0;
+  border: none;
+  border-top: 1px solid var(--rule2);
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.occurrenceMark {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.occurrenceText {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.occurrenceTitle {
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+.occurrenceCount {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--ink3);
+}
+
+/* 桌機才有 hover——手機沒有，所以靜態呈現本身必須夠明確，
+   **不用 hover tooltip 承載說明內容**。 */
+@media (hover: hover) {
+  .close:hover,
+  .expand:hover {
+    color: var(--ink);
+  }
+  .occurrences:hover {
+    background: var(--paper2);
+  }
+}
+
+.disclaimer {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 10px 20px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--rule2);
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--ink3);
+}

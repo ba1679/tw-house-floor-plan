@@ -1,8 +1,22 @@
+/* 設計 token 取自 design/_tokens.txt，四份設計稿共用同一組值。
+   字體只給堆疊、不載 webfont：站是 SSG、使用情境是接待中心的行動網路，
+   為了三個標題字去打 fonts.googleapis.com 不划算。設計稿指定的 Noto 系列
+   在台灣的手機上多半已經是系統字，拿不到就落回系統的黑體／明體。 */
 :root {
-  --ink: #2b2b2b;
-  --ink-muted: #7a7a7a;
-  --paper: #ffffff;
-  --line: #e2ded6;
+  --paper: oklch(0.985 0.004 85);
+  --paper2: oklch(0.96 0.006 85);
+  --ink: oklch(0.24 0.01 260);
+  --ink2: oklch(0.47 0.012 260);
+  --ink3: oklch(0.645 0.01 260);
+  --rule: oklch(0.865 0.006 260);
+  --rule2: oklch(0.925 0.005 260);
+  --accent: oklch(0.55 0.17 28);
+  --accent2: oklch(0.55 0.17 232);
+
+  --sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", -apple-system,
+    BlinkMacSystemFont, sans-serif;
+  --serif: "Noto Serif TC", "Songti TC", serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
 * {
@@ -15,5 +29,7 @@ body {
   padding: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "PingFang TC", sans-serif;
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  text-wrap: pretty;
 }
