@@ -153,9 +153,10 @@ export function InfoSheet({
       </div>
 
       {/* N 為 1 時**整列**不出現（決議 2）：只有一處的符號沒有「其他位置」可去。
-          代價是「共 1 處」這個事實也跟著不見——那是 spec user story 17 想說的話，
-          而這一列量起來約 43px，卡片離 46vh 的上限只剩 14px，補不回來。
-          要不要為它挪位置是內容決策，記在票 03 的 comments 裡等作者裁示。 */}
+          代價是「共 1 處」這個事實也跟著不見——那是 spec user story 17 想說的話。
+          2026-09-07 裁定維持現狀：這一列量起來約 43px，而卡片離 46vh 的上限只剩 14px，
+          補回去就 14/14 全部頂到上限，決議 1 的「高度隨內容走」在這張圖上再也沒有例子。
+          不必再回頭翻這個問題，來龍去脈在票 03 的 comments。 */}
       {occurrence.total > 1 && (
         <button type="button" className={styles.occurrences} onClick={onNextOccurrence}>
           <OccurrenceMark />
