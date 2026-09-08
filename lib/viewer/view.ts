@@ -76,19 +76,75 @@ export function fitView(frame: Frame): View {
  * 把視野的中心拉回來，讓可視範圍不會跑出圖外（圖邊之外沒有東西可看）。
  * 可視範圍比圖還大時（zoom < 1，說明卡升起來的那條可視帶）沒有東西需要夾——
  * 這時要的是置中，不是貼邊。少了這一條，圖會在卡片升起的瞬間往左上角偏過去。
+ *
+ * 可視範圍的兩個邊長各自由**框自己的邊長**換算而來，不是拿 viewBox 的長寬比推出高度。
+ * 框的長寬比與 viewBox 一致時兩者算出來一樣（`.viewport` 的 aspect-ratio 就是這麼定的），
+ * 說明卡把框壓扁之後就不一樣了（`docs/adr/0003`）——而那正是使用者一邊看卡片一邊平移的時候：
+ * 用長寬比推出來的高度會在那一刻既擋住圖的下緣、又允許畫面滑出圖外。
  */
-export function clampView(viewBox: ViewBox, view: View): View {
-  const visibleW = viewBox.width / view.zoom;
-  const visibleH = viewBox.height / view.zoom;
+export function clampView(frame: Frame, view: View): View {
+  const scale = pxPerCm({ ...frame, view });
   const axis = (center: number, origin: number, extent: number, visible: number) =>
     visible >= extent
       ? origin + extent / 2
       : Math.min(Math.max(center, origin + visible / 2), origin + extent - visible / 2);
   return {
     zoom: view.zoom,
-    cx: axis(view.cx, viewBox.x, viewBox.width, visibleW),
-    cy: axis(view.cy, viewBox.y, viewBox.height, visibleH),
+    cx: axis(view.cx, frame.viewBox.x, frame.viewBox.width, frame.viewportWidth / scale),
+    cy: axis(view.cy, frame.viewBox.y, frame.viewBox.height, frame.viewportHeight / scale),
   };
+}
+
+/**
+ * 使用者自己發起的平移：手指往哪邊走，圖就往哪邊走，位移 1:1。
+ * dx/dy 是螢幕上的位移（CSS px），視野的中心因此往反方向移動同樣多的圖面公分。
+ */
+export function panView(projection: Projection, dx: number, dy: number): View {
+  const { view } = projection;
+  return {
+    ...view,
+    cx: view.cx - pxToCm(projection, dx),
+    cy: view.cy - pxToCm(projection, dy),
+  };
+}
+
+/**
+ * 縮放到指定倍率，並讓畫面上 (anchorX, anchorY) 那一點底下的圖面座標留在原地。
+ * 雙指的中點、雙擊的落點都是這個錨點——少了它，圖會在手指底下滑走。
+ *
+ * 倍率是**夾好上下限之後**才傳進來的，不是在這裡乘出來：先算後夾的話，錨點是照那個
+ * 沒被夾的倍率算的，圖會在撞到上限之後繼續漂，而畫面上看起來就是「捏到底了它還在動」。
+ */
+export function zoomView(
+  projection: Projection,
+  zoom: number,
+  anchorX: number,
+  anchorY: number,
+): View {
+  const anchor = screenToPlan(projection, anchorX, anchorY);
+  const factor = zoom / projection.view.zoom;
+  return {
+    zoom,
+    cx: anchor.x + (projection.view.cx - anchor.x) / factor,
+    cy: anchor.y + (projection.view.cy - anchor.y) / factor,
+  };
+}
+
+/**
+ * 現在看到的就是全圖嗎。「回到全圖」那顆按鈕要不要佔版面看這個——
+ * 已經是全圖時它沒有事情可做，而它一出現就從平面圖那條可視帶挖走 56px。
+ *
+ * 比較留了容差：縮放經過 RESIZE 的等比調整往返之後會留下浮點數的尾數，
+ * 而這個判斷只用來決定一顆按鈕的去留，差 0.1% 與 0.5cm 都不是使用者看得出來的事。
+ */
+export function isFitView(projection: Projection): boolean {
+  const fit = fitView(projection);
+  const { view } = projection;
+  return (
+    Math.abs(view.zoom - fit.zoom) <= fit.zoom * 1e-3 &&
+    Math.abs(view.cx - fit.cx) <= 0.5 &&
+    Math.abs(view.cy - fit.cy) <= 0.5
+  );
 }
 
 /**

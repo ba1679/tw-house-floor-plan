@@ -10,7 +10,9 @@
   flex: 0 1 auto;
   min-height: 0;
   overflow: hidden;
-  touch-action: manipulation;
+  /* 平移與縮放由這個元件自己做（票 04），所以把瀏覽器內建的捲動與雙指縮放讓開——
+     留著的話，手指一滑就變成瀏覽器在捲頁面，pointermove 也不會再送過來。 */
+  touch-action: none;
   user-select: none;
   -webkit-user-select: none;
   background: #fff;
@@ -74,7 +76,7 @@
 }
 
 /* 手機優先：使用情境是站在接待中心單手操作，控制元件一律點得到。 */
-.reselect {
+.control {
   min-height: 44px;
   min-width: 44px;
   padding: 0 16px;

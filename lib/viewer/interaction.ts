@@ -1,5 +1,15 @@
 import type { Hotspot, ViewBox } from "@/lib/floorplan/types";
-import { clampView, fitView, fitZoom, pxToCm, type Projection, type View } from "./view";
+import {
+  clampView,
+  fitView,
+  fitZoom,
+  panView,
+  pxToCm,
+  screenToPlan,
+  zoomView,
+  type Projection,
+  type View,
+} from "./view";
 
 // 兩段式點擊的狀態機：(state, action) => state，不碰 DOM、不讀 document。
 //
@@ -14,6 +24,17 @@ import { clampView, fitView, fitZoom, pxToCm, type Projection, type View } from 
 const TAP1_TOLERANCE_PX = 46; // 第一段：點大略位置的容錯半徑
 const TAP2_TOLERANCE_PX = 30; // 第二段：確認時「最近者」的上限
 const STAGE_ZOOM = 3; // 第一段之後自動放大的倍率
+
+// 使用者自己發起的縮放（票 04）。上下限一律**相對 fit** 定義，不是絕對倍率：
+// 「整張圖剛好放得下」是 1 倍，說明卡升起來時它小於 1，而使用者能放大到的極限
+// 應該跟著框走，不是跟著一個寫死的數字走。相對定義還有一個好處——RESIZE 的等比調整
+// 保持 zoom ÷ fit 不變，所以框一變，撞在上限的視野仍然剛好在上限，不會被夾掉一截。
+//
+// 8：這張圖 1197cm 寬，8 倍下 1cm 畫成 2.3px，柱與相鄰窗那 3cm 的間距看得見。
+// 再放大下去畫面上只剩一條線，看不出那是什麼符號。
+const MAX_ZOOM_FACTOR = 8;
+/** 雙擊放大一級。一級 = 2 倍，是地圖與相簿共用的慣例，使用者不必學。 */
+const DOUBLE_TAP_ZOOM_STEP = 2;
 
 export type Stage = "browsing" | "candidates" | "confirmed";
 
@@ -48,18 +69,35 @@ export type ViewerState = {
   fitLocked: boolean;
 };
 
+/**
+ * 手勢的錨點：畫面上的一點，**CSS px，相對可視區域左上角**。
+ * 注意它與 TAP 的 x/y 不同單位——TAP 帶的是圖面公分（元件已經換算過），
+ * 錨點帶的是螢幕座標，因為「這一點在畫面上不動」正是縮放要維持的東西，
+ * 換算成公分再換回來只會多一次進位誤差。
+ */
+export type Anchor = { x: number; y: number };
+
 export type ViewerAction =
   | { type: "TAP"; x: number; y: number }
   | { type: "RESELECT" }
   | { type: "NEXT_OCCURRENCE" }
-  | { type: "RESIZE"; viewportWidth: number; viewportHeight: number };
+  | { type: "RESIZE"; viewportWidth: number; viewportHeight: number }
+  /** 拖曳平移。dx/dy 是螢幕位移（CSS px），圖跟著手指走。 */
+  | { type: "PAN"; dx: number; dy: number }
+  /** 雙指縮放。factor 是這一小段的指距比例，錨點是兩指的中點。 */
+  | { type: "ZOOM"; factor: number; anchor: Anchor }
+  /** 雙擊：放大一級，錨點是落點。 */
+  | { type: "DOUBLE_TAP"; anchor: Anchor }
+  /** 一鍵回到全圖。 */
+  | { type: "RESET_VIEW" }
+  /** 找找看（M4）的視野鎖定開關。 */
+  | { type: "SET_FIT_LOCKED"; locked: boolean };
 
 export type ViewerConfig = {
   hotspots: Hotspot[];
   viewBox: ViewBox;
   viewportWidth: number;
   viewportHeight: number;
-  fitLocked?: boolean;
 };
 
 export function createViewerState(config: ViewerConfig): ViewerState {
@@ -76,7 +114,7 @@ export function createViewerState(config: ViewerConfig): ViewerState {
     tolCmAtTap: null,
     lastTap: null,
     confirmMissed: false,
-    fitLocked: config.fitLocked ?? false,
+    fitLocked: false,
   };
 }
 
@@ -94,6 +132,17 @@ function containsCm(h: Hotspot, x: number, y: number): boolean {
 function distCm(h: Hotspot, x: number, y: number): number {
   const [hx, hy, w, ht] = h.coords;
   return Math.hypot(Math.max(hx - x, 0, x - (hx + w)), Math.max(hy - y, 0, y - (hy + ht)));
+}
+
+/** 夾在上下限之間的倍率。下限是「整張圖剛好放得下」，上限是它的 MAX_ZOOM_FACTOR 倍。 */
+function clampZoom(s: ViewerState, zoom: number): number {
+  const fit = fitZoom(s);
+  return Math.min(fit * MAX_ZOOM_FACTOR, Math.max(fit, zoom));
+}
+
+/** 以錨點為圓心縮放 factor 倍，夾好上下限與圖邊。雙指與雙擊差的只是 factor 從哪來。 */
+function zoomBy(s: ViewerState, factor: number, anchor: Anchor): View {
+  return clampView(s, zoomView(s, clampZoom(s, s.view.zoom * factor), anchor.x, anchor.y));
 }
 
 // ViewerState 本身就帶著 Projection 要的三個欄位，直接當 Projection 用——
@@ -130,7 +179,12 @@ function firstTap(s: ViewerState, x: number, y: number): ViewerState {
     savedView: s.savedView ?? s.view,
     confirmMissed: false,
     // 找找看鎖定視野時也照樣放大：擋的是「使用者自己縮放」，不是機制本身。
-    view: clampView(s.viewBox, { cx: x, cy: y, zoom: STAGE_ZOOM }),
+    //
+    // 取「現在的倍率」與「fit 的 3 倍」的較大者，**不是一律跳到 3 倍**：自動放大是為了
+    // 讓候選看得清楚，使用者自己已經放到 4 倍時再跳回 3 倍是把他的視野拿走（票 04）。
+    // 以 fit 為基準而不是絕對 3 倍，是為了讓說明卡開著時點下去也是「fit 的三倍」——
+    // 卡片收起來之後 RESIZE 會按 fit 的變化等比調回來，兩邊講的才是同一件事。
+    view: clampView(s, { cx: x, cy: y, zoom: Math.max(s.view.zoom, fitZoom(s) * STAGE_ZOOM) }),
   };
 }
 
@@ -168,14 +222,19 @@ function confirmTap(s: ViewerState, x: number, y: number): ViewerState {
   };
 }
 
+/**
+ * 點一下圖上的某個位置。第二段進行中就是確認，否則是新的第一段——
+ * browsing 與 confirmed 都當作新的第一段：看完一張說明卡後直接點圖上別的地方就能看下一個，
+ * 「重選」是明確的退出鍵，不是看下一個符號的必經步驟（PRD §11 #20）。
+ */
+function tap(s: ViewerState, x: number, y: number): ViewerState {
+  return s.stage === "candidates" ? confirmTap(s, x, y) : firstTap(s, x, y);
+}
+
 export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState {
   switch (action.type) {
     case "TAP":
-      // browsing 與 confirmed 都當作新的第一段：看完一張說明卡後直接點圖上別的地方
-      // 就能看下一個，「重選」是明確的退出鍵，不是看下一個符號的必經步驟（PRD §11 #20）。
-      return s.stage === "candidates"
-        ? confirmTap(s, action.x, action.y)
-        : firstTap(s, action.x, action.y);
+      return tap(s, action.x, action.y);
 
     case "NEXT_OCCURRENCE": {
       // 「看它在圖上的其他位置」：換看同一個 symbol 的下一處，循環回第 1 處。
@@ -227,7 +286,10 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
       if (!widthChanged) {
         return {
           ...resized,
-          view: clampView(s.viewBox, rescale(s.view)),
+          // 夾的時候用 resized，不是 s：框剛剛才變，拿舊框配新倍率算出來的可視範圍
+          // 會把視野往裡面推一小段，而那一段在框變回來時不會自己還原——
+          // 說明卡開了又關，圖就悄悄偏掉了（票 04 抓到）。
+          view: clampView(resized, rescale(s.view)),
           savedView: s.savedView && rescale(s.savedView),
         };
       }
@@ -245,12 +307,54 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
         tolCmAtTap: null,
         confirmMissed: false,
         view: clampView(
-          s.viewBox,
+          resized,
           s.stage === "browsing" ? rescale(s.view) : rescale(s.savedView ?? s.view),
         ),
         savedView: null,
       };
     }
+
+    // 以下四個是使用者自己發起的手勢（票 04）。它們**不動 stage、不動候選**：
+    // 平移到候選旁邊、放大看清楚，都還在同一次選擇裡。第一段圈出的那組候選是
+    // 點下去那一刻決定的（容錯圈畫的就是它），縮放不該回頭改寫已經做完的判定。
+    case "PAN":
+      // 鎖住視野時連平移都不給：擋了縮放卻放行平移，使用者只要點一下拿到第一段的 3×，
+      // 就能用那個倍率把整張圖逛完——那正是找找看要防的事。
+      // 平移不是作答需要的動作：候選一定落在第一段的容錯圈裡，放大之後仍然在畫面內。
+      if (s.fitLocked) return s;
+      // 全圖時整張圖都看得到，clampView 會把中心夾回正中央——平移自然是個空操作。
+      return { ...s, view: clampView(s, panView(s, action.dx, action.dy)) };
+
+    case "ZOOM":
+      if (s.fitLocked) return s;
+      return { ...s, view: zoomBy(s, action.factor, action.anchor) };
+
+    case "DOUBLE_TAP": {
+      const { x, y } = screenToPlan(s, action.anchor.x, action.anchor.y);
+      // 雙擊要放大的前提是「上一下什麼都沒選到」——那時它是使用者唯一還沒被回應的意圖。
+      // 其餘兩種情況這一下都只是普通的一下：
+      //  - 不在 browsing：兩段式進行中，第二下的意思是**確認**，那是全站的基礎操作，
+      //    不能被手勢搶走（PRD §6.1.1）。
+      //  - lastTap 是 null：中間有人按過重選、關過說明卡、或框變了。上一下已經被回應完，
+      //    這一下是新的第一段。手勢層記不得這件事，狀態機記得——所以判斷放在這裡。
+      if (s.stage !== "browsing" || s.lastTap === null) return tap(s, x, y);
+      if (s.fitLocked) return s;
+      // 「這附近沒有可以點的東西」到這裡已經過期：使用者的意思現在是「放大這一區」。
+      return { ...s, lastTap: null, view: zoomBy(s, DOUBLE_TAP_ZOOM_STEP, action.anchor) };
+    }
+
+    case "RESET_VIEW": {
+      // 迷路了就重來。fitLocked 不擋它——回到全圖是回到鎖定的那個視野，不是繞過鎖定。
+      const fit = fitView(s);
+      // 第一段存下的視野一併回到全圖：使用者明講不要那個視野了，確認之後又跳回去
+      // 只會讓他覺得那顆按鈕沒有用。
+      // lastTap 一併清掉：這是「重新開始看」，上一下落空的提示留著只是舊消息，
+      // 而它還會讓接下來那一下被誤讀成雙擊。
+      return { ...s, view: fit, savedView: s.savedView && fit, lastTap: null };
+    }
+
+    case "SET_FIT_LOCKED":
+      return action.locked === s.fitLocked ? s : { ...s, fitLocked: action.locked };
   }
 }
 
