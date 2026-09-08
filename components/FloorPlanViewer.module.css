@@ -40,10 +40,22 @@
 .hotspots rect {
   fill: transparent;
   stroke: none;
-  /* 點擊收在可視區域上：兩段式點的是「圖上一個位置」，不是「這個熱區」。 */
-  pointer-events: none;
+  /* 讓熱區接收 hover；pointer 事件仍冒泡到可視區域，沿用座標命中判定。 */
+  pointer-events: auto;
   /* 線寬不隨縮放變粗——它是畫面上的標示，不是圖面上的東西。 */
   vector-effect: non-scaling-stroke;
+}
+
+/* 靜態底色在手機與回訪時也可見；不加動畫，保留圖面線條的辨識度。
+   進入候選或說明卡階段後，只留下該階段的標示。 */
+.hotspots[data-stage="browsing"] rect[data-state="normal"] {
+  fill: oklch(0.55 0.17 232 / 0.06);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hotspots[data-stage="browsing"] rect[data-state="normal"]:hover {
+    fill: oklch(0.55 0.17 232 / 0.14);
+  }
 }
 
 /* 「我剛剛看的是這一圈」。使用者沒點準時，這圈解釋了為什麼是這幾個東西亮起來。 */

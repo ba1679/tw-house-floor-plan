@@ -1,8 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import { FloorPlanView } from "./FloorPlanView";
 import { InfoSheet } from "./InfoSheet";
+import { useFirstVisitHint } from "./useFirstVisitHint";
 import { useViewerGestures } from "./useViewerGestures";
 import type { FloorPlan, FloorPlanArtwork } from "@/lib/floorplan/types";
 import type { SymbolRecord } from "@/lib/symbols/types";
@@ -13,6 +20,12 @@ import styles from "./FloorPlanViewer.module.css";
 // PRD §10.1 的分層：Layout Data → SVG Renderer → Hotspot Layer → Interaction State → Info Panel。
 // 這個元件是 Hotspot Layer 與 Interaction State 的接線處：它把使用者點在哪個 CSS 像素上
 // 換算成圖面座標交給純狀態機，再把回傳的狀態畫成畫面。判斷邏輯一條都不在這裡。
+
+/**
+ * 第一次進站的那一句話（PRD §6.1.2 v0.5）。它刻意不說「點擊圖上的標記」——
+ * 那句話要求使用者點準一個比指尖還小的東西，而兩段式存在的理由正是拆掉這個預設。
+ */
+const TAP_HINT = "點圖上任何一個位置，我們會放大讓你看清楚";
 
 type Props = {
   floorplan: FloorPlan;
@@ -66,6 +79,20 @@ export function FloorPlanViewer({ floorplan, artwork, symbols }: Props) {
   // 使用者發起的手勢：拖曳平移、雙指縮放、雙擊放大，以及「哪一下才算點擊」。
   const gestures = useViewerGestures(viewportRef, state, dispatch);
 
+  // 「這張圖可以點」的一次性引導（票 05）。只有第一次進站的人看得到。
+  const hint = useFirstVisitHint();
+  const { dismiss } = hint;
+  // 引導在**手指碰到圖的那一刻**收起來，不等 TAP 派出去——拖曳與雙指也算碰到。
+  // 使用者已經發現這張圖會回應他，那句話就沒有事情可做了；接下來狀態列要說的是
+  // 「圈出了幾個候選」這種當下的事。
+  const onPointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      dismiss();
+      gestures.onPointerDown(event);
+    },
+    [dismiss, gestures],
+  );
+
   const close = useCallback(() => dispatch({ type: "RESELECT" }), []);
   const nextOccurrence = useCallback(() => dispatch({ type: "NEXT_OCCURRENCE" }), []);
   const resetView = useCallback(() => dispatch({ type: "RESET_VIEW" }), []);
@@ -97,13 +124,20 @@ export function FloorPlanViewer({ floorplan, artwork, symbols }: Props) {
         className={styles.viewport}
         style={{ aspectRatio: `${viewBox.width} / ${viewBox.height}` }}
         {...gestures}
+        onPointerDown={onPointerDown}
       >
         <div
           className={styles.canvas}
           style={{ transform: canvasTransform(state) }}
         >
           <FloorPlanView floorplan={floorplan} artwork={artwork}>
-            <g className={styles.hotspots} aria-hidden="true">
+            <g
+              id="hotspots"
+              className={styles.hotspots}
+              data-hint={hint.visible === null ? undefined : hint.visible ? "on" : "off"}
+              data-stage={state.stage}
+              aria-hidden="true"
+            >
               {/* 第一段看了多大一圈。半徑用命中判定當下存下的 tolCmAtTap，**不在放大後重算**：
                   重算是拿 3× 的比例尺去換同樣的 46px，畫出來只有實際的三分之一，
                   圈外的熱區卻亮著。原型自己踩過這個坑。 */}
@@ -153,9 +187,9 @@ export function FloorPlanViewer({ floorplan, artwork, symbols }: Props) {
               : `放大了，圈出 ${state.candidates.length} 個候選。再點一次確認你要的那一個。`
             : state.lastTap
               ? "這附近沒有可以點的東西，換個地方點點看，或連點兩下放大這一區。"
-              : /* 還沒動過手：這裡的「可以點」引導是票 05 的事，它要配 localStorage
-                   只出現一次。先放在這裡的話，回訪的人每次都會看到（user story 23）。 */
-                ""}
+              : hint.visible
+                ? TAP_HINT
+                : ""}
       </p>
 
       {selectedSymbol && occurrence && (
