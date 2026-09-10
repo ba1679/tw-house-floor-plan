@@ -119,7 +119,7 @@ test("塞得下就不出現「上拉看完整內容」；塞不下才出現，�
   await expect(hint).toBeHidden();
 
   // 展開之後卡片仍然不佔滿螢幕：上緣留給平面圖，位置感才不會斷。
-  const plan = (await page.getByRole("img", { name: /三房兩廳/ }).boundingBox())!;
+  const plan = (await page.getByRole("group", { name: /三房兩廳/ }).boundingBox())!;
   expect(plan.height).toBeGreaterThan(0);
   expect(plan.y + plan.height).toBeLessThanOrEqual(expanded.y + 1);
 });
@@ -164,7 +164,7 @@ test("關閉鍵就是「重選」：卡片收起、選取清掉、圖回到全�
 
   // 量的是圖本身，不是選中的熱區：熱區選中時會多一圈 3.5px 的框，
   // 拿它跨狀態比大小會把框的粗細算成圖的縮放。
-  const plan = page.getByRole("img", { name: /三房兩廳/ });
+  const plan = page.getByRole("group", { name: /三房兩廳/ });
   const door = page.locator("#hs-door-entry");
   const fullView = (await plan.boundingBox())!;
 

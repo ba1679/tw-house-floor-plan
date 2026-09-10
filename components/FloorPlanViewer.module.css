@@ -9,7 +9,12 @@
   width: 100%;
   flex: 0 1 auto;
   min-height: 0;
+  /* `clip` 而不是 `hidden`：hidden 的框是一個「可以被程式捲動」的框，而瀏覽器在焦點
+     移到框外的元素時**會捲它**（票 06 之後每個熱區都可聚焦）。那個位移不在 View 裡，
+     命中判定看不見它，圖與座標就此偏掉。clip 的框捲不動，平移一律走我們自己的 transform。
+     兩行都留著：不認得 clip 的瀏覽器停在 hidden，至少還是裁切的。 */
   overflow: hidden;
+  overflow: clip;
   /* 平移與縮放由這個元件自己做（票 04），所以把瀏覽器內建的捲動與雙指縮放讓開——
      留著的話，手指一滑就變成瀏覽器在捲頁面，pointermove 也不會再送過來。 */
   touch-action: none;
@@ -105,6 +110,18 @@
   fill: oklch(0.55 0.17 28 / 0.22);
   stroke: oklch(0.55 0.17 28);
   stroke-width: 3.5;
+}
+
+/* 鍵盤的焦點（票 06）。焦點框由瀏覽器畫，這裡再加一層熱區自己的強調——
+   UA 的框畫在熱區的外接矩形上，而這張圖上的熱區又細又長，只有框的話使用者看得出
+   「大概那一帶」，看不出是哪一條線。
+
+   放在所有狀態規則的最後：特異度與它們相同，順序決勝。焦點要蓋過 candidate 與 selected——
+   使用者正在移動的那一個，永遠是畫面上最該被看到的東西。 */
+.hotspots rect[data-state]:focus-visible {
+  fill: oklch(0.55 0.17 232 / 0.3);
+  stroke: oklch(0.42 0.17 232);
+  stroke-width: 5;
 }
 
 .controls {

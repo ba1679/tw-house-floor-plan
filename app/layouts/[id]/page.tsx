@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { FloorPlanViewer } from "@/components/FloorPlanViewer";
 import { listLayoutIds, loadFloorPlanBundle } from "@/lib/floorplan/data";
+import { readingOrder } from "@/lib/floorplan/reading-order";
 import { loadSymbols } from "@/lib/symbols/data";
 import styles from "./page.module.css";
 
@@ -16,11 +17,19 @@ export default async function LayoutPage({ params }: { params: Promise<{ id: str
   if (!listLayoutIds().includes(id)) notFound();
 
   const { floorplan, artwork } = loadFloorPlanBundle(id);
+  const symbols = loadSymbols();
 
   return (
     <main className={styles.page}>
       <h1 className={styles.title}>{floorplan.name}</h1>
-      <FloorPlanViewer floorplan={floorplan} artwork={artwork} symbols={loadSymbols()} />
+      {/* 鍵盤的閱讀順序在這裡算完（票 06）：頁面是 SSG，這一行只在 build 時跑一次，
+          瀏覽器拿到的是排好的結果。房間歸屬因此不必寫進 floorplan schema。 */}
+      <FloorPlanViewer
+        floorplan={floorplan}
+        artwork={artwork}
+        symbols={symbols}
+        readingOrder={readingOrder(floorplan, symbols)}
+      />
     </main>
   );
 }

@@ -23,11 +23,16 @@ export function FloorPlanView({ floorplan, artwork, children }: Props) {
       id={`floorplan-${floorplan.id}`}
       className="floorplan"
       viewBox={`${x} ${y} ${width} ${height}`}
-      role="img"
+      // 不是 `img`：`img` 的子樹在 ARIA 裡是裝飾性的，而票 06 之後這底下有 37 個可聚焦的熱區，
+      // 掛在 `img` 底下等於宣告它們不存在。這裡要的語意是「一個有名字的容器」。
+      role="group"
       aria-label={`${floorplan.name} 平面配置圖`}
     >
-      {/* 圖面內容來自 data/layouts/*.svg：build 時讀進來的自家產物，不是使用者輸入。 */}
-      <g dangerouslySetInnerHTML={{ __html: artwork.markup }} />
+      {/* 圖面內容來自 data/layouts/*.svg：build 時讀進來的自家產物，不是使用者輸入。
+
+          對輔助技術隱藏：它是一堆線與填色，念出來只會是「圖片」兩個字。同一份內容**讀得出來**
+          的那一版是疊在它上面的熱區層——每個熱區有自己的名字、依房間排好（票 06）。 */}
+      <g aria-hidden="true" dangerouslySetInnerHTML={{ __html: artwork.markup }} />
       {children}
     </svg>
   );

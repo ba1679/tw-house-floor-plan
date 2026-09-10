@@ -5,6 +5,7 @@ import {
   fitZoom,
   panView,
   pxToCm,
+  revealView,
   screenToPlan,
   zoomView,
   type Projection,
@@ -35,6 +36,12 @@ const STAGE_ZOOM = 3; // 第一段之後自動放大的倍率
 const MAX_ZOOM_FACTOR = 8;
 /** 雙擊放大一級。一級 = 2 倍，是地圖與相簿共用的慣例，使用者不必學。 */
 const DOUBLE_TAP_ZOOM_STEP = 2;
+
+/**
+ * 焦點落在畫面外的熱區時，圖移過去之後那個熱區與畫面邊緣至少留這麼多（CSS px，票 06）。
+ * 貼著邊緣的東西看起來像被切掉了一半，而使用者無從判斷是不是真的切掉了。
+ */
+const FOCUS_MARGIN_PX = 24;
 
 export type Stage = "browsing" | "candidates" | "confirmed";
 
@@ -90,6 +97,10 @@ export type ViewerAction =
   | { type: "DOUBLE_TAP"; anchor: Anchor }
   /** 一鍵回到全圖。 */
   | { type: "RESET_VIEW" }
+  /** 鍵盤的焦點移到某個熱區上。看不見的話圖跟著移過去，其餘什麼都不改。 */
+  | { type: "FOCUS_HOTSPOT"; id: string }
+  /** 鍵盤直接選定一個熱區（Enter）。**不走兩段式**：鍵盤沒有手指精度問題。 */
+  | { type: "SELECT_HOTSPOT"; id: string }
   /** 找找看（M4）的視野鎖定開關。 */
   | { type: "SET_FIT_LOCKED"; locked: boolean };
 
@@ -353,6 +364,34 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
       return { ...s, view: fit, savedView: s.savedView && fit, lastTap: null };
     }
 
+    case "FOCUS_HOTSPOT": {
+      const target = s.hotspots.find((h) => h.id === action.id);
+      if (!target) return s;
+      const [x, y, width, height] = target.coords;
+      const view = clampView(s, revealView(s, { x, y, width, height }, FOCUS_MARGIN_PX));
+      // 本來就看得見時回原本的 state：每一次 Tab 都回一個新的視野，會讓整張圖在原地重畫一次。
+      return view.cx === s.view.cx && view.cy === s.view.cy ? s : { ...s, view };
+    }
+
+    case "SELECT_HOTSPOT": {
+      // 鍵盤路徑不走兩段式（PRD §9、票 06）：Tab 已經明確指出是哪一個熱區，
+      // 再要求「先放大、再確認」是把手指的問題轉嫁給沒有這個問題的人。
+      const target = s.hotspots.find((h) => h.id === action.id);
+      if (!target) return s;
+      return {
+        ...s,
+        stage: "confirmed",
+        candidates: [],
+        selected: target,
+        // 兩段式進行到一半時按 Enter：視野照樣還原，與 confirmTap 是同一件事。
+        view: s.savedView ?? s.view,
+        savedView: null,
+        lastTap: null,
+        tolCmAtTap: null,
+        confirmMissed: false,
+      };
+    }
+
     case "SET_FIT_LOCKED":
       return action.locked === s.fitLocked ? s : { ...s, fitLocked: action.locked };
   }
@@ -360,8 +399,11 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
 
 /**
  * 同一個 symbol 在這張圖上的所有熱區，**依 floorplan.hotspots 的出現順序**。
- * 順序取檔案順序：floorplan 由程式產生、順序穩定，不必等票 06 的房間歸屬算出來。
- * （票 06 的鍵盤順序是「依房間、房間內依類別」，與這裡不同；等 06 落地後再評估要不要統一。）
+ *
+ * 票 06 落地後評估過要不要改成跟鍵盤的閱讀順序一致（`lib/floorplan/reading-order.ts`）：
+ * **不改**。這裡數的是「同一個符號的第幾處」，它要的只是一個穩定的編號，
+ * 而閱讀順序是一條動線——把動線塞進「第 3 處」這個數字，讀的人也看不出來，
+ * 卻要讓狀態機從此依賴 symbol 的分類（閱讀順序需要它）才排得出自己的熱區。
  */
 export function occurrencesOf(s: ViewerState, symbolId: string | null): Hotspot[] {
   return symbolId === null ? [] : s.hotspots.filter((h) => h.symbol_id === symbolId);

@@ -17,10 +17,26 @@ export type Hotspot = {
   coords: [number, number, number, number];
 };
 
+/**
+ * 房間。閱讀順序（`reading-order.ts`）拿它的幾何算出熱區的房間歸屬——
+ * **歸屬不寫進 floorplan schema**：floorplan 由程式產生、不得手改，
+ * 加一個欄位就要動 `expand_layout.py` 與所有既有產物。
+ */
+export type Room = {
+  id: string;
+  /** 房間型態，例如 `living_room`。集合由 floorplan-generator 決定，這裡不列舉。 */
+  type: string;
+  /** 給人看的房間名稱，例如「客廳」。 */
+  name: string;
+  /** **含牆厚**的外框，單位 cm。牆內那一塊是 `inner`，這裡用不到。 */
+  geometry: { x: number; y: number; width: number; height: number };
+};
+
 export type FloorPlan = {
   id: string;
   /** 給人看的格局名稱，例如「三房兩廳」。 */
   name: string;
+  rooms: Room[];
   hotspots: Hotspot[];
 };
 

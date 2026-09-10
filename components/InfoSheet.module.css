@@ -19,6 +19,13 @@
   box-shadow: 0 -14px 34px color-mix(in oklch, var(--ink) 9%, transparent);
 }
 
+/* 卡片是鍵盤焦點的**落點**，不是一個控制元件（票 06）：它升起來這件事本身就是給眼睛看的
+   回饋，外面再套一圈瀏覽器的焦點框，看起來像整張卡被選取了。卡片裡真正按得下去的東西
+   （關閉鍵、「其他位置」）照樣留著自己的焦點框。 */
+.sheet:focus {
+  outline: none;
+}
+
 .sheet[data-expanded="true"] {
   --sheet-max: 78dvh;
 }

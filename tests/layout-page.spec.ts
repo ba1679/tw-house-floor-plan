@@ -6,7 +6,7 @@ test.describe("/layouts/[id] 靜態平面圖", () => {
   test("打開三房兩廳的網址就看到平面圖，而且量得出非零尺寸", async ({ page }) => {
     await page.goto("/layouts/3b2l_standard");
 
-    const plan = page.getByRole("img", { name: /三房兩廳/ });
+    const plan = page.getByRole("group", { name: /三房兩廳/ });
     await expect(plan).toBeVisible();
 
     const box = await plan.boundingBox();
@@ -28,7 +28,7 @@ test.describe("/layouts/[id] 靜態平面圖", () => {
   test("在 375px 手機寬度下不溢出、不橫向捲動", async ({ page }) => {
     await page.goto("/layouts/3b2l_standard");
 
-    const plan = page.getByRole("img", { name: /三房兩廳/ });
+    const plan = page.getByRole("group", { name: /三房兩廳/ });
     const box = await plan.boundingBox();
     expect(box!.width).toBeLessThanOrEqual(375);
 

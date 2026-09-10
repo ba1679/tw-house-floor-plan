@@ -29,6 +29,11 @@ type Props = {
   symbols: Record<string, SymbolRecord>;
   /** 這個符號在這張圖上共 N 處、現在看的是第 M 處。由 floorplan 算出來，不得寫死。 */
   occurrence: Occurrence;
+  /**
+   * 卡片開啟時把焦點收進來。鍵盤打開的卡片才給 true（票 06）：
+   * 焦點留在圖上的話，Tab 的下一站是圖上的下一個熱區，卡片裡的內容永遠走不到。
+   */
+  takeFocus: boolean;
   onClose: () => void;
   onNextOccurrence: () => void;
 };
@@ -47,15 +52,23 @@ export function InfoSheet({
   symbol,
   symbols,
   occurrence,
+  takeFocus,
   onClose,
   onNextOccurrence,
 }: Props) {
+  const sheetRef = useRef<HTMLElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState(false);
   const [overflowing, setOverflowing] = useState(false);
 
   // 換一個符號就收回初始高度：上一個符號展開過，不代表這一個也需要展開。
   useEffect(() => setExpanded(false), [symbol.id]);
+
+  // 焦點收進卡片本身，不是卡片裡的第一顆按鈕（那是關閉鍵——一開卡就停在「關掉我」上面，
+  // 讀螢幕的人得先退回去才讀得到內容）。卡片有 aria-labelledby，落點就是那個符號的名字。
+  useEffect(() => {
+    if (takeFocus) sheetRef.current?.focus();
+  }, [takeFocus]);
 
   // 內容有沒有超出上限，只有排版之後才知道——13/14 個符號沒有 caution，
   // 塞不塞得下因符號而異（票 03 決議 1）。塞得下就不該出現漸層與提示。
@@ -75,6 +88,10 @@ export function InfoSheet({
   return (
     <aside
       id="info-sheet"
+      ref={sheetRef}
+      // 焦點的落點，但不進 Tab 序列：Tab 從卡片裡繼續往下走是關閉鍵、「其他位置」，
+      // 而不是再回到卡片這個容器本身。
+      tabIndex={-1}
       className={styles.sheet}
       data-expanded={expanded ? "true" : "false"}
       aria-labelledby="info-sheet-name"

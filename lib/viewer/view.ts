@@ -130,6 +130,35 @@ export function zoomView(
   };
 }
 
+/** 圖面上的一塊矩形（cm）。 */
+export type PlanRect = { x: number; y: number; width: number; height: number };
+
+/**
+ * 把圖面上的一塊帶進可視範圍。看得見就原地不動，看不見就以**最小的位移**把它推進來。
+ *
+ * 鍵盤的焦點走到畫面外的熱區時用它（票 06）。最小位移而不是一律置中：Tab 一次就把整張圖
+ * 甩到另一個位置，使用者會失去「我剛剛在哪一間」；推進來剛好看得見，旁邊的東西還在旁邊。
+ *
+ * **倍率不動**。鍵盤路徑不走兩段式，焦點移動不該改變使用者看圖的比例尺——
+ * 那是他自己用手勢調出來的（票 04）。
+ */
+export function revealView(projection: Projection, rect: PlanRect, marginPx: number): View {
+  const scale = pxPerCm(projection);
+  const margin = marginPx / scale;
+  const { view } = projection;
+  const axis = (center: number, min: number, max: number, visible: number) =>
+    // 比可視範圍還大的東西推不進來（放大之後的雨遮就是），這時置中——看得到中間那一段，
+    // 總比貼著一邊、另一邊不知道還有多長要好。
+    max - min + margin * 2 >= visible
+      ? (min + max) / 2
+      : Math.min(Math.max(center, max + margin - visible / 2), min - margin + visible / 2);
+  return {
+    zoom: view.zoom,
+    cx: axis(view.cx, rect.x, rect.x + rect.width, projection.viewportWidth / scale),
+    cy: axis(view.cy, rect.y, rect.y + rect.height, projection.viewportHeight / scale),
+  };
+}
+
 /**
  * 現在看到的就是全圖嗎。「回到全圖」那顆按鈕要不要佔版面看這個——
  * 已經是全圖時它沒有事情可做，而它一出現就從平面圖那條可視帶挖走 56px。

@@ -64,7 +64,7 @@ test("柱與窗重疊的地方，選到的是柱——面積小者優先", async
 test("點在房子外面的留白處：給提示，而且不放大", async ({ page }) => {
   await page.goto(PLAN);
 
-  const plan = page.getByRole("img", { name: /三房兩廳/ });
+  const plan = page.getByRole("group", { name: /三房兩廳/ });
   const door = page.locator("#hs-door-entry");
   const before = (await door.boundingBox())!;
 
@@ -87,7 +87,7 @@ test("點在房子外面的留白處：給提示，而且不放大", async ({ pa
 test("最壞情況：主臥衛浴一次圈出 9 個候選，9 個都選得到", async ({ page }) => {
   await page.goto(PLAN);
 
-  const plan = page.getByRole("img", { name: /三房兩廳/ });
+  const plan = page.getByRole("group", { name: /三房兩廳/ });
   // 全圖時畫布與可視區域重疊，所以這個框就是可視區域的框。放大之後它不再是——
   // 但框本身不會動，之後裁切用的是這一份。
   const frame = (await plan.boundingBox())!;

@@ -42,6 +42,13 @@ floorplan 上一個可點擊的區域，指向一個 symbol。一個 symbol 在�
 程式裡把「同一個 symbol 的第幾個 hotspot」這件事叫 **occurrence**，它是 hotspot 的一個面向，不是另一種東西。
 _Avoid_: 標記、marker、annotation（`annotation` 在 floorplan 裡另有所指：尺寸標註）
 
+**閱讀順序（Reading Order）**：
+鍵盤走過一張圖上所有熱區的順序——**依房間，房間內依符號類別**（結構 → 門窗 → 家具家配）。
+房間的先後對上「看屋時一間一間看」的動線（玄關 → 公共區 → 私密區），不是座標掃描；
+熱區屬於哪一間房**由 `rooms` 的幾何在 build 時算出**，不進 floorplan schema（`lib/floorplan/reading-order.ts`）。
+它與 occurrence 的「第幾處」是兩種順序，**刻意不統一**：一個是動線，一個是編號。
+_Avoid_: tab 順序（它同時是 DOM 順序、也是讀螢幕的順序，不只 tab）、動線（那是房間之間的事，不含房間內的類別）
+
 **State（互動狀態）**：
 單一 hotspot 此刻的狀態（`normal` / `candidate` / `selected` / `highlighted` / `quiz-target` / `discovered`）。純執行期資料，**不進任何資料檔**。
 `candidate` 是兩段式點擊第一段圈出的候選之一，`selected` 是第二段確認的那一個——兩件不同的事，

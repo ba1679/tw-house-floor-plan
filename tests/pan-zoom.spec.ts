@@ -9,7 +9,7 @@ import { test, expect, type Page } from "@playwright/test";
 
 const PLAN = "/layouts/3b2l_standard";
 
-const planOf = (page: Page) => page.getByRole("img", { name: /三房兩廳/ });
+const planOf = (page: Page) => page.getByRole("group", { name: /三房兩廳/ });
 const viewportOf = (page: Page) => page.locator("#floorplan-viewport");
 
 /**

@@ -5,12 +5,15 @@ import {
   useEffect,
   useReducer,
   useRef,
+  type FocusEvent as ReactFocusEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { FloorPlanView } from "./FloorPlanView";
 import { InfoSheet } from "./InfoSheet";
 import { useFirstVisitHint } from "./useFirstVisitHint";
 import { useViewerGestures } from "./useViewerGestures";
+import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan, FloorPlanArtwork } from "@/lib/floorplan/types";
 import type { SymbolRecord } from "@/lib/symbols/types";
 import { createViewerState, reduceViewer, selectedOccurrence } from "@/lib/viewer/interaction";
@@ -32,9 +35,17 @@ type Props = {
   artwork: FloorPlanArtwork;
   /** symbol id → 該符號的內容。畫面上的字取自 symbol 資料，不在元件裡寫死。 */
   symbols: Record<string, SymbolRecord>;
+  /**
+   * 熱區依「依房間、房間內依類別」排好（票 06）。**它就是 Tab 的順序**——
+   * 熱區按這個順序進 DOM，不靠 tabindex 排號碼；正的 tabindex 一旦出現，
+   * 之後每加一個可聚焦的東西都要回頭重編一次全站的號碼。
+   *
+   * 在 build 時算好（`lib/floorplan/reading-order.ts`），這裡只負責畫。
+   */
+  readingOrder: RoomHotspots[];
 };
 
-export function FloorPlanViewer({ floorplan, artwork, symbols }: Props) {
+export function FloorPlanViewer({ floorplan, artwork, symbols, readingOrder }: Props) {
   const { viewBox } = artwork;
   const viewportRef = useRef<HTMLDivElement>(null);
 
@@ -97,9 +108,49 @@ export function FloorPlanViewer({ floorplan, artwork, symbols }: Props) {
   // 疊的那種寫法對屬性順序敏感，有人調換一次就把 dismiss 靜靜地弄丟了。
   const viewportHandlers = { ...gestures, onPointerDown };
 
-  const close = useCallback(() => dispatch({ type: "RESELECT" }), []);
+  /**
+   * 說明卡是從哪個熱區用鍵盤打開的。關掉卡片時焦點要回到那裡——
+   * 不然使用者得從第一間房重新 Tab 一次才能接著看下一個符號。
+   *
+   * 只有鍵盤那條路會記：用手指點開卡片的人沒有焦點可還，而替他把焦點搬進卡片、
+   * 再搬回一個他看不見焦點框的熱區，只會讓讀螢幕的游標莫名其妙地跳。
+   */
+  const keyboardOrigin = useRef<string | null>(null);
+
+  const close = useCallback(() => {
+    dispatch({ type: "RESELECT" });
+    const origin = keyboardOrigin.current;
+    keyboardOrigin.current = null;
+    if (origin) document.getElementById(origin)?.focus();
+  }, []);
   const nextOccurrence = useCallback(() => dispatch({ type: "NEXT_OCCURRENCE" }), []);
   const resetView = useCallback(() => dispatch({ type: "RESET_VIEW" }), []);
+
+  // 焦點走到畫面外的熱區時，圖跟著移過去（票 06）。id 從事件的 currentTarget 拿，
+  // 不是替 37 個熱區各做一個 closure。
+  const focusHotspot = useCallback((event: ReactFocusEvent<SVGRectElement>) => {
+    dispatch({ type: "FOCUS_HOTSPOT", id: event.currentTarget.id });
+  }, []);
+
+  // Enter（與 role="button" 一併要求的 Space）直接開說明卡：鍵盤不走兩段式。
+  const activateHotspot = useCallback((event: ReactKeyboardEvent<SVGRectElement>) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    keyboardOrigin.current = event.currentTarget.id;
+    dispatch({ type: "SELECT_HOTSPOT", id: event.currentTarget.id });
+  }, []);
+
+  // Esc 退回上一步：說明卡開著就關卡片，第二段進行中就退回第一段——兩者本來就是同一個 action。
+  // 掛在 window 上而不是卡片上：焦點可能在卡片裡、在熱區上、或在「重選」那顆按鈕上，
+  // 而 Esc 在這三個地方的意思是同一件事。
+  useEffect(() => {
+    if (state.stage === "browsing") return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") close();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [state.stage, close]);
 
   const candidateIds = new Set(state.candidates.map((h) => h.id));
   const selectedSymbol = state.selected?.symbol_id
@@ -137,12 +188,12 @@ export function FloorPlanViewer({ floorplan, artwork, symbols }: Props) {
             {/* id 刻意不叫 `hotspots`：那是產生器自己那組熱區的 id，artwork.ts 讀進來時把它剝掉。
                 剝除若哪天靜靜地失效（產生器改個名字就會，artwork.ts 已經寫下這個風險），
                 兩組同名的 id 會讓這裡的 CSS 與測試選到錯的那一個，而畫面上看不出來。 */}
+            {/* aria-hidden 在票 06 拿掉了：這一層現在是這張圖讀得出來的那一版。 */}
             <g
               id="hotspot-layer"
               className={styles.hotspots}
               data-hint={hint.visible === null ? undefined : hint.visible ? "on" : "off"}
               data-stage={state.stage}
-              aria-hidden="true"
             >
               {/* 第一段看了多大一圈。半徑用命中判定當下存下的 tolCmAtTap，**不在放大後重算**：
                   重算是拿 3× 的比例尺去換同樣的 46px，畫出來只有實際的三分之一，
@@ -153,24 +204,42 @@ export function FloorPlanViewer({ floorplan, artwork, symbols }: Props) {
                   cx={state.lastTap.x}
                   cy={state.lastTap.y}
                   r={state.tolCmAtTap}
+                  aria-hidden="true"
                 />
               )}
-              {state.hotspots.map((h) => (
-                <rect
-                  key={h.id}
-                  id={h.id}
-                  data-state={
-                    state.selected?.id === h.id
-                      ? "selected"
-                      : candidateIds.has(h.id)
-                        ? "candidate"
-                        : "normal"
-                  }
-                  x={h.coords[0]}
-                  y={h.coords[1]}
-                  width={h.coords[2]}
-                  height={h.coords[3]}
-                />
+              {/* DOM 的順序就是 Tab 的順序，所以熱區依房間分段、依閱讀順序畫（票 06）。
+                  一間房一個 <g>：讀螢幕的人聽得到自己走到哪一間，而 data-room 讓測試
+                  問得出「頁面自己說這個熱區屬於哪一間」，不必在測試裡把演算法再寫一次。 */}
+              {readingOrder.map((room) => (
+                <g
+                  key={room.roomId}
+                  role="group"
+                  data-room={room.roomId}
+                  aria-label={room.roomName}
+                >
+                  {room.hotspots.map((h) => (
+                    <rect
+                      key={h.id}
+                      id={h.id}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={nameOf(h.symbol_id)}
+                      onFocus={focusHotspot}
+                      onKeyDown={activateHotspot}
+                      data-state={
+                        state.selected?.id === h.id
+                          ? "selected"
+                          : candidateIds.has(h.id)
+                            ? "candidate"
+                            : "normal"
+                      }
+                      x={h.coords[0]}
+                      y={h.coords[1]}
+                      width={h.coords[2]}
+                      height={h.coords[3]}
+                    />
+                  ))}
+                </g>
               ))}
             </g>
           </FloorPlanView>
@@ -203,6 +272,7 @@ export function FloorPlanViewer({ floorplan, artwork, symbols }: Props) {
           symbol={selectedSymbol}
           symbols={symbols}
           occurrence={occurrence}
+          takeFocus={keyboardOrigin.current !== null}
           onClose={close}
           onNextOccurrence={nextOccurrence}
         />
