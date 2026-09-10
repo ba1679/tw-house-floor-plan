@@ -6,6 +6,14 @@
         "playwright",
         "run-test-mcp-server"
       ]
+    },
+    "codegraph": {
+      "type": "stdio",
+      "command": "codegraph",
+      "args": [
+        "serve",
+        "--mcp"
+      ]
     }
   }
 }
