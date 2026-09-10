@@ -147,6 +147,37 @@ test("每個熱區都報得出自己是什麼符號", async ({ page }) => {
   expect(unnamed, "這些熱區沒有替代文字，讀螢幕的人不知道游標停在什麼上面").toEqual([]);
 });
 
+test("熱區歸到圖上實際所在的那一間房", async ({ page }) => {
+  await page.goto(PLAN);
+
+  // 上面兩條測的是「頁面自己宣稱的房間」排得對不對——歸屬本身算錯了它們照樣會過。
+  // 歸屬只能拿人看得懂的事實來對，所以這裡列的每一筆都是站在圖前面指得出來的，
+  // 而且刻意挑了會分岔的那幾個：跨在兩間房中間的門、畫在牆上的窗、掛在房子外面的雨遮。
+  const expected: Record<string, string> = {
+    "hs-door-entry": "玄關",
+    "hs-win-living": "客廳", // 窗畫在牆上、一半落在房間的幾何裡：它屬於它照亮的那一間
+    "hs-door-hall-living": "客廳", // 開口跨在客廳與走道中間，歸它通往的那個空間
+    "hs-f-counter": "廚房",
+    "hs-door-master": "主臥", // 門跨在走道與主臥中間。五扇門若全歸走道，就成了五次「一般單開門」
+    "hs-f-toilet-m": "主浴",
+    "hs-canopy-master": "主臥", // 整個掛在房子外面：離主臥與主浴一樣近，取重心較近的主臥
+    "hs-room-ps": "管道間",
+  };
+
+  const actual = await page.evaluate(
+    (ids) =>
+      Object.fromEntries(
+        ids.map((id) => [
+          id,
+          document.getElementById(id)?.closest("[data-room]")?.getAttribute("aria-label") ?? "",
+        ]),
+      ),
+    Object.keys(expected),
+  );
+
+  expect(actual).toEqual(expected);
+});
+
 test("Enter 開說明卡、Esc 關卡，焦點回到原本的熱區", async ({ page }) => {
   await page.goto(PLAN);
 
@@ -224,4 +255,36 @@ test("焦點所在的熱區，畫面上看得出來", async ({ page }) => {
 
   // 焦點狀態要比一般狀態明顯：鍵盤使用者正在移動的那一個，是畫面上最該被看到的東西。
   expect(await strokeOf(focused)).toBeGreaterThan(await strokeOf(page.locator("#hs-win-living")));
+});
+
+test("鍵盤開過卡片之後改用手指，卡片不再搶走焦點", async ({ page }) => {
+  await page.goto(PLAN);
+  const sheet = page.locator("#info-sheet");
+  const band = async () => Math.round((await viewportOf(page).boundingBox())!.height);
+  const full = await band();
+
+  // 先用鍵盤開一張卡片：「這張卡是從哪個熱區來的」因此被記了下來。
+  const bathtub = page.locator("#hs-f-bathtub-m");
+  await bathtub.focus();
+  await page.keyboard.press("Enter");
+  await expect(sheet).toBeFocused();
+
+  // 不按 Esc，直接用手指點圖上別的地方——「重選」不是看下一個符號的必經步驟（PRD §11 #20），
+  // 而這條路不經過關閉鍵，記下來的那個熱區沒有人會替它收尾。
+  const door = page.locator("#hs-door-entry");
+  const before = (await door.boundingBox())!;
+  await page.mouse.click(before.x + before.width + 13, before.y + before.height / 2);
+  // 卡片收起來、圖長回整條可視帶之後才量得準（票 03 決議 3）。
+  await expect(sheet).toBeHidden();
+  await expect.poll(band).toBe(full);
+
+  const zoomed = (await door.boundingBox())!;
+  await page.mouse.click(zoomed.x + zoomed.width / 2, zoomed.y + zoomed.height / 2);
+  await expect(sheet).toContainText("雙開門");
+
+  // 手指使用者看不到焦點框，把焦點搬進卡片對他沒有意義；
+  // 而關掉之後若還跳回浴缸，那是他從頭到尾沒有碰過的一個熱區。
+  await expect(sheet).not.toBeFocused();
+  await sheet.getByRole("button", { name: "關閉說明" }).click();
+  await expect(bathtub).not.toBeFocused();
 });

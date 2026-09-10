@@ -1,3 +1,4 @@
+import { hasSymbol, rectOf } from "@/lib/floorplan/hotspots";
 import type { Hotspot, ViewBox } from "@/lib/floorplan/types";
 import {
   clampView,
@@ -46,7 +47,7 @@ const FOCUS_MARGIN_PX = 24;
 export type Stage = "browsing" | "candidates" | "confirmed";
 
 export type ViewerState = {
-  /** 已經濾掉 symbol_id 為 null 的熱區：它們不畫、不進候選、不計入任何統計。 */
+  /** 已經濾掉沒有 symbol 的熱區（`hasSymbol`）：它們不畫、不進候選、不計入任何統計。 */
   readonly hotspots: Hotspot[];
   readonly viewBox: ViewBox;
   viewportWidth: number;
@@ -113,7 +114,7 @@ export type ViewerConfig = {
 
 export function createViewerState(config: ViewerConfig): ViewerState {
   return {
-    hotspots: config.hotspots.filter((h) => h.symbol_id !== null),
+    hotspots: config.hotspots.filter(hasSymbol),
     viewBox: config.viewBox,
     viewportWidth: config.viewportWidth,
     viewportHeight: config.viewportHeight,
@@ -219,14 +220,31 @@ function confirmTap(s: ViewerState, x: number, y: number): ViewerState {
   // 還是沒點到：留在第二段，候選與放大都不動，讓使用者再試一次或按「重選」。
   if (!hit) return { ...s, lastTap: { x, y }, confirmMissed: true };
 
-  // 候選的高亮到此為止：選擇已經做完，留著另外 8 個亮著只是雜訊——
-  // 而這張圖本身就是學習對象，圖上多餘的標示會妨礙辨識符號的線條。
+  return confirmSelection(s, hit, { x, y });
+}
+
+/**
+ * 選定了一個熱區：說明卡開起來、視野回到第一段之前。
+ *
+ * 候選的高亮到此為止——選擇已經做完，留著另外 8 個亮著只是雜訊，而這張圖本身就是學習對象，
+ * 圖上多餘的標示會妨礙辨識符號的線條。
+ *
+ * 手指的第二段與鍵盤的 Enter 走的是同一條路，差別只在「怎麼指出是哪一個」，
+ * 所以結果寫在同一個地方：兩份各自維護的話，遲早有一邊少清一個欄位。
+ */
+function confirmSelection(
+  s: ViewerState,
+  hit: Hotspot,
+  lastTap: { x: number; y: number } | null,
+): ViewerState {
   return {
     ...s,
     stage: "confirmed",
     candidates: [],
     selected: hit,
-    lastTap: { x, y },
+    lastTap,
+    // 容錯圈只畫在第二段，這個值在 confirmed 之下看不見；鍵盤那條路沒有點過，一併清掉。
+    tolCmAtTap: lastTap === null ? null : s.tolCmAtTap,
     confirmMissed: false,
     view: s.savedView ?? s.view,
     savedView: null,
@@ -367,8 +385,12 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
     case "FOCUS_HOTSPOT": {
       const target = s.hotspots.find((h) => h.id === action.id);
       if (!target) return s;
-      const [x, y, width, height] = target.coords;
-      const view = clampView(s, revealView(s, { x, y, width, height }, FOCUS_MARGIN_PX));
+      // fitLocked 不擋它，理由與它不擋 firstTap 的自動放大相同：擋的是「使用者自己發起的
+      // 縮放與平移」，不是機制對使用者動作的回應。焦點已經落在那個熱區上了，圖不跟過去的話
+      // 鍵盤使用者會盯著一個看不到目標的畫面。
+      // （M4 的找找看若要防鍵盤玩家「一路 Tab 過去看答案」，要防的是熱區的替代文字直接
+      //   念出符號名字，不是這裡的平移——那件事這張票擋不住，也不該假裝擋得住。）
+      const view = clampView(s, revealView(s, rectOf(target), FOCUS_MARGIN_PX));
       // 本來就看得見時回原本的 state：每一次 Tab 都回一個新的視野，會讓整張圖在原地重畫一次。
       return view.cx === s.view.cx && view.cy === s.view.cy ? s : { ...s, view };
     }
@@ -378,18 +400,8 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
       // 再要求「先放大、再確認」是把手指的問題轉嫁給沒有這個問題的人。
       const target = s.hotspots.find((h) => h.id === action.id);
       if (!target) return s;
-      return {
-        ...s,
-        stage: "confirmed",
-        candidates: [],
-        selected: target,
-        // 兩段式進行到一半時按 Enter：視野照樣還原，與 confirmTap 是同一件事。
-        view: s.savedView ?? s.view,
-        savedView: null,
-        lastTap: null,
-        tolCmAtTap: null,
-        confirmMissed: false,
-      };
+      // 兩段式進行到一半時按 Enter 也走得通：視野照樣還原，與第二段是同一件事。
+      return confirmSelection(s, target, null);
     }
 
     case "SET_FIT_LOCKED":

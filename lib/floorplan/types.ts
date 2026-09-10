@@ -2,6 +2,9 @@
 // 由 floorplan-generator 產生、commit 進 repo、不得手改。這裡只宣告檢視器現在真的會讀的欄位——
 // 把整份 schema 抄成 TS 型別，抄來的那一份不會跟著產生器走。
 
+/** 圖面座標系裡的一塊矩形，單位 cm。熱區、房間、viewBox 講的都是它。 */
+export type PlanRect = { x: number; y: number; width: number; height: number };
+
 /**
  * Hotspot（熱區）：floorplan 上一個可點擊的區域，指向一個 symbol。
  * 一個 symbol 在同一張圖上可以有多個 hotspot，每個 hotspot 有自己的全檔唯一 id。
@@ -28,8 +31,8 @@ export type Room = {
   type: string;
   /** 給人看的房間名稱，例如「客廳」。 */
   name: string;
-  /** **含牆厚**的外框，單位 cm。牆內那一塊是 `inner`，這裡用不到。 */
-  geometry: { x: number; y: number; width: number; height: number };
+  /** **含牆厚**的外框。牆內那一塊是 `inner`，這裡用不到。 */
+  geometry: PlanRect;
 };
 
 export type FloorPlan = {
@@ -40,7 +43,8 @@ export type FloorPlan = {
   hotspots: Hotspot[];
 };
 
-export type ViewBox = { x: number; y: number; width: number; height: number };
+/** SVG 的 viewBox：固定是整張圖，不隨操作改變（縮放與平移走 CSS transform）。 */
+export type ViewBox = PlanRect;
 
 /**
  * 圖面：平面圖畫出來的樣子——牆、房間、門窗、傢俱、標註。

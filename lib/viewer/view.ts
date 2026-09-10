@@ -1,4 +1,4 @@
-import type { ViewBox } from "@/lib/floorplan/types";
+import type { PlanRect, ViewBox } from "@/lib/floorplan/types";
 
 // 圖面座標（cm）↔ 畫面座標（CSS px）的換算層。
 //
@@ -129,9 +129,6 @@ export function zoomView(
     cy: anchor.y + (projection.view.cy - anchor.y) / factor,
   };
 }
-
-/** 圖面上的一塊矩形（cm）。 */
-export type PlanRect = { x: number; y: number; width: number; height: number };
 
 /**
  * 把圖面上的一塊帶進可視範圍。看得見就原地不動，看不見就以**最小的位移**把它推進來。

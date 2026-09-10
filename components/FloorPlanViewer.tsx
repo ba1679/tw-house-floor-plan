@@ -5,6 +5,7 @@ import {
   useEffect,
   useReducer,
   useRef,
+  useState,
   type FocusEvent as ReactFocusEvent,
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
@@ -36,9 +37,9 @@ type Props = {
   /** symbol id → 該符號的內容。畫面上的字取自 symbol 資料，不在元件裡寫死。 */
   symbols: Record<string, SymbolRecord>;
   /**
-   * 熱區依「依房間、房間內依類別」排好（票 06）。**它就是 Tab 的順序**——
-   * 熱區按這個順序進 DOM，不靠 tabindex 排號碼；正的 tabindex 一旦出現，
-   * 之後每加一個可聚焦的東西都要回頭重編一次全站的號碼。
+   * 熱區依「依房間、房間內依類別」排好（票 06）。**熱區按這個順序進 DOM，焦點與讀螢幕
+   * 都跟著 DOM 走**，不靠 tabindex 排號碼；正的 tabindex 一旦出現，之後每加一個可聚焦的
+   * 東西都要回頭重編一次全站的號碼。
    *
    * 在 build 時算好（`lib/floorplan/reading-order.ts`），這裡只負責畫。
    */
@@ -100,6 +101,9 @@ export function FloorPlanViewer({ floorplan, artwork, symbols, readingOrder }: P
   const onPointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       dismiss();
+      // 手指一碰到圖，鍵盤那條路就結束了。少了這一行，用鍵盤開過卡片的人改用手指點圖時，
+      // 下一張卡片會把焦點搶進去，關掉之後又跳回一個他根本沒碰過的熱區、順便把圖平移過去。
+      setKeyboardOrigin(null);
       startGesture(event);
     },
     [dismiss, startGesture],
@@ -114,15 +118,17 @@ export function FloorPlanViewer({ floorplan, artwork, symbols, readingOrder }: P
    *
    * 只有鍵盤那條路會記：用手指點開卡片的人沒有焦點可還，而替他把焦點搬進卡片、
    * 再搬回一個他看不見焦點框的熱區，只會讓讀螢幕的游標莫名其妙地跳。
+   *
+   * 是 state 不是 ref：它要參與渲染（決定卡片開起來時收不收焦點），
+   * 而 render 期間讀 ref 讀到的是「上一次改到哪」，不是這一輪該畫的東西。
    */
-  const keyboardOrigin = useRef<string | null>(null);
+  const [keyboardOrigin, setKeyboardOrigin] = useState<string | null>(null);
 
   const close = useCallback(() => {
     dispatch({ type: "RESELECT" });
-    const origin = keyboardOrigin.current;
-    keyboardOrigin.current = null;
-    if (origin) document.getElementById(origin)?.focus();
-  }, []);
+    if (keyboardOrigin) document.getElementById(keyboardOrigin)?.focus();
+    setKeyboardOrigin(null);
+  }, [keyboardOrigin]);
   const nextOccurrence = useCallback(() => dispatch({ type: "NEXT_OCCURRENCE" }), []);
   const resetView = useCallback(() => dispatch({ type: "RESET_VIEW" }), []);
 
@@ -136,7 +142,7 @@ export function FloorPlanViewer({ floorplan, artwork, symbols, readingOrder }: P
   const activateHotspot = useCallback((event: ReactKeyboardEvent<SVGRectElement>) => {
     if (event.key !== "Enter" && event.key !== " ") return;
     event.preventDefault();
-    keyboardOrigin.current = event.currentTarget.id;
+    setKeyboardOrigin(event.currentTarget.id);
     dispatch({ type: "SELECT_HOTSPOT", id: event.currentTarget.id });
   }, []);
 
@@ -207,7 +213,7 @@ export function FloorPlanViewer({ floorplan, artwork, symbols, readingOrder }: P
                   aria-hidden="true"
                 />
               )}
-              {/* DOM 的順序就是 Tab 的順序，所以熱區依房間分段、依閱讀順序畫（票 06）。
+              {/* DOM 的順序就是焦點走過的順序，所以熱區依房間分段、依閱讀順序畫（票 06）。
                   一間房一個 <g>：讀螢幕的人聽得到自己走到哪一間，而 data-room 讓測試
                   問得出「頁面自己說這個熱區屬於哪一間」，不必在測試裡把演算法再寫一次。 */}
               {readingOrder.map((room) => (
@@ -272,7 +278,7 @@ export function FloorPlanViewer({ floorplan, artwork, symbols, readingOrder }: P
           symbol={selectedSymbol}
           symbols={symbols}
           occurrence={occurrence}
-          takeFocus={keyboardOrigin.current !== null}
+          takeFocus={keyboardOrigin !== null}
           onClose={close}
           onNextOccurrence={nextOccurrence}
         />

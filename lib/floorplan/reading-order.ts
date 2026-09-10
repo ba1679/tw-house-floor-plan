@@ -1,4 +1,5 @@
-import type { FloorPlan, Hotspot, Room } from "./types";
+import { hasSymbol, rectOf } from "./hotspots";
+import type { FloorPlan, Hotspot, PlanRect, Room } from "./types";
 import type { SymbolCategory, SymbolRecord } from "@/lib/symbols/types";
 
 // 鍵盤使用者走過這張圖的順序（票 06，解掉 PRD §9 標為「v0.5 未決、實作前必須先定」的問題）：
@@ -57,28 +58,19 @@ const CATEGORY_RANK: Record<SymbolCategory, number> = {
 /** symbol 查不到分類時排在最後。前台的字會落回 symbol id，順序也不該讓它插隊。 */
 const UNKNOWN_CATEGORY_RANK = 3;
 
-type Rect = { x: number; y: number; width: number; height: number };
+const right = (r: PlanRect) => r.x + r.width;
+const bottom = (r: PlanRect) => r.y + r.height;
+const area = (r: PlanRect) => r.width * r.height;
 
-const rectOf = (hotspot: Hotspot): Rect => ({
-  x: hotspot.coords[0],
-  y: hotspot.coords[1],
-  width: hotspot.coords[2],
-  height: hotspot.coords[3],
-});
-
-const right = (r: Rect) => r.x + r.width;
-const bottom = (r: Rect) => r.y + r.height;
-const area = (r: Rect) => r.width * r.height;
-
-const overlapArea = (a: Rect, b: Rect) =>
+const overlapArea = (a: PlanRect, b: PlanRect) =>
   Math.max(0, Math.min(right(a), right(b)) - Math.max(a.x, b.x)) *
   Math.max(0, Math.min(bottom(a), bottom(b)) - Math.max(a.y, b.y));
 
 /** 兩個矩形之間的最短距離；碰在一起是 0。 */
-const gap = (a: Rect, b: Rect) =>
+const gap = (a: PlanRect, b: PlanRect) =>
   Math.hypot(Math.max(a.x - right(b), b.x - right(a), 0), Math.max(a.y - bottom(b), b.y - bottom(a), 0));
 
-const centerGap = (a: Rect, b: Rect) =>
+const centerGap = (a: PlanRect, b: PlanRect) =>
   Math.hypot((a.x + right(a) - b.x - right(b)) / 2, (a.y + bottom(a) - b.y - bottom(b)) / 2);
 
 /**
@@ -122,8 +114,7 @@ const tourRank = (room: Room) => ROOM_TOUR_RANK[room.type] ?? PRIVATE_RANK;
  * 每一次排序都以既有順序收尾（`Array.prototype.sort` 是穩定的），所以分不出先後的兩個東西
  * 維持 floorplan 檔案裡的順序——那是程式產生的、穩定的順序，不是隨機的。
  *
- * `symbol_id` 為 null 的熱區不出現：它們不畫、不進候選、不計入「共 N 處」（PRD §7.3），
- * 也就不該有焦點——一個念不出名字的東西擋在 Tab 路上，比沒有它更糟。
+ * `symbol_id` 為 null 的熱區不出現，理由與規則本身在 `hotspots.ts` 的 `hasSymbol`。
  */
 export function readingOrder(
   floorplan: FloorPlan,
@@ -146,15 +137,14 @@ export function readingOrder(
     return category ? CATEGORY_RANK[category] : UNKNOWN_CATEGORY_RANK;
   };
 
-  const members = new Map<string, { hotspot: Hotspot; outside: boolean }[]>();
-  for (const hotspot of floorplan.hotspots) {
-    if (hotspot.symbol_id === null) continue;
+  const hotspotsByRoom = new Map<string, { hotspot: Hotspot; outside: boolean }[]>();
+  for (const hotspot of floorplan.hotspots.filter(hasSymbol)) {
     const { room, outside } = assignRoom(hotspot, rooms);
-    members.set(room.id, [...(members.get(room.id) ?? []), { hotspot, outside }]);
+    hotspotsByRoom.set(room.id, [...(hotspotsByRoom.get(room.id) ?? []), { hotspot, outside }]);
   }
 
   return rooms.flatMap((room) => {
-    const inRoom = members.get(room.id);
+    const inRoom = hotspotsByRoom.get(room.id);
     if (!inRoom) return [];
     // 掛在房子外緣的（雨遮）排在該房間的最後：房間裡實際有的東西先走完，
     // 走到外緣就知道這一間看完了。同類之間由上而下、由左而右。
