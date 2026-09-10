@@ -85,13 +85,17 @@ export function FloorPlanViewer({ floorplan, artwork, symbols }: Props) {
   // 引導在**手指碰到圖的那一刻**收起來，不等 TAP 派出去——拖曳與雙指也算碰到。
   // 使用者已經發現這張圖會回應他，那句話就沒有事情可做了；接下來狀態列要說的是
   // 「圈出了幾個候選」這種當下的事。
+  const { onPointerDown: startGesture } = gestures;
   const onPointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       dismiss();
-      gestures.onPointerDown(event);
+      startGesture(event);
     },
-    [dismiss, gestures],
+    [dismiss, startGesture],
   );
+  // 覆寫寫在同一個物件裡，不是在 JSX 上疊第二個 onPointerDown：
+  // 疊的那種寫法對屬性順序敏感，有人調換一次就把 dismiss 靜靜地弄丟了。
+  const viewportHandlers = { ...gestures, onPointerDown };
 
   const close = useCallback(() => dispatch({ type: "RESELECT" }), []);
   const nextOccurrence = useCallback(() => dispatch({ type: "NEXT_OCCURRENCE" }), []);
@@ -123,16 +127,18 @@ export function FloorPlanViewer({ floorplan, artwork, symbols }: Props) {
         ref={viewportRef}
         className={styles.viewport}
         style={{ aspectRatio: `${viewBox.width} / ${viewBox.height}` }}
-        {...gestures}
-        onPointerDown={onPointerDown}
+        {...viewportHandlers}
       >
         <div
           className={styles.canvas}
           style={{ transform: canvasTransform(state) }}
         >
           <FloorPlanView floorplan={floorplan} artwork={artwork}>
+            {/* id 刻意不叫 `hotspots`：那是產生器自己那組熱區的 id，artwork.ts 讀進來時把它剝掉。
+                剝除若哪天靜靜地失效（產生器改個名字就會，artwork.ts 已經寫下這個風險），
+                兩組同名的 id 會讓這裡的 CSS 與測試選到錯的那一個，而畫面上看不出來。 */}
             <g
-              id="hotspots"
+              id="hotspot-layer"
               className={styles.hotspots}
               data-hint={hint.visible === null ? undefined : hint.visible ? "on" : "off"}
               data-stage={state.stage}

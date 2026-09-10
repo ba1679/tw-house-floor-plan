@@ -40,21 +40,48 @@
 .hotspots rect {
   fill: transparent;
   stroke: none;
-  /* 讓熱區接收 hover；pointer 事件仍冒泡到可視區域，沿用座標命中判定。 */
-  pointer-events: auto;
+  /* 點擊收在可視區域上：兩段式點的是「圖上一個位置」，不是「這個熱區」——命中是座標算出來的
+     （interaction.ts 的 distCm），不是靠事件打在哪個元素上。這條規則只在下面的 hover 區塊裡
+     被放寬，而且只為了讓 :hover 打得到；放寬之後事件照樣冒泡到可視區域，判定那條路徑一步沒改。 */
+  pointer-events: none;
   /* 線寬不隨縮放變粗——它是畫面上的標示，不是圖面上的東西。 */
   vector-effect: non-scaling-stroke;
 }
 
-/* 靜態底色在手機與回訪時也可見；不加動畫，保留圖面線條的辨識度。
-   進入候選或說明卡階段後，只留下該階段的標示。 */
+/* 可點擊性提示（票 05）。回訪的人與手機使用者只剩下這一層，所以它要自己站得住
+   （PRD §6.1.2「手機無 hover，因此靜態提示必須自身足夠明確」）。
+
+   **底色之外還要一條細邊**：底色的可見度跟面積成正比，而這張圖要教的符號正好都很小。
+   375px 全圖下量到的短邊——客廳窗 6.9px、大門 6.9px、柱 11.5px；6% 的藍疊在白底上是
+   rgb(240,247,251)、對比 1.08:1，鋪在一條 6.9px 的細長條上等於沒有。細邊不吃面積，
+   而 non-scaling-stroke 讓它在任何倍率、任何大小的熱區上都是 1px。
+
+   不用動畫：**不得持續閃爍**是明令，而這張圖本身就是學習對象（PRD §6.1.2）。
+   進入候選或說明卡階段就收起來——那時該亮的是候選與選取，多一層底色只是雜訊，
+   而且第二段只認第一段圈出的候選，把其餘 36 個也標起來是騙人的（PRD §11 #19）。 */
 .hotspots[data-stage="browsing"] rect[data-state="normal"] {
-  fill: oklch(0.55 0.17 232 / 0.06);
+  fill: oklch(0.55 0.17 232 / 0.1);
+  stroke: oklch(0.55 0.17 232 / 0.5);
+  stroke-width: 1;
 }
 
+/* 桌機的 hover。手機沒有 hover，上面那層必須自己就夠明確——hover 是加分，不是提示的本體。 */
 @media (hover: hover) and (pointer: fine) {
+  /* 只在真的有 hover 規則的地方打開命中，其餘維持 pointer-events: none。 */
+  .hotspots[data-stage="browsing"] rect[data-state="normal"],
+  .hotspots rect[data-state="candidate"] {
+    pointer-events: fill;
+  }
+
   .hotspots[data-stage="browsing"] rect[data-state="normal"]:hover {
-    fill: oklch(0.55 0.17 232 / 0.14);
+    fill: oklch(0.55 0.17 232 / 0.22);
+    stroke: oklch(0.55 0.17 232 / 0.9);
+  }
+
+  /* 第二段最壞情況是在 9 個重疊的候選裡挑一個（spec §Testing Decisions 案例 4）。
+     游標停在哪一個上面就讓哪一個更明顯，使用者才不必靠猜。 */
+  .hotspots rect[data-state="candidate"]:hover {
+    fill: oklch(0.55 0.17 232 / 0.32);
   }
 }
 
