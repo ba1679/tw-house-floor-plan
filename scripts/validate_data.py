@@ -7,7 +7,7 @@
 
 用法: python3 scripts/validate_data.py
 """
-import json, io, sys, glob, os, subprocess
+import json, io, sys, glob, os
 import xml.etree.ElementTree as ET
 from collections import Counter
 
@@ -124,37 +124,69 @@ for path, f in zip(floorplan_paths, floorplans):
     check(f["id"] == stem, "%s 裡的 id 是 %r，與檔名 %r 對不上——網址由檔名決定，"
                            "而格局 id 一旦上線不得更改" % (os.path.basename(path), f["id"], stem))
 
-# --- 圖面產物與 floorplan 同步（檢視器直接顯示這個產物）---
-# data/layouts/*.svg 是 floorplan-generator 從同一份 floorplan 資料畫出來的產物，網站顯示的就是它，
-# 而熱區是檢視器另外依 floorplan.hotspots 畫的。兩份東西一旦不同步，使用者會看著一張畫錯的圖、
-# 點在錯的位置——而畫面上看不出來。所以這裡把產生器重跑一次，逐字比對：
-# 只要有人手改了 SVG，或改了 floorplan 卻忘記重跑產生器，建置就停下來。
-# 產生器搬家時這條路徑要跟著改，而且不只這一處——tests/build-validation.spec.ts
-# 也有一份（它要重跑產生器才驗得出 null symbol_id 的案子）。清單在 docs/adr/0002。
-RENDERER = ".claude/skills/floorplan-generator/scripts/render_svg.py"
+# --- floorplan 畫得出來（檢視器自己渲染，docs/adr/0005）--------------------
+# 票 07 之後網站不再顯示產生器畫好的 SVG，而是自己讀這份 JSON 把圖畫出來。
+# 少一個欄位的後果因此換了一種：從前是「圖面過期、而畫面上看不出來」，
+# 現在是**整個 next build 死在 renderer 裡**——而那個 TypeError 不會說是哪一份檔案、
+# 哪一間房。所以這裡把 renderer 會直接取用的欄位擋在建置之前，訊息裡帶上檔名與 id。
+GEOMETRY = ["x", "y", "width", "height"]
+POINT = ["x", "y"]
+# 檢視器靠 rotation 決定傢俱哪一邊是背面。資料裡只有 90 的倍數，產生器的碰撞規則也是
+# （hotspot 的 coords 本來就是軸向矩形），所以這裡照實擋住，不留一個會被默默吸附的角度。
+ROTATIONS = {0, 90, 180, 270}
 
-if not os.path.exists(RENDERER):
-    errors.append("找不到 %s——沒有它就無從確認網站顯示的圖面還跟資料一致，"
-                  "而圖面過期在畫面上看不出來" % RENDERER)
-else:
-    for path, f in zip(floorplan_paths, floorplans):
-        svg_path = path.replace(".floorplan.json", ".svg")
-        if not os.path.exists(svg_path):
-            errors.append("%s 沒有對應的圖面 %s——檢視器就是顯示這個檔案，缺了整頁只剩空白"
-                          % (os.path.basename(path), os.path.basename(svg_path)))
-            continue
-        proc = subprocess.Popen([sys.executable, RENDERER, path],
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        rendered, stderr = proc.communicate()
-        if proc.returncode != 0:
-            errors.append("%s 畫不出 %s: %s"
-                          % (RENDERER, os.path.basename(path), stderr.decode("utf-8", "replace").strip()))
-            continue
-        committed = io.open(svg_path, "rb").read()
-        check(rendered == committed,
-              "%s 與重跑產生器的結果不一致——不是有人手改了 SVG，就是改了 floorplan 卻沒重跑產生器。"
-              "圖面是 floorplan 的投影，不是資料（CONTEXT.md）；修法：\n"
-              "       python3 %s %s -o %s" % (os.path.basename(svg_path), RENDERER, path, svg_path))
+
+def require(what, obj, fields):
+    for field in fields:
+        check(isinstance(obj, dict) and obj.get(field) is not None,
+              "%s 缺 %s——檢視器渲染時直接取用這個欄位，缺了建置會死在 renderer 裡，"
+              "而那個錯誤訊息不會告訴你是哪一份檔案、哪一個 id" % (what, field))
+
+
+for path, plan in zip(floorplan_paths, floorplans):
+    src = os.path.basename(path)
+    require("%s 的 bounds" % src, plan.get("bounds"), ["width", "height"])
+
+    for rm in plan.get("rooms") or []:
+        what = "%s 的 room %s" % (src, rm.get("id"))
+        require(what, rm, ["id", "type", "name", "area_ping"])
+        require(what + " 的 geometry", rm.get("geometry"), GEOMETRY)
+
+    wall_ids = set(w.get("id") for w in plan.get("walls") or [])
+    for w in plan.get("walls") or []:
+        what = "%s 的 wall %s" % (src, w.get("id"))
+        require(what, w, ["id", "orientation", "thickness"])
+        require(what + " 的 start", w.get("start"), POINT)
+        require(what + " 的 end", w.get("end"), POINT)
+
+    openings = [("door", d) for d in plan.get("doors") or []]
+    openings += [("window", w) for w in plan.get("windows") or []]
+    for kind, op in openings:
+        what = "%s 的 %s %s" % (src, kind, op.get("id"))
+        require(what, op, ["id", "type", "wall_id", "offset", "width"])
+        check(op.get("wall_id") in wall_ids,
+              "%s 掛在不存在的 wall_id %r 上——檢視器畫不出這個開口，"
+              "牆上就少一個洞，而那件事在圖上看起來只像牆比較長" % (what, op.get("wall_id")))
+
+    for fn in plan.get("furniture") or []:
+        what = "%s 的 furniture %s" % (src, fn.get("id"))
+        require(what, fn, ["id", "type", "room_id", "rotation"])
+        require(what + " 的 geometry", fn.get("geometry"), GEOMETRY)
+        check(fn.get("rotation") in ROTATIONS,
+              "%s 的 rotation 是 %r，檢視器只認得 %s——它靠這個值決定哪一邊是背面"
+              "（馬桶的水箱、床的枕頭側、洗臉盆的牆線都畫在背面）。"
+              "認不得的角度會被當成 0，圖上的朝向就錯了，而且不會報錯"
+              % (what, fn.get("rotation"), sorted(ROTATIONS)))
+
+    for col in plan.get("columns") or []:
+        require("%s 的 column %s 的 geometry" % (src, col.get("id")), col.get("geometry"), GEOMETRY)
+    for cp in plan.get("canopies") or []:
+        require("%s 的 canopy %s 的 geometry" % (src, cp.get("id")), cp.get("geometry"), GEOMETRY)
+    for an in plan.get("annotations") or []:
+        what = "%s 的 annotation %s" % (src, an.get("id"))
+        require(what, an, ["id", "type", "label"])
+        require(what + " 的 start", an.get("start"), POINT)
+        require(what + " 的 end", an.get("end"), POINT)
 
 
 # --- confused_with 必須雙向登錄（PRD §7.2）---
@@ -211,7 +243,7 @@ if not errors:
     print("  ✓ risk_flags 已移除")
     print("  ✓ verified 符號內容完整")
     print("  ✓ svg_ref 全部存在於 sprite")
-    print("  ✓ 圖面產物與 floorplan 同步（重跑產生器逐字比對）")
+    print("  ✓ floorplan 的欄位齊全、傢俱朝向認得（檢視器畫得出來）")
 print("-" * 46)
 print("  %d symbols validated" % len(symbols))
 print("  %d sprite symbols" % len(sprite_ids))

@@ -29,12 +29,13 @@ _Avoid_: layout spec、格局圖、平面圖、floorplan
 由一個 layout 展開出來的具體圖面——座標、牆、開口、傢俱、熱區。**由程式產生，不得手改**；SVG 是它的一個投影，不是資料。
 _Avoid_: layout、plan data、圖檔
 
-**圖面產物（FloorPlanArtwork）**：
-一張 floorplan 被畫出來的那份 SVG——牆、房間、門窗、傢俱、尺寸標註。由 floorplan-generator 產生，
-是 floorplan 的投影而不是資料：改它不會改變任何事實，改資料才會。
-檢視器目前直接顯示這份產物、不自己重畫（`docs/adr/0002`，是延後不是終局）；
-熱區層不在裡面，由檢視器依 hotspots 另外畫。
-_Avoid_: 單講「圖面」（FloorPlan 詞條裡的「具體圖面」指的是資料本身）、圖檔、拿「SVG」指涉圖上有什麼東西
+**圖面（Artwork）**：
+一張 floorplan 被畫出來的樣子——牆、房間、門窗、傢俱、尺寸標註。
+它是 floorplan 的**投影**而不是資料：改它不會改變任何事實，改資料才會。
+由檢視器自己讀 floorplan JSON 畫出來（`components/FloorPlanRenderer.tsx`，`docs/adr/0005`），
+**畫法可以依互動狀態改變**——那正是它從產生器的靜態產物換成 React renderer 的理由。
+熱區層不在圖面裡，由檢視器依 hotspots 另外畫。
+_Avoid_: 「圖面產物」（曾經指 `data/layouts/*.svg`，那條路已在 `docs/adr/0005` 結束）、圖檔、拿「SVG」指涉圖上有什麼東西
 
 **Hotspot（熱區）**：
 floorplan 上一個可點擊的區域，指向一個 symbol。一個 symbol 在同一張圖上可以有多個 hotspot，每個 hotspot 有自己的全檔唯一 id。

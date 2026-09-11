@@ -34,14 +34,12 @@
   will-change: transform;
 }
 
-.canvas .floorplan {
-  display: block;
-  width: 100%;
-  height: auto;
-}
+/* 圖面自己的尺寸規則在 `FloorPlanRenderer.module.css`——那個 <svg> 是它畫的，
+   它才知道自己要怎麼填滿這個框。這裡原本有一條同樣用意的規則，但它寫在 CSS Module 裡、
+   選的卻是一個沒有被 hash 的字串 class，從來沒有生效過。 */
 
-/* 熱區層由檢視器依 floorplan.hotspots 自己畫，不是產物裡那一份（docs/adr/0002）。
-   它跟圖面在同一個 <svg> 底下，座標同為 cm，所以疊上去不需要換算。 */
+/* 熱區層依 floorplan.hotspots 畫，跟圖面在同一個 <svg> 底下（`FloorPlanRenderer` 的 children），
+   座標同為 cm，所以疊上去不需要換算。 */
 .hotspots rect {
   fill: transparent;
   stroke: none;

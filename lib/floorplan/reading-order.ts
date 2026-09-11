@@ -158,3 +158,17 @@ export function readingOrder(
     return [{ roomId: room.id, roomName: room.name, hotspots: inRoom.map((m) => m.hotspot) }];
   });
 }
+
+/**
+ * 這個熱區屬於哪一間房（沒有這個熱區時是 null）。
+ *
+ * 問的是**已經排好的閱讀順序**，不是把 `assignRoom` 再跑一次：房間歸屬只能有一份答案，
+ * 而那份答案在 build 時就算完了。說明卡開著時要把其他房間畫暗（票 07），
+ * 靠的就是這個對照。
+ */
+export function roomOfHotspot(order: RoomHotspots[], hotspotId: string): string | null {
+  for (const room of order) {
+    if (room.hotspots.some((hotspot) => hotspot.id === hotspotId)) return room.roomId;
+  }
+  return null;
+}

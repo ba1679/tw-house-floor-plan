@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
@@ -10,12 +11,13 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { FloorPlanView } from "./FloorPlanView";
+import { FloorPlanRenderer, type RoomState } from "./FloorPlanRenderer";
 import { InfoSheet } from "./InfoSheet";
 import { useFirstVisitHint } from "./useFirstVisitHint";
 import { useViewerGestures } from "./useViewerGestures";
-import type { RoomHotspots } from "@/lib/floorplan/reading-order";
-import type { FloorPlan, FloorPlanArtwork } from "@/lib/floorplan/types";
+import { planViewBox } from "@/lib/floorplan/drawing";
+import { roomOfHotspot, type RoomHotspots } from "@/lib/floorplan/reading-order";
+import type { FloorPlan } from "@/lib/floorplan/types";
 import type { SymbolRecord } from "@/lib/symbols/types";
 import { createViewerState, reduceViewer, selectedOccurrence } from "@/lib/viewer/interaction";
 import { canvasTransform, isFitView } from "@/lib/viewer/view";
@@ -33,7 +35,6 @@ const TAP_HINT = "點圖上任何一個位置，我們會放大讓你看清楚";
 
 type Props = {
   floorplan: FloorPlan;
-  artwork: FloorPlanArtwork;
   /** symbol id → 該符號的內容。畫面上的字取自 symbol 資料，不在元件裡寫死。 */
   symbols: Record<string, SymbolRecord>;
   /**
@@ -46,8 +47,10 @@ type Props = {
   readingOrder: RoomHotspots[];
 };
 
-export function FloorPlanViewer({ floorplan, artwork, symbols, readingOrder }: Props) {
-  const { viewBox } = artwork;
+export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
+  // 圖面與命中判定必須在同一個座標系裡，所以 viewBox 只有一份算法
+  // （`lib/floorplan/drawing.ts` 的 `planViewBox`），renderer 與狀態機各自去問它。
+  const viewBox = planViewBox(floorplan);
   const viewportRef = useRef<HTMLDivElement>(null);
 
   // 初始尺寸先給一個占位值：zoom 1 的 transform 是 translate(0,0) scale(1)，
@@ -159,6 +162,36 @@ export function FloorPlanViewer({ floorplan, artwork, symbols, readingOrder }: P
   }, [state.stage, close]);
 
   const candidateIds = new Set(state.candidates.map((h) => h.id));
+
+  /**
+   * 說明卡開著時，**沒被選到的房間暗下去**（票 07）。
+   *
+   * 說明卡是版面裡的一格（票 03），它升起來就把平面圖壓成一條可視帶。在那條帶子裡
+   * 「我現在看的東西在哪一間」是最容易掉的一件事，所以把其餘房間退成背景。
+   * 兩段式進行中不做——那時該亮的是候選，多一層明暗只是雜訊。
+   *
+   * 這是圖面第一次依互動狀態改變畫法。做得到這件事，正是這一層從產生器的靜態產物
+   * 換成 React renderer 的理由（`docs/adr/0005`）；M4 找找看要的「把某個房間變暗」走同一條路。
+   */
+  const focusedRoomId =
+    state.stage === "confirmed" && state.selected
+      ? roomOfHotspot(readingOrder, state.selected.id)
+      : null;
+  // useMemo 不是為了省這幾行的計算，是為了**同一個物件**：平移的每一次 pointermove
+  // 都會重畫一輪，而圖面那一層靠 props 沒變才跳得過去（`PlanArtwork` 的 memo）。
+  // 每輪新做一個內容相同的物件，等於那層 memo 不存在。
+  const roomStates = useMemo<Record<string, RoomState> | undefined>(
+    () =>
+      focusedRoomId
+        ? Object.fromEntries(
+            floorplan.rooms
+              .filter((room) => room.id !== focusedRoomId)
+              .map((room) => [room.id, "muted" as const]),
+          )
+        : undefined,
+    [focusedRoomId, floorplan.rooms],
+  );
+
   const selectedSymbol = state.selected?.symbol_id
     ? (symbols[state.selected.symbol_id] ?? null)
     : null;
@@ -190,10 +223,7 @@ export function FloorPlanViewer({ floorplan, artwork, symbols, readingOrder }: P
           className={styles.canvas}
           style={{ transform: canvasTransform(state) }}
         >
-          <FloorPlanView floorplan={floorplan} artwork={artwork}>
-            {/* id 刻意不叫 `hotspots`：那是產生器自己那組熱區的 id，artwork.ts 讀進來時把它剝掉。
-                剝除若哪天靜靜地失效（產生器改個名字就會，artwork.ts 已經寫下這個風險），
-                兩組同名的 id 會讓這裡的 CSS 與測試選到錯的那一個，而畫面上看不出來。 */}
+          <FloorPlanRenderer floorplan={floorplan} roomStates={roomStates}>
             {/* aria-hidden 在票 06 拿掉了：這一層現在是這張圖讀得出來的那一版。 */}
             <g
               id="hotspot-layer"
@@ -248,7 +278,7 @@ export function FloorPlanViewer({ floorplan, artwork, symbols, readingOrder }: P
                 </g>
               ))}
             </g>
-          </FloorPlanView>
+          </FloorPlanRenderer>
         </div>
       </div>
 

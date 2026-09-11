@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { FloorPlanViewer } from "@/components/FloorPlanViewer";
-import { listLayoutIds, loadFloorPlanBundle } from "@/lib/floorplan/data";
+import { listLayoutIds, loadFloorPlan } from "@/lib/floorplan/data";
 import { readingOrder } from "@/lib/floorplan/reading-order";
 import { loadSymbols } from "@/lib/symbols/data";
 import styles from "./page.module.css";
@@ -16,7 +16,7 @@ export default async function LayoutPage({ params }: { params: Promise<{ id: str
   const { id } = await params;
   if (!listLayoutIds().includes(id)) notFound();
 
-  const { floorplan, artwork } = loadFloorPlanBundle(id);
+  const floorplan = loadFloorPlan(id);
   const symbols = loadSymbols();
 
   return (
@@ -26,7 +26,6 @@ export default async function LayoutPage({ params }: { params: Promise<{ id: str
           瀏覽器拿到的是排好的結果。房間歸屬因此不必寫進 floorplan schema。 */}
       <FloorPlanViewer
         floorplan={floorplan}
-        artwork={artwork}
         symbols={symbols}
         readingOrder={readingOrder(floorplan, symbols)}
       />

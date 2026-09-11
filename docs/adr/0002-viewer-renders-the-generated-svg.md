@@ -1,9 +1,16 @@
 ---
-status: accepted
+status: superseded
 date: 2026-09-02
+superseded-by: 0005-viewer-draws-the-floorplan-itself.md
 ---
 
 # 檢視器顯示產生器畫好的圖面產物，React renderer 延後
+
+> **已於 2026-09-11 被 [`0005`](0005-viewer-draws-the-floorplan-itself.md) 推翻**，
+> 理由正是本文「什麼情況下該推翻它」的第一條：圖面需要依互動狀態改變畫法。
+> 檢視器現在自己讀 floorplan JSON 畫圖（`components/FloorPlanRenderer.tsx`），
+> `lib/floorplan/artwork.ts`、`validate_data.py` 的逐字比對、`data/layouts/*.svg` 都已移除。
+> 以下保留原文，因為它記著當初為什麼要延後——那個排序的理由到最後都成立。
 
 `data/layouts/*.svg` 是 floorplan-generator（`.claude/skills/floorplan-generator/scripts/render_svg.py`）
 從 floorplan 資料畫出來、commit 進 repo 的產物。Next.js 檢視器在 build 時把它讀進來當圖面，

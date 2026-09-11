@@ -19,7 +19,8 @@ test.describe("/layouts/[id] 靜態平面圖", () => {
     await page.goto("/layouts/3b2l_standard");
 
     // 熱區層（02）要跟圖面在同一個座標系底下，所以圖必須是 inline SVG 而不是一張 <img>。
-    // 圖面是否還跟 floorplan 資料同步，是 build 時擋的事（tests/build-validation.spec.ts）。
+    // 圖是檢視器自己從 floorplan 資料畫的（票 07），畫法本身另有一組測試：
+    // tests/floorplan-renderer.spec.ts。
     await expect(page.locator("svg#floorplan-3b2l_standard")).toBeAttached();
     await expect(page.locator("#room-master")).toBeAttached();
     await expect(page.locator("#wall-001")).toBeAttached();

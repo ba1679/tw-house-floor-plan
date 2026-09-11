@@ -10,8 +10,6 @@ function sandbox() {
   const dir = mkdtempSync(join(tmpdir(), "floorplan-validate-"));
   cpSync("data", join(dir, "data"), { recursive: true });
   cpSync("scripts", join(dir, "scripts"), { recursive: true });
-  // 驗證會重跑 floorplan-generator 來比對圖面，所以產生器也要在沙箱裡。
-  cpSync(".claude", join(dir, ".claude"), { recursive: true });
   return dir;
 }
 
@@ -26,10 +24,6 @@ function runValidator(cwd: string): { code: number; output: string } {
 }
 
 const FLOORPLAN = "data/layouts/3b2l_standard.floorplan.json";
-const ARTWORK = "data/layouts/3b2l_standard.svg";
-// 與 scripts/validate_data.py 的 RENDERER 是同一條路徑的第二份。產生器搬家時兩處都要改，
-// 清單記在 docs/adr/0002。這裡沒有共用的辦法——一邊是 Python，一邊是 TS。
-const RENDERER = ".claude/skills/floorplan-generator/scripts/render_svg.py";
 
 test.describe("build 時的資料驗證", () => {
   test("資料完好時通過", () => {
@@ -63,8 +57,6 @@ test.describe("build 時的資料驗證", () => {
     const plan = JSON.parse(readFileSync(join(dir, FLOORPLAN), "utf8"));
     plan.hotspots[0].symbol_id = null;
     writeFileSync(join(dir, FLOORPLAN), JSON.stringify(plan, null, 2));
-    // 改了 floorplan 就要重跑產生器，這是這個 repo 記錄在案的兩步流程。
-    execFileSync("python3", [RENDERER, FLOORPLAN, "-o", ARTWORK], { cwd: dir });
 
     const { code, output } = runValidator(dir);
     expect(code, output).toBe(0);
@@ -83,30 +75,43 @@ test.describe("build 時的資料驗證", () => {
   });
 });
 
-// 網站顯示的是 data/layouts/*.svg 這個產物，熱區卻讀 floorplan JSON（docs/adr/0002）。
-// 兩者一旦不同步，使用者就會看著一張畫錯的圖、點在錯的位置——而畫面上看不出來，
-// 所以驗證會把 floorplan-generator 重跑一次，逐字比對產物。以下兩條是它擋的兩個方向。
-test.describe("圖面產物與 floorplan 的同步", () => {
-  test("有人手改了圖面 SVG 時，建置失敗", () => {
-    const dir = sandbox();
-    const before = readFileSync(join(dir, ARTWORK), "utf8");
-    const after = before.replace(/(<rect id="room-master"[^>]*?)x="[-\d.]+"/, '$1x="300"');
-    expect(after, "fixture 沒改到 room-master，這條測試等於沒測").not.toBe(before);
-    writeFileSync(join(dir, ARTWORK), after);
-
-    const { code, output } = runValidator(dir);
-    expect(code).not.toBe(0);
-    expect(output).toContain("重跑產生器");
-  });
-
-  test("改了 floorplan 卻沒重跑產生器時，建置失敗", () => {
+// 票 07 之後圖面由檢視器自己畫（docs/adr/0005），少一個欄位的後果從「圖面過期」
+// 變成「build 死在 renderer 裡」——而那個 TypeError 不會說是哪一份檔案、哪一間房。
+// 驗證因此接手把 renderer 會直接取用的東西擋在建置之前。
+test.describe("floorplan 畫得出來", () => {
+  test("房間少了 area_ping 時，建置失敗，而且說得出是哪一間", () => {
     const dir = sandbox();
     const plan = JSON.parse(readFileSync(join(dir, FLOORPLAN), "utf8"));
-    plan.rooms[0].geometry.width = 300;
-    writeFileSync(join(dir, FLOORPLAN), JSON.stringify(plan, null, 2));
+    delete plan.rooms[0].area_ping;
+    writeFileSync(join(dir, FLOORPLAN), JSON.stringify(plan));
 
     const { code, output } = runValidator(dir);
     expect(code).not.toBe(0);
-    expect(output).toContain("3b2l_standard.svg");
+    expect(output).toContain(plan.rooms[0].id);
+    expect(output).toContain("area_ping");
+  });
+
+  // 檢視器靠 rotation 決定傢俱哪一邊是背面——馬桶的水箱、床的枕頭側、洗臉盆的牆線
+  // 都畫在背面。認不得的角度不會報錯，只會把朝向畫反，所以擋在建置之前。
+  test("傢俱的 rotation 不是 90 的倍數時，建置失敗", () => {
+    const dir = sandbox();
+    const plan = JSON.parse(readFileSync(join(dir, FLOORPLAN), "utf8"));
+    plan.furniture[0].rotation = 45;
+    writeFileSync(join(dir, FLOORPLAN), JSON.stringify(plan));
+
+    const { code, output } = runValidator(dir);
+    expect(code).not.toBe(0);
+    expect(output).toContain("rotation");
+  });
+
+  test("開口掛在不存在的牆上時，建置失敗", () => {
+    const dir = sandbox();
+    const plan = JSON.parse(readFileSync(join(dir, FLOORPLAN), "utf8"));
+    plan.doors[0].wall_id = "wall-999";
+    writeFileSync(join(dir, FLOORPLAN), JSON.stringify(plan));
+
+    const { code, output } = runValidator(dir);
+    expect(code).not.toBe(0);
+    expect(output).toContain("wall-999");
   });
 });
