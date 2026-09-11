@@ -70,6 +70,19 @@ export type ViewerState = {
       使用者不知道剛剛那一下有沒有被聽見。 */
   confirmMissed: boolean;
   /**
+   * 候選視野該對準圖面的哪一點（cm），而這個視野**還沒被使用者接手**（票 08）。
+   *
+   * 第一段定位視野時用的是「點下去那一刻的框」，但那個框馬上就要變：說明卡收起來、
+   * 「重選」那一列冒出來，兩件事都改變可視帶的高度。卡片展開時 fit 很小，`fit × 3` 仍可能
+   * 小於 1，clampView 於是把中心夾回圖面正中央——使用者瞄準的位置在那一刻就沒了，
+   * 而接在後面的 RESIZE 只調得回倍率，調不回一個已經不存在的中心。
+   *
+   * 所以存的是**目標點**，不是算好的視野：算好的視野在舊框下已經被夾過一次，夾掉的回不來。
+   * 每一次 RESIZE 都照它重新定位，直到使用者自己平移、縮放，或這一次選擇結束為止——
+   * 框會連著變好幾次（卡片收合與控制列各算一次），一次性消耗掉就會賭錯是哪一次。
+   */
+  pendingFocus: { x: number; y: number } | null;
+  /**
    * 找找看（M4）的視野鎖定：擋使用者自己發起的縮放，**不擋 firstTap 的自動 3×**。
    * 寫成一個開關的話，找找看就變成一道不可能作答的題目。
    * M2 不接 UI，只把這個輸入留好，M4 才不必回頭改狀態機。
@@ -126,6 +139,7 @@ export function createViewerState(config: ViewerConfig): ViewerState {
     tolCmAtTap: null,
     lastTap: null,
     confirmMissed: false,
+    pendingFocus: null,
     fitLocked: false,
   };
 }
@@ -178,6 +192,7 @@ function firstTap(s: ViewerState, x: number, y: number): ViewerState {
       lastTap: { x, y },
       tolCmAtTap: tolCm,
       confirmMissed: false,
+      pendingFocus: null,
     };
   }
 
@@ -197,6 +212,9 @@ function firstTap(s: ViewerState, x: number, y: number): ViewerState {
     // 以 fit 為基準而不是絕對 3 倍，是為了讓說明卡開著時點下去也是「fit 的三倍」——
     // 卡片收起來之後 RESIZE 會按 fit 的變化等比調回來，兩邊講的才是同一件事。
     view: clampView(s, { cx: x, cy: y, zoom: Math.max(s.view.zoom, fitZoom(s) * STAGE_ZOOM) }),
+    // 上面那一夾是照**現在**的框夾的，而框馬上就要變。夾掉的中心留不住，所以把目標點
+    // 原封不動存下來，等新的框到齊再定位一次（票 08）。
+    pendingFocus: { x, y },
   };
 }
 
@@ -246,6 +264,8 @@ function confirmSelection(
     // 容錯圈只畫在第二段，這個值在 confirmed 之下看不見；鍵盤那條路沒有點過，一併清掉。
     tolCmAtTap: lastTap === null ? null : s.tolCmAtTap,
     confirmMissed: false,
+    // 選擇做完了，視野回到第一段之前——沒有「還等著定位」這件事了。
+    pendingFocus: null,
     view: s.savedView ?? s.view,
     savedView: null,
   };
@@ -286,6 +306,7 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
         lastTap: null,
         tolCmAtTap: null,
         confirmMissed: false,
+        pendingFocus: null,
         // 從 candidates 退回：還原第一段之前的視野。
         // 從 confirmed 退回：視野在確認時就已經還原了，savedView 是 null——
         // 這時該留在當下的視野，跳回全圖等於把使用者自己調好的縮放丟掉。
@@ -309,6 +330,10 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
       // 而不是一律跳回全圖——第一段的 3× 因此在框變之後仍然是「fit 的三倍」。
       const ratio = fitZoom(resized) / fitZoom(s);
       const rescale = (v: View): View => ({ ...v, zoom: v.zoom * ratio });
+      // 第一段的視野是照「點下去那一刻的框」夾的，而那個框正是被這一次 RESIZE 換掉的那個。
+      // 倍率有 ratio 調得回來，中心沒有——所以照原本的目標點重放一次（票 08）。
+      const refocus = (v: View): View =>
+        s.pendingFocus ? { ...v, cx: s.pendingFocus.x, cy: s.pendingFocus.y } : v;
 
       // 只有高度變：這是說明卡自己升起或收起造成的（票 03 決議 3、docs/adr/0003）。
       // **不能退回第一段**——退回就等於卡片一開就把自己關掉。
@@ -318,7 +343,7 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
           // 夾的時候用 resized，不是 s：框剛剛才變，拿舊框配新倍率算出來的可視範圍
           // 會把視野往裡面推一小段，而那一段在框變回來時不會自己還原——
           // 說明卡開了又關，圖就悄悄偏掉了（票 04 抓到）。
-          view: clampView(resized, rescale(s.view)),
+          view: clampView(resized, refocus(rescale(s.view))),
           savedView: s.savedView && rescale(s.savedView),
         };
       }
@@ -335,6 +360,7 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
         lastTap: null,
         tolCmAtTap: null,
         confirmMissed: false,
+        pendingFocus: null,
         view: clampView(
           resized,
           s.stage === "browsing" ? rescale(s.view) : rescale(s.savedView ?? s.view),
@@ -352,11 +378,13 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
       // 平移不是作答需要的動作：候選一定落在第一段的容錯圈裡，放大之後仍然在畫面內。
       if (s.fitLocked) return s;
       // 全圖時整張圖都看得到，clampView 會把中心夾回正中央——平移自然是個空操作。
-      return { ...s, view: clampView(s, panView(s, action.dx, action.dy)) };
+      // pendingFocus 一併清掉：使用者自己把視野接手過去了，下一次框變動時再把他拉回
+      // 第一段點的那個位置，等於把他剛剛的平移默默撤銷（票 08）。以下幾個動作同理。
+      return { ...s, pendingFocus: null, view: clampView(s, panView(s, action.dx, action.dy)) };
 
     case "ZOOM":
       if (s.fitLocked) return s;
-      return { ...s, view: zoomBy(s, action.factor, action.anchor) };
+      return { ...s, pendingFocus: null, view: zoomBy(s, action.factor, action.anchor) };
 
     case "DOUBLE_TAP": {
       const { x, y } = screenToPlan(s, action.anchor.x, action.anchor.y);
@@ -369,7 +397,12 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
       if (s.stage !== "browsing" || s.lastTap === null) return tap(s, x, y);
       if (s.fitLocked) return s;
       // 「這附近沒有可以點的東西」到這裡已經過期：使用者的意思現在是「放大這一區」。
-      return { ...s, lastTap: null, view: zoomBy(s, DOUBLE_TAP_ZOOM_STEP, action.anchor) };
+      return {
+        ...s,
+        lastTap: null,
+        pendingFocus: null,
+        view: zoomBy(s, DOUBLE_TAP_ZOOM_STEP, action.anchor),
+      };
     }
 
     case "RESET_VIEW": {
@@ -379,7 +412,7 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
       // 只會讓他覺得那顆按鈕沒有用。
       // lastTap 一併清掉：這是「重新開始看」，上一下落空的提示留著只是舊消息，
       // 而它還會讓接下來那一下被誤讀成雙擊。
-      return { ...s, view: fit, savedView: s.savedView && fit, lastTap: null };
+      return { ...s, view: fit, savedView: s.savedView && fit, lastTap: null, pendingFocus: null };
     }
 
     case "FOCUS_HOTSPOT": {
@@ -392,7 +425,9 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
       //   念出符號名字，不是這裡的平移——那件事這張票擋不住，也不該假裝擋得住。）
       const view = clampView(s, revealView(s, rectOf(target), FOCUS_MARGIN_PX));
       // 本來就看得見時回原本的 state：每一次 Tab 都回一個新的視野，會讓整張圖在原地重畫一次。
-      return view.cx === s.view.cx && view.cy === s.view.cy ? s : { ...s, view };
+      return view.cx === s.view.cx && view.cy === s.view.cy
+        ? s
+        : { ...s, pendingFocus: null, view };
     }
 
     case "SELECT_HOTSPOT": {

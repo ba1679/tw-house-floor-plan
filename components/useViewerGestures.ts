@@ -73,6 +73,15 @@ export function useViewerGestures(
   const onPointerDown = useCallback((event: PointerEvent<HTMLDivElement>) => {
     const el = viewportRef.current;
     if (!el) return;
+    // 滑鼠的右鍵與中鍵不是這個檢視器的手勢：使用者按右鍵是要開瀏覽器的選單，
+    // 而它一旦進了手勢記帳，放開就會派出一次點擊（圈出候選、放大），滑動還會派出平移。
+    //
+    // 濾的是**按鍵**，不是 `isPrimary`：第二根觸控手指的 isPrimary 也是 false，
+    // 濾掉它就沒有雙指縮放了。觸控與筆按下時 button 一律是 0，這一行碰不到它們。
+    //
+    // 擋在記帳與 setPointerCapture 之前：抓住了指標卻不打算處理它，右鍵選單就開不出來。
+    // 也不去 preventDefault contextmenu——右鍵選單是瀏覽器的東西，這裡只是不插手。
+    if (event.pointerType === "mouse" && event.button !== 0) return;
     const g = session.current;
     const point = local(el, event);
     g.pointers.set(event.pointerId, point);
