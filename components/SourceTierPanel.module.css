@@ -1,0 +1,80 @@
+/* 四級之間的階梯與小徽章同一套語彙：實線＝有明文依據，虛線＝畫法分歧，
+   填色深淺再疊一層權威感（design/Badges.dc.html）。尺寸放大、線型不變——
+   放大版換一套視覺語言的話，讀者就得在兩個地方各學一次。 */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  background: var(--paper);
+  border: 1px solid var(--ink3);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.iconBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--ink3);
+  color: var(--ink2);
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+  color: var(--ink2);
+}
+
+.explainer {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: var(--ink2);
+}
+
+/* CNS：最粗的框、實心圖標底——階梯最上層。 */
+.panel[data-tier="cns"] {
+  border: 2px solid var(--ink);
+  background: var(--paper2);
+}
+.panel[data-tier="cns"] .iconBox {
+  border: none;
+  background: var(--ink);
+  color: var(--paper);
+}
+.panel[data-tier="cns"] .label {
+  color: var(--ink);
+}
+
+/* 法規：實線粗框。 */
+.panel[data-tier="regulation"] {
+  border: 1.5px solid var(--ink);
+}
+.panel[data-tier="regulation"] .iconBox {
+  border: 1.5px solid var(--ink);
+  background: var(--paper2);
+  color: var(--ink);
+}
+.panel[data-tier="regulation"] .label {
+  color: var(--ink);
+}
+
+/* 業界慣例：實線細框，就是 .panel 的預設。 */
+
+/* 畫法不一：**虛線框，不是警告色**。它不是錯誤，是誠實揭露。 */
+.panel[data-tier="varies"] {
+  border: 1px dashed var(--ink3);
+}
+.panel[data-tier="varies"] .iconBox {
+  border: 1px dashed var(--ink3);
+}

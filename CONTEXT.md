@@ -11,6 +11,14 @@
 平面圖上一個可辨認的圖形記號所代表的東西，例如「密閉式撒水頭」「一般單開門」。它是內容，與任何一張圖無關。
 _Avoid_: 圖例、icon、element、元件
 
+**符號圖形（Symbol Art）**：
+一個 symbol 畫出來的樣子——`data/symbols.sprite.svg` 裡的那一格，由 `svg_ref` 指到。
+它**不是圖示**，是平面圖的放大局部：線型、填色、記號與圖面上那一套是同一套，
+所以使用者在符號頁認得的形狀，回到平面圖上找得到（PRD §12）。因此**不得另外畫一套**——
+另外畫的那一套遲早會與圖面分岔，而分岔的那一天畫面上看不出來。
+與「圖面（Artwork）」是兩件事：那是一整張 floorplan 被畫出來的樣子，這是一個符號的。
+_Avoid_: 圖示、icon、圖例、拿「圖面」指涉它
+
 **Source Tier（來源層級）**：
 一個 symbol 的說法出自哪一級文件：`cns` / `regulation` / `convention` / `varies`。它描述**答案的出處**。
 _Avoid_: 可信度、credibility、等級
@@ -49,7 +57,7 @@ _Avoid_: layout、plan data、圖檔
 由檢視器自己讀 floorplan JSON 畫出來（`components/FloorPlanRenderer.tsx`，`docs/adr/0005`），
 **畫法可以依互動狀態改變**——那正是它從產生器的靜態產物換成 React renderer 的理由。
 熱區層不在圖面裡，由檢視器依 hotspots 另外畫。
-_Avoid_: 「圖面產物」（曾經指 `data/layouts/*.svg`，那條路已在 `docs/adr/0005` 結束）、圖檔、拿「SVG」指涉圖上有什麼東西
+_Avoid_: 「圖面產物」（曾經指 `data/layouts/*.svg`，那條路已在 `docs/adr/0005` 結束）、圖檔、拿「SVG」指涉圖上有什麼東西、拿它指涉單一符號的畫法（那是「符號圖形」）
 
 **Hotspot（熱區）**：
 floorplan 上一個可點擊的區域，指向一個 symbol。一個 symbol 在同一張圖上可以有多個 hotspot，每個 hotspot 有自己的全檔唯一 id。

@@ -32,3 +32,15 @@ export type SymbolRecord = {
   source_tier: SourceTier;
   confused_with: ConfusedWith[];
 };
+
+/**
+ * 符號頁與分類頁要的形狀：說明卡那一份，再加它們自己要的欄位。
+ *
+ * 為什麼不是同一份：說明卡那一份會被序列化進**每一張平面圖頁**的 props，多一個欄位
+ * 就是 14 筆乘以每張圖；符號頁是 server component，直接渲染成 HTML，多帶幾個欄位
+ * 沒有人要付運費。兩個消費者的形狀因此由「它要不要過網路」決定，而不是由資料檔決定。
+ */
+export type SymbolPageRecord = SymbolRecord & {
+  /** `data/symbols.sprite.svg` 裡的 `<symbol id>`。符號頁的圖形取自那裡，不另外畫一套（PRD §12）。 */
+  svg_ref: string;
+};

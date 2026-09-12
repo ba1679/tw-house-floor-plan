@@ -14,20 +14,50 @@ export const CATEGORY_LABELS: Record<SymbolCategory, { zh: string; en: string }>
 };
 
 /**
- * 四種來源徽章（PRD §6.5，樣式照 design/Badges.dc.html 的小尺寸版）。
+ * 四種來源徽章（PRD §6.5，樣式照 design/Badges.dc.html 的小／大兩種尺寸）。
  *
  * `note` 只給**結論**，不給出處：說明卡上寫「依〈某某設置標準〉」對站在接待中心的人
- * 沒有用，他無從點開查證。完整出處與可點連結是符號頁（M3）的事。
+ * 沒有用，他無從點開查證。完整出處與可點連結是符號頁的事。
+ *
+ * `explainer` 是符號頁那個大尺寸徽章上的一整句（文字照設計稿）。同一件事在兩個地方
+ * 長度不同，不是兩件事：說明卡是站著看的，一眼掃過；符號頁是搜尋落地頁，讀者是來
+ * 判斷「這個答案硬到什麼程度」的，值得多給他一句。
  */
-export const SOURCE_TIER_BADGES: Record<SourceTier, { label: string; note: string }> = {
-  cns: { label: "CNS 標準", note: "國家標準明文" },
-  regulation: { label: "法規依據", note: "法條明文" },
-  convention: { label: "業界慣例", note: "各建商畫法可能不同" },
-  varies: { label: "畫法不一", note: "請以個案圖說為準" },
+export const SOURCE_TIER_BADGES: Record<
+  SourceTier,
+  { label: string; note: string; explainer: string }
+> = {
+  cns: {
+    label: "CNS 標準",
+    note: "國家標準明文",
+    explainer: "此符號的畫法在中華民國國家標準中有明文規定。",
+  },
+  regulation: {
+    label: "法規依據",
+    note: "法條明文",
+    explainer: "此符號或其設置規定，在現行法規中有明文條文。",
+  },
+  convention: {
+    label: "業界慣例",
+    note: "各建商畫法可能不同",
+    explainer: "常見於台灣建築圖說，但沒有標準或法規明文，不同建商可能有不同畫法。",
+  },
+  varies: {
+    label: "畫法不一",
+    note: "請以個案圖說為準",
+    explainer:
+      "查到的來源彼此分歧。這不是我們沒查，是實務上真的沒有統一畫法——請以個案圖說為準。",
+  },
 };
 
-/** 說明卡上各區塊的標題。 */
-export const SHEET_SECTIONS = {
+/**
+ * 各區塊的標題，說明卡與符號頁共用。
+ *
+ * **兩邊的順序刻意不同**（說明卡是站著看的，符號頁是搜尋落地頁，「容易搞混」排在
+ * 「注意事項」前面），但**名字必須一樣**：同一個區塊在兩處各叫一個名字，會讓讀者
+ * 以為那是兩種東西。
+ */
+export const SECTION_LABELS = {
   plainMeaning: "白話意思",
   caution: "注意事項",
   confusedWith: "容易搞混",
@@ -52,3 +82,25 @@ export const confusedWithLabel = (otherName: string) => `跟${otherName}的差�
 /** PRD §6.4 的完整一句，一字不改。每頁固定顯示。 */
 export const DISCLAIMER =
   "本網站符號說明為一般通用慣例，不同建商 / 設計師畫法可能有差異，實際請以個案圖說或現場人員說明為準。";
+
+/**
+ * 符號頁的標題——**一個問句，不是把 `name` 印出來**。
+ *
+ * 這一頁的讀者多半是在 Google 打完「平面圖上的虛線是什麼」之後點進來的，標題要長得像
+ * 他剛才打的那句話，他才在一排搜尋結果裡認得出這一條值得點（PRD §6.2.1）。
+ * 頁面的 `<title>` 與 `<h1>` 同一句：搜尋結果上那一行與落地後看到的第一行不該是兩句話。
+ */
+export const symbolPageTitle = (name: string) => `平面圖上的${name}是什麼？`;
+
+/**
+ * 符號頁的 meta description。前半是資料裡的白話意思——他要的答案，搜尋結果上就先給他；
+ * 後半是本站與內容農場的差別，也就是他點進來之後會拿到的額外東西。
+ */
+export const symbolPageDescription = (plainMeaning: string) =>
+  `${plainMeaning}本頁同時標示這個說法出自哪一級文件，你可以自己判斷要不要信。`;
+
+/**
+ * 符號圖形的替代文字。圖不是裝飾：它是這一頁在教的東西，讀螢幕的人要知道
+ * 那畫的是這個符號**在平面圖上**的樣子，而不是一張照片或圖示。
+ */
+export const symbolArtLabel = (name: string) => `${name}在平面圖上的畫法`;

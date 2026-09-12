@@ -31,6 +31,23 @@ REQUIRED_WHEN_VERIFIED = {
     "verified_at": "verified 要記得這筆查證是什麼時候做的，缺了日期就看不出它有多舊",
     "verified_by": "verified 要記得這筆查證是誰做的，缺了人就沒有人能被問起它",
 }
+
+# 符號頁是搜尋落地頁（PRD §6.2.1），這五個欄位是它渲染得出一頁的最低限度。
+# 缺一個的後果不是報錯而是**靜默少一塊**：標題少一半、圖形留白、徽章不見——
+# 那看起來像設計沒做完，不像資料出問題，所以擋在建置之前。
+#
+# 理由與欄位寫在同一行，一個欄位一句自己的（與 REQUIRED_WHEN_VERIFIED 同一條規矩）：
+# 共用一句會退化成「這些欄位就是要填」，而清單裡說不出自己為什麼在清單裡的那一項，
+# 遲早會變成下一個 caution。
+REQUIRED_CONTENT = {
+    "name": "符號頁的標題由它生成（「平面圖上的○○是什麼？」），沒有名字就沒有標題，"
+            "而標題正是搜尋結果上使用者看到的那一行",
+    "plain_meaning": "讀者三秒內要的那句答案，缺了它這一頁就只剩一張圖和一個徽章",
+    "svg_ref": "符號頁的圖形取自 sprite 的這一格，缺了它頁面上就是一塊空白",
+    "category": "分類頁的清單由符號的 category 算出來，沒有分類的符號哪一頁都不會列到它",
+    "source_tier": "答案出自哪一級文件——「這個答案硬到什麼程度」是本站相對於內容農場的"
+                   "核心主張，沒有它符號頁就退化成一篇說不出自己憑什麼的文章",
+}
 VALID_TIERS = {"cns", "regulation", "convention", "varies"}
 VALID_STATUS = {"verified", "partial", "pending_purchase", "blocked"}
 VALID_CATEGORIES = {"structure", "door_window", "plumbing_electric", "fire_safety", "furniture"}
@@ -68,9 +85,14 @@ for s in symbols:
             warnings.append("alias「%s」同時屬於 %s 與 %s，搜尋會有歧義" % (a, alias_owner[a], s["id"]))
         alias_owner[a] = s["id"]
 
+# --- 符號頁渲染得出一頁：必填內容欄位非空 ---
+for s in symbols:
+    for f, why in REQUIRED_CONTENT.items():
+        check(s.get(f), "%s: %s 為空——%s" % (s["id"], f, why))
+
 # --- enum 值合法 ---
 for s in symbols:
-    check(s["category"] in VALID_CATEGORIES, "%s: category 非法值 %r" % (s["id"], s["category"]))
+    check(s.get("category") in VALID_CATEGORIES, "%s: category 非法值 %r" % (s["id"], s.get("category")))
     check(s["verification_status"] in VALID_STATUS, "%s: verification_status 非法值 %r" % (s["id"], s["verification_status"]))
     if s.get("source_tier") is not None:
         check(s["source_tier"] in VALID_TIERS, "%s: source_tier 非法值 %r" % (s["id"], s["source_tier"]))
@@ -110,7 +132,7 @@ except ET.ParseError as exc:
     errors.append("sprite 不是合法 XML: %s" % exc)
 
 for s in symbols:
-    check(s.get("svg_ref"), "%s: 缺 svg_ref" % s["id"])
+    # 「有沒有 svg_ref」在 REQUIRED_CONTENT 那一輪就問過了，這裡只問它指得到不到。
     if s.get("svg_ref") and sprite_ids:
         check(s["svg_ref"] in sprite_ids,
               "%s: svg_ref %r 在 %s 找不到" % (s["id"], s["svg_ref"], SPRITE_PATH))
@@ -262,6 +284,7 @@ if not errors:
     print("  ✓ hotspot.source 合法")
     print("  ✓ confused_with 雙向一致")
     print("  ✓ enum 值合法")
+    print("  ✓ 符號的必填內容欄位非空（符號頁渲染得出一頁）")
     print("  ✓ risk_flags 已移除")
     print("  ✓ verified 符號的查證紀錄完整（caution 不綁在查證完備性上，它要的是法規來源）")
     print("  ✓ svg_ref 全部存在於 sprite")

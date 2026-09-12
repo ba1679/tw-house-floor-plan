@@ -1,0 +1,10 @@
+/* sprite 的每一格都是 140×140（驗證器擋著這件事），所以正方形、等比縮放就好。
+   `max-width` 而不是固定寬：375px 的手機上它要縮得下去，而寬螢幕上一格符號圖形
+   放到 300px 只會變成一張沒有細節的大圖。 */
+.art {
+  display: block;
+  width: 100%;
+  max-width: 180px;
+  height: auto;
+  aspect-ratio: 1 / 1;
+}

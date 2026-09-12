@@ -8,7 +8,7 @@ import {
   CATEGORY_LABELS,
   DISCLAIMER,
   SHEET_CONTROLS,
-  SHEET_SECTIONS,
+  SECTION_LABELS,
   confusedWithLabel,
   occurrenceLabel,
 } from "@/lib/ui/copy";
@@ -128,7 +128,7 @@ export function InfoSheet({
           </div>
 
           <section className={styles.section}>
-            <h3 className={styles.sectionLabel}>{SHEET_SECTIONS.plainMeaning}</h3>
+            <h3 className={styles.sectionLabel}>{SECTION_LABELS.plainMeaning}</h3>
             <p className={styles.prose}>{symbol.plain_meaning}</p>
           </section>
 
@@ -136,14 +136,14 @@ export function InfoSheet({
               14 個符號裡只有雨遮有，留一個空標題會讓另外 13 張卡看起來像壞掉。 */}
           {symbol.caution && (
             <section className={styles.section} data-section="caution">
-              <h3 className={styles.sectionLabel}>{SHEET_SECTIONS.caution}</h3>
+              <h3 className={styles.sectionLabel}>{SECTION_LABELS.caution}</h3>
               <p className={styles.prose}>{symbol.caution}</p>
             </section>
           )}
 
           {symbol.confused_with.length > 0 && (
             <section className={styles.section} data-section="confused-with">
-              <h3 className={styles.sectionLabel}>{SHEET_SECTIONS.confusedWith}</h3>
+              <h3 className={styles.sectionLabel}>{SECTION_LABELS.confusedWith}</h3>
               <dl className={styles.confusedList}>
                 {symbol.confused_with.map((other) => (
                   <div key={other.symbol_id} className={styles.confusedItem}>

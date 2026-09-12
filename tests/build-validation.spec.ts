@@ -171,3 +171,45 @@ test.describe("verified 的閘門", () => {
     });
   }
 });
+
+// 符號頁是搜尋落地頁（M3 票 02）：缺一個內容欄位的後果不是報錯，而是頁面上**靜默少一塊**
+// ——標題少一半、圖形留白、徽章不見。那看起來像設計沒做完，不像資料出問題，
+// 所以擋在建置之前，而且訊息要說得出少了它那一頁會缺什麼。
+test.describe("符號的必填內容欄位", () => {
+  const WHY_EACH_CONTENT_FIELD_IS_REQUIRED = {
+    name: "沒有名字就沒有標題",
+    plain_meaning: "讀者三秒內要的那句答案",
+    svg_ref: "缺了它頁面上就是一塊空白",
+    category: "哪一頁都不會列到它",
+    source_tier: "這個答案硬到什麼程度",
+  };
+
+  for (const [missing, why] of Object.entries(WHY_EACH_CONTENT_FIELD_IS_REQUIRED)) {
+    test(`符號少了 ${missing} 時，建置失敗，而且說得出少了它那一頁會缺什麼`, () => {
+      const dir = sandbox();
+      const path = join(dir, SYMBOLS);
+      const data = JSON.parse(readFileSync(path, "utf8"));
+      // 每一輪只清掉一個欄位，其餘留著——才證明是「缺這一個」擋下來的。
+      const symbol = data.symbols[0];
+      symbol[missing] = null;
+      writeFileSync(path, JSON.stringify(data, null, 2));
+
+      const { code, output } = runValidator(dir);
+      expect(code, output).not.toBe(0);
+      expect(output).toContain(symbol.id);
+      expect(output).toContain(missing);
+      expect(output).toContain(why);
+    });
+  }
+
+  // 空字串與「沒有這個欄位」是同一件事：頁面上都是一塊空白。
+  test("內容欄位是空字串時也擋下來", () => {
+    const dir = sandbox();
+    const path = join(dir, SYMBOLS);
+    const data = JSON.parse(readFileSync(path, "utf8"));
+    data.symbols[0].plain_meaning = "";
+    writeFileSync(path, JSON.stringify(data, null, 2));
+
+    expect(runValidator(dir).code).not.toBe(0);
+  });
+});

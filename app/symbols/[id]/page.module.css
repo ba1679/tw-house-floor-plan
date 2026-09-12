@@ -1,0 +1,116 @@
+/* 這一頁**可以捲動**，與平面圖頁相反：那一頁是一個螢幕就是一頁（說明卡是版面裡的一列），
+   這一頁是一篇讀物。
+
+   字級、線條、留白照 design/SymbolPage.dc.html，但**區塊順序不照它**——那份稿子把徽章
+   排在末段、沒有「容易搞混」，而順序在 2026-09-12 的決議裡重排過（spec 的「符號頁」）。
+   拿設計稿對照這一頁的人請以 spec 為準：稿子在那一點上已經被推翻。 */
+.page {
+  padding: 22px 20px 40px;
+}
+
+/* 手機優先，但寬螢幕上一行字不該橫跨整個視窗——長行讀起來會掉行。 */
+.article {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.category {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--ink3);
+}
+
+/* 標題是一個問句，而且是這一頁唯一的大字。明體：這一頁是讀物不是介面。 */
+.title {
+  margin: -14px 0 0;
+  font-family: var(--serif);
+  font-size: 29px;
+  font-weight: 700;
+  line-height: 1.42;
+  letter-spacing: 0.01em;
+}
+
+.figure {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 24px 20px;
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+}
+
+/* 底下幾個名字與 `components/InfoSheet.module.css` 重複，**值刻意不同**：說明卡是被
+   壓在 46vh 裡站著掃過的，這一頁是坐著讀的。抽成共用的一份會逼兩邊共用尺寸，
+   而尺寸正是它們唯一該分開的東西——共用的是文案（`SECTION_LABELS`），不是排版。 */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.sectionLabel {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  color: var(--ink3);
+}
+
+.prose {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.9;
+}
+
+.confusedList {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.confusedItem {
+  border-top: 1px solid var(--rule2);
+  padding-top: 12px;
+}
+
+.confusedName {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+/* 連結整行可點，而且**高度吃滿 44px**：手機上這是這一頁唯一的出口（PRD §9）。 */
+.confusedLink {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.confusedLink:hover,
+.confusedLink:focus-visible {
+  border-bottom-color: currentColor;
+}
+
+.confusedText {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.85;
+  color: var(--ink2);
+}
+
+/* 注意事項是這一頁唯一與讀者的錢直接有關的一段（14 筆裡只有雨遮有），
+   給它一條左邊線，讓捲過去的人停一下。 */
+.section[data-section="caution"] {
+  border-left: 2px solid var(--ink);
+  padding-left: 14px;
+}
