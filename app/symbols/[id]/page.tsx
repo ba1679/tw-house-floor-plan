@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { SourceTierPanel } from "@/components/SourceTierPanel";
 import { SymbolArt } from "@/components/SymbolArt";
 import { loadSymbolsForPages } from "@/lib/symbols/data";
+import { printedSourceRefs } from "@/lib/symbols/source-refs";
 import {
   CATEGORY_LABELS,
   SECTION_LABELS,
@@ -51,6 +52,7 @@ export default async function SymbolPage({ params }: { params: Promise<{ id: str
   if (!symbol) notFound();
 
   const category = CATEGORY_LABELS[symbol.category];
+  const sources = printedSourceRefs(symbol.source_refs);
 
   return (
     <main className={styles.page}>
@@ -100,6 +102,35 @@ export default async function SymbolPage({ params }: { params: Promise<{ id: str
             <p className={styles.prose}>{symbol.caution}</p>
           </section>
         )}
+
+        {/* 完整出處。徽章說的是「這個答案硬到什麼程度」，這一區說的是「憑什麼這樣說」——
+            讀者在這裡自己數得出來我們查到幾筆，那比顯示一個內部的查證狀態欄位誠實
+            （`verification_status` 不上前台，CONTEXT.md）。
+
+            `<ol>` 而不是 `<ul>`：第一筆是主要來源，後面補的是交叉來源，順序有意思。
+            每一筆印成什麼由 `printedSourceRefs` 決定，這裡只把決定畫出來——
+            現況 15 筆沒有任何一筆有 `url`，M1 補上之後連結自己長出來，不必回頭改這裡。
+
+            **這一區沒有「沒有就不出現」的豁免**，`caution` 那一區才有。零筆來源時這裡會留下
+            一個空的「出處」標題——那正是該讓人看見的：一個說不出自己憑什麼的符號頁是壞的，
+            不該安靜地看起來很正常。 */}
+        <section className={styles.section} data-section="sources">
+          <h2 className={styles.sectionLabel}>{SECTION_LABELS.sources}</h2>
+          <ol className={styles.sourceList}>
+            {sources.map((source) => (
+              <li key={`${source.doc}|${source.locator ?? ""}`} className={styles.sourceItem}>
+                <p className={styles.sourceDoc}>{source.doc}</p>
+                {source.locator && <p className={styles.sourceLocator}>{source.locator}</p>}
+                {source.via && <p className={styles.sourceVia}>{source.via}</p>}
+                {source.link && (
+                  <a className={styles.sourceLink} href={source.link.href}>
+                    {source.link.label}
+                  </a>
+                )}
+              </li>
+            ))}
+          </ol>
+        </section>
       </article>
     </main>
   );

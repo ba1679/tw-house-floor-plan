@@ -17,6 +17,7 @@ type RawSymbol = {
   caution: string | null;
   source_tier: string;
   confused_with: { symbol_id: string; difference: string }[];
+  source_refs: { doc: string; clause?: string; year?: number; url?: string; via?: string }[];
 };
 
 const symbols: RawSymbol[] = JSON.parse(readFileSync("data/symbols.sample.json", "utf8")).symbols;
@@ -49,6 +50,16 @@ function spriteMarkup(svgRef: string) {
   const match = new RegExp(`<symbol id="${svgRef}"[^>]*>([\\s\\S]*?)</symbol>`).exec(sprite);
   expect(match, `sprite 裡找不到 ${svgRef}`).toBeTruthy();
   return match![1].trim();
+}
+
+/**
+ * 出處那一區的 HTML。區塊裡沒有巢狀 `<section>`，非貪婪比對到 `</section>` 就是它。
+ * 分開取是因為「這一頁有沒有連結」只該問這一區——「容易搞混」那一區本來就都是連結。
+ */
+function sourcesSection(id: string) {
+  const match = /<section[^>]*data-section="sources"[\s\S]*?<\/section>/.exec(built(id));
+  expect(match, `${id} 的頁面上找不到出處那一區`).toBeTruthy();
+  return match![0];
 }
 
 test.describe("/symbols/[id] 符號頁", () => {
@@ -148,6 +159,77 @@ test.describe("/symbols/[id] 符號頁", () => {
       expect(text, s.id).toContain(copy.label);
       expect(text, s.id).toContain(copy.explainer);
     }
+  });
+
+  // 讀完一頁的人往下看，要知道這個說法出自哪份文件的哪一頁、哪一年的版本——
+  // 他因此可以自己判斷要不要信，而不是被要求相信（PRD §6.5）。
+  test("每一筆來源都印出文件名、條次／頁碼與年份", () => {
+    for (const s of symbols) {
+      expect(s.source_refs.length, `${s.id} 資料裡沒有任何出處`).toBeGreaterThan(0);
+      const text = textOf(sourcesSection(s.id));
+      for (const ref of s.source_refs) {
+        expect(text, `${s.id} 少印了文件名`).toContain(ref.doc);
+        if (ref.clause) expect(text, `${s.id} 少印了條次／頁碼`).toContain(ref.clause);
+        if (ref.year) expect(text, `${s.id} 少印了年份`).toContain(String(ref.year));
+      }
+    }
+  });
+
+  // 讀者數得出來的來源數，必須等於我們實際查到的筆數。M1 補第 2 個交叉來源之後
+  // 頁面自己多一行（spec user story 36）——雨遮現在就是那個兩筆的實例。
+  test("印出來的筆數與資料一致；雨遮那頁印得出兩筆", () => {
+    for (const s of symbols) {
+      // 數 `<li>`：出處區裡一筆就是一個 `<li>`，不另外加一個只有測試在用的屬性。
+      const printed = sourcesSection(s.id).match(/<li\b/g)?.length ?? 0;
+      expect(printed, s.id).toBe(s.source_refs.length);
+    }
+    expect(symbols.find((s) => s.id === "canopy_rain")!.source_refs).toHaveLength(2);
+  });
+
+  // 轉載＝經由他人文件讀到某份標準，而未核對標準原文（CONTEXT.md）。
+  // 不說的話，讀者會以為我們真的翻過 CNS 原文——那是這一頁最不該給人的錯覺。
+  test("四個 cns 符號印出轉載那一整行；其餘的頁面不留這一行", () => {
+    const transcribed = symbols.filter((s) => s.source_refs.some((ref) => ref.via));
+    expect(transcribed.map((s) => s.id)).toEqual([
+      "toilet",
+      "washbasin",
+      "kitchen_counter",
+      "bathtub",
+    ]);
+    expect(transcribed.every((s) => s.source_tier === "cns")).toBe(true);
+
+    for (const s of symbols) {
+      const text = textOf(sourcesSection(s.id));
+      const via = s.source_refs.find((ref) => ref.via)?.via;
+      if (via) {
+        expect(text, s.id).toContain("轉載");
+        expect(text, s.id).toContain(via);
+        expect(text, s.id).toContain("未核對標準原文");
+      } else {
+        expect(text, s.id).not.toContain("轉載");
+      }
+    }
+  });
+
+  // 有 url 就連得出去，沒有就印純文字——**不因為缺連結而少印一筆來源**。
+  // 現況 15 筆沒有任何一筆有 url（缺的那兩筆屬於 M1），所以這條現在驗的是
+  // 「全部印成純文字，而且一筆都沒少」。連結長出來那條路由 fixture 顧著
+  // （tests/source-refs.spec.ts），M1 補上 url 之後不必回頭改元件也不必補測試。
+  test("沒有 url 的來源印純文字；公會規範那幾筆永遠不出現連結", () => {
+    for (const s of symbols) {
+      const links = sourcesSection(s.id).match(/<a\b/g)?.length ?? 0;
+      expect(links, `${s.id} 的出處連結數與資料裡有 url 的筆數對不上`).toBe(
+        s.source_refs.filter((ref) => ref.url).length,
+      );
+    }
+
+    // 公會規範是別人的著作，永遠不連、也不 host——資料裡一旦長出 url，上面那條就會
+    // 讓頁面連出去，所以這裡把規矩守在資料這一端。
+    const guild = symbols
+      .flatMap((s) => s.source_refs)
+      .filter((ref) => ref.doc.includes("室內設計裝修製圖規範"));
+    expect(guild.length).toBeGreaterThan(0);
+    expect(guild.every((ref) => !ref.url)).toBe(true);
   });
 
   // 本站的核心承諾：符號頁上認得的形狀，回到平面圖上找得到（PRD §12）。

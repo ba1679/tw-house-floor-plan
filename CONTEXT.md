@@ -20,8 +20,18 @@ _Avoid_: 圖例、icon、element、元件
 _Avoid_: 圖示、icon、圖例、拿「圖面」指涉它
 
 **Source Tier（來源層級）**：
-一個 symbol 的說法出自哪一級文件：`cns` / `regulation` / `convention` / `varies`。它描述**答案的出處**。
-_Avoid_: 可信度、credibility、等級
+一個 symbol 的說法出自哪一級文件：`cns` / `regulation` / `convention` / `varies`。它描述**答案硬到什麼程度**。
+_Avoid_: 可信度、credibility、等級、拿「出處」指涉它（那是 `source_refs`，見下一條）
+
+**出處（`source_refs`）**：
+這個說法**出自哪一份文件的哪一頁**：文件名、條次／頁碼、版本年，法規類另有全文網址。
+與 source tier 是兩個問題的答案——tier 說「這個答案硬到什麼程度」，出處說「憑什麼這樣說」，
+一個是層級一個是清單，**不可互相取代**：只給 tier 的頁面等於要求讀者相信我們，而本站的主張
+是他可以自己判斷（PRD §6.5）。也因此**只在符號頁完整印出**：說明卡上只給結論，站著看圖的人
+無從點開查證（`SOURCE_TIER_BADGES.note`）。讀者數得出來的筆數必須等於我們實際查到的筆數，
+所以缺 `url` 的印純文字，**不因為缺連結而少印一筆**。
+_Avoid_: 拿「來源」單獨指涉它（會與 source tier 混）、把它讀成查證狀態（那是 `verification_status`）、
+把 `clause` 當成內容轉錄（它是定位資訊，說明文字一律自行白話重寫，PRD §7.1）
 
 **Verification Status（查證狀態）**：
 查證流程走到哪一步：`verified` / `partial` / `pending_purchase` / `blocked`。它描述**我們做到哪**，與 source tier 是兩條不同的軸，不可互相取代或合併顯示。

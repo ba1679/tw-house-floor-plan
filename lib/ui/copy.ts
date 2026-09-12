@@ -61,6 +61,8 @@ export const SECTION_LABELS = {
   plainMeaning: "白話意思",
   caution: "注意事項",
   confusedWith: "容易搞混",
+  /** **符號頁獨有。** 說明卡只給結論（見上面 `note`），完整出處是坐下來讀的人才要的。 */
+  sources: "出處",
 } as const;
 
 export const SHEET_CONTROLS = {
@@ -104,3 +106,17 @@ export const symbolPageDescription = (plainMeaning: string) =>
  * 那畫的是這個符號**在平面圖上**的樣子，而不是一張照片或圖示。
  */
 export const symbolArtLabel = (name: string) => `${name}在平面圖上的畫法`;
+
+/**
+ * 轉載那一行：經由他人文件讀到某份標準，而未核對標準原文（CONTEXT.md「轉載」）。
+ *
+ * 印出來的成本是承認自己沒翻過原文，不印的代價是讀者以為我們翻過——
+ * 一個網站的主張若是「你可以自己判斷要不要信」，就不能在這一行上省字。
+ */
+export const viaLabel = (via: string) => `轉載自：${via}`;
+
+/**
+ * 出處連結的字。**帶著文件名**：雨遮那一頁有兩筆來源，兩個連結都叫「看原文」的話，
+ * 讀螢幕的人聽到的是兩個一模一樣的連結，分不出哪個通往哪裡（PRD §9）。
+ */
+export const sourceLinkLabel = (doc: string) => `看《${doc}》原文`;

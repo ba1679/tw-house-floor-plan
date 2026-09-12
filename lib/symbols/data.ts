@@ -59,9 +59,16 @@ export function loadSymbolsForViewer(): Record<string, SymbolRecord> {
  * 疊在說明卡那一份上面，是因為兩者要的**內容**本來就是同一批字，差的只有隨頁面長出來的
  * 附加欄位。哪天說明卡因為 props 太重而拿掉某個欄位，而符號頁仍然要它，那一天這裡就得
  * 自己把它列出來——不要為了少打幾個字把頁面的需求綁在說明卡的運費決定上。
+ *
+ * `source_refs` **整批帶過去，不像 `confused_with` 那樣逐欄挑**：逐欄挑是為了控制序列化進
+ * HTML 的重量，而這一份不過網路。抄一份欄位清單反而是負債——`SourceRef` 四欄選填，
+ * 將來多一欄漏抄，TypeScript 不會出聲，那一欄就從符號頁上靜靜消失。
  */
 export function loadSymbolsForPages(): Record<string, SymbolPageRecord> {
   return Object.fromEntries(
-    readSymbolFile().map((s) => [s.id, { ...viewerFields(s), svg_ref: s.svg_ref }]),
+    readSymbolFile().map((s) => [
+      s.id,
+      { ...viewerFields(s), svg_ref: s.svg_ref, source_refs: s.source_refs },
+    ]),
   );
 }

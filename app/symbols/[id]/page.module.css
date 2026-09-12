@@ -114,3 +114,65 @@
   border-left: 2px solid var(--ink);
   padding-left: 14px;
 }
+
+/* 出處：一筆一格，格與格之間一條細線——讀者要能一眼數出這一頁有幾筆來源。
+   `list-style: none` 但保留 `<ol>` 的語意：編號在版面上是噪音，順序在語意上有意思。 */
+.sourceList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sourceItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid var(--rule2);
+  padding-top: 12px;
+}
+
+.sourceDoc {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+/* 條次／頁碼與年份：定位資訊，不是內容——比文件名輕一階。 */
+.sourceLocator {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--ink3);
+}
+
+/* 轉載那一行是**對上面那一筆的但書**，所以縮排、掛一條線，讀者看得出它從屬於誰。
+   線用 `--rule` 不用 `--ink`：注意事項那一區才是最重的一條，這裡是揭露不是警告。 */
+.sourceVia {
+  margin: 2px 0 0;
+  border-left: 2px solid var(--rule);
+  padding-left: 10px;
+  font-size: 12.5px;
+  line-height: 1.8;
+  color: var(--ink2);
+}
+
+/* 只有法規類會有連結。整行吃滿 44px（PRD §9），而且長網址不得把版面撐破——
+   375px 的手機上一條沒有斷點的 URL 會讓整頁橫向捲動。 */
+.sourceLink {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid transparent;
+}
+
+.sourceLink:hover,
+.sourceLink:focus-visible {
+  border-bottom-color: currentColor;
+}

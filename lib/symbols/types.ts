@@ -17,6 +17,34 @@ export type ConfusedWith = {
   difference: string;
 };
 
+/**
+ * 一筆出處：這個說法從哪份文件的哪一頁來。
+ *
+ * 除了 `doc` 以外全是選填，而**缺席一律是安全的**——現況 15 筆沒有任何一筆有 `url`，
+ * 渲染端因此不得把任何一欄當成一定有：少一欄就少印一行，不是少印一筆來源。
+ */
+export type SourceRef = {
+  /** 文件名。唯一必填的一欄——說不出是哪份文件的出處不算出處。 */
+  doc: string;
+  /**
+   * 條次、頁碼、表號，加一句足以辨認的短引。
+   * **是定位資訊，不是內容轉錄**：說明文字一律自行白話重寫（PRD §7.1）。
+   */
+  clause?: string;
+  /** 版本年。同一部法規改過好幾次，讀者要知道我們看的是哪一版。 */
+  year?: number;
+  /**
+   * 全文網址。**只有法規類會有**（全國法規資料庫全文免費公開）——
+   * 公會規範是別人的著作，永遠不連、也不 host（spec 的「符號頁」）。
+   */
+  url?: string;
+  /**
+   * 轉載出處：經由這份文件讀到上面那份標準，而未核對標準原文（CONTEXT.md「轉載」）。
+   * 有它就必須印出來，否則讀者會以為我們真的翻過標準原文（PRD §7.2.2）。
+   */
+  via?: string;
+};
+
 export type SymbolRecord = {
   id: string;
   name: string;
@@ -43,4 +71,9 @@ export type SymbolRecord = {
 export type SymbolPageRecord = SymbolRecord & {
   /** `data/symbols.sprite.svg` 裡的 `<symbol id>`。符號頁的圖形取自那裡，不另外畫一套（PRD §12）。 */
   svg_ref: string;
+  /**
+   * 完整出處。**只有符號頁印它**：說明卡上只給結論（`SOURCE_TIER_BADGES.note`），
+   * 站在接待中心的人無從點開查證；坐下來讀落地頁的人才是來判斷「要不要信」的。
+   */
+  source_refs: SourceRef[];
 };
