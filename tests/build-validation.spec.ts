@@ -24,6 +24,7 @@ function runValidator(cwd: string): { code: number; output: string } {
 }
 
 const FLOORPLAN = "data/layouts/3b2l_standard.floorplan.json";
+const SYMBOLS = "data/symbols.sample.json";
 
 test.describe("build 時的資料驗證", () => {
   test("資料完好時通過", () => {
@@ -114,4 +115,59 @@ test.describe("floorplan 畫得出來", () => {
     expect(code).not.toBe(0);
     expect(output).toContain("wall-999");
   });
+});
+
+// M1（內容查證）與 M3 並行，而這條閘門是兩線唯一會互相弄壞的接觸面：
+// REQUIRED_WHEN_VERIFIED 曾經含 caution，而 14 筆裡只有雨遮有 caution——M1 一把任何
+// 其他符號翻成 verified，prebuild 就失敗、build 斷掉，連帶弄掛所有頁面測試。
+test.describe("verified 的閘門", () => {
+  // 不寫死符號 id：M1 哪天替牆補了 caution，寫死的那條測試會默默變成在測「有 caution 的
+  // 符號能不能 verified」——還是綠的，但守的已經不是原來那件事。找不到就帶訊息失敗。
+  // 只改記憶體裡的那份，寫檔留給呼叫的人，跟這個檔案其餘九條測試同一個手法。
+  function verifiedWithoutCaution(dir: string) {
+    const path = join(dir, SYMBOLS);
+    const data = JSON.parse(readFileSync(path, "utf8"));
+    const symbol = data.symbols.find((s: { caution: string | null }) => s.caution === null);
+    expect(symbol, "資料裡找不到 caution 為 null 的符號，這個測試的前提已經不成立").toBeTruthy();
+    symbol.verification_status = "verified";
+    symbol.verified_at = "2026-01-01";
+    symbol.verified_by = "build-validation-fixture";
+    return { path, data, symbol };
+  }
+
+  // caution（買房時要注意什麼）要的是法規來源，與畫法來源是兩條軸。綁在一起等於宣告
+  // 「沒有法規注意事項的符號就不算查證完成」，而那會把查證率上限壓到 1/14 = 7%。
+  test("caution 為 null 的符號填齊查證紀錄後標成 verified，建置照樣過", () => {
+    const dir = sandbox();
+    const { path, data } = verifiedWithoutCaution(dir);
+    writeFileSync(path, JSON.stringify(data, null, 2));
+
+    const { code, output } = runValidator(dir);
+    expect(code, output).toBe(0);
+  });
+
+  // 拆掉 caution 不是把整條檢查放掉：verified_at 與 verified_by 記錄這筆查證是誰在什麼時候
+  // 做的，那正是查證這件事本身。訊息斷言釘的是各自那一句理由而不是共用的半句——只釘共用的
+  // 那半句，等於允許訊息退回「這些欄位就是要填」，而那是 caution 當初混進來的原因。
+  const WHY_EACH_FIELD_IS_REQUIRED = {
+    verified_at: "缺了日期就看不出它有多舊",
+    verified_by: "缺了人就沒有人能被問起它",
+  };
+
+  for (const [missing, why] of Object.entries(WHY_EACH_FIELD_IS_REQUIRED)) {
+    test(`verified 卻缺 ${missing} 時，建置仍然失敗，而且說得出為什麼要有`, () => {
+      const dir = sandbox();
+      const { path, data, symbol } = verifiedWithoutCaution(dir);
+      // 只蓋掉一個欄位，另一個留著填好的值——才證明是「缺這一個」擋下來的，
+      // 不是兩個一起缺才擋。
+      symbol[missing] = null;
+      writeFileSync(path, JSON.stringify(data, null, 2));
+
+      const { code, output } = runValidator(dir);
+      expect(code, output).not.toBe(0);
+      expect(output).toContain(symbol.id);
+      expect(output).toContain(missing);
+      expect(output).toContain(why);
+    });
+  }
 });

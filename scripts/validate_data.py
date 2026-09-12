@@ -11,7 +11,26 @@ import json, io, sys, glob, os
 import xml.etree.ElementTree as ET
 from collections import Counter
 
-REQUIRED_WHEN_VERIFIED = ["plain_meaning", "caution", "source_refs", "verified_at", "verified_by"]
+# verification_status 描述的是「**來源查證**做到哪」，所以這裡只擋查證這件事本身的紀錄。
+# caution（買房時要注意什麼）刻意不在清單裡：它要的是建築技術規則、防火門 A/B 分級、
+# 採光通風規定這類**法規**來源，與畫法來源是兩回事，不能從製圖規範推導
+# （symbols.sample.json 的 _meta.content_state 已經這樣寫，SymbolRecord 也宣告它可為 null）。
+# 把它綁進來等於宣告「沒有法規注意事項的符號就不算查證完成」，那是把兩條軸混成一條
+# （CONTEXT.md 的「Source Tier」與「Verification Status」兩條對此警告過），而且 14 筆裡
+# 只有雨遮有 caution——查證率上限因此被壓到 1/14 = 7%，上線門檻 80% 在算術上不可能達成。
+#
+# 理由與欄位寫在同一行，一個欄位一句自己的：共用一句會退化成「這些欄位就是要填」，
+# 而那正是 caution 當初混進來沒被擋下的原因——清單裡的每一項都說不出自己為什麼在清單裡。
+# 也因此不拆成「清單」與「理由表」兩份：兩份手工同步的東西，漏掉一邊就是 KeyError 炸在
+# 驗證器裡，而不是一條說得清楚的驗證錯誤。
+REQUIRED_WHEN_VERIFIED = {
+    "plain_meaning": "verified 的意思是這個符號的說法已經查到來源，"
+                     "沒有白話意思就沒有任何被查證的內容",
+    "source_refs": "查證的產物就是出處，少了它 verified 說不出自己憑什麼——"
+                   "而「憑什麼」正是本站的核心主張",
+    "verified_at": "verified 要記得這筆查證是什麼時候做的，缺了日期就看不出它有多舊",
+    "verified_by": "verified 要記得這筆查證是誰做的，缺了人就沒有人能被問起它",
+}
 VALID_TIERS = {"cns", "regulation", "convention", "varies"}
 VALID_STATUS = {"verified", "partial", "pending_purchase", "blocked"}
 VALID_CATEGORIES = {"structure", "door_window", "plumbing_electric", "fire_safety", "furniture"}
@@ -60,12 +79,15 @@ for s in symbols:
 for s in symbols:
     check("risk_flags" not in s, "%s: 仍含 risk_flags，v0.3 已刪除此欄位（PRD §7.2.1）" % s["id"])
 
-# --- verified 的符號必須內容完整 ---
+# --- verified 的符號必須有完整的查證紀錄 ---
 for s in symbols:
     if s["verification_status"] == "verified":
-        for f in REQUIRED_WHEN_VERIFIED:
-            check(s.get(f), "%s: 標記 verified 但 %s 為空" % (s["id"], f))
-        check(s.get("source_tier"), "%s: 標記 verified 但無 source_tier" % s["id"])
+        for f, why in REQUIRED_WHEN_VERIFIED.items():
+            check(s.get(f), "%s: 標記 verified 但 %s 為空——%s" % (s["id"], f, why))
+        check(s.get("source_tier"),
+              "%s: 標記 verified 但無 source_tier——查證完成卻不說答案出自哪一級文件，"
+              "讀者就無法判斷這個答案硬到什麼程度；這兩個欄位是兩條不同的軸，"
+              "不可互相取代（CONTEXT.md）" % s["id"])
 
 # --- svg_ref exists in sprite（PRD §10.1）---
 # sprite 是「符號畫成什麼樣」的唯一來源。svg_ref 斷掉的後果不是報錯而是靜默留白：
@@ -241,7 +263,7 @@ if not errors:
     print("  ✓ confused_with 雙向一致")
     print("  ✓ enum 值合法")
     print("  ✓ risk_flags 已移除")
-    print("  ✓ verified 符號內容完整")
+    print("  ✓ verified 符號的查證紀錄完整（caution 不綁在查證完備性上，它要的是法規來源）")
     print("  ✓ svg_ref 全部存在於 sprite")
     print("  ✓ floorplan 的欄位齊全、傢俱朝向認得（檢視器畫得出來）")
 print("-" * 46)
