@@ -17,7 +17,21 @@ _Avoid_: 可信度、credibility、等級
 
 **Verification Status（查證狀態）**：
 查證流程走到哪一步：`verified` / `partial` / `pending_purchase` / `blocked`。它描述**我們做到哪**，與 source tier 是兩條不同的軸，不可互相取代或合併顯示。
-_Avoid_: 狀態、進度
+「哪一步」指的是**本專案的**查證流程，而 `docs/adr/0001` 已經把「核對 CNS 標準原文」從流程裡刪掉了。
+所以**轉載也可以是 `verified`**：`via` 填齊就是這個符號的流程終點，沒有下一步了。
+把轉載永遠留在 `partial` 是在描述一個永遠不會發生的下一步，那會讓 `partial` 與 `blocked` 無法區分。
+誠實性由 `via` 承擔，不由 `partial` 承擔——符號頁會把那一行印出來（PRD §7.2.2）。
+`verified` 要求的是**查證紀錄**齊全：`plain_meaning`、`source_refs`、`verified_at`、`verified_by`
+（`scripts/validate_data.py` 的 `REQUIRED_WHEN_VERIFIED`，缺一項就中斷建置）。
+**`caution` 不在其中**——買房時要注意什麼需要的是法規來源（建築技術規則、防火門 A/B 分級、採光通風規定），
+與畫法來源是兩回事，綁進來就是把這兩條軸混成一條，而且 14 筆裡只有雨遮有 `caution`，查證率上限會被壓到 7%。
+_Avoid_: 狀態、進度、拿 `partial` 當「可能畫錯」的意思（畫法對不對是 source tier 那條軸的事）、把 `caution` 算成查證完備性的一部分
+
+**`related_layouts`**：
+這個符號的頁面該把讀者帶去哪幾張格局圖——一個**編輯決定**，不是統計結果。
+所以樑填 `['3b2l_standard']` 是對的：它在那張圖上沒有熱區，而我們**就是要**帶他去看那張看不到樑的圖（PRD §6.2.1 的特例）。
+「這張圖上有沒有這個符號」不靠這個欄位，直接數 `floorplan.hotspots`——那是唯一不會與資料分岔的算法（說明卡的「共 N 處」已經這樣算）。
+_Avoid_: 把它讀成「出現在哪些格局範例中」（PRD §7.2 的字面說法，會讓樑變成空陣列、按鈕沒有目標）
 
 ### 圖面層
 
