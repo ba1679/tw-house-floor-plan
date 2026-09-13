@@ -219,11 +219,12 @@ test.describe("符號的必填內容欄位", () => {
 //
 //   Python（下面第一條）    ── 資料裡的分類合不合法
 //   TypeScript（下面第二條）── 合法的分類有沒有中文名
+//   兩份 id 清單（第三條）── 上面兩半講的是不是同一組分類
 //
 // 為什麼不寫成一條「每個分類都要有中文名」：中文名在 `lib/ui/copy.ts` 的 `CATEGORY_LABELS`，
 // 那是 TypeScript，而掛在 prebuild 的驗證器是 Python——它讀不到那個常數。寫成一條就得在
 // Python 裡再抄一份中文名，變成第二份會跟 UI 分岔的清單，正是這張票要防的事。
-// 兩半合起來的保證與原本那一條相同，但沒有重複的資料。
+// 中文名因此只有一份。兩半之間仍然手工同步的，只剩合法分類的 id 清單本身——第三條比對它。
 test.describe("分類：兩半各自把關", () => {
   test("category 是 v0.4 砍掉的設備類時，建置失敗，而且說得出那不是打錯字", () => {
     const dir = sandbox();
@@ -304,5 +305,28 @@ test.describe("分類：兩半各自把關", () => {
     // 訊息要點名那一類：只說「型別不合」的話，下一個人得自己去比對哪一個 key 不見了。
     expect(output).toContain(category);
     expect(output).toContain("copy.ts");
+  });
+
+  // 兩半之間仍然手工同步的那一份：合法分類的 id 清單。Python 那一份（VALID_CATEGORIES）決定資料
+  // 可以用哪些分類，TypeScript 那一份（SymbolCategory）決定哪些分類必須有中文名。只放寬 Python
+  // 那一邊、再有符號用上那一類，tsc 照樣是綠的（資料是 `as` 進去的），建置會死在分類頁取中文名
+  // 的那一行——一個不說是誰跟誰分岔的 TypeError。這條把它換成一句說得清楚的話。
+  test("驗證器的合法分類與 TypeScript 的 SymbolCategory 是同一份清單", () => {
+    const python = /^VALID_CATEGORIES = \{([^}]*)\}/m.exec(
+      readFileSync("scripts/validate_data.py", "utf8"),
+    );
+    const typescript = /^export type SymbolCategory = ([^;]+);/m.exec(
+      readFileSync("lib/symbols/types.ts", "utf8"),
+    );
+    // 找不到那一行時帶訊息失敗：兩邊都比對成空清單的話，這條會是一個永遠綠的斷言。
+    expect(python, "scripts/validate_data.py 裡找不到 VALID_CATEGORIES 那一行").toBeTruthy();
+    expect(typescript, "lib/symbols/types.ts 裡找不到 SymbolCategory 那一行").toBeTruthy();
+
+    const ids = (source: string) => [...source.matchAll(/"([^"]+)"/g)].map((m) => m[1]).sort();
+    expect(ids(python![1]).length).toBeGreaterThan(0);
+    expect(
+      ids(typescript![1]),
+      "lib/symbols/types.ts 的 SymbolCategory 與 scripts/validate_data.py 的 VALID_CATEGORIES 分岔了——改一邊要改另一邊",
+    ).toEqual(ids(python![1]));
   });
 });

@@ -5,8 +5,8 @@ import { DISCLAIMER } from "@/lib/ui/copy";
 
 // PRD §6.4 要的是**每頁固定顯示**，所以這一組刻意不列舉路由。
 //
-// 列舉會讓這條規則在下一張票落地的那一刻悄悄失效：`/` 與 `/categories/[id]` 現在還不存在
-// （票 07、票 05），而它們正是最需要被這條守住的頁面——一份只認得今天有哪些頁的清單，
+// 列舉會讓這條規則在下一張票落地的那一刻悄悄失效：`/categories/[id]`（票 05）與這張票同一天
+// 落地，`/`（票 07）還不存在，而它們正是最需要被這條守住的頁面——一份只認得今天有哪些頁的清單，
 // 明天多一頁時不會紅，只會少測一頁。改成掃過 `out/` 裡的每一個 `.html`，
 // 新頁面一產生就自動被要求帶著這句話，不必回頭改測試。
 //
@@ -55,6 +55,13 @@ const pageScrolls = (page: Page) =>
 
 test.describe("免責聲明的全站頁尾", () => {
   test("build 出來的每一頁都印著免責聲明，一字不改", () => {
+    // 「一字不改」問的是 PRD §6.4 那一句本身，所以這裡**再打一次**原文、不從常數拿：從常數
+    // import 的斷言只證明頁面與常數一致，證不出常數本身被改壞（同 category-page.spec.ts 的
+    // 中文分類名、symbol-page.spec.ts 的 TIER_COPY）。頁面上的字則照舊比對常數。
+    expect(DISCLAIMER, "lib/ui/copy.ts 的 DISCLAIMER 與 PRD §6.4 的原文不一致").toBe(
+      "本網站符號說明為一般通用慣例，不同建商 / 設計師畫法可能有差異，實際請以個案圖說或現場人員說明為準。",
+    );
+
     const pages = builtPages();
     // 掃到零個檔案時上面那個迴圈會安靜地全過——先確認真的有東西可掃。
     expect(pages.length).toBeGreaterThan(0);
@@ -163,7 +170,10 @@ test.describe("矮螢幕：頁尾讓框在兩下點擊之間變矮", () => {
     const start = (await door.boundingBox())!;
     // 與 two-stage-tap.spec.ts 同一個點法：大門右緣外 13px，在第一段的容錯之內。
     await page.mouse.click(start.x + start.width + 13, start.y + start.height / 2);
-    await expect(door).toHaveAttribute("data-state", "candidate");
+    await expect(
+      door,
+      "第一段的候選沒有留下來——在這個高度，候選一出現「重選」列就把框擠矮；多半是那一次高度的 RESIZE 把第一段丟了（只有寬度變才該退回第一段）",
+    ).toHaveAttribute("data-state", "candidate");
 
     // 前提：這個高度真的會讓框在第二段之前變矮。版面哪天改了、568px 擠不到它，這條就不再測
     // 它說它在測的事——帶著訊息失敗，而不是安靜地退化成一條普通的兩段式測試。

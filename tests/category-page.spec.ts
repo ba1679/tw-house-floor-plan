@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync, readdirSync } from "node:fs";
+import { categoryCountLabel } from "@/lib/ui/copy";
 
 // 分類頁是給「想一類一類看完」的人走的那條路（spec user story 24）：打開三張頁，
 // 各自看到該分類底下有哪些符號，點任一個進到它的符號頁。
@@ -53,6 +54,15 @@ const descriptionOf = (html: string) =>
 const listedSymbols = (id: string) =>
   [...built(id).matchAll(/href="\/symbols\/([^"]+)"/g)].map((m) => m[1]);
 
+const normalize = (text: string) => text.replace(/\s+/g, " ").trim();
+
+/** 一列在畫面上讀得到的字：連到那個符號的連結裡面、圖形以外（圖形裡的 `<title>` 不算）。 */
+function rowText(html: string, id: string) {
+  const row = new RegExp(`<a[^>]*href="/symbols/${id}"[^>]*>([\\s\\S]*?)</a>`).exec(html);
+  expect(row, `找不到連到 /symbols/${id} 的那一列`).toBeTruthy();
+  return normalize(textOf(row![1].replace(/<svg[\s\S]*?<\/svg>/g, " ")));
+}
+
 test.describe("/categories/[id] 分類頁", () => {
   // v0.4 把設備類砍出範圍，但驗證器的合法分類一直留著它們。留著的後果不是多兩行常數，
   // 而是「這一類階段一尚未收錄」那種空頁面——對讀者沒有價值，Google 當 thin content。
@@ -88,6 +98,10 @@ test.describe("/categories/[id] 分類頁", () => {
   test("每一頁列出的就是該分類底下那幾個符號，一個不多一個不少", () => {
     for (const category of categoriesInData) {
       expect(listedSymbols(category), category).toEqual(symbolsIn(category).map((s) => s.id));
+      // 頁面上方那一行「共 N 個符號」要跟列出來的一樣多：讀者捲完自己數得出來的，必須是同一個數字。
+      expect(textOf(built(category)), `${category} 的「共 N 個符號」`).toContain(
+        categoryCountLabel(symbolsIn(category).length),
+      );
     }
 
     // 14 個符號各自被列到一次，而且只有一次——某一類漏了一個的話，上面那一圈會紅，
@@ -97,12 +111,17 @@ test.describe("/categories/[id] 分類頁", () => {
   });
 
   // 分類頁與符號頁的字都來自同一份資料：內容維護者改一次，兩邊一起改（spec user story 34）。
-  test("每一列的名字與白話意思都與資料一字不差", () => {
+  //
+  // **比的是每一列自己讀得到的字，不是整頁的字。** 每一列的圖形是 sprite 原封不動嵌進來的，
+  // 而 sprite 每一格都帶著 `<title>馬桶</title>`——對整頁問「有沒有馬桶這兩個字」，名字那一格
+  // 整個拿掉也照樣是綠的。所以把連結裡的圖形剝掉，剩下的字必須剛好是「名字＋白話意思」。
+  test("每一列讀得到的字，剛好是資料裡的名字與白話意思", () => {
     for (const category of categoriesInData) {
-      const text = textOf(built(category));
+      const html = built(category);
       for (const symbol of symbolsIn(category)) {
-        expect(text, `${category} 少了 ${symbol.id} 的名字`).toContain(symbol.name);
-        expect(text, `${category} 少了 ${symbol.id} 的白話意思`).toContain(symbol.plain_meaning);
+        expect(rowText(html, symbol.id), `${category} 的 ${symbol.id} 那一列`).toBe(
+          normalize(`${symbol.name} ${symbol.plain_meaning}`),
+        );
       }
     }
   });

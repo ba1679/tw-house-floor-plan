@@ -8,8 +8,10 @@
    `flex: 1 1 0` 的 0 是關鍵，不是 `auto`：body 的高度是 `min-height` 不是 `height`，
    所以它會被內容撐高。flex-basis 給 auto 的話，這一格的基準尺寸就是它的內容高度——
    說明卡一升起（46dvh，展開 78dvh）內容就超過一個螢幕，body 跟著長高，
-   頁面又變成捲得動的那一種。基準給 0，這一格拿到的永遠是「螢幕高度減掉頁尾」，
-   多出來的內容由下面的 `overflow: hidden` 裁掉——那正是說明卡把圖擠小的機制。 */
+   頁面又變成捲得動的那一種。基準給 0，這一格拿到的永遠是「螢幕高度減掉頁尾」；
+   說明卡升起時塞不下的高度，由 `.viewport` 的 `flex: 0 1 auto; min-height: 0` 吸收
+   （components/FloorPlanViewer.module.css）——那才是說明卡把圖擠小的機制；
+   下面的 `overflow: hidden` 只是最後一道裁切。 */
 .page {
   flex: 1 1 0;
   min-height: 0;

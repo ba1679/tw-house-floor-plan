@@ -64,7 +64,12 @@ VALID_STATUS = {"verified", "partial", "pending_purchase", "blocked"}
 # 這支 Python 讀不到它；在這裡檢查就得再抄一份中文名，變成第二份會跟 UI 分岔的清單。
 # 所以這條保證拆成兩半，各自用看得到事實的語言把關：Python 管「資料裡的分類合不合法」，
 # TypeScript 管「合法的分類有沒有中文名」（CATEGORY_LABELS 的型別是以 SymbolCategory
-# 為 key 的 Record，少一個 key 直接編譯失敗）。兩半合起來的保證相同，但沒有重複的資料。
+# 為 key 的 Record，少一個 key 直接編譯失敗）。中文名因此只有一份。
+#
+# **但兩半之間仍有一份手工同步的東西：合法分類的 id 清單本身**——這裡的 VALID_CATEGORIES 與
+# lib/symbols/types.ts 的 SymbolCategory。只放寬這一邊、再有符號用上那一類的話，tsc 照樣是綠的
+# （資料是 JSON.parse 之後 `as` 進去的），建置會死在分類頁取中文名的那一行，而那個 TypeError
+# 不會說是兩份清單分岔了。tests/build-validation.spec.ts 比對這兩份，分岔時說得出是哪兩份。
 VALID_CATEGORIES = {"structure", "door_window", "furniture"}
 SPRITE_PATH = "data/symbols.sprite.svg"
 SPRITE_VIEWBOX = "0 0 140 140"

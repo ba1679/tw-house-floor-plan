@@ -8,7 +8,12 @@
 /** 答案出自哪一級文件。四種各有自己的徽章（PRD §6.5）。 */
 export type SourceTier = "cns" | "regulation" | "convention" | "varies";
 
-/** 階段一的三類。中文名不在資料裡，在 lib/ui/copy.ts。 */
+/**
+ * 階段一的三類。中文名不在資料裡，在 lib/ui/copy.ts。
+ *
+ * **與 `scripts/validate_data.py` 的 `VALID_CATEGORIES` 是同一份清單的兩個抄本**——驗證器是 Python，
+ * 讀不到這裡。改一邊要改另一邊；`tests/build-validation.spec.ts` 比對兩者，分岔時會說。
+ */
 export type SymbolCategory = "structure" | "door_window" | "furniture";
 
 /** 「這個容易跟哪個搞混、差別在哪」。雙向登錄，build 時檢查（PRD §7.2.2）。 */
