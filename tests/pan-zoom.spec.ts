@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { blankSpot, dragLeft, pinch } from "./viewer-page";
+import { blankSpot, dragLeft, pinch, selectByTwoTaps } from "./viewer-page";
 
 type BoundingBox = { x: number; y: number; width: number; height: number };
 
@@ -298,19 +298,6 @@ function visiblePart(target: BoundingBox, frame: BoundingBox): BoundingBox | nul
   return right > x && bottom > y ? { x, y, width: right - x, height: bottom - y } : null;
 }
 
-/** 兩段式選到指定熱區：點大略位置放大，再點一次確認。 */
-async function select(page: Page, hotspotId: string) {
-  const target = page.locator(`#${hotspotId}`);
-  const before = (await target.boundingBox())!;
-  await page.mouse.click(before.x + before.width / 2, before.y + before.height / 2);
-  const zoomed = (await target.boundingBox())!;
-  await page.mouse.click(zoomed.x + zoomed.width / 2, zoomed.y + zoomed.height / 2);
-  await expect(target, `${hotspotId} 沒有被選中，後面的斷言都不算數`).toHaveAttribute(
-    "data-state",
-    "selected",
-  );
-}
-
 // 票 08：說明卡展開之後，圖被壓成一條很矮的可視帶，fit 隨之變得很小。第一段若照那個框
 // 把視野定好位，`fit × 3` 仍可能小於 1，clampView 就把中心夾回圖面正中央——使用者點的
 // 那個位置在那一刻被丟掉了，而接在後面的 RESIZE 只調得回倍率，調不回已經沒有的中心。
@@ -324,7 +311,7 @@ for (const [label, query] of [
     const plan = planOf(page);
 
     // 雨遮是唯一有注意事項的符號，內容塞不下——「上拉看完整內容」只在它身上出現。
-    await select(page, "hs-canopy-master");
+    await selectByTwoTaps(page, "hs-canopy-master");
     const withSheet = (await plan.boundingBox())!;
     await page.getByRole("button", { name: /上拉看完整內容/ }).click();
     // 卡片長高，圖被擠得更扁：等這一輪 RESIZE 走完，才是使用者看到的那個畫面。

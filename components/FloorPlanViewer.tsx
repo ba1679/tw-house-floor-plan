@@ -18,7 +18,7 @@ import { InfoSheet } from "./InfoSheet";
 import { useFirstVisitHint } from "./useFirstVisitHint";
 import { useViewerGestures } from "./useViewerGestures";
 import { planViewBox } from "@/lib/floorplan/drawing";
-import { hotspotsOfSymbol } from "@/lib/floorplan/hotspots";
+import { isSymbolAbsent } from "@/lib/floorplan/hotspots";
 import { roomOfHotspot, type RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
 import type { SymbolRecord } from "@/lib/symbols/types";
@@ -118,7 +118,7 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
    * 而橫幅要在兩段式點擊照常進行時留著。也不進 `ViewerState`：狀態機裡沒有任何判斷讀它——命中、stage、
    * 視野都與它無關。它是畫面上的一條說明，與「找不到網址指定的符號」那一句是同一種東西。
    *
-   * 0 處用 `hotspotsOfSymbol` 數，與符號頁決定按鈕要不要說「看不到」是同一個算法：按鈕說看不到，進來就有這條橫幅。
+   * 0 處由 `isSymbolAbsent` 判斷，與符號頁決定按鈕要不要說「看不到」是同一個判斷：按鈕說看不到，進來就有這條橫幅。
    */
   const [absentSymbol, setAbsentSymbol] = useState<string | null>(null);
   const highlightSymbol = useCallback(
@@ -128,7 +128,7 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
         return;
       }
       dispatch({ type: "HIGHLIGHT_SYMBOL", symbolId });
-      if (hotspotsOfSymbol(floorplan.hotspots, symbolId).length === 0) setAbsentSymbol(symbolId);
+      if (isSymbolAbsent(floorplan.hotspots, symbolId)) setAbsentSymbol(symbolId);
     },
     [symbols, floorplan.hotspots],
   );
@@ -242,6 +242,8 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
     ? (symbols[state.selected.symbol_id] ?? null)
     : null;
   const occurrence = selectedOccurrence(state);
+  /** 說明卡此刻升起來了沒。掛上 `<InfoSheet>` 與樑的橫幅讓位，問的是同一件事，所以只寫一次。 */
+  const sheetOpen = selectedSymbol !== null && occurrence !== null;
   const nameOf = (symbolId: string | null) =>
     (symbolId && symbols[symbolId]?.name) || symbolId || "";
 
@@ -263,10 +265,10 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
    *
    * 橫幅是版面裡的一列，它拿走的是高度。全圖時拿走的是留白（375 × 812 下框一 px 都沒少），而卡片一升起，
    * 可視帶本來就只剩一條，再拿走一列就是從圖上挖：量過 334.7px → 231.3px，展開時 187.7px → 84.3px。
-   * 與頁尾讓位是同一個理由（`SiteFooter.module.css`）。條件與下面掛上 `<InfoSheet>` 的是同一個。
+   * 與頁尾讓位是同一個理由（`SiteFooter.module.css`）。
    */
   const banner =
-    absentSymbol && !(selectedSymbol && occurrence)
+    absentSymbol && !sheetOpen
       ? absentSymbolBanner(floorplan.name, nameOf(absentSymbol))
       : null;
 
@@ -395,7 +397,7 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
                 `${landingLine}${hint.visible ? TAP_HINT : ""}`}
       </p>
 
-      {selectedSymbol && occurrence && (
+      {sheetOpen && (
         <InfoSheet
           symbol={selectedSymbol}
           symbols={symbols}

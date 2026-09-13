@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { SourceTierPanel } from "@/components/SourceTierPanel";
 import { SymbolArt } from "@/components/SymbolArt";
 import { loadFloorPlan } from "@/lib/floorplan/data";
-import { hotspotsOfSymbol } from "@/lib/floorplan/hotspots";
+import { isSymbolAbsent } from "@/lib/floorplan/hotspots";
 import { loadSymbolsForPages } from "@/lib/symbols/data";
 import { printedSourceRefs } from "@/lib/symbols/source-refs";
 import { highlightHref } from "@/lib/viewer/highlight";
@@ -146,11 +146,11 @@ export default async function SymbolPage({ params }: { params: Promise<{ id: str
 
             **這個符號在那張圖上 0 處時，只換字**（樑，M3 票 09）：誠實說看不到，網址與畫法都不變——
             「圖上找不到」本身就是內容，進去之後由檢視器的橫幅說明為什麼。在不在圖上直接數那張圖的 hotspots，
-            與檢視器數「共 N 處」是同一個算法（`hotspotsOfSymbol`）。 */}
+            與檢視器決定要不要出橫幅是同一個判斷（`isSymbolAbsent`）。 */}
         <div className={styles.layoutLinks}>
           {symbol.related_layouts.map((layoutId) => {
             const floorplan = loadFloorPlan(layoutId);
-            const absent = hotspotsOfSymbol(floorplan.hotspots, symbol.id).length === 0;
+            const absent = isSymbolAbsent(floorplan.hotspots, symbol.id);
             return (
               <Link key={layoutId} className={styles.layoutLink} href={highlightHref(layoutId, symbol.id)}>
                 {absent ? absentSymbolButton(floorplan.name, symbol.name) : SYMBOL_LAYOUT_BUTTON}

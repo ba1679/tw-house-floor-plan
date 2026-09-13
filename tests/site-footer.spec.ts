@@ -2,6 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { DISCLAIMER } from "@/lib/ui/copy";
+import { selectByTwoTaps } from "./viewer-page";
 
 // PRD §6.4 要的是**每頁固定顯示**，所以這一組刻意不列舉路由。
 //
@@ -33,19 +34,6 @@ const textOf = (html: string) => html.replace(/<script[\s\S]*?<\/script>/g, " ")
 
 /** 頁尾那一份。`<footer>` 是 contentinfo 地標，讀螢幕的人跳得到。 */
 const footerOf = (page: Page) => page.getByRole("contentinfo");
-
-/** 兩段式選到指定熱區：點大略位置放大，再點一次確認（與 info-sheet.spec.ts 同一套）。 */
-async function select(page: Page, hotspotId: string) {
-  const target = page.locator(`#${hotspotId}`);
-  const before = (await target.boundingBox())!;
-  await page.mouse.click(before.x + before.width / 2, before.y + before.height / 2);
-  const zoomed = (await target.boundingBox())!;
-  await page.mouse.click(zoomed.x + zoomed.width / 2, zoomed.y + zoomed.height / 2);
-  await expect(target, `${hotspotId} 沒有被選中，後面的斷言都不算數`).toHaveAttribute(
-    "data-state",
-    "selected",
-  );
-}
 
 /** 這一頁捲不捲得動。平面圖頁的答案永遠必須是「不能」（ADR-0003）。 */
 const pageScrolls = (page: Page) =>
@@ -121,7 +109,7 @@ test.describe("免責聲明的全站頁尾", () => {
     await expect(visibleCopies).toHaveCount(1);
 
     // 雨遮是唯一有注意事項的符號，卡片內容最長、也是唯一展得開的一張。
-    await select(page, "hs-canopy-master");
+    await selectByTwoTaps(page, "hs-canopy-master");
     await expect(footerOf(page), "說明卡升起來了，頁尾卻沒有讓位").toBeHidden();
     await expect(sheetCopy, "頁尾讓位了，卡片裡卻沒有接手的那一份").toBeVisible();
     await expect(visibleCopies).toHaveCount(1);

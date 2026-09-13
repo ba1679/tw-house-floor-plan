@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect } from "@playwright/test";
+import { selectByTwoTaps } from "./viewer-page";
 
 // 說明卡是使用者確認符號之後拿到的東西：這是什麼、要注意什麼，
 // **以及這個說法是從哪份文件來的**（PRD §6.5，本產品的核心差異化）。
@@ -10,25 +11,11 @@ import { test, expect, type Page } from "@playwright/test";
 const PLAN = "/layouts/3b2l_standard";
 const SHEET = "#info-sheet";
 
-/** 兩段式選到指定熱區：點大略位置放大，再點一次確認。 */
-async function select(page: Page, hotspotId: string) {
-  const target = page.locator(`#${hotspotId}`);
-  const before = (await target.boundingBox())!;
-  await page.mouse.click(before.x + before.width / 2, before.y + before.height / 2);
-  const zoomed = (await target.boundingBox())!;
-  await page.mouse.click(zoomed.x + zoomed.width / 2, zoomed.y + zoomed.height / 2);
-  await expect(target, `${hotspotId} 沒有被選中，後面的斷言都不算數`).toHaveAttribute(
-    "data-state",
-    "selected",
-  );
-  return target;
-}
-
 test("選到符號之後，說明卡帶著這個符號的白話意思升起來", async ({ page }) => {
   await page.goto(PLAN);
   await expect(page.locator(SHEET)).toBeHidden();
 
-  await select(page, "hs-door-entry");
+  await selectByTwoTaps(page, "hs-door-entry");
 
   const sheet = page.locator(SHEET);
   await expect(sheet).toBeVisible();
@@ -45,7 +32,7 @@ test("選到符號之後，說明卡帶著這個符號的白話意思升起來",
 
 test("控制元件量得出 44px：關閉鍵與「其他位置」列", async ({ page }) => {
   await page.goto(PLAN);
-  await select(page, "hs-win-living");
+  await selectByTwoTaps(page, "hs-win-living");
 
   // 37/37 熱區永遠達不到 44px（兩段式就是那個替代方案）；
   // M2 完成定義裡的 44px 指的是說明卡上這兩個控制元件（PRD §13，v0.6 修正）。
@@ -62,20 +49,20 @@ test("「共 N 處」由 floorplan 算出來，與資料一致", async ({ page }
   await page.goto(PLAN);
 
   // 窗 9 處、單扇門 5 處、柱 5 處。數字不得寫死——加減 hotspot 時不必回頭改文案。
-  await select(page, "hs-win-living");
+  await selectByTwoTaps(page, "hs-win-living");
   await expect(page.locator(SHEET)).toContainText("這張圖上共 9 處 · 目前第 1 處");
 
   await page.reload();
-  await select(page, "hs-door-master");
+  await selectByTwoTaps(page, "hs-door-master");
   await expect(page.locator(SHEET)).toContainText("這張圖上共 5 處");
 
   await page.reload();
-  await select(page, "hs-col-sw");
+  await selectByTwoTaps(page, "hs-col-sw");
   await expect(page.locator(SHEET)).toContainText("這張圖上共 5 處");
 
   // 只有一處的符號沒有「其他位置」可看，整列不出現（決議 2）。
   await page.reload();
-  await select(page, "hs-door-entry");
+  await selectByTwoTaps(page, "hs-door-entry");
   await expect(page.getByRole("button", { name: /其他位置/ })).toBeHidden();
 });
 
@@ -83,12 +70,12 @@ test("沒有注意事項的符號，卡片上不留空的區塊", async ({ page 
   await page.goto(PLAN);
 
   // 14 個符號裡只有雨遮有 caution——另外 13 張卡若留一個空標題，看起來像壞掉。
-  await select(page, "hs-win-living");
+  await selectByTwoTaps(page, "hs-win-living");
   await expect(page.locator(`${SHEET} [data-section="caution"]`)).toBeHidden();
   await expect(page.locator(SHEET)).not.toContainText("注意事項");
 
   await page.reload();
-  await select(page, "hs-canopy-master");
+  await selectByTwoTaps(page, "hs-canopy-master");
   await expect(page.locator(`${SHEET} [data-section="caution"]`)).toBeVisible();
   await expect(page.locator(SHEET)).toContainText("這是買房最容易被灌水的坪數項目");
 });
@@ -99,13 +86,13 @@ test("塞得下就不出現「上拉看完整內容」；塞不下才出現，�
 
   // 雙開門：一則容易搞混、沒有注意事項，內容整個塞得進上限。
   // 高度隨內容走——這正是「392 是上限不是初始」要防的那片空白（決議 1）。
-  await select(page, "hs-door-entry");
+  await selectByTwoTaps(page, "hs-door-entry");
   const fitted = (await page.locator(SHEET).boundingBox())!;
   await expect(hint).toBeHidden();
 
   // 雨遮：唯一有 caution 的符號，內容超出上限。
   await page.reload();
-  await select(page, "hs-canopy-master");
+  await selectByTwoTaps(page, "hs-canopy-master");
   const initial = (await page.locator(SHEET).boundingBox())!;
   expect(initial.height, "塞不下的卡片應該頂到上限，比塞得下的那張高").toBeGreaterThan(
     fitted.height,
@@ -128,7 +115,7 @@ test("按「其他位置」換看下一處：M 遞增、標示換到同一個符
   page,
 }) => {
   await page.goto(PLAN);
-  await select(page, "hs-win-living");
+  await selectByTwoTaps(page, "hs-win-living");
 
   const sheet = page.locator(SHEET);
   await expect(sheet).toContainText("目前第 1 處");
@@ -151,7 +138,7 @@ test("卡片開啟時，圖面下半部的選中標示仍落在卡片上緣以�
 
   // 主臥外側那片雨遮在圖的最下緣（y 794–884，整張圖 782 高）。
   // 卡片若是浮在圖上的一層，它就會被壓在卡片底下——所以卡片改成把圖收進上方那條可視帶（決議 3）。
-  const canopy = await select(page, "hs-canopy-master");
+  const canopy = await selectByTwoTaps(page, "hs-canopy-master");
 
   const sheet = (await page.locator(SHEET).boundingBox())!;
   const mark = (await canopy.boundingBox())!;
@@ -168,7 +155,7 @@ test("關閉鍵就是「重選」：卡片收起、選取清掉、圖回到全�
   const door = page.locator("#hs-door-entry");
   const fullView = (await plan.boundingBox())!;
 
-  await select(page, "hs-door-entry");
+  await selectByTwoTaps(page, "hs-door-entry");
 
   // 卡片升起來，圖被擠進上方那條可視帶——但仍然看得見，選中標示也還在。
   const withSheet = (await plan.boundingBox())!;

@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 // 在瀏覽器裡問檢視器的測試共用的幾個小工具：手勢怎麼做出來、熱區實際被畫成什麼樣。
 //
@@ -45,6 +45,25 @@ export async function dragLeft(page: Page, from: { x: number; y: number }, dx: n
   await page.mouse.down();
   await page.mouse.move(from.x - dx, from.y, { steps: 8 });
   await page.mouse.up();
+}
+
+/**
+ * 兩段式選到指定熱區：點它的正中央圈出候選並放大，再點一次放大後的正中央確認。
+ * 放大之後同一個熱區換了螢幕座標，所以第二下之前重新量，不自己推算（見檔頭）。
+ *
+ * 沒選中就在這裡帶訊息失敗：呼叫端後面的斷言都建立在「選到了這一個」上。回傳那個熱區，呼叫端接著量它。
+ */
+export async function selectByTwoTaps(page: Page, hotspotId: string) {
+  const target = page.locator(`#${hotspotId}`);
+  const before = (await target.boundingBox())!;
+  await page.mouse.click(before.x + before.width / 2, before.y + before.height / 2);
+  const zoomed = (await target.boundingBox())!;
+  await page.mouse.click(zoomed.x + zoomed.width / 2, zoomed.y + zoomed.height / 2);
+  await expect(target, `${hotspotId} 沒有被選中，後面的斷言都不算數`).toHaveAttribute(
+    "data-state",
+    "selected",
+  );
+  return target;
 }
 
 /** 熱區實際被畫成什麼樣子。測的是使用者看得到的東西，不是 class 名稱。 */

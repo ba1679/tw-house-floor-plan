@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
-import { blankSpot, dragLeft, markingOf, painted, pinch } from "./viewer-page";
+import { blankSpot, dragLeft, markingOf, painted, pinch, selectByTwoTaps } from "./viewer-page";
 
 // 轉換點：符號頁底部那顆按鈕，是把 SEO 流量帶進平面圖的**唯一入口**（PRD §6.2.1，M3 票 08）。
 // 從 Google 落在「窗」那一頁的人讀完之後按下去，進到三房兩廳，圖上 9 扇窗同時亮起來——
@@ -275,25 +275,22 @@ test.describe("樑：這張圖上看不到它", () => {
     await expect(page.getByRole("status")).not.toContainText("都亮起來了");
   });
 
-  /** 兩段式選一個熱區：點它的正中央圈出候選，放大之後重新量、再點一次正中央確認（同 two-stage-tap.spec.ts）。 */
-  async function selectByTwoTaps(page: Page, selector: string) {
-    const target = page.locator(selector);
-    const before = (await target.boundingBox())!;
-    await page.mouse.click(before.x + before.width / 2, before.y + before.height / 2);
-    await expect(target).toHaveAttribute("data-state", "candidate");
-    const zoomed = (await target.boundingBox())!;
-    await page.mouse.click(zoomed.x + zoomed.width / 2, zoomed.y + zoomed.height / 2);
-    await expect(target).toHaveAttribute("data-state", "selected");
-  }
-
-  test("橫幅關得掉；關掉之後兩段式點擊照常開得出說明卡", async ({ page }) => {
+  test("橫幅關得掉；關掉之後縮放與兩段式點擊照常", async ({ page }) => {
     await page.goto(`/layouts/${layoutId}?symbol=beam`);
     await expect(banner(page)).toBeVisible();
 
     await banner(page).getByRole("button", { name: "知道了" }).click();
     await expect(banner(page)).toBeHidden();
 
-    await selectByTwoTaps(page, "#hs-win-living");
+    // 橫幅那一列拿掉，圖往上移了一列。手勢的座標是每一下當場量框算的，這裡問的就是它有沒有跟著走。
+    const plan = page.locator(`svg#floorplan-${layoutId}`);
+    const fit = (await plan.boundingBox())!;
+    await pinch(page, { x: fit.x + fit.width / 2, y: fit.y + fit.height / 2 }, 100, 250);
+    expect((await plan.boundingBox())!.width).toBeCloseTo(fit.width * 2.5, 0);
+    await page.getByRole("button", { name: "回到全圖" }).click();
+    await expect.poll(async () => (await plan.boundingBox())!.width).toBeCloseTo(fit.width, 0);
+
+    await selectByTwoTaps(page, "hs-win-living");
     await expect(page.locator("#info-sheet")).toBeVisible();
     // 關掉說明卡回到 browsing，橫幅也沒有自己回來：關掉就是關掉了。
     await page.getByRole("button", { name: "關閉說明" }).click();
@@ -321,7 +318,7 @@ test.describe("樑：這張圖上看不到它", () => {
     await expect.poll(async () => (await plan.boundingBox())!.width).toBeCloseTo(fit.width, 0);
     await expect(banner(page)).toBeVisible();
 
-    await selectByTwoTaps(page, "#hs-win-living");
+    await selectByTwoTaps(page, "hs-win-living");
     await page.getByRole("button", { name: "關閉說明" }).click();
     await expect(page.locator("#info-sheet")).toBeHidden();
     await expect(banner(page)).toBeVisible();
@@ -329,16 +326,15 @@ test.describe("樑：這張圖上看不到它", () => {
 
   // 375px 下橫幅不能把圖擠到無法操作。橫幅是版面裡的一列（在框的外面），所以它拿走的是高度：
   //  - 全圖時拿走的是留白——這張圖在 375 × 812 本來就有用不掉的空間，框一 px 都沒少。
-  //  - 說明卡升起時，可視帶已經只剩一條，橫幅再拿走一列就是從圖上挖（量過：334.7px → 231.3px，
-  //    展開時 187.7px → 84.3px）。所以卡片開著時它讓位，與頁尾同一個理由（SiteFooter.module.css）；
-  //    讓位不是關掉，卡片收起來它就回來。
+  //  - 說明卡升起時，可視帶已經只剩一條，橫幅再拿走一列就是從圖上挖（量到的數字寫在 FloorPlanViewer.tsx 的 `banner`）。
+  //    所以卡片開著時它讓位，與頁尾同一個理由（SiteFooter.module.css）；讓位不是關掉，卡片收起來它就回來。
   // 高度拿「同一張圖、沒有帶符號進來」的同一個操作來比，不寫死 px：比的是「橫幅有沒有拿走東西」。
   test("375px：橫幅不擠圖——全圖時框一樣高；說明卡升起時它讓位，收起來又回來", async ({ page }) => {
     const frameOf = async () => (await page.locator("#floorplan-viewport").boundingBox())!;
 
     await page.goto(`/layouts/${layoutId}`);
     const plainFit = await frameOf();
-    await selectByTwoTaps(page, "#hs-win-living");
+    await selectByTwoTaps(page, "hs-win-living");
     await expect(page.locator("#info-sheet")).toBeVisible();
     const plainSheet = await frameOf();
 
@@ -349,7 +345,7 @@ test.describe("樑：這張圖上看不到它", () => {
     expect(bannerBox.y + bannerBox.height, "橫幅疊到圖上了").toBeLessThanOrEqual(withBanner.y);
     expect(withBanner.height).toBeCloseTo(plainFit.height, 0);
 
-    await selectByTwoTaps(page, "#hs-win-living");
+    await selectByTwoTaps(page, "hs-win-living");
     await expect(page.locator("#info-sheet")).toBeVisible();
     await expect(banner(page)).toBeHidden();
     await expect.poll(async () => (await frameOf()).height).toBeCloseTo(plainSheet.height, 0);
