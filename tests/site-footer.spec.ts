@@ -146,3 +146,64 @@ test.describe("免責聲明的全站頁尾", () => {
     expect(focusable).toBe(0);
   });
 });
+
+// 矮螢幕上，這條頁尾會讓框在**兩下點擊之間**變矮：第二段的「重選」列與狀態文字一出現，
+// 留白就用完（app/globals.css）。加頁尾之前這件事只在約 524px 以下的螢幕發生，現在門檻約在
+// 581px——同一條 RESIZE 高度的路（stage 不動，ADR-0003），從少有人走變成常見手機的日常。
+// 測試專案的 812px 走不到它，所以把螢幕調矮再走一次兩段式。
+test.describe("矮螢幕：頁尾讓框在兩下點擊之間變矮", () => {
+  test.use({ viewport: { width: 375, height: 568 } });
+
+  test("第一段之後框變矮了，第二下仍然選得中原本那個熱區", async ({ page }) => {
+    await page.goto(PLAN);
+    const frame = page.locator("#floorplan-viewport");
+    const door = page.locator("#hs-door-entry");
+
+    const frameBefore = (await frame.boundingBox())!.height;
+    const start = (await door.boundingBox())!;
+    // 與 two-stage-tap.spec.ts 同一個點法：大門右緣外 13px，在第一段的容錯之內。
+    await page.mouse.click(start.x + start.width + 13, start.y + start.height / 2);
+    await expect(door).toHaveAttribute("data-state", "candidate");
+
+    // 前提：這個高度真的會讓框在第二段之前變矮。版面哪天改了、568px 擠不到它，這條就不再測
+    // 它說它在測的事——帶著訊息失敗，而不是安靜地退化成一條普通的兩段式測試。
+    await expect
+      .poll(async () => (await frame.boundingBox())!.height, {
+        message: "375×568 下框沒有在第一段之後變矮，這條測試的前提已經不成立——換一個更矮的高度",
+      })
+      .toBeLessThan(frameBefore - 1);
+
+    // 框一變，檢視器要再走一輪 RESIZE 才把視野調好。這個高度下圖面本身可能一 px 都不動，
+    // 沒有「看得到的結果」可以等（pan-zoom.spec.ts 等的是圖變扁）；在 RESIZE 之前點下去，
+    // 測到的就不是「變矮之後」。所以等大門的位置隔一輪量起來不再變，才算調好。
+    let previous: { x: number; y: number; width: number } | null = null;
+    await expect
+      .poll(
+        async () => {
+          const now = (await door.boundingBox())!;
+          const still =
+            previous !== null &&
+            Math.abs(now.x - previous.x) < 0.5 &&
+            Math.abs(now.y - previous.y) < 0.5 &&
+            Math.abs(now.width - previous.width) < 0.5;
+          previous = now;
+          return still;
+        },
+        { intervals: [100] },
+      )
+      .toBe(true);
+
+    const zoomed = (await door.boundingBox())!;
+    const frameBox = (await frame.boundingBox())!;
+    const target = { x: zoomed.x + zoomed.width / 2, y: zoomed.y + zoomed.height / 2 };
+    expect(
+      target.y > frameBox.y && target.y < frameBox.y + frameBox.height,
+      "大門被變矮的框擠出畫面外了，第二段無從點起",
+    ).toBe(true);
+    await page.mouse.click(target.x, target.y);
+
+    await expect(door).toHaveAttribute("data-state", "selected");
+    await expect(page.getByRole("status")).toContainText("雙開門");
+    expect(await pageScrolls(page), "矮螢幕上平面圖頁被撐成可捲的").toBe(false);
+  });
+});
