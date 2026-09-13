@@ -82,3 +82,18 @@ export type SymbolPageRecord = SymbolRecord & {
    */
   source_refs: SourceRef[];
 };
+
+/**
+ * 搜尋索引的一筆：比對要的 `name` 與 `aliases`，列出結果要的 `id` 與 `category`，**就這四欄**。
+ *
+ * 它是 client 元件的 props，會被序列化進每一張放搜尋框的頁面，所以與說明卡那一份同一個道理：
+ * 多一欄就是 14 筆乘以每一頁。查證欄位（`source_refs`、`verification_status`⋯）尤其不得夾帶。
+ * M4 的找找看也要從同一份出題，所以它不是搜尋框的私有形狀。
+ */
+export type SearchIndexEntry = {
+  id: string;
+  name: string;
+  /** 同義詞、俗稱、英文——正式名稱以外，人們真的會打的字（PRD §6.2）。 */
+  aliases: string[];
+  category: SymbolCategory;
+};

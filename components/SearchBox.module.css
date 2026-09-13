@@ -1,0 +1,116 @@
+/* 搜尋框在分類頁與首頁（票 07）是同一個元件，所以這裡只管它自己這一塊，不管它放在頁面的哪裡。
+   間距寫在各自的 margin 上而不是 `gap`：狀態列空著的時候必須**不佔位置、但仍在 DOM 裡**（見 `.status`），
+   而 `gap` 會替一個零高度的子項照樣留一道縫。 */
+.search {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 與符號頁的區塊標題同一個畫法：它是一個標籤，不是這一頁的標題。 */
+.label {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  color: var(--ink3);
+}
+
+/* 字級 16px 不是品味：iOS Safari 對小於 16px 的輸入框會在聚焦時把整頁放大，而且不會自己縮回來。
+   高度吃滿 44px（PRD §9）。`appearance: none` 拿掉各家瀏覽器自帶的圓角與陰影，
+   讓它與這一頁其他方框（符號圖形的框）是同一種線。 */
+.input {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  appearance: none;
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: 1px;
+}
+
+/* 還沒打字時是空的。空的 `<p>` 本來就沒有高度，只要不替它留 margin。
+   **不得寫成 `:empty { display: none }`**：那會把 live region 從無障礙樹裡拿掉，第一次出現的字
+   是跟著 region 一起冒出來的，不少讀螢幕軟體不會唸一個剛剛才出現的 region。 */
+/* `overflow-wrap: anywhere`：「找不到」那一句會把讀者打的字原封不動複述回去，而一長串沒有空白的
+   英數字沒有斷點，在 375px 上會把整頁往右撐出去。 */
+.status {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink2);
+  overflow-wrap: anywhere;
+}
+
+.status:not(:empty) {
+  margin-top: 8px;
+}
+
+/* 一列一格、格與格之間一條細線——與分類頁的清單同一個畫法。 */
+.results {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--rule2);
+}
+
+.result {
+  border-top: 1px solid var(--rule2);
+}
+
+/* 整列是一個連結，高度吃滿 44px（PRD §9）：手機上這幾列就是搜尋的出口。
+   左邊是它是什麼（名字，加上為什麼是它），右邊是它屬於哪一類。 */
+.link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* `min-width: 0` 與 `overflow-wrap: anywhere` 同分類頁的 `.text`：一段沒有空白的英數別名
+   不得把 375px 的頁面往右撐出去。名字與「又稱」在寬度夠時同一行，不夠時換行。 */
+.text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 8px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.link:hover .name,
+.link:focus-visible .name {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* 「又稱」是對名字的說明，比名字輕一階。 */
+.alias {
+  font-size: 13px;
+  color: var(--ink2);
+}
+
+/* `flex: none`：左邊那段換行時，分類不跟著被擠成直排。 */
+.category {
+  flex: none;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--ink3);
+}

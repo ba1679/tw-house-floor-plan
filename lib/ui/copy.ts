@@ -134,6 +134,30 @@ export const categoryPageDescription = (zh: string, names: string[]) =>
 export const categoryCountLabel = (count: number) => `共 ${count} 個符號`;
 
 /**
+ * 搜尋框的標籤。**說出它搜的是全部**：放在分類頁上的搜尋框，讀者會以為它只搜這一類。
+ * N 由索引算出來，不得寫死（同 `categoryCountLabel`）。
+ *
+ * 它是看得見的 `<label>`，不是 placeholder：placeholder 一打字就消失，讀者打到一半就忘了這個框搜的是什麼。
+ */
+export const searchLabel = (total: number) => `搜尋全部 ${total} 個符號`;
+
+/** 「找到 N 個符號」。N 是列出來的那幾個，不得另外算——讀者數得出來的必須是同一個數字。 */
+export const searchResultCount = (count: number) => `找到 ${count} 個符號`;
+
+/**
+ * 沒有命中時的那一句。**把他打的字複述回去**：他才看得出是自己打錯了，還是這裡真的沒有。
+ * 一片空白的話，他分不出「沒有這個符號」與「搜尋壞了、還在等」。
+ */
+export const searchNoResult = (query: string) => `找不到符合「${query}」的符號`;
+
+/**
+ * 結果列上的「又稱「流理台」」。**只在別名對上、名字沒對上時出現**：打「流理台」看到「廚具」的人
+ * 要看得出為什麼是它，否則他會以為搜尋找錯了；名字本身就對上時不必解釋。
+ * 印的是資料裡的原文，不是正規化之後的樣子（`SearchHit.matchedAlias`）。
+ */
+export const searchAliasHint = (alias: string) => `又稱「${alias}」`;
+
+/**
  * 轉載那一行：經由他人文件讀到某份標準，而未核對標準原文（CONTEXT.md「轉載」）。
  *
  * 印出來的成本是承認自己沒翻過原文，不印的代價是讀者以為我們翻過——

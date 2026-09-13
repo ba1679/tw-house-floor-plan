@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SearchBox } from "@/components/SearchBox";
 import { SymbolArt } from "@/components/SymbolArt";
-import { loadCategories } from "@/lib/symbols/data";
+import { loadCategories, loadSearchIndex } from "@/lib/symbols/data";
 import {
   CATEGORY_LABELS,
   categoryCountLabel,
@@ -70,6 +71,14 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
         </p>
         {/* `<title>` 與 `<h1>` 同一句：搜尋結果上那一行與落地後看到的第一行不該是兩句話。 */}
         <h1 className={styles.title}>{categoryPageTitle(label.zh)}</h1>
+
+        {/* 搜尋框排在標題**之後**（落地後看到的第一行仍是標題），但在「共 N 個符號」與清單**之前**：
+            數目是清單的前言，兩者不拆開；而想查特定符號的人不必先捲過這一類的清單才找得到它。
+            它搜的是全部，不是這一類——標籤自己說（`searchLabel`）。索引見 `loadSearchIndex()`。 */}
+        <div className={styles.search}>
+          <SearchBox index={loadSearchIndex()} />
+        </div>
+
         <p className={styles.count}>{categoryCountLabel(category.symbols.length)}</p>
 
         <ul className={styles.list}>

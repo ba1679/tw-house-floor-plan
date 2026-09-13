@@ -1,6 +1,11 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { SymbolCategory, SymbolPageRecord, SymbolRecord } from "./types";
+import type {
+  SearchIndexEntry,
+  SymbolCategory,
+  SymbolPageRecord,
+  SymbolRecord,
+} from "./types";
 
 // Symbol（符號）是內容，與任何一張圖無關（CONTEXT.md）。資料在 build 時讀入，
 // 執行期不打 API。前台看得見的字全部從這裡來——內容維護者改一次資料，
@@ -18,9 +23,9 @@ const SYMBOLS_FILE = join(process.cwd(), "data", "symbols.sample.json");
  * 型別只宣告投影會挑到的那幾欄，但執行期那一筆是完整的——所以這個函式**不匯出**，
  * 它的回傳值只能經由底下的投影出去，否則查證欄位就跟著上前台了。
  */
-function readSymbolFile(): SymbolPageRecord[] {
+function readSymbolFile(): (SymbolPageRecord & SearchIndexEntry)[] {
   const { symbols } = JSON.parse(readFileSync(SYMBOLS_FILE, "utf8")) as {
-    symbols: SymbolPageRecord[];
+    symbols: (SymbolPageRecord & SearchIndexEntry)[];
   };
   return symbols;
 }
@@ -71,6 +76,21 @@ export function loadSymbolsForPages(): Record<string, SymbolPageRecord> {
       { ...viewerFields(s), svg_ref: s.svg_ref, source_refs: s.source_refs },
     ]),
   );
+}
+
+/**
+ * 搜尋框要的索引，照資料檔的先後。
+ *
+ * **第三種投影，也是最窄的一種**：與說明卡那一份同樣逐欄挑，理由（它會被序列化進每一張放搜尋框的頁面）
+ * 寫在 `SearchIndexEntry`。在 build 時內嵌、不 fetch：14 筆大約 2KB，為它打一次網路不划算。
+ */
+export function loadSearchIndex(): SearchIndexEntry[] {
+  return readSymbolFile().map((s) => ({
+    id: s.id,
+    name: s.name,
+    aliases: s.aliases,
+    category: s.category,
+  }));
 }
 
 /** 一張分類頁的內容：它是哪一類，以及該類底下有哪些符號。 */
