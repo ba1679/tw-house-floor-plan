@@ -276,6 +276,21 @@ for a, targets in cw.items():
         check(a in cw.get(b, set()),
               "confused_with 只登錄了單向: %s → %s，但 %s 沒有指回 %s" % (a, b, b, a))
 
+# --- related_layouts 指到的格局都存在（M3 票 08）---
+# 符號頁底部的轉換點由它決定帶讀者去哪張圖（/layouts/<id>?symbol=<symbol>）。對不到的 id 就是
+# 一顆通往 404 的按鈕，而那顆按鈕是把搜尋流量帶進平面圖的唯一入口（PRD §6.2.1）——壞掉的那一天
+# 符號頁看起來完全正常，所以是 error，不是下面那一種 warning。
+#
+# 「存在」以 floorplan 為準，不以 *.layout.json：網站的 /layouts/<id> 由 floorplan 的檔名決定
+# （lib/floorplan/data.ts 的 listLayoutIds），只有 layout spec 沒有 floorplan 的格局沒有頁面。
+known_layouts = set(floorplan_ids)
+for s in symbols:
+    for lid in s.get("related_layouts") or []:
+        check(lid in known_layouts,
+              "%s: related_layouts 裡的 %r 對不到任何格局——符號頁的轉換點由它決定帶讀者去哪張圖，"
+              "對不到就是一顆通往 404 的按鈕，而那是把搜尋流量帶進平面圖的唯一入口（PRD §6.2.1）。"
+              "現有的格局：%s" % (s["id"], lid, "、".join(sorted(known_layouts))))
+
 # --- 雙向一致性: symbol.related_layouts vs 實際 hotspot ---
 # related_layouts 存的是 layout.id，而 floorplan.id 與 layout.id 相同，故可直接比對。
 actual = {}
@@ -285,7 +300,8 @@ for f in floorplans:
             continue  # 還沒指向任何符號，不算任何 symbol 的一次出現
         actual.setdefault(h["symbol_id"], set()).add(f["id"])
 for s in symbols:
-    declared = set(s.get("related_layouts") or [])
+    # 對不到任何格局的 id 上面已經報成 error，這裡不再多報一條「該圖沒有對應 hotspot」——根本沒有那張圖。
+    declared = set(s.get("related_layouts") or []) & known_layouts
     real = actual.get(s["id"], set())
     for lid in declared - real:
         warnings.append("%s 宣稱出現在 %s，但該圖沒有對應 hotspot——"
@@ -313,6 +329,7 @@ if not errors:
     print("  ✓ risk_flags 已移除")
     print("  ✓ verified 符號的查證紀錄完整（caution 不綁在查證完備性上，它要的是法規來源）")
     print("  ✓ svg_ref 全部存在於 sprite")
+    print("  ✓ related_layouts 指到的格局都存在（符號頁的轉換點不會通往 404）")
     print("  ✓ floorplan 的欄位齊全、傢俱朝向認得（檢視器畫得出來）")
 print("-" * 46)
 print("  %d symbols validated" % len(symbols))

@@ -73,7 +73,12 @@ export function loadSymbolsForPages(): Record<string, SymbolPageRecord> {
   return Object.fromEntries(
     readSymbolFile().map((s) => [
       s.id,
-      { ...viewerFields(s), svg_ref: s.svg_ref, source_refs: s.source_refs },
+      {
+        ...viewerFields(s),
+        svg_ref: s.svg_ref,
+        source_refs: s.source_refs,
+        related_layouts: s.related_layouts,
+      },
     ]),
   );
 }

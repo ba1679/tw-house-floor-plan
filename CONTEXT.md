@@ -85,13 +85,16 @@ _Avoid_: tab 順序（它同時是 DOM 順序、也是讀螢幕的順序，不�
 **State（互動狀態）**：
 單一 hotspot 此刻的狀態（`normal` / `candidate` / `selected` / `highlighted` / `quiz-target` / `discovered`）。純執行期資料，**不進任何資料檔**。
 `candidate` 是兩段式點擊第一段圈出的候選之一，`selected` 是第二段確認的那一個——兩件不同的事，
-不可用 `highlighted` 概括；`highlighted` 留給 M3「符號頁 → 平面圖」的自動高亮（PRD §6.2.1）。
+不可用 `highlighted` 概括。`highlighted` 是 M3「符號頁 → 平面圖」的自動高亮（PRD §6.2.1）：
+從網址的 `?symbol=` 帶進來、那個 symbol 在圖上的每一處，使用者一點圖或按 Enter 選定一個就清掉（`docs/adr/0006`）。
 _Avoid_: 模式、mode、idle（要說「沒有在互動」就用 `normal`）
 
 **Stage（互動階段）**：
 兩段式點擊走到哪一段（`browsing` / `candidates` / `confirmed`）。它描述**整個檢視器**，
 State 描述**單一 hotspot**，兩者不可互換：`candidates` 階段裡有一群 `candidate` 狀態的 hotspot。
-_Avoid_: 步驟、step、模式
+**高亮不是第四個 stage**：高亮期間該有的行為全是 browsing 的行為（縮放、拖曳、直接點圖開始第一段），
+所以 stage 維持 `browsing`，高亮疊在上面另外記（`docs/adr/0006`）。
+_Avoid_: 步驟、step、模式、「高亮模式」
 
 **View（視野）**：
 畫面現在看著圖面的哪一塊——中心點（圖面 cm）與放大倍率。純執行期資料。

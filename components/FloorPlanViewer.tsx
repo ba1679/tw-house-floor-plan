@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -12,6 +13,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { FloorPlanRenderer, type RoomState } from "./FloorPlanRenderer";
+import { HighlightFromQuery } from "./HighlightFromQuery";
 import { InfoSheet } from "./InfoSheet";
 import { useFirstVisitHint } from "./useFirstVisitHint";
 import { useViewerGestures } from "./useViewerGestures";
@@ -90,6 +92,13 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
     const locked = new URLSearchParams(window.location.search).get("fitLocked") === "1";
     dispatch({ type: "SET_FIT_LOCKED", locked });
   }, []);
+
+  // 從符號頁按轉換點進來的人（`?symbol=`，M3 票 08）：那個符號在圖上的每一處一起亮。
+  // 網址由 `HighlightFromQuery` 讀，它自己待在一個 Suspense 邊界裡——理由寫在那個元件上。
+  const highlightSymbol = useCallback(
+    (symbolId: string) => dispatch({ type: "HIGHLIGHT_SYMBOL", symbolId }),
+    [],
+  );
 
   // 使用者發起的手勢：拖曳平移、雙指縮放、雙擊放大，以及「哪一下才算點擊」。
   const gestures = useViewerGestures(viewportRef, state, dispatch);
@@ -212,6 +221,10 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
 
   return (
     <>
+      {/* 邊界只包住這個什麼都不畫的元件，不包整個檢視器：包在外面的話，圖就從靜態 HTML 裡消失了。 */}
+      <Suspense fallback={null}>
+        <HighlightFromQuery onSymbol={highlightSymbol} />
+      </Suspense>
       <div
         id="floorplan-viewport"
         ref={viewportRef}
@@ -267,7 +280,9 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
                           ? "selected"
                           : candidateIds.has(h.id)
                             ? "candidate"
-                            : "normal"
+                            : h.symbol_id === state.highlightedSymbol
+                              ? "highlighted"
+                              : "normal"
                       }
                       x={h.coords[0]}
                       y={h.coords[1]}

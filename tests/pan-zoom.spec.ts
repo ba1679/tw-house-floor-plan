@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { blankSpot, dragLeft, pinch } from "./viewer-page";
 
 type BoundingBox = { x: number; y: number; width: number; height: number };
 
@@ -6,53 +7,12 @@ type BoundingBox = { x: number; y: number; width: number; height: number };
 // 這一組測的是使用者自己發起的手勢，以及它與兩段式之間那條界線：
 // 拖曳不是點擊、雙擊不是兩次點擊、放大之後 46 CSS px 仍然是 46 CSS px。
 //
-// 座標一律從瀏覽器量到的框算起，測試不自己算一次 cm → px（與 two-stage-tap.spec.ts 同一條規矩）。
-// 換算層是這個檢視器最會壞的地方，測試若抄同一條公式，公式錯了兩邊會一起錯、一起過。
+// 手勢怎麼做出來（雙指、拖曳、哪裡是留白）收在 `viewer-page.ts`：票 08 的高亮也要在同樣的手勢下測一次。
 
 const PLAN = "/layouts/3b2l_standard";
 
 const planOf = (page: Page) => page.getByRole("group", { name: /三房兩廳/ });
 const viewportOf = (page: Page) => page.locator("#floorplan-viewport");
-
-/**
- * 圖的最上緣、房子外面的那條留白。全圖時 46px 容錯換算成圖面約 160cm，
- * 而這裡離最近的熱區還有 200cm 以上——點下去不會有候選，第一段因此不會放大。
- * 雙擊要成立就需要這種地方：第一下什麼都沒選到，第二下才會被當成「放大這一區」。
- */
-const blankSpot = (frame: { x: number; y: number; width: number; height: number }) => ({
-  x: frame.x + frame.width * 0.7,
-  y: frame.y + frame.height * 0.03,
-});
-
-/**
- * 雙指縮放。Playwright 的 touchscreen 只給得出單指，兩根手指要走 CDP。
- * 指距的比例就是縮放的倍率；中點固定，所以這是純縮放、不含平移。
- */
-async function pinch(page: Page, center: { x: number; y: number }, from: number, to: number) {
-  const cdp = await page.context().newCDPSession(page);
-  const touchPoints = (gap: number) => [
-    { x: center.x - gap / 2, y: center.y, id: 0 },
-    { x: center.x + gap / 2, y: center.y, id: 1 },
-  ];
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: touchPoints(from) });
-  const steps = 8;
-  for (let i = 1; i <= steps; i++) {
-    await cdp.send("Input.dispatchTouchEvent", {
-      type: "touchMove",
-      touchPoints: touchPoints(from + ((to - from) * i) / steps),
-    });
-  }
-  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
-  await cdp.detach();
-}
-
-/** 從 from 往左拖 dx 個 CSS px。一次手勢拖不動的距離要分段——手指也離不開畫面。 */
-async function dragLeft(page: Page, from: { x: number; y: number }, dx: number) {
-  await page.mouse.move(from.x, from.y);
-  await page.mouse.down();
-  await page.mouse.move(from.x - dx, from.y, { steps: 8 });
-  await page.mouse.up();
-}
 
 test("拖曳平移：圖跟著手指走，而且不會被當成一次點擊", async ({ page }) => {
   await page.goto(PLAN);

@@ -88,6 +88,19 @@ export type ViewerState = {
    * M2 不接 UI，只把這個輸入留好，M4 才不必回頭改狀態機。
    */
   fitLocked: boolean;
+  /**
+   * 從符號頁帶進來的那個符號（`?symbol=`，M3 票 08）：它在這張圖上的每一處都是 `highlighted`。
+   *
+   * **疊在 stage 上的一層標記，不是第四個 stage**（docs/adr/0006）。高亮期間該能自由縮放、
+   * 該能直接開始新的第一段——那正是 browsing 的行為，所以 stage 維持 browsing，這一欄另外記。
+   *
+   * **不塞進 `candidates`**：檢視器的 data-state 只看「在不在候選集裡」、不看 stage，
+   * 塞進去會被畫成與真正的第一段候選無法分辨的樣子，而使用者其實沒有點過任何東西。
+   *
+   * 存 symbol id 而不是熱區清單：這個符號在圖上有哪幾處由 hotspots 算（`occurrencesOf`），
+   * 另存一份就多一份會跟 hotspots 分岔的名單。對到 0 處也是合法的值——樑在圖上沒有熱區（票 09）。
+   */
+  highlightedSymbol: string | null;
 };
 
 /**
@@ -116,7 +129,9 @@ export type ViewerAction =
   /** 鍵盤直接選定一個熱區（Enter）。**不走兩段式**：鍵盤沒有手指精度問題。 */
   | { type: "SELECT_HOTSPOT"; id: string }
   /** 找找看（M4）的視野鎖定開關。 */
-  | { type: "SET_FIT_LOCKED"; locked: boolean };
+  | { type: "SET_FIT_LOCKED"; locked: boolean }
+  /** 符號頁的轉換點（M3 票 08）：把這個 symbol 在圖上的每一處標成 highlighted。stage 與視野都不動。 */
+  | { type: "HIGHLIGHT_SYMBOL"; symbolId: string };
 
 export type ViewerConfig = {
   hotspots: Hotspot[];
@@ -141,6 +156,7 @@ export function createViewerState(config: ViewerConfig): ViewerState {
     confirmMissed: false,
     pendingFocus: null,
     fitLocked: false,
+    highlightedSymbol: null,
   };
 }
 
@@ -260,6 +276,9 @@ function confirmSelection(
     stage: "confirmed",
     candidates: [],
     selected: hit,
+    // 選定了一個熱區，從符號頁帶進來的高亮到此為止（M3 票 08）。手指那條路在 tap() 就清過了；
+    // 寫在這裡是為了鍵盤的 Enter——它不經過 tap()，而它同樣是「使用者自己選定了一個」。
+    highlightedSymbol: null,
     lastTap,
     // 容錯圈只畫在第二段，這個值在 confirmed 之下看不見；鍵盤那條路沒有點過，一併清掉。
     tolCmAtTap: lastTap === null ? null : s.tolCmAtTap,
@@ -275,9 +294,15 @@ function confirmSelection(
  * 點一下圖上的某個位置。第二段進行中就是確認，否則是新的第一段——
  * browsing 與 confirmed 都當作新的第一段：看完一張說明卡後直接點圖上別的地方就能看下一個，
  * 「重選」是明確的退出鍵，不是看下一個符號的必經步驟（PRD §11 #20）。
+ *
+ * **任何一下都清掉高亮**（M3 票 08）。高亮是從符號頁帶進來的脈絡，使用者一動手點圖，就是開始自己看了。
+ * 點在一扇亮著的窗上也一樣：那一下是新的第一段，不是第二段的確認——stage 仍是 browsing，
+ * 他從符號頁進來時根本沒有點過任何東西。雙擊的第一下同樣會清掉它：手勢層先把那一下當成一次點擊送出來，
+ * 認出是雙擊的是第二下（`useViewerGestures`）。
  */
 function tap(s: ViewerState, x: number, y: number): ViewerState {
-  return s.stage === "candidates" ? confirmTap(s, x, y) : firstTap(s, x, y);
+  const cleared = { ...s, highlightedSymbol: null };
+  return cleared.stage === "candidates" ? confirmTap(cleared, x, y) : firstTap(cleared, x, y);
 }
 
 export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState {
@@ -441,6 +466,13 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
 
     case "SET_FIT_LOCKED":
       return action.locked === s.fitLocked ? s : { ...s, fitLocked: action.locked };
+
+    case "HIGHLIGHT_SYMBOL":
+      // stage 不動：高亮是疊在 browsing 上的一層，不是第四個階段（docs/adr/0006）。
+      // 視野也不動——落地時就是全圖，而**不自動放大**：9 扇窗散在全圖，放大只會藏起其中幾處。
+      return action.symbolId === s.highlightedSymbol
+        ? s
+        : { ...s, highlightedSymbol: action.symbolId };
   }
 }
 

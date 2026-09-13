@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { markingOf, painted } from "./viewer-page";
 
 // 這個檢視器最危險的失敗不是「點不到」，是**看起來不能點**：整張圖都是熱區卻毫無提示，
 // 使用者會把它當成一張靜態圖片直接離開（PRD §6.1.2）。這一組測的就是「他知道可以點」。
@@ -16,27 +17,14 @@ const TAP_HINT = "點圖上任何一個位置，我們會放大讓你看清楚";
 const statusOf = (page: Page) => page.getByRole("status");
 const layerOf = (page: Page) => page.locator("#hotspot-layer");
 
-/** 熱區實際被畫成什麼樣子。測的是使用者看得到的東西，不是 class 名稱。 */
-const markingOf = (page: Page, selector: string) =>
-  page.locator(selector).evaluate((el) => {
-    const style = getComputedStyle(el);
-    return { fill: style.fill, stroke: style.stroke, strokeWidth: style.strokeWidth };
-  });
+// 熱區實際被畫成什麼樣子（`markingOf`）、有沒有真的畫出來（`painted`）收在 `viewer-page.ts`：
+// 票 08 的高亮要與這一層提示分得開，問的是同一件事。
 
 const motionOf = (page: Page, selector: string) =>
   page.locator(selector).evaluate((el) => {
     const style = getComputedStyle(el);
     return { count: style.animationIterationCount, duration: style.animationDuration };
   });
-
-/**
- * 這個東西在畫面上真的被畫出來了嗎。
- *
- * 兩種「沒畫」在 computed style 裡長得不一樣：`fill: transparent` 算成 `rgba(0, 0, 0, 0)`，
- * `stroke: none` 算成 `none`。只比對其中一種，另一種會安靜地通過——
- * 「沒有細邊」曾經因此被判成「有細邊」。
- */
-const painted = (value: string) => value !== "none" && value !== "rgba(0, 0, 0, 0)";
 
 /**
  * 等 client 真的接手。

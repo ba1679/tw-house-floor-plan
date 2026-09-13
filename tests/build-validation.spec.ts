@@ -330,3 +330,23 @@ test.describe("分類：兩半各自把關", () => {
     ).toEqual(ids(python![1]));
   });
 });
+
+// 符號頁底部的轉換點由 related_layouts 決定帶讀者去哪張圖（M3 票 08）。對不到的 id 是一顆通往 404 的
+// 按鈕——而那顆按鈕是把搜尋流量帶進平面圖的唯一入口（PRD §6.2.1），壞掉的那一天頁面看起來完全正常。
+test.describe("related_layouts", () => {
+  test("有一個 id 對不到任何格局時，建置失敗，而且說得出是哪個符號、哪個 id", () => {
+    const dir = sandbox();
+    const path = join(dir, SYMBOLS);
+    const data = JSON.parse(readFileSync(path, "utf8"));
+    // 留著原本對得到的那一個，只多塞一個對不到的：才證明擋下來的是「這一個」，不是「清單不能多一筆」。
+    const symbol = data.symbols[0];
+    symbol.related_layouts = [...symbol.related_layouts, "layout_that_does_not_exist"];
+    writeFileSync(path, JSON.stringify(data, null, 2));
+
+    const { code, output } = runValidator(dir);
+    expect(code, output).not.toBe(0);
+    expect(output).toContain(symbol.id);
+    expect(output).toContain("layout_that_does_not_exist");
+    expect(output).toContain("通往 404");
+  });
+});

@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
+import { blankSpot } from "./viewer-page";
 
 // 兩段式點擊升為全站的基礎操作之後，它是**所有人看圖的唯一方式**——所以鍵盤必須有一條
 // 完整的平行路徑，否則這個網站對鍵盤使用者等於不存在（票 06）。
@@ -86,9 +87,6 @@ async function tabThroughHotspots(page: Page) {
 
 const viewportOf = (page: Page) => page.locator("#floorplan-viewport");
 const planOf = (page: Page) => page.getByRole("group", { name: /三房兩廳/ });
-
-/** 圖的最上緣、房子外面的那條留白：點下去沒有候選，第二下才會被當成「放大這一區」。 */
-const blankSpot = (frame: Box) => ({ x: frame.x + frame.width * 0.7, y: frame.y + frame.height * 0.03 });
 
 test("Tab 一間房一間房走過所有符號，順序對上看屋的動線", async ({ page }) => {
   await page.goto(PLAN);

@@ -81,6 +81,12 @@ export type SymbolPageRecord = SymbolRecord & {
    * 站在接待中心的人無從點開查證；坐下來讀落地頁的人才是來判斷「要不要信」的。
    */
   source_refs: SourceRef[];
+  /**
+   * 這個符號的頁面該把讀者帶去哪幾張格局圖——**編輯決定，不是統計**（CONTEXT.md「related_layouts」）。
+   * 符號頁底部的轉換點由它決定去處（M3 票 08）。所以樑也有值：它在圖上沒有熱區，而我們就是要帶他去看那張看不到樑的圖。
+   * 每個 id 都對得到實際存在的格局，由 `scripts/validate_data.py` 在建置前擋。
+   */
+  related_layouts: string[];
 };
 
 /**
