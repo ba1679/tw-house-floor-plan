@@ -112,9 +112,8 @@ export const symbolArtLabel = (name: string) => `${name}在平面圖上的畫法
  * （「平面圖 門窗符號 有哪些」），不是把分類的中文名直接當標題。
  * 頁面的 `<title>` 與 `<h1>` 同一句，理由同 `symbolPageTitle`。
  *
- * 中文名由呼叫端從 `CATEGORY_LABELS` 取來再傳進來，這裡不自己查：查中文名那件事有它自己的
- * 那一份常數，而那份常數的型別正是「少一類就編譯失敗」的那道保證——在這裡多開一條
- * 用字串去查的路，就是多一個繞過它的地方。
+ * 中文名由呼叫端從 `CATEGORY_LABELS` 取來再傳進來，這裡不自己查——與 `symbolPageTitle` 收
+ * `name` 同一個形狀：這一區的函式只負責把字排成一句話，查表留在手上拿著有型別 id 的呼叫端。
  */
 export const categoryPageTitle = (zh: string) => `平面圖上的${zh}符號有哪些？`;
 

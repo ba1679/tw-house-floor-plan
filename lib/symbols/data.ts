@@ -92,11 +92,15 @@ export type SymbolCategoryPage = {
  * `fire_safety` 在 v0.4 被砍出範圍（PRD §4.1），替它們留一張「此分類階段一尚未收錄」
  * 對讀者沒有價值，Google 則會把它當 thin content，連帶拖累整站。
  *
- * `id` 的型別是 `SymbolCategory` 而不是 `string`，而這件事是有作用的：分類頁拿它去查
- * `lib/ui/copy.ts` 的 `CATEGORY_LABELS`（型別是以 `SymbolCategory` 為 key 的 `Record`），
- * 所以**少一個分類的中文名就是編譯失敗**。這是那條建置檢查的一半；另一半是
- * 「資料裡的分類合不合法」，由 `scripts/validate_data.py` 顧著——它是 Python，讀不到
+ * **少一個分類的中文名就編譯失敗**——這是那條建置檢查的 TypeScript 半邊，而它**住在
+ * `lib/ui/copy.ts` 的 `CATEGORY_LABELS` 那一行型別註記上**（以 `SymbolCategory` 為 key 的
+ * `Record`）：少一個 key，錯誤就報在那份常數的定義處，與有沒有人查它、用什麼型別的 key 查都無關。
+ * 另一半是「資料裡的分類合不合法」，由 `scripts/validate_data.py` 顧著——它是 Python，讀不到
  * 這邊的常數，兩半因此各自用看得到事實的語言把關，而不是在兩邊各抄一份中文名。
+ *
+ * `id` 的型別是 `SymbolCategory` 而不是 `string`，買到的是比較小的一件事：分類頁查
+ * `CATEGORY_LABELS` 時不必把網址字串 `as SymbolCategory` 硬轉。硬轉弄不掉上面那道編譯保證，
+ * 但它是一句編譯器檢查不了的斷言；從這裡拿到的 id 則一定出自資料，而資料裡的分類驗證器已經擋過。
  *
  * **順序照資料檔**：分類之間、以及一類之內的符號都是。另外排一套等於在資料之外再做一個
  * 編輯決定，而那個決定過幾個月沒有人記得寫在哪裡；要換順序就換資料檔裡的順序。

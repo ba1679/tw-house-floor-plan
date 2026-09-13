@@ -76,3 +76,12 @@ spec Testing Decisions 第 9 條寫「剛好 3 張」。測試**沒有寫死 3**
   「共 N 個符號」。三個新文案常數：`categoryPageTitle`、`categoryPageDescription`、`categoryCountLabel`。
 - 沒做：頁尾免責聲明（票 04 加在根版面，合併後自動繼承）、搜尋框（票 06）、`/symbols` 索引頁（spec 明確拒絕）。
 - **目前還沒有任何頁面連到分類頁**：入口是票 07 的首頁，sitemap 是票 10。
+
+**2026-09-13 — 更正上面「讓那道型別保證在頁面上真的有作用」那一條的理由。**
+
+實測過：`CATEGORY_LABELS` 少一個 key 時，`tsc` 只報一個錯，位置在 `lib/ui/copy.ts` 常數的定義處（TS2741）；
+把分類頁改成拿網址字串 `as SymbolCategory` 硬轉去查，報的仍然是同一個、同一處的錯。所以那道編譯保證**住在
+`Record<SymbolCategory, …>` 的型別註記上**，與頁面怎麼查無關——「那一轉就是保證斷掉的地方」不成立。
+
+`findCategory()` 回傳有型別的 `id` 仍然值得留著，只是理由比較小：查表時不必做一次編譯器檢查不了的硬轉，
+而經由它拿到的 id 一定出自資料、已經被驗證器擋過。`lib/symbols/data.ts`、分類頁、`lib/ui/copy.ts` 三處註解一併改正。

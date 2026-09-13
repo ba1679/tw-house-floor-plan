@@ -29,10 +29,10 @@ export function generateStaticParams() {
 /**
  * 網址上的那一段對得到哪一類。
  *
- * 回傳值的 `id` 是 `SymbolCategory`，不是網址上那個 `string`：底下拿它查 `CATEGORY_LABELS`，
- * 而那份常數的型別（以 `SymbolCategory` 為 key 的 `Record`）正是「少一類中文名就編譯失敗」
- * 的那一半建置檢查。拿網址字串去查就得先 `as SymbolCategory` 硬轉一次——那一轉就是
- * 這道保證斷掉的地方。
+ * 回傳值的 `id` 是 `SymbolCategory`，不是網址上那個 `string`，所以底下查 `CATEGORY_LABELS`
+ * 不必 `as SymbolCategory` 硬轉。那一轉**弄不掉**「少一類中文名就編譯失敗」的保證——那個錯誤
+ * 報在 `lib/ui/copy.ts` 的常數定義處，與這裡怎麼查無關——但它是一句編譯器檢查不了的斷言；
+ * 從這裡拿到的 id 則一定出自資料，而資料裡的分類 `validate_data.py` 已經擋過。
  */
 function findCategory(id: string) {
   return loadCategories().find((category) => category.id === id);
