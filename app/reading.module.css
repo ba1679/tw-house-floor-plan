@@ -6,7 +6,10 @@
    （符號頁的區塊間距大，標題要往上吃掉一段 gap），留在各頁自己的檔案裡。首頁與分類頁的這兩個值
    今天相同，但那是兩頁各自的決定，不是這一套版心的一部分。同一個屬性不得在這裡與各頁同時寫：
    composes 進來的 class 與頁面自己的 class 誰蓋過誰，取決於兩份 CSS 在打包後的先後，
-   那不是這個檔案控制得了的事。 */
+   那不是這個檔案控制得了的事。
+
+   **最底下的 `primaryAction` 是例外**：它不是版心的一部分，是首頁與符號頁各有一顆的那個主要動作（票 08）。
+   分類頁沒有它。放在這裡是因為兩顆做的是同一件事，而兩份照抄的按鈕遲早會長得不一樣。 */
 .page {
   padding: 22px 20px 40px;
 }
@@ -35,4 +38,32 @@
   font-weight: 700;
   line-height: 1.42;
   letter-spacing: 0.01em;
+}
+
+/* 這幾頁**唯一**填滿底色的東西：首頁那顆進平面圖的按鈕（PRD §8）、符號頁底部的轉換點（PRD §6.2.1）。
+   兩顆做的是同一件事——把讀者從讀物帶進平面圖——所以長得一樣。
+   底色用墨色不用 `--accent`：`--accent` 是這個站的連結色——分類入口、搜尋結果、符號頁「容易搞混」的每一則都是它。
+   主要動作要一眼就與那些連結分得開。紙色字壓在墨色上的對比約 15.8:1，滑過時的 `--ink2` 約 6.5:1。
+   高度超過 44px（PRD §9），手機上整條寬度都按得到。 */
+.primaryAction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--paper);
+  background: var(--ink);
+  text-decoration: none;
+}
+
+.primaryAction:hover {
+  background: var(--ink2);
+}
+
+.primaryAction:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: 2px;
 }

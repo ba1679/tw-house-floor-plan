@@ -79,12 +79,15 @@ export const occurrenceLabel = (total: number, index: number) =>
   `這張圖上共 ${total} 處 · 目前第 ${index} 處`;
 
 /**
- * 符號頁底部的轉換點，照 PRD §6.2.1 的原句。它是把搜尋流量帶進平面圖的唯一入口（M3 票 08）。
+ * 符號頁底部那顆轉換點按鈕的字，照 PRD §6.2.1 的原句。它是把搜尋流量帶進平面圖的唯一入口（M3 票 08）。
  *
  * 「真實格局」是跟同一頁上那張符號圖形對照著說的：讀者剛看完的是一個圖例，按下去看的是它長在一張真的圖上。
- * 格局名不寫進這一句，由頁面從 floorplan 資料取來另外印（理由在 `app/symbols/[id]/page.tsx`）。
+ *
+ * **不帶格局名**。樑的那一顆（票 09）自己就寫著「這張三房兩廳上看不到樑」，在按鈕上另外印一次格局名會與它重複，
+ * 票 09 就得替樑另開一條畫法——而那張票明講不為樑開分支。代價落在第 2 張圖進來的那一天：
+ * 一頁上兩顆按鈕的字一模一樣，那時要回頭換這一句（`app/symbols/[id]/page.tsx`）。
  */
-export const SYMBOL_TO_LAYOUT = "這個符號在真實格局裡長怎樣";
+export const SYMBOL_LAYOUT_BUTTON = "這個符號在真實格局裡長怎樣";
 
 /** 「跟○○的差別」——容易搞混區塊裡每一則的標題。 */
 export const confusedWithLabel = (otherName: string) => `跟${otherName}的差別`;

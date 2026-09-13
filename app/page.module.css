@@ -34,31 +34,9 @@
 }
 
 /* 這一頁**唯一**填滿底色的東西：從首頁進平面圖是這一頁存在的理由（PRD §8）。
-   底色用墨色不用 `--accent`：`--accent` 是這個站的連結色——底下的分類入口、搜尋結果、符號頁上的
-   每一個連結都是它。這一顆是這一頁唯一的主要動作，要一眼就與那些連結分得開。
-   紙色字壓在墨色上的對比約 15.8:1，滑過時的 `--ink2` 約 6.5:1。
-   高度超過 44px（PRD §9），手機上整條寬度都按得到。 */
+   畫法與符號頁底部的轉換點同一套（`reading.module.css` 的 `primaryAction`），墨色底的理由寫在那裡。 */
 .layoutButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 52px;
-  padding: 12px 20px;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--paper);
-  background: var(--ink);
-  text-decoration: none;
-}
-
-.layoutButton:hover {
-  background: var(--ink2);
-}
-
-.layoutButton:focus-visible {
-  outline: 2px solid var(--accent2);
-  outline-offset: 2px;
+  composes: primaryAction from "./reading.module.css";
 }
 
 .browse {

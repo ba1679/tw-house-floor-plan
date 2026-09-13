@@ -91,14 +91,15 @@ export type ViewerState = {
   /**
    * 從符號頁帶進來的那個符號（`?symbol=`，M3 票 08）：它在這張圖上的每一處都是 `highlighted`。
    *
-   * **疊在 stage 上的一層標記，不是第四個 stage**（docs/adr/0006）。高亮期間該能自由縮放、
+   * **疊在 stage 上的一層，不是第四個 stage**（docs/adr/0006）。高亮期間該能自由縮放、
    * 該能直接開始新的第一段——那正是 browsing 的行為，所以 stage 維持 browsing，這一欄另外記。
    *
    * **不塞進 `candidates`**：檢視器的 data-state 只看「在不在候選集裡」、不看 stage，
    * 塞進去會被畫成與真正的第一段候選無法分辨的樣子，而使用者其實沒有點過任何東西。
    *
    * 存 symbol id 而不是熱區清單：這個符號在圖上有哪幾處由 hotspots 算（`occurrencesOf`），
-   * 另存一份就多一份會跟 hotspots 分岔的名單。對到 0 處也是合法的值——樑在圖上沒有熱區（票 09）。
+   * 另存一份就多一份會跟 hotspots 分岔的名單。對到 0 處也是合法的值（樑在圖上沒有熱區）；
+   * 但票 09 的橫幅不能直接掛在這一欄上——這一欄點一下就清掉，橫幅要留到使用者自己關。
    */
   highlightedSymbol: string | null;
 };
@@ -297,8 +298,8 @@ function confirmSelection(
  *
  * **任何一下都清掉高亮**（M3 票 08）。高亮是從符號頁帶進來的脈絡，使用者一動手點圖，就是開始自己看了。
  * 點在一扇亮著的窗上也一樣：那一下是新的第一段，不是第二段的確認——stage 仍是 browsing，
- * 他從符號頁進來時根本沒有點過任何東西。雙擊的第一下同樣會清掉它：手勢層先把那一下當成一次點擊送出來，
- * 認出是雙擊的是第二下（`useViewerGestures`）。
+ * 他從符號頁進來時根本沒有點過任何東西。雙擊的第一下同樣會清掉它（手勢層先把那一下當成一次點擊送出來，
+ * 第二下才認得出是雙擊）——這一點與「縮放時高亮留著」互相拉扯，還沒定案（docs/adr/0006「後果」）。
  */
 function tap(s: ViewerState, x: number, y: number): ViewerState {
   const cleared = { ...s, highlightedSymbol: null };

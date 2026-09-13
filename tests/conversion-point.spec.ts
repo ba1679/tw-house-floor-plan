@@ -6,7 +6,7 @@ import { blankSpot, dragLeft, markingOf, painted, pinch } from "./viewer-page";
 // 從 Google 落在「窗」那一頁的人讀完之後按下去，進到三房兩廳，圖上 9 扇窗同時亮起來——
 // 他看得到這個符號在真實的圖上長在哪些地方。
 //
-// 高亮是**疊在 browsing 上的一層標記，不是第四個階段**（docs/adr/0006）。所以這一組除了
+// 高亮是**疊在 browsing 上的一層，不是第四個階段**（docs/adr/0006）。所以這一組除了
 // 「亮了沒」，大半在問 browsing 的行為有沒有被它弄壞：縮放、拖曳、直接點圖開始下一個。
 
 type Hotspot = { id: string; symbol_id: string | null };
@@ -139,10 +139,12 @@ test.describe("高亮之中，browsing 的行為照常", () => {
     expect(await highlightedIds(page)).toEqual(expected);
   });
 
-  // 雙擊照樣放大一級。但雙擊的第一下在狀態機眼裡就是一次點擊——手勢層要到第二下才認得出那是雙擊——
-  // 而任何一下都清掉高亮（spec「轉換點與高亮」）。所以雙擊之後高亮是清掉的。
-  // 這是照 spec 那一條的字面走出來的結果，不是這張票另外做的決定；釘在這裡，哪天要改看得見（docs/adr/0006）。
-  test("雙擊照樣放大一級；它的第一下是一次點擊，所以高亮跟著清掉", async ({ page }) => {
+  // 雙擊照樣放大一級（票面「高亮期間 pan / zoom / 雙擊 / 一鍵回全圖照常」）。
+  //
+  // **這條刻意不問高亮還在不在。** 雙擊的第一下在手勢層就是一次點擊（第二下才認得出是雙擊），而 spec 寫
+  // 「任何 TAP 清掉高亮」——所以現在雙擊之後高亮是清掉的。那與「縮放時高亮留著」（user story 16）互相拉扯，
+  // 留給規格的主人決定（票 08 的 Comments、docs/adr/0006「後果」）；在那之前不拿一條綠燈替其中一邊背書。
+  test("高亮之中雙擊照樣放大一級", async ({ page }) => {
     await land(page);
     const plan = planOf(page);
     const fit = (await plan.boundingBox())!;
@@ -150,7 +152,6 @@ test.describe("高亮之中，browsing 的行為照常", () => {
     await page.mouse.dblclick(blankSpot(fit).x, blankSpot(fit).y);
 
     await expect.poll(async () => (await plan.boundingBox())!.width).toBeCloseTo(fit.width * 2, 0);
-    await expect(page.locator('#hotspot-layer [data-state="highlighted"]')).toHaveCount(0);
   });
 
   // CONTEXT.md 把 highlighted 與 candidate 分開登錄、明講不可互相概括，這一條是那句話在畫面上的樣子。
@@ -182,20 +183,30 @@ test.describe("建置產物", () => {
   // 邊界若包到整個檢視器外面，build 照樣會過、瀏覽器裡照樣會亮——壞掉的是靜態 HTML：
   // 圖整個不在裡面，要等 JavaScript 跑完才畫得出來。這一條只有拿靜態檔案本身來問才問得到。
   test("讀網址參數沒有把平面圖擠出靜態 HTML", () => {
-    for (const layoutId of new Set(symbols.flatMap((s) => s.related_layouts))) {
+    const layoutIds = new Set(symbols.flatMap((s) => s.related_layouts));
+    // 前提不成立時帶訊息失敗：沒有任何一筆 related_layouts 的話，底下的迴圈一次都不跑，這條會是恆綠的。
+    expect(layoutIds.size, "資料裡沒有任何 related_layouts，這條測試沒有東西可以問").toBeGreaterThan(0);
+
+    for (const layoutId of layoutIds) {
       const html = readFileSync(`out/layouts/${layoutId}.html`, "utf8");
       const hotspots = floorplanOf(layoutId).hotspots.filter((h) => h.symbol_id !== null);
-      expect(hotspots.length).toBeGreaterThan(0);
+      expect(hotspots.length, `${layoutId} 沒有任何熱區，這條測試在那張圖上沒有東西可以問`).toBeGreaterThan(0);
       for (const h of hotspots) {
         expect(html, `${layoutId} 的靜態 HTML 裡沒有熱區 ${h.id}`).toContain(`id="${h.id}"`);
       }
     }
   });
 
-  // 按鈕帶去哪張圖由 related_layouts 決定（spec「路由」：任何地方不得寫死 3b2l_standard）。
-  // **這條擋不住寫死格局**：今天 14 筆的 related_layouts 全是同一張圖。它擋得住的是「帶錯符號」、
-  // 「漏了哪一頁」、以及「一張圖一顆」變成別的數量——寫死那一道要等第 2 張圖進來才量得出來。
-  test("每一張符號頁都有轉換點，帶著自己的符號、去 related_layouts 指的每一張圖", () => {
+  // 按鈕帶去哪裡由 related_layouts 決定（spec「路由」：任何地方不得寫死 3b2l_standard）。
+  // **這條擋不住寫死格局**：今天 14 筆的 related_layouts 全是同一個 layout。它擋得住的是「帶錯符號」、
+  // 「漏了哪一頁」、以及「一個 layout 一顆」變成別的數量——寫死那一道要等第 2 張圖進來才量得出來。
+  test("每一張符號頁都有轉換點，帶著自己的符號、去 related_layouts 指的每一個 layout", () => {
+    // 前提：至少有一筆 related_layouts。全是空陣列的話，每一頁都「剛好沒有按鈕」，這條會是恆綠的。
+    expect(
+      symbols.some((s) => s.related_layouts.length > 0),
+      "資料裡沒有任何 related_layouts，這條測試沒有東西可以問",
+    ).toBe(true);
+
     for (const s of symbols) {
       const html = readFileSync(`out/symbols/${s.id}.html`, "utf8").replace(
         /<script[\s\S]*?<\/script>/g,

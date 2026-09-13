@@ -3,14 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SourceTierPanel } from "@/components/SourceTierPanel";
 import { SymbolArt } from "@/components/SymbolArt";
-import { loadFloorPlan } from "@/lib/floorplan/data";
 import { loadSymbolsForPages } from "@/lib/symbols/data";
 import { printedSourceRefs } from "@/lib/symbols/source-refs";
 import { highlightHref } from "@/lib/viewer/highlight";
 import {
   CATEGORY_LABELS,
   SECTION_LABELS,
-  SYMBOL_TO_LAYOUT,
+  SYMBOL_LAYOUT_BUTTON,
   confusedWithLabel,
   symbolPageDescription,
   symbolPageTitle,
@@ -138,17 +137,15 @@ export default async function SymbolPage({ params }: { params: Promise<{ id: str
         {/* 轉換點（PRD §6.2.1、M3 票 08）：把搜尋流量帶進平面圖的唯一入口。按下去，圖上這個符號的
             每一處同時亮起來——讀者剛看完的是一個圖例，這裡讓他看它長在一張真的圖上哪些地方。
 
-            **帶去哪張圖由資料決定**（`related_layouts`，編輯決定而不是統計，CONTEXT.md），不寫死
-            3b2l_standard；有幾張就幾顆，今天是一顆。每一顆底下印著格局名：兩顆都只有 PRD 那一句的話，
-            讀螢幕的人聽到的是兩個一模一樣的連結，分不出哪個通往哪張圖。 */}
+            **帶去哪裡由資料決定**（`related_layouts`，編輯決定而不是統計，CONTEXT.md），不寫死
+            3b2l_standard；有幾個 layout 就幾顆，今天是一顆。字照 PRD 原句、不帶格局名（理由在 `SYMBOL_LAYOUT_BUTTON`）。
+            **第 2 張圖進來的那一天這裡要回頭改**：兩顆按鈕的字一模一樣，讀螢幕的人分不出哪個通往哪裡。 */}
         <div className={styles.layoutLinks}>
           {symbol.related_layouts.map((layoutId) => (
             <Link key={layoutId} className={styles.layoutLink} href={highlightHref(layoutId, symbol.id)}>
-              <span className={styles.layoutLinkText}>
-                {SYMBOL_TO_LAYOUT}
-                <span aria-hidden="true"> →</span>
-              </span>
-              <span className={styles.layoutLinkName}>{loadFloorPlan(layoutId).name}</span>
+              {SYMBOL_LAYOUT_BUTTON}
+              {/* 箭頭是給看得見的人的方向感；讀螢幕的人聽到那一句就夠了（同首頁那顆）。 */}
+              <span aria-hidden="true">→</span>
             </Link>
           ))}
         </div>

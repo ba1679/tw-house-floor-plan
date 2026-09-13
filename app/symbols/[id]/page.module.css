@@ -168,11 +168,8 @@
   border-bottom-color: currentColor;
 }
 
-/* 轉換點（票 08）：這一頁**唯一**填滿底色的東西，它是把搜尋流量帶進平面圖的唯一入口（PRD §6.2.1）。
-   與首頁那顆進平面圖的按鈕同一個畫法、同一個理由：`--accent` 是全站的連結色——上面「容易搞混」
-   的每一則都是它——而這一顆是這一頁唯一的主要動作，要一眼就與那些連結分得開。
-   不 composes 首頁那一顆：那一顆是單行置中，這一顆是兩行（那一句、底下的格局名）。
-   紙色字壓在墨色上約 15.8:1；滑過時底色換 `--ink2`，格局名用 `--paper2` 仍在 4.5:1 以上。 */
+/* 轉換點（票 08）：把搜尋流量帶進平面圖的唯一入口（PRD §6.2.1）。與首頁那顆進平面圖的按鈕做的是同一件事，
+   畫法也同一套（`reading.module.css` 的 `primaryAction`），這裡只排這一頁的一欄按鈕。 */
 .layoutLinks {
   display: flex;
   flex-direction: column;
@@ -180,33 +177,5 @@
 }
 
 .layoutLink {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-height: 52px;
-  padding: 12px 20px;
-  color: var(--paper);
-  background: var(--ink);
-  text-decoration: none;
-}
-
-.layoutLink:hover {
-  background: var(--ink2);
-}
-
-.layoutLink:focus-visible {
-  outline: 2px solid var(--accent2);
-  outline-offset: 2px;
-}
-
-.layoutLinkText {
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1.6;
-}
-
-.layoutLinkName {
-  font-size: 12.5px;
-  line-height: 1.6;
-  color: var(--paper2);
+  composes: primaryAction from "../../reading.module.css";
 }
