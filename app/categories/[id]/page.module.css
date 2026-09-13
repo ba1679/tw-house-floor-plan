@@ -1,39 +1,26 @@
 /* 與符號頁是同一類讀物：可以捲動、一欄、手機優先。`.page` 的留白、`.category` 與 `.title`
-   的字型字級、版心寬 560px，都**照抄** `app/symbols/[id]/page.module.css`——從這裡點進去，
-   版心與標題不會跳。
+   的字型字級、版心寬 560px，與符號頁、首頁同一套（`app/reading.module.css`）——從這裡點進去，
+   版心與標題不會跳。這裡只寫這一頁自己的間距。
 
-   照抄而不抽成共用，理由只是目前只有這兩頁。符號頁那邊「排版不抽成共用」的註解講的是它與
-   說明卡**值刻意不同**，不適用於這裡：這兩頁的值是刻意相同的。第三張讀物頁（票 07 的首頁）
-   若也要同一套，那時就該抽出來，而不是抄第三份。 */
+   符號頁那邊「排版不抽成共用」的註解講的是它與說明卡**值刻意不同**，不適用於這裡：
+   這幾頁的值是刻意相同的。 */
 .page {
-  padding: 22px 20px 40px;
+  composes: page from "../../reading.module.css";
 }
 
-/* 寬螢幕上一行字不該橫跨整個視窗，與符號頁同寬：從這裡點進去，版心不會跳。 */
 .column {
-  display: flex;
-  flex-direction: column;
+  composes: column from "../../reading.module.css";
   gap: 10px;
-  max-width: 560px;
-  margin: 0 auto;
 }
 
 .category {
-  margin: 0;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.1em;
-  color: var(--ink3);
+  composes: eyebrow from "../../reading.module.css";
 }
 
-/* 標題是一個問句，而且是這一頁唯一的大字。明體：這一頁是讀物不是介面。 */
+/* 標題是一個問句。 */
 .title {
+  composes: title from "../../reading.module.css";
   margin: 0;
-  font-family: var(--serif);
-  font-size: 29px;
-  font-weight: 700;
-  line-height: 1.42;
-  letter-spacing: 0.01em;
 }
 
 /* 搜尋框夾在標題與「共 N 個符號」之間，上下多留一點：它是一個工具，不是標題的副標、也不是清單的第一列。 */

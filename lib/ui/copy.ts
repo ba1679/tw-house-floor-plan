@@ -81,6 +81,56 @@ export const occurrenceLabel = (total: number, index: number) =>
 /** 「跟○○的差別」——容易搞混區塊裡每一則的標題。 */
 export const confusedWithLabel = (otherName: string) => `跟${otherName}的差別`;
 
+/** 站名。根版面的預設標題、首頁標題上方那一行小字，都是它。 */
+export const SITE_NAME = "平面圖教學";
+
+/**
+ * 首頁那一句主張，照 PRD §8 資訊架構圖上的原句。
+ *
+ * 一個問句而不是介紹：讀者多半以為自己看得懂平面圖，這一句先讓他懷疑一下，底下那個按鈕才有人按。
+ * 「這裡在幹嘛」由緊接著的 `HOME_LEDE` 說。
+ */
+export const HOME_CLAIM = "一張平面圖，你真的看得懂嗎？";
+
+/** 主張底下那一句：這個網站替你做什麼。一句，不展開成產品敘事（票 07「要小」）。 */
+export const HOME_LEDE = "點圖上的符號，就知道它是什麼、該注意什麼，以及這個說法出自哪一級文件。";
+
+/**
+ * 首頁的標題。與平面圖頁的標題**對照著取**（`layoutPageTitle`，票 07）：這一頁是站上唯一一頁以
+ * 網站本身為主題的頁，所以站名在前；平面圖頁說的是那一張圖。
+ *
+ * 與 `HOME_CLAIM` 刻意不同句，與符號頁、分類頁「`<title>` 與 `<h1>` 同一句」的規矩不同：那兩種頁是
+ * 搜尋落地頁，標題要長得像使用者打的那句話；首頁的主張是一個問句，放進搜尋結果裡看不出這是哪個網站。
+ */
+export const HOME_PAGE_TITLE = `${SITE_NAME}：看懂建案平面圖上的符號`;
+
+/** 首頁的 meta description：這個網站替誰做什麼，以及站上有哪幾條路（進圖、搜尋、依分類）。 */
+export const HOME_PAGE_DESCRIPTION =
+  "教買房的人看懂建案平面圖：點圖上的符號，就知道它是什麼、該注意什麼，以及這個說法出自哪一級文件。也可以直接搜尋，或依分類瀏覽。";
+
+/**
+ * 首頁那個進平面圖的按鈕（PRD §8「開始探索三房兩廳」）。**格局名由呼叫端從 floorplan 資料取來**，
+ * 不寫在這裡：寫死「三房兩廳」，M6 加第 2 張圖時這一行就是第二份會跟資料分岔的名字。
+ */
+export const homePlanButton = (layoutName: string) => `開始探索${layoutName}`;
+
+/** 首頁分類入口那一區的標題。 */
+export const HOME_BROWSE_LABEL = "依分類瀏覽";
+
+/**
+ * 平面圖頁的標題。與首頁的標題**對照著取**（票 07）：首頁說的是這個網站，這一頁說的是這一張圖——
+ * 在一排搜尋結果裡，兩條要看得出是兩頁。與符號頁、分類頁同一個作法，長得像使用者會打進 Google 的那句話。
+ *
+ * **這一句只進 `<title>`，不進 `<h1>`**，與符號頁、分類頁那條「兩者同一句」的規矩刻意不同，
+ * 理由寫在 `app/layouts/[id]/page.tsx` 的 `generateMetadata`。
+ * 格局名由呼叫端從 floorplan 資料取來，理由同 `homePlanButton`。
+ */
+export const layoutPageTitle = (layoutName: string) => `${layoutName}平面圖怎麼看？`;
+
+/** 平面圖頁的 meta description：這一頁能讓他做什麼，以及與內容農場的差別（同 `symbolPageDescription`）。 */
+export const layoutPageDescription = (layoutName: string) =>
+  `一張點得動的${layoutName}平面圖：點圖上任何一個符號，就知道它是什麼、該注意什麼，以及這個說法出自哪一級文件。`;
+
 /** PRD §6.4 的完整一句，一字不改。每頁固定顯示。 */
 export const DISCLAIMER =
   "本網站符號說明為一般通用慣例，不同建商 / 設計師畫法可能有差異，實際請以個案圖說或現場人員說明為準。";

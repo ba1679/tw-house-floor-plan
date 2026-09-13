@@ -1,0 +1,37 @@
+/* 讀物頁的版心與標題：符號頁、分類頁、首頁三頁共用，各自 `composes` 進去。
+   這三頁刻意長得一樣——從任何一頁點到另一頁，版心與標題不會跳。
+   原本是符號頁與分類頁兩份照抄，分類頁的 CSS 註解說好了第三頁出現時抽出來，這裡就是那一份。
+
+   **只放三頁的值真的相同的屬性。** 區塊之間的 `gap` 與標題的 `margin` 三頁各不相同
+   （符號頁的標題要往上吃掉一段 gap），留在各頁自己的檔案裡。同一個屬性不得在這裡與各頁同時寫：
+   composes 進來的 class 與頁面自己的 class 誰蓋過誰，取決於兩份 CSS 在打包後的先後，
+   那不是這個檔案控制得了的事。 */
+.page {
+  padding: 22px 20px 40px;
+}
+
+/* 手機優先，但寬螢幕上一行字不該橫跨整個視窗——長行讀起來會掉行。 */
+.column {
+  display: flex;
+  flex-direction: column;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+/* 標題上方那一行小字：符號頁與分類頁放分類名，首頁放站名。 */
+.eyebrow {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--ink3);
+}
+
+/* 這一頁唯一的大字。明體：這幾頁是讀物不是介面。 */
+.title {
+  font-family: var(--serif);
+  font-size: 29px;
+  font-weight: 700;
+  line-height: 1.42;
+  letter-spacing: 0.01em;
+}

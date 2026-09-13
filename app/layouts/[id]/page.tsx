@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { FloorPlanViewer } from "@/components/FloorPlanViewer";
 import { listLayoutIds, loadFloorPlan } from "@/lib/floorplan/data";
 import { readingOrder } from "@/lib/floorplan/reading-order";
 import { loadSymbolsForViewer } from "@/lib/symbols/data";
+import { layoutPageDescription, layoutPageTitle } from "@/lib/ui/copy";
 import styles from "./page.module.css";
 
 // 網址以 layout（格局）id 定址，頁面渲染的是該 layout 展開出的 floorplan（PRD §8）。
@@ -10,6 +12,27 @@ export const dynamicParams = false;
 
 export function generateStaticParams() {
   return listLayoutIds().map((id) => ({ id }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  if (!listLayoutIds().includes(id)) return {};
+
+  // 每一張圖自己的標題與描述，由它自己的 `floorplan.name` 生成。沿用根版面那一句「平面圖教學」的話，
+  // 這一頁在搜尋結果上與首頁同名；寫死三房兩廳的話，M6 加第 2 張圖時兩頁又同名（spec「路由」）。
+  //
+  // **只改 `<title>` 與 meta，不動 `<h1>`**——與符號頁、分類頁「兩者同一句」的規矩刻意不同。
+  // 這一頁的 `<h1>` 是 100dvh 版面裡的一列（ADR-0003）：換成這一句，它在 375px 上會折成兩行，
+  // 檢視器的框就跟著變矮——說明卡升起時與矮螢幕上，正是票 04 的頁尾驗過的那一類風險。
+  const { name } = loadFloorPlan(id);
+  return {
+    title: layoutPageTitle(name),
+    description: layoutPageDescription(name),
+  };
 }
 
 export default async function LayoutPage({ params }: { params: Promise<{ id: string }> }) {

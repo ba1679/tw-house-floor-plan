@@ -3,36 +3,27 @@
 
    字級、線條、留白照 design/SymbolPage.dc.html，但**區塊順序不照它**——那份稿子把徽章
    排在末段、沒有「容易搞混」，而順序在 2026-09-12 的決議裡重排過（spec 的「符號頁」）。
-   拿設計稿對照這一頁的人請以 spec 為準：稿子在那一點上已經被推翻。 */
+   拿設計稿對照這一頁的人請以 spec 為準：稿子在那一點上已經被推翻。
+
+   版心、分類小字與標題的字型與分類頁、首頁同一套（`app/reading.module.css`）；
+   這裡只寫這一頁自己的區塊間距。 */
 .page {
-  padding: 22px 20px 40px;
+  composes: page from "../../reading.module.css";
 }
 
-/* 手機優先，但寬螢幕上一行字不該橫跨整個視窗——長行讀起來會掉行。 */
 .article {
-  display: flex;
-  flex-direction: column;
+  composes: column from "../../reading.module.css";
   gap: 24px;
-  max-width: 560px;
-  margin: 0 auto;
 }
 
 .category {
-  margin: 0;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.1em;
-  color: var(--ink3);
+  composes: eyebrow from "../../reading.module.css";
 }
 
-/* 標題是一個問句，而且是這一頁唯一的大字。明體：這一頁是讀物不是介面。 */
+/* 標題是一個問句。往上吃掉一段 gap：它與上面那行分類小字是同一組。 */
 .title {
+  composes: title from "../../reading.module.css";
   margin: -14px 0 0;
-  font-family: var(--serif);
-  font-size: 29px;
-  font-weight: 700;
-  line-height: 1.42;
-  letter-spacing: 0.01em;
 }
 
 .figure {

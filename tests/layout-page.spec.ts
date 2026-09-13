@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
-import { readdirSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+
+const titleOf = (html: string) => /<title[^>]*>([^<]*)<\/title>/.exec(html)?.[1];
+const descriptionOf = (html: string) =>
+  /<meta name="description" content="([^"]*)"/.exec(html)?.[1];
 
 // 這一組測的是曳光彈本身：資料檔 → 建置驗證 → 路由 → 渲染 → 真的在瀏覽器裡量得出尺寸。
 test.describe("/layouts/[id] 靜態平面圖", () => {
@@ -57,5 +61,29 @@ test.describe("/layouts/[id] 靜態平面圖", () => {
       .sort();
 
     expect(fromBuild).toEqual(fromData);
+  });
+
+  // 沿用根版面那一句「平面圖教學」的話，這一頁在搜尋結果上與首頁同名（spec「全站」）。
+  //
+  // 「根版面的那一句」**不從程式裡抄**：一頁沒有宣告自己的標題時拿到的是什麼，看 404 頁就知道——
+  // 它由根版面產出，而且不會有自己的標題。這樣根版面哪天換了字，這條不必跟著改。
+  //
+  // 標題與描述由**那張圖自己的資料**生成（`floorplan.name`），不寫死三房兩廳：M6 加第 2 張圖時不必回頭改。
+  test("每一張平面圖頁有自己的標題與 meta description，由那張圖的名字生成", () => {
+    const fallback = readFileSync("out/404.html", "utf8");
+
+    for (const file of readdirSync("data/layouts").filter((name) => name.endsWith(".floorplan.json"))) {
+      const floorplan: { id: string; name: string } = JSON.parse(
+        readFileSync(`data/layouts/${file}`, "utf8"),
+      );
+      const html = readFileSync(`out/layouts/${floorplan.id}.html`, "utf8");
+
+      expect(titleOf(html), floorplan.id).toContain(floorplan.name);
+      expect(titleOf(html), `${floorplan.id} 用的還是根版面的標題`).not.toBe(titleOf(fallback));
+      expect(descriptionOf(html), floorplan.id).toContain(floorplan.name);
+      expect(descriptionOf(html), `${floorplan.id} 用的還是根版面的描述`).not.toBe(
+        descriptionOf(fallback),
+      );
+    }
   });
 });

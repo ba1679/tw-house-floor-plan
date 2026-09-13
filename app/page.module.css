@@ -1,0 +1,120 @@
+/* 首頁一頁捲得完：一句主張、一個按鈕、搜尋框、分類入口（票 07「要小」）。
+   版心與標題與符號頁、分類頁同一套（`reading.module.css`）。 */
+.page {
+  composes: page from "./reading.module.css";
+}
+
+.column {
+  composes: column from "./reading.module.css";
+  gap: 10px;
+}
+
+.site {
+  composes: eyebrow from "./reading.module.css";
+}
+
+.title {
+  composes: title from "./reading.module.css";
+  margin: 0;
+}
+
+.lede {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.9;
+  color: var(--ink2);
+}
+
+/* 今天只有一張圖，所以只有一個按鈕；M6 多一張圖就多一個，排成一欄。 */
+.plans {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 14px 0 18px;
+}
+
+/* 這一頁**唯一**填滿底色的東西：從首頁進平面圖是這一頁存在的理由（PRD §8）。
+   底色用墨色不用 `--accent`：`--accent` 是這個站的連結色，白字壓在上面的對比不到 4.5:1。
+   高度超過 44px（PRD §9），手機上整條寬度都按得到。 */
+.planButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--paper);
+  background: var(--ink);
+  text-decoration: none;
+}
+
+.planButton:hover {
+  background: var(--ink2);
+}
+
+.planButton:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: 2px;
+}
+
+.browse {
+  display: flex;
+  flex-direction: column;
+  margin-top: 18px;
+}
+
+/* 與搜尋框的標籤同一個畫法：兩區在這一頁上是並列的兩條路，標題長得一樣。 */
+.browseLabel {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  color: var(--ink3);
+}
+
+/* 一列一格、格與格之間一條細線——與分類頁的清單、搜尋結果同一個畫法。 */
+.categories {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--rule2);
+}
+
+.categoryItem {
+  border-top: 1px solid var(--rule2);
+}
+
+/* 整列是一個連結，高度超過 44px（PRD §9）。 */
+.categoryLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.categoryName {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.categoryLink:hover .categoryName,
+.categoryLink:focus-visible .categoryName {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.categoryEn {
+  flex: none;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--ink3);
+}

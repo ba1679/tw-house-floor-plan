@@ -6,7 +6,7 @@ import { DISCLAIMER } from "@/lib/ui/copy";
 // PRD §6.4 要的是**每頁固定顯示**，所以這一組刻意不列舉路由。
 //
 // 列舉會讓這條規則在下一張票落地的那一刻悄悄失效：`/categories/[id]`（票 05）與這張票同一天
-// 落地，`/`（票 07）還不存在，而它們正是最需要被這條守住的頁面——一份只認得今天有哪些頁的清單，
+// 落地，`/`（票 07）當時還不存在，而它們正是最需要被這條守住的頁面——一份只認得今天有哪些頁的清單，
 // 明天多一頁時不會紅，只會少測一頁。改成掃過 `out/` 裡的每一個 `.html`，
 // 新頁面一產生就自動被要求帶著這句話，不必回頭改測試。
 //
@@ -67,6 +67,8 @@ test.describe("免責聲明的全站頁尾", () => {
     expect(pages.length).toBeGreaterThan(0);
     expect(pages).toContain(join("out", "layouts", "3b2l_standard.html"));
     expect(pages).toContain(join("out", "symbols", "wall.html"));
+    // spec Testing Decisions 第 18 條點名首頁。
+    expect(pages).toContain(join("out", "index.html"));
 
     for (const path of pages) {
       expect(textOf(readFileSync(path, "utf8")), `${path} 沒有免責聲明`).toContain(DISCLAIMER);
