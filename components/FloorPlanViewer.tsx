@@ -18,10 +18,11 @@ import { InfoSheet } from "./InfoSheet";
 import { useFirstVisitHint } from "./useFirstVisitHint";
 import { useViewerGestures } from "./useViewerGestures";
 import { planViewBox } from "@/lib/floorplan/drawing";
+import { hotspotsOfSymbol } from "@/lib/floorplan/hotspots";
 import { roomOfHotspot, type RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
 import type { SymbolRecord } from "@/lib/symbols/types";
-import { SYMBOL_NOT_FOUND, highlightStatus } from "@/lib/ui/copy";
+import { SYMBOL_NOT_FOUND, absentSymbolBanner, highlightStatus } from "@/lib/ui/copy";
 import {
   createViewerState,
   occurrencesOf,
@@ -109,12 +110,27 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
   // 用 `Object.hasOwn` 而不是「查不查得到」：`symbols` 是一個普通物件，`symbols["constructor"]`
   // 查得到 Object 原型上的東西，會被當成一個真的符號。
   const [symbolNotFound, setSymbolNotFound] = useState(false);
+
+  /**
+   * 帶進來的符號在這張圖上 0 處時，是哪一個——橫幅說的就是它（樑，M3 票 09）。留到使用者自己關掉為止。
+   *
+   * **不掛在狀態機的 `highlightedSymbol` 上**：那一欄在使用者開始選東西時就清掉（docs/adr/0006），
+   * 而橫幅要在兩段式點擊照常進行時留著。也不進 `ViewerState`：狀態機裡沒有任何判斷讀它——命中、stage、
+   * 視野都與它無關。它是畫面上的一條說明，與「找不到網址指定的符號」那一句是同一種東西。
+   *
+   * 0 處用 `hotspotsOfSymbol` 數，與符號頁決定按鈕要不要說「看不到」是同一個算法：按鈕說看不到，進來就有這條橫幅。
+   */
+  const [absentSymbol, setAbsentSymbol] = useState<string | null>(null);
   const highlightSymbol = useCallback(
     (symbolId: string) => {
-      if (Object.hasOwn(symbols, symbolId)) dispatch({ type: "HIGHLIGHT_SYMBOL", symbolId });
-      else setSymbolNotFound(true);
+      if (!Object.hasOwn(symbols, symbolId)) {
+        setSymbolNotFound(true);
+        return;
+      }
+      dispatch({ type: "HIGHLIGHT_SYMBOL", symbolId });
+      if (hotspotsOfSymbol(floorplan.hotspots, symbolId).length === 0) setAbsentSymbol(symbolId);
     },
-    [symbols],
+    [symbols, floorplan.hotspots],
   );
 
   // 使用者發起的手勢：拖曳平移、雙指縮放、雙擊放大，以及「哪一下才算點擊」。
@@ -242,6 +258,17 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
     : highlightTotal > 0
       ? highlightStatus(nameOf(state.highlightedSymbol), highlightTotal)
       : "";
+  /**
+   * 樑的那條橫幅此刻畫不畫（M3 票 09）。**說明卡升起時讓位**，收起來就回來——讓位不是關掉，關掉只有使用者自己按。
+   *
+   * 橫幅是版面裡的一列，它拿走的是高度。全圖時拿走的是留白（375 × 812 下框一 px 都沒少），而卡片一升起，
+   * 可視帶本來就只剩一條，再拿走一列就是從圖上挖：量過 334.7px → 231.3px，展開時 187.7px → 84.3px。
+   * 與頁尾讓位是同一個理由（`SiteFooter.module.css`）。條件與下面掛上 `<InfoSheet>` 的是同一個。
+   */
+  const banner =
+    absentSymbol && !(selectedSymbol && occurrence)
+      ? absentSymbolBanner(floorplan.name, nameOf(absentSymbol))
+      : null;
 
   const controls =
     state.stage === "candidates" ? (
@@ -260,6 +287,21 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
       <Suspense fallback={null}>
         <HighlightFromQuery onSymbol={highlightSymbol} />
       </Suspense>
+      {/* 帶進來的符號在這張圖上 0 處（樑，M3 票 09）：圖的正上方一條說明，說它為什麼不在圖上。
+          **在框的外面，不疊在圖上**：疊上去會蓋掉一塊圖，而且落在手勢的範圍裡——點橫幅會被當成點圖。
+          不開說明卡：他剛在符號頁讀完同樣的內容，而說明卡是綁著「選中了某個熱區」才開的。 */}
+      {banner && (
+        <div id="absent-symbol-banner" className={styles.banner}>
+          <p className={styles.bannerText}>
+            <span className={styles.bannerLead}>{banner.lead}</span>
+            {banner.reason}
+          </p>
+          {/* 只有使用者自己關得掉它：開始選東西、縮放、開關說明卡都不收——那些都不代表他讀過了。 */}
+          <button type="button" className={styles.bannerDismiss} onClick={() => setAbsentSymbol(null)}>
+            {banner.dismiss}
+          </button>
+        </div>
+      )}
       <div
         id="floorplan-viewport"
         ref={viewportRef}

@@ -165,3 +165,34 @@
   line-height: 1.7;
   color: var(--ink2);
 }
+
+/* 圖上看不到的符號（樑）落地時的那條橫幅（M3 票 09）。
+   左邊那條琥珀色與高亮的邊同色：兩者都是「從符號頁帶進來的那一層」，一個亮在圖上，一個說圖上為什麼沒有。 */
+.banner {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-left: 3px solid oklch(0.68 0.15 75);
+  background: var(--paper2);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.bannerText {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+/* 與控制列的按鈕同一個樣子、同樣點得到（44px）。 */
+.bannerDismiss {
+  composes: control;
+  flex: 0 0 auto;
+}
+
+.bannerLead {
+  font-weight: 700;
+}

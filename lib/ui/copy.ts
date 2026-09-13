@@ -90,6 +90,33 @@ export const occurrenceLabel = (total: number, index: number) =>
 export const SYMBOL_LAYOUT_BUTTON = "這個符號在真實格局裡長怎樣";
 
 /**
+ * 符號在那個 layout 上 0 處時，轉換點按鈕換成這一句（PRD §6.2.1 的例外，M3 票 09）。今天只有樑：建案平面圖不畫樑（PRD §4.2）。
+ *
+ * **誠實說看不到**，不說「這個符號在真實格局裡長怎樣」——那會帶讀者去找一個不存在的東西，
+ * 他進去之後找不到，會以為網站壞了（spec user story 18）。按下去照樣是同一個網址、同一個機制：「圖上找不到」本身就是內容。
+ *
+ * 帶格局名：「看不到」要說得出是在哪一張圖上。名字由呼叫端從 floorplan 取來，不寫死三房兩廳。
+ */
+export const absentSymbolButton = (layoutName: string, symbolName: string) =>
+  `這張${layoutName}上看不到${symbolName}——這正是重點`;
+
+/**
+ * 從「看不到」那顆按鈕進來時，平面圖上那條橫幅（M3 票 09）。
+ *
+ * - `lead` 接著他剛按下的那一句說：他到對地方了，圖上確實沒有——不是網站壞了（spec user story 18）。
+ * - `reason` 說為什麼。「看不到」這件事本身就是他要學的東西（user story 19）：你看不到它，所以要問。
+ * - `dismiss` 是關掉它的那顆按鈕。字而不是一個 ×：站在接待中心單手拿手機的人，一個 × 要猜；「知道了」不必。
+ *
+ * **`reason` 是為樑寫的**（PRD §4.2：建案平面圖不畫樑，它在施工圖與結構圖上）。今天圖上 0 處的符號只有樑；
+ * 第二個出現時，`scripts/validate_data.py` 那條「宣稱在某張圖上、該圖卻沒有熱區」的 warning 會提醒回來看這一句。
+ */
+export const absentSymbolBanner = (layoutName: string, symbolName: string) => ({
+  lead: `這張${layoutName}上看不到${symbolName}。`,
+  reason: `建案平面圖多半不畫${symbolName}，它在施工圖與結構圖上。你看不到它，所以要問建商。`,
+  dismiss: "知道了",
+});
+
+/**
  * 從符號頁落地時，平面圖的狀態列說的那一句（M3 票 08；規格主人 2026-09-13 的決定 D2）。
  * N 由 floorplan.hotspots 算出來，不得寫死（同 `occurrenceLabel`）。對到 0 處時呼叫端不說這一句——那是樑，由橫幅接手。
  */

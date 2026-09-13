@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SourceTierPanel } from "@/components/SourceTierPanel";
 import { SymbolArt } from "@/components/SymbolArt";
+import { loadFloorPlan } from "@/lib/floorplan/data";
+import { hotspotsOfSymbol } from "@/lib/floorplan/hotspots";
 import { loadSymbolsForPages } from "@/lib/symbols/data";
 import { printedSourceRefs } from "@/lib/symbols/source-refs";
 import { highlightHref } from "@/lib/viewer/highlight";
@@ -10,6 +12,7 @@ import {
   CATEGORY_LABELS,
   SECTION_LABELS,
   SYMBOL_LAYOUT_BUTTON,
+  absentSymbolButton,
   confusedWithLabel,
   symbolPageDescription,
   symbolPageTitle,
@@ -139,15 +142,23 @@ export default async function SymbolPage({ params }: { params: Promise<{ id: str
 
             **帶去哪裡由資料決定**（`related_layouts`，編輯決定而不是統計，CONTEXT.md），不寫死
             3b2l_standard；有幾個 layout 就幾顆，今天是一顆。字照 PRD 原句、不帶格局名（理由在 `SYMBOL_LAYOUT_BUTTON`）。
-            **第 2 張圖進來的那一天這裡要回頭改**：兩顆按鈕的字一模一樣，讀螢幕的人分不出哪個通往哪裡。 */}
+            **第 2 張圖進來的那一天這裡要回頭改**：兩顆按鈕的字一模一樣，讀螢幕的人分不出哪個通往哪裡。
+
+            **這個符號在那張圖上 0 處時，只換字**（樑，M3 票 09）：誠實說看不到，網址與畫法都不變——
+            「圖上找不到」本身就是內容，進去之後由檢視器的橫幅說明為什麼。在不在圖上直接數那張圖的 hotspots，
+            與檢視器數「共 N 處」是同一個算法（`hotspotsOfSymbol`）。 */}
         <div className={styles.layoutLinks}>
-          {symbol.related_layouts.map((layoutId) => (
-            <Link key={layoutId} className={styles.layoutLink} href={highlightHref(layoutId, symbol.id)}>
-              {SYMBOL_LAYOUT_BUTTON}
-              {/* 箭頭是給看得見的人的方向感；讀螢幕的人聽到那一句就夠了（同首頁那顆）。 */}
-              <span aria-hidden="true">→</span>
-            </Link>
-          ))}
+          {symbol.related_layouts.map((layoutId) => {
+            const floorplan = loadFloorPlan(layoutId);
+            const absent = hotspotsOfSymbol(floorplan.hotspots, symbol.id).length === 0;
+            return (
+              <Link key={layoutId} className={styles.layoutLink} href={highlightHref(layoutId, symbol.id)}>
+                {absent ? absentSymbolButton(floorplan.name, symbol.name) : SYMBOL_LAYOUT_BUTTON}
+                {/* 箭頭是給看得見的人的方向感；讀螢幕的人聽到那一句就夠了（同首頁那顆）。 */}
+                <span aria-hidden="true">→</span>
+              </Link>
+            );
+          })}
         </div>
       </article>
     </main>

@@ -1,4 +1,4 @@
-import { hasSymbol, rectOf } from "@/lib/floorplan/hotspots";
+import { hasSymbol, hotspotsOfSymbol, rectOf } from "@/lib/floorplan/hotspots";
 import type { Hotspot, ViewBox } from "@/lib/floorplan/types";
 import {
   clampView,
@@ -489,7 +489,7 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
  * 卻要讓狀態機從此依賴 symbol 的分類（閱讀順序需要它）才排得出自己的熱區。
  */
 export function occurrencesOf(s: ViewerState, symbolId: string | null): Hotspot[] {
-  return symbolId === null ? [] : s.hotspots.filter((h) => h.symbol_id === symbolId);
+  return symbolId === null ? [] : hotspotsOfSymbol(s.hotspots, symbolId);
 }
 
 /** 「這張圖上共 N 處 · 目前第 M 處」的 N 與 M。兩個數字永遠一起走，所以綁成一個值。 */

@@ -238,7 +238,172 @@ test.describe("落地時的狀態列", () => {
   });
 });
 
+// 樑是清單上唯一圖上沒有的符號（PRD §4.2）：建案平面圖不畫樑，它在施工圖與結構圖上。
+// 「圖上找不到」本身就是內容，所以它**走同一個網址、同一個機制**，特例只落在呈現上（M3 票 09）：
+// 按鈕誠實說看不到（user story 18），落地後圖上一條橫幅說明為什麼（user story 19），不開說明卡。
+test.describe("樑：這張圖上看不到它", () => {
+  const beam = symbols.find((s) => s.id === "beam")!;
+  const [layoutId] = beam.related_layouts;
+  /** 字照 PRD §6.2.1 的原句。箭頭是 aria-hidden 的，不在按鈕的名字裡。 */
+  const BEAM_BUTTON = "這張三房兩廳上看不到樑——這正是重點";
+  const banner = (page: Page) => page.locator("#absent-symbol-banner");
+
+  test("樑的符號頁：按鈕說這張圖上看不到樑，按下去照樣進 related_layouts 指的那張圖", async ({ page }) => {
+    // 前提：樑在那張圖上真的是 0 處。哪天有人畫了一根樑，這一組問的就不是「看不到」了。
+    expect(hotspotIdsOf("beam", layoutId), `樑在 ${layoutId} 上有熱區，這一組的前提不成立`).toEqual([]);
+
+    await page.goto("/symbols/beam");
+    await page.getByRole("link", { name: BEAM_BUTTON, exact: true }).click();
+
+    await expect(page).toHaveURL(`/layouts/${layoutId}?symbol=beam`);
+  });
+
+  test("落地：圖上一條橫幅說明樑為什麼不在圖上，說明卡沒有開", async ({ page }) => {
+    await page.goto("/symbols/beam");
+    await page.getByRole("link", { name: BEAM_BUTTON, exact: true }).click();
+
+    // 先等橫幅出來（網址在 hydration 之後才讀得到），底下「沒有開」的斷言才不會在什麼都還沒發生時就通過。
+    await expect(banner(page)).toBeVisible();
+    // 講清楚為什麼：建案平面圖不畫樑，它在施工圖與結構圖上（spec「樑（0 個匹配熱區）」）。
+    await expect(banner(page)).toContainText("看不到樑");
+    await expect(banner(page)).toContainText("施工圖與結構圖");
+
+    // 不開說明卡：他剛在符號頁讀完同樣的內容；而且說明卡是綁著「選中了某個熱區」才開的。
+    await expect(page.locator("#info-sheet")).toBeHidden();
+    await expect(page.locator('#hotspot-layer [data-state="highlighted"]')).toHaveCount(0);
+    // 狀態列不說「樑在這張圖上共 0 處，都亮起來了。」——對到 0 處時由橫幅接手（決定 D2）。
+    await expect(page.getByRole("status")).not.toContainText("都亮起來了");
+  });
+
+  /** 兩段式選一個熱區：點它的正中央圈出候選，放大之後重新量、再點一次正中央確認（同 two-stage-tap.spec.ts）。 */
+  async function selectByTwoTaps(page: Page, selector: string) {
+    const target = page.locator(selector);
+    const before = (await target.boundingBox())!;
+    await page.mouse.click(before.x + before.width / 2, before.y + before.height / 2);
+    await expect(target).toHaveAttribute("data-state", "candidate");
+    const zoomed = (await target.boundingBox())!;
+    await page.mouse.click(zoomed.x + zoomed.width / 2, zoomed.y + zoomed.height / 2);
+    await expect(target).toHaveAttribute("data-state", "selected");
+  }
+
+  test("橫幅關得掉；關掉之後兩段式點擊照常開得出說明卡", async ({ page }) => {
+    await page.goto(`/layouts/${layoutId}?symbol=beam`);
+    await expect(banner(page)).toBeVisible();
+
+    await banner(page).getByRole("button", { name: "知道了" }).click();
+    await expect(banner(page)).toBeHidden();
+
+    await selectByTwoTaps(page, "#hs-win-living");
+    await expect(page.locator("#info-sheet")).toBeVisible();
+    // 關掉說明卡回到 browsing，橫幅也沒有自己回來：關掉就是關掉了。
+    await page.getByRole("button", { name: "關閉說明" }).click();
+    await expect(page.locator("#info-sheet")).toBeHidden();
+    await expect(banner(page)).toBeHidden();
+  });
+
+  // 橫幅不是一個要先關掉才能繼續的東西；反過來，這些操作也不會替使用者把它收掉——那些都不代表他讀過了。
+  // 後半是「橫幅不能直接掛在 highlightedSymbol 上」在畫面上的樣子：那一欄在開始選東西時就清掉（docs/adr/0006）。
+  test("橫幅在的時候，雙指縮放、拖曳、兩段式點擊照常；它一路留著，直到使用者自己關", async ({ page }) => {
+    await page.goto(`/layouts/${layoutId}?symbol=beam`);
+    await expect(banner(page)).toBeVisible();
+    const plan = page.locator(`svg#floorplan-${layoutId}`);
+    const fit = (await plan.boundingBox())!;
+
+    await pinch(page, { x: fit.x + fit.width / 2, y: fit.y + fit.height / 2 }, 100, 250);
+    const zoomed = (await plan.boundingBox())!;
+    expect(zoomed.width).toBeCloseTo(fit.width * 2.5, 0);
+
+    const frame = (await page.locator("#floorplan-viewport").boundingBox())!;
+    await dragLeft(page, { x: frame.x + frame.width / 2, y: frame.y + frame.height / 2 }, 60);
+    expect((await plan.boundingBox())!.x).toBeCloseTo(zoomed.x - 60, 0);
+
+    await page.getByRole("button", { name: "回到全圖" }).click();
+    await expect.poll(async () => (await plan.boundingBox())!.width).toBeCloseTo(fit.width, 0);
+    await expect(banner(page)).toBeVisible();
+
+    await selectByTwoTaps(page, "#hs-win-living");
+    await page.getByRole("button", { name: "關閉說明" }).click();
+    await expect(page.locator("#info-sheet")).toBeHidden();
+    await expect(banner(page)).toBeVisible();
+  });
+
+  // 375px 下橫幅不能把圖擠到無法操作。橫幅是版面裡的一列（在框的外面），所以它拿走的是高度：
+  //  - 全圖時拿走的是留白——這張圖在 375 × 812 本來就有用不掉的空間，框一 px 都沒少。
+  //  - 說明卡升起時，可視帶已經只剩一條，橫幅再拿走一列就是從圖上挖（量過：334.7px → 231.3px，
+  //    展開時 187.7px → 84.3px）。所以卡片開著時它讓位，與頁尾同一個理由（SiteFooter.module.css）；
+  //    讓位不是關掉，卡片收起來它就回來。
+  // 高度拿「同一張圖、沒有帶符號進來」的同一個操作來比，不寫死 px：比的是「橫幅有沒有拿走東西」。
+  test("375px：橫幅不擠圖——全圖時框一樣高；說明卡升起時它讓位，收起來又回來", async ({ page }) => {
+    const frameOf = async () => (await page.locator("#floorplan-viewport").boundingBox())!;
+
+    await page.goto(`/layouts/${layoutId}`);
+    const plainFit = await frameOf();
+    await selectByTwoTaps(page, "#hs-win-living");
+    await expect(page.locator("#info-sheet")).toBeVisible();
+    const plainSheet = await frameOf();
+
+    await page.goto(`/layouts/${layoutId}?symbol=beam`);
+    await expect(banner(page)).toBeVisible();
+    const withBanner = await frameOf();
+    const bannerBox = (await banner(page).boundingBox())!;
+    expect(bannerBox.y + bannerBox.height, "橫幅疊到圖上了").toBeLessThanOrEqual(withBanner.y);
+    expect(withBanner.height).toBeCloseTo(plainFit.height, 0);
+
+    await selectByTwoTaps(page, "#hs-win-living");
+    await expect(page.locator("#info-sheet")).toBeVisible();
+    await expect(banner(page)).toBeHidden();
+    await expect.poll(async () => (await frameOf()).height).toBeCloseTo(plainSheet.height, 0);
+
+    await page.getByRole("button", { name: "關閉說明" }).click();
+    await expect(banner(page)).toBeVisible();
+  });
+
+  // 橫幅的條件是「帶進來的符號在圖上 0 處」，不是「這是樑」——其餘的符號走同一條路，照樣亮、沒有橫幅。
+  test("其餘的符號：落地照樣亮起它的每一處，不出現橫幅", async ({ page }) => {
+    const others = symbols.filter((s) => s.id !== "beam");
+    expect(others.length, "資料裡除了樑沒有別的符號，這條測試沒有東西可以問").toBeGreaterThan(0);
+
+    for (const s of others) {
+      const [target] = s.related_layouts;
+      const expected = hotspotIdsOf(s.id, target);
+      expect(expected.length, `${s.id} 在 ${target} 上是 0 處——它該走樑那條路，這條測試的前提不成立`).toBeGreaterThan(0);
+
+      await page.goto(`/layouts/${target}?symbol=${s.id}`);
+      // 先等亮起來（網址在 hydration 之後才讀得到），「沒有橫幅」才不是在什麼都還沒發生時就通過。
+      await expect.poll(() => highlightedIds(page), s.id).toEqual(expected);
+      await expect(banner(page), s.id).toBeHidden();
+    }
+  });
+});
+
 test.describe("建置產物", () => {
+  // 按鈕要不要改說「看不到」由那張圖的 hotspots 決定，不寫死樑（M3 票 09）。期待值因此**不**在這裡自己數 hotspots——
+  // 那是把程式的算法抄一次，兩邊一起錯、一起過。「圖上沒有的只有樑」是 PRD §4.2 的決議，照抄那個決議，
+  // 再在前提裡跟資料對一次：資料與決議分岔的那一天，這條先說出來——橫幅那句「施工圖與結構圖」是為樑寫的。
+  test("「看不到」那一句只在樑的符號頁上，其餘每一頁照舊", () => {
+    const absent = symbols
+      .filter((s) => s.related_layouts.some((layoutId) => hotspotIdsOf(s.id, layoutId).length === 0))
+      .map((s) => s.id);
+    expect(
+      absent,
+      "圖上 0 處的符號不再只有樑：PRD §4.2 的決議與資料分岔了，lib/ui/copy.ts 的 absentSymbolBanner 是為樑寫的，要回頭看",
+    ).toEqual(["beam"]);
+
+    for (const s of symbols) {
+      const html = readFileSync(`out/symbols/${s.id}.html`, "utf8").replace(
+        /<script[\s\S]*?<\/script>/g,
+        "",
+      );
+      if (s.id === "beam") {
+        expect(html, s.id).toContain("這張三房兩廳上看不到樑——這正是重點");
+        expect(html, s.id).not.toContain("這個符號在真實格局裡長怎樣");
+      } else {
+        expect(html, s.id).toContain("這個符號在真實格局裡長怎樣");
+        expect(html, s.id).not.toContain("這正是重點");
+      }
+    }
+  });
+
   // 讀 `?symbol=` 的元件自己待在一個 Suspense 邊界裡（components/HighlightFromQuery.tsx）。
   // 邊界若包到整個檢視器外面，build 照樣會過、瀏覽器裡照樣會亮——壞掉的是靜態 HTML：
   // 圖整個不在裡面，要等 JavaScript 跑完才畫得出來。這一條只有拿靜態檔案本身來問才問得到。

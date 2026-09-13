@@ -306,10 +306,15 @@ for s in symbols:
     # 對不到任何格局的 id 上面已經報成 error，這裡不再多報一條「該圖沒有對應 hotspot」——根本沒有那張圖。
     declared = set(s.get("related_layouts") or []) & known_layouts
     real = actual.get(s["id"], set())
+    # 刻意的那一種（樑）在網站上有自己的樣子（M3 票 09）：符號頁的按鈕改說「這張圖上看不到」，
+    # 平面圖上跳一條橫幅說明為什麼。那條橫幅的說明是**為樑寫的**（施工圖與結構圖），所以訊息把這件事說出來——
+    # 第二個這樣的符號出現時，這條 warning 是唯一會提醒人回頭改那一句的地方。
     for lid in declared - real:
         warnings.append("%s 宣稱出現在 %s，但該圖沒有對應 hotspot——"
-                        "若是刻意的（例如「樑」：建案平面圖不畫樑，只做符號頁），"
-                        "這條警告就是預期行為；否則代表圖或清單少了東西" % (s["id"], lid))
+                        "若是刻意的（例如「樑」：建案平面圖不畫樑），這條警告就是預期行為："
+                        "符號頁的按鈕會改說這張圖上看不到它，平面圖上會跳一條橫幅說明為什麼。"
+                        "但那條橫幅的說明是為樑寫的（lib/ui/copy.ts 的 absentSymbolBanner），不是樑的話要回頭改那一句。"
+                        "若不是刻意的，代表圖或清單少了東西" % (s["id"], lid))
 
 # --- 報告 ---
 verified = sum(1 for s in symbols if s["verification_status"] == "verified")
