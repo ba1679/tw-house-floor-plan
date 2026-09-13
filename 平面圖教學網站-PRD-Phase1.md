@@ -410,7 +410,7 @@ symbol {
   // --- 核心（階段一即使用）---
   id: string                  // 穩定不可變 ID，例如 "beam_concealed"；一旦上線不得更改
   schema_version: number
-  category: enum [structure, door_window, plumbing_electric, fire_safety, furniture]
+  category: enum [structure, door_window, furniture]  // 階段一三類；plumbing_electric、fire_safety 是 v0.4 砍掉的設備類（§4.1）
   name: string                // 正式名稱，例如「暗樑」
   aliases: string[]           // 同義詞／俗稱／錯字，供搜尋比對
   svg_ref: string             // 對應的 SVG 圖形識別（`data/symbols.sprite.svg` 的 <symbol id>）

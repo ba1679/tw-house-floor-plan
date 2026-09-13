@@ -183,7 +183,7 @@ client 元件，索引在 build 時內嵌進頁面（14 筆 × `id`/`name`/`alia
 2. `related_layouts` 裡的每個 id 都對得到實際存在的 layout
 3. 每個 symbol 的 `category` 必須落在**階段一的三類**（`structure` / `door_window` / `furniture`）。`validate_data.py` 現在的 `VALID_CATEGORIES` 還留著 v0.4 砍掉的 `plumbing_electric` 與 `fire_safety`，要收窄；錯誤訊息要說明設備類是 v0.4 砍出範圍的，不是打錯字
 
-   **這一條刻意不寫成「每個 category 都有中文名」。** 中文名在 `lib/ui/copy.ts` 的 `CATEGORY_LABELS`，那是 TypeScript，掛在 prebuild 的 Python 驗證器讀不到它——寫成那樣就得在 Python 裡再抄一份中文名，變成第二份會分岔的清單。改成兩半各自用看得到事實的語言把關：**Python 管「資料裡的分類合不合法」，TypeScript 管「合法的分類有沒有中文名」**（`CATEGORY_LABELS` 型別是 `Record<SymbolCategory, …>`，少一個 key 直接編譯失敗）。合起來的保證與原本那條相同，但沒有重複的資料。
+   **這一條刻意不寫成「每個 category 都有中文名」。** 中文名在 `lib/ui/copy.ts` 的 `CATEGORY_LABELS`，那是 TypeScript，掛在 prebuild 的 Python 驗證器讀不到它——寫成那樣就得在 Python 裡再抄一份中文名，變成第二份會分岔的清單。改成兩半各自用看得到事實的語言把關：**Python 管「資料裡的分類合不合法」，TypeScript 管「合法的分類有沒有中文名」**（`CATEGORY_LABELS` 型別是 `Record<SymbolCategory, …>`，少一個 key 直接編譯失敗）。合起來的保證與原本那條相同，而**中文名只有一份**。兩半之間仍有一份手工同步的東西：合法分類的 id 清單本身（Python 的 `VALID_CATEGORIES` 與 TypeScript 的 `SymbolCategory`），由 `tests/build-validation.spec.ts` 比對，分岔時說得出是哪兩份。
 
 **「符號在不在那張圖上」維持 warning**，不升為 error。樑就是那個預期中的例外（PRD §10.1 明講不可以寫成 error，否則會逼未來的維護者為了消錯而畫一根不存在的樑）。
 
@@ -214,6 +214,8 @@ client 元件，索引在 build 時內嵌進頁面（14 筆 × `id`/`name`/`alia
 
 **② build 時資料驗證（既有）** — `tests/build-validation.spec.ts` 已經建立了「複製 `data/` 與 `scripts/` 到 tmp、改壞、跑 `validate_data.py`、斷言非零退出」的手法。三條新檢查各加一條測試，沿用同一個 sandbox，**不得改動 repo 裡的真資料**。
 
+**② 的延伸（2026-09-13 決議）** — 同一套 sandbox 手法另外用來跑一次 `tsc`，只為了票 05 那一條驗收條件：「文案常數少一個分類的中文名時，`npm run typecheck` 失敗」。那道保證住在 `CATEGORY_LABELS` 的型別註記上，不真的跑一次 tsc 就驗不到。它把 `app/`、`components/`、`lib/` 與 `tsconfig.json` 複製到 tmp、symlink `node_modules`、自己寫一份最小的 `next-env.d.ts`，約 3–4 秒。手法與 ② 相同（複製到 tmp、改壞、跑檢查、斷言非零退出），跑的檢查不同——寫在這裡，免得下一次 review 把它當成沒人同意過的第四條 seam。
+
 **③ 搜尋比對的純函式（新，唯一的新 seam）** — 跑在 Playwright 的 node context，不需要 `page` fixture，**不新增測試框架、不改 config**。
 
 第三條是對 M2「不另外替純模組開單元測試」那條規矩的**刻意破例**。M2 立那條規矩的理由很具體：已知的 bug 都躲在 client px → 圖面 cm 的換算層，只測純模組會把最會壞的地方留在測試外。這個理由在搜尋上不成立——比對邏輯與版面尺寸完全無關，而它的風險是**組合性的**（46 個 aliases × 大小寫 × 全形半形 × 空白），瀏覽器測試只能抽樣，抽不到的那一組就是會出事的那一組。
@@ -224,7 +226,7 @@ client 元件，索引在 build 時內嵌進頁面（14 筆 × `id`/`name`/`alia
 2. 14 個 symbol id 各自有一張 `/symbols/[id]`，都回 200
 3. 符號頁的標題不等於根版面的標題，且 14 頁彼此不同
 4. 符號頁的字全部來自資料：測試自己讀 `data/symbols.sample.json`，斷言頁面上出現的是**資料裡那一字不差的字串**。
-   **不要用「改一筆資料看頁面跟不跟著變」來測**——那需要重跑 `next build`，不屬於三條 seam 任何一條（`build-validation` 的 sandbox 只跑 `validate_data.py`）。測「渲染出來的等於資料裡的」已經足以證明沒有人把字寫死在元件裡，而且不必動到真資料
+   **不要用「改一筆資料看頁面跟不跟著變」來測**——那需要重跑 `next build`，不屬於三條 seam 任何一條（`build-validation` 的 sandbox 不跑 `next build`：它跑的是 `validate_data.py`，以及 ② 的延伸那一次 `tsc`）。測「渲染出來的等於資料裡的」已經足以證明沒有人把字寫死在元件裡，而且不必動到真資料
 5. `caution` 為 `null` 的符號（13/14），頁面上沒有「注意事項」這個標題
 6. 雨遮的頁面**有**注意事項
 7. 符號頁印得出 `source_refs` 的每一筆；`cns` 的四筆看得到 `via` 那一行
