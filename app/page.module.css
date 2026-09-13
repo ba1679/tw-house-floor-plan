@@ -25,8 +25,8 @@
   color: var(--ink2);
 }
 
-/* 今天只有一張圖，所以只有一個按鈕；M6 多一張圖就多一個，排成一欄。 */
-.plans {
+/* 今天只有一個 layout，所以只有一個按鈕；M6 多一張圖就多一個，排成一欄。 */
+.layouts {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -34,9 +34,11 @@
 }
 
 /* 這一頁**唯一**填滿底色的東西：從首頁進平面圖是這一頁存在的理由（PRD §8）。
-   底色用墨色不用 `--accent`：`--accent` 是這個站的連結色，白字壓在上面的對比不到 4.5:1。
+   底色用墨色不用 `--accent`：`--accent` 是這個站的連結色——底下的分類入口、搜尋結果、符號頁上的
+   每一個連結都是它。這一顆是這一頁唯一的主要動作，要一眼就與那些連結分得開。
+   紙色字壓在墨色上的對比約 15.8:1，滑過時的 `--ink2` 約 6.5:1。
    高度超過 44px（PRD §9），手機上整條寬度都按得到。 */
-.planButton {
+.layoutButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,11 +52,11 @@
   text-decoration: none;
 }
 
-.planButton:hover {
+.layoutButton:hover {
   background: var(--ink2);
 }
 
-.planButton:focus-visible {
+.layoutButton:focus-visible {
   outline: 2px solid var(--accent2);
   outline-offset: 2px;
 }
@@ -75,7 +77,9 @@
   color: var(--ink3);
 }
 
-/* 一列一格、格與格之間一條細線——與分類頁的清單、搜尋結果同一個畫法。 */
+/* 一列一格、格與格之間一條細線——與分類頁的清單、搜尋結果同一個畫法。
+   畫法相同但**不 composes 搜尋框的 class**：那是 `SearchBox` 自己的內部名字，首頁拿去用，
+   搜尋框改一次結果列，首頁的分類入口就跟著變。 */
 .categories {
   margin: 8px 0 0;
   padding: 0;

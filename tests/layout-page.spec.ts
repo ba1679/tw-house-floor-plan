@@ -1,9 +1,11 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync, readdirSync } from "node:fs";
+import { descriptionOf, rootLayoutFallback, titleOf } from "./built-html";
 
-const titleOf = (html: string) => /<title[^>]*>([^<]*)<\/title>/.exec(html)?.[1];
-const descriptionOf = (html: string) =>
-  /<meta name="description" content="([^"]*)"/.exec(html)?.[1];
+/** data/layouts 裡的 floorplan 資料檔。站上有哪些平面圖頁，由這份清單決定。 */
+const floorplanFiles = readdirSync("data/layouts").filter((name) =>
+  name.endsWith(".floorplan.json"),
+);
 
 // 這一組測的是曳光彈本身：資料檔 → 建置驗證 → 路由 → 渲染 → 真的在瀏覽器裡量得出尺寸。
 test.describe("/layouts/[id] 靜態平面圖", () => {
@@ -51,10 +53,7 @@ test.describe("/layouts/[id] 靜態平面圖", () => {
   // 第二張格局圖只要放資料檔進來就該有頁面。這條測的就是那件事：
   // build 出來的頁面集合，必須等於 data/layouts 裡的資料檔集合。
   test("站上有哪些格局由資料檔決定，不是寫死在程式裡", () => {
-    const fromData = readdirSync("data/layouts")
-      .filter((name) => name.endsWith(".floorplan.json"))
-      .map((name) => name.replace(".floorplan.json", ""))
-      .sort();
+    const fromData = floorplanFiles.map((name) => name.replace(".floorplan.json", "")).sort();
     const fromBuild = readdirSync("out/layouts")
       .filter((name) => name.endsWith(".html"))
       .map((name) => name.replace(".html", ""))
@@ -64,25 +63,25 @@ test.describe("/layouts/[id] 靜態平面圖", () => {
   });
 
   // 沿用根版面那一句「平面圖教學」的話，這一頁在搜尋結果上與首頁同名（spec「全站」）。
-  //
-  // 「根版面的那一句」**不從程式裡抄**：一頁沒有宣告自己的標題時拿到的是什麼，看 404 頁就知道——
-  // 它由根版面產出，而且不會有自己的標題。這樣根版面哪天換了字，這條不必跟著改。
+  // 「根版面那一句」從 404 頁讀，不從程式裡抄（`rootLayoutFallback`）。
   //
   // 標題與描述由**那張圖自己的資料**生成（`floorplan.name`），不寫死三房兩廳：M6 加第 2 張圖時不必回頭改。
+  // **這條擋不住寫死**：今天資料只有一張圖，把「三房兩廳平面圖怎麼看？」原封不動寫進程式也會過。
+  // 它擋得住的是「沿用根版面」與「名字對不上資料」；寫死那一道要等第 2 張圖進來才量得出來。
   test("每一張平面圖頁有自己的標題與 meta description，由那張圖的名字生成", () => {
-    const fallback = readFileSync("out/404.html", "utf8");
+    const fallback = rootLayoutFallback();
 
-    for (const file of readdirSync("data/layouts").filter((name) => name.endsWith(".floorplan.json"))) {
+    for (const file of floorplanFiles) {
       const floorplan: { id: string; name: string } = JSON.parse(
         readFileSync(`data/layouts/${file}`, "utf8"),
       );
       const html = readFileSync(`out/layouts/${floorplan.id}.html`, "utf8");
 
       expect(titleOf(html), floorplan.id).toContain(floorplan.name);
-      expect(titleOf(html), `${floorplan.id} 用的還是根版面的標題`).not.toBe(titleOf(fallback));
+      expect(fallback.titles, `${floorplan.id} 用的還是根版面的標題`).not.toContain(titleOf(html));
       expect(descriptionOf(html), floorplan.id).toContain(floorplan.name);
       expect(descriptionOf(html), `${floorplan.id} 用的還是根版面的描述`).not.toBe(
-        descriptionOf(fallback),
+        fallback.description,
       );
     }
   });

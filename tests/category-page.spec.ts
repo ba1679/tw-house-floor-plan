@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync, readdirSync } from "node:fs";
 import { categoryCountLabel } from "@/lib/ui/copy";
+import { descriptionOf, titleOf } from "./built-html";
 
 // 分類頁是給「想一類一類看完」的人走的那條路（spec user story 24）：打開三張頁，
 // 各自看到該分類底下有哪些符號，點任一個進到它的符號頁。
@@ -45,10 +46,6 @@ function textOf(html: string) {
     .replace(/&gt;/g, ">")
     .replace(/&amp;/g, "&");
 }
-
-const titleOf = (html: string) => /<title[^>]*>([^<]*)<\/title>/.exec(html)?.[1];
-const descriptionOf = (html: string) =>
-  /<meta name="description" content="([^"]*)"/.exec(html)?.[1];
 
 /** 這一頁列出了哪些符號——照出現的先後，一個連結一個。 */
 const listedSymbols = (id: string) =>

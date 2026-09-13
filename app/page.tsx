@@ -7,11 +7,11 @@ import {
   CATEGORY_LABELS,
   HOME_BROWSE_LABEL,
   HOME_CLAIM,
-  HOME_LEDE,
   HOME_PAGE_DESCRIPTION,
   HOME_PAGE_TITLE,
   SITE_NAME,
-  homePlanButton,
+  SITE_TAGLINE,
+  homeLayoutButton,
 } from "@/lib/ui/copy";
 import styles from "./page.module.css";
 
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  // **有幾張圖就有幾個按鈕，由 `data/layouts/` 決定。** 今天只有一張，所以就是一個。
+  // **有幾個 layout 就有幾個按鈕，由 `data/layouts/` 決定。** 今天只有三房兩廳，所以就是一個。
   // 不挑「第一張」當主打：哪一張該被主打是一個編輯決定，而那個決定不該藏在排序裡；
   // 也不寫死 `3b2l_standard`（spec「路由」）——M6 加第 2 張圖時，它自己長出第二個按鈕。
   const layouts = listLayoutIds().map((id) => ({ id, name: loadFloorPlan(id).name }));
@@ -38,12 +38,12 @@ export default function HomePage() {
       <div className={styles.column}>
         <p className={styles.site}>{SITE_NAME}</p>
         <h1 className={styles.title}>{HOME_CLAIM}</h1>
-        <p className={styles.lede}>{HOME_LEDE}</p>
+        <p className={styles.lede}>{SITE_TAGLINE}</p>
 
-        <div className={styles.plans}>
+        <div className={styles.layouts}>
           {layouts.map((layout) => (
-            <Link key={layout.id} className={styles.planButton} href={`/layouts/${layout.id}`}>
-              {homePlanButton(layout.name)}
+            <Link key={layout.id} className={styles.layoutButton} href={`/layouts/${layout.id}`}>
+              {homeLayoutButton(layout.name)}
               {/* 箭頭是給看得見的人的方向感；讀螢幕的人聽到「開始探索三房兩廳」就夠了。 */}
               <span aria-hidden="true">→</span>
             </Link>
@@ -55,7 +55,7 @@ export default function HomePage() {
 
         {/* 想一類一類看完的人從這裡走。有哪幾類由 `loadCategories()` 從資料算出，中文名從 `CATEGORY_LABELS` 來——
             與分類頁自己用的是同一份，這裡不另外手寫一份「就這 3 類」（PRD §9「不得各自維護副本」）。
-            每一類不附「共 N 個符號」：那是分類頁自己的前言，放到首頁就成了票面不要的統計數字。 */}
+            每一類不附「共 N 個符號」：那一行是分類頁清單的前言，離開清單就只剩一個數字，而這一頁要小。 */}
         <nav className={styles.browse} aria-labelledby="home-browse">
           <h2 id="home-browse" className={styles.browseLabel}>
             {HOME_BROWSE_LABEL}

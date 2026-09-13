@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync, readdirSync } from "node:fs";
+import { descriptionOf, titleOf } from "./built-html";
 
 // 符號頁是**搜尋落地頁**：有人在 Google 打「平面圖上的虛線是什麼」，點進來就落在這裡。
 // 他沒看過首頁，也不會往上找導覽，所以這一頁必須自己站得住（PRD §6.2.1）。
@@ -40,10 +41,6 @@ function textOf(html: string) {
     .replace(/&gt;/g, ">")
     .replace(/&amp;/g, "&");
 }
-
-const titleOf = (html: string) => /<title[^>]*>([^<]*)<\/title>/.exec(html)?.[1];
-const descriptionOf = (html: string) =>
-  /<meta name="description" content="([^"]*)"/.exec(html)?.[1];
 
 /** sprite 裡那一格畫的是什麼——一字不改的那一段 SVG。 */
 function spriteMarkup(svgRef: string) {

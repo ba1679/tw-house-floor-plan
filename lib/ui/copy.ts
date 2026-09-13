@@ -88,12 +88,15 @@ export const SITE_NAME = "平面圖教學";
  * 首頁那一句主張，照 PRD §8 資訊架構圖上的原句。
  *
  * 一個問句而不是介紹：讀者多半以為自己看得懂平面圖，這一句先讓他懷疑一下，底下那個按鈕才有人按。
- * 「這裡在幹嘛」由緊接著的 `HOME_LEDE` 說。
+ * 「這裡在幹嘛」由緊接著的 `SITE_TAGLINE` 說。
  */
 export const HOME_CLAIM = "一張平面圖，你真的看得懂嗎？";
 
-/** 主張底下那一句：這個網站替你做什麼。一句，不展開成產品敘事（票 07「要小」）。 */
-export const HOME_LEDE = "點圖上的符號，就知道它是什麼、該注意什麼，以及這個說法出自哪一級文件。";
+/**
+ * 這個網站替你做什麼的那一句。首頁的主張底下印它；首頁、平面圖頁、根版面的 meta description 都由它組出來——
+ * 同一個承諾在四個地方各寫一版，改一處就漏三處。一句，不展開成產品敘事（票 07「要小」）。
+ */
+export const SITE_TAGLINE = "點圖上的符號，就知道它是什麼、該注意什麼，以及這個說法出自哪一級文件。";
 
 /**
  * 首頁的標題。與平面圖頁的標題**對照著取**（`layoutPageTitle`，票 07）：這一頁是站上唯一一頁以
@@ -105,14 +108,13 @@ export const HOME_LEDE = "點圖上的符號，就知道它是什麼、該注意
 export const HOME_PAGE_TITLE = `${SITE_NAME}：看懂建案平面圖上的符號`;
 
 /** 首頁的 meta description：這個網站替誰做什麼，以及站上有哪幾條路（進圖、搜尋、依分類）。 */
-export const HOME_PAGE_DESCRIPTION =
-  "教買房的人看懂建案平面圖：點圖上的符號，就知道它是什麼、該注意什麼，以及這個說法出自哪一級文件。也可以直接搜尋，或依分類瀏覽。";
+export const HOME_PAGE_DESCRIPTION = `教買房的人看懂建案平面圖：${SITE_TAGLINE}也可以直接搜尋，或依分類瀏覽。`;
 
 /**
- * 首頁那個進平面圖的按鈕（PRD §8「開始探索三房兩廳」）。**格局名由呼叫端從 floorplan 資料取來**，
+ * 首頁那個進平面圖的按鈕（PRD §8「開始探索三房兩廳」），一個 layout 一個。**格局名由呼叫端從 floorplan 資料取來**，
  * 不寫在這裡：寫死「三房兩廳」，M6 加第 2 張圖時這一行就是第二份會跟資料分岔的名字。
  */
-export const homePlanButton = (layoutName: string) => `開始探索${layoutName}`;
+export const homeLayoutButton = (layoutName: string) => `開始探索${layoutName}`;
 
 /** 首頁分類入口那一區的標題。 */
 export const HOME_BROWSE_LABEL = "依分類瀏覽";
@@ -123,13 +125,13 @@ export const HOME_BROWSE_LABEL = "依分類瀏覽";
  *
  * **這一句只進 `<title>`，不進 `<h1>`**，與符號頁、分類頁那條「兩者同一句」的規矩刻意不同，
  * 理由寫在 `app/layouts/[id]/page.tsx` 的 `generateMetadata`。
- * 格局名由呼叫端從 floorplan 資料取來，理由同 `homePlanButton`。
+ * 格局名由呼叫端從 floorplan 資料取來，理由同 `homeLayoutButton`。
  */
 export const layoutPageTitle = (layoutName: string) => `${layoutName}平面圖怎麼看？`;
 
-/** 平面圖頁的 meta description：這一頁能讓他做什麼，以及與內容農場的差別（同 `symbolPageDescription`）。 */
+/** 平面圖頁的 meta description：這是哪一張圖，加上這個網站替你做什麼（`SITE_TAGLINE`）。 */
 export const layoutPageDescription = (layoutName: string) =>
-  `一張點得動的${layoutName}平面圖：點圖上任何一個符號，就知道它是什麼、該注意什麼，以及這個說法出自哪一級文件。`;
+  `一張點得動的${layoutName}平面圖。${SITE_TAGLINE}`;
 
 /** PRD §6.4 的完整一句，一字不改。每頁固定顯示。 */
 export const DISCLAIMER =
