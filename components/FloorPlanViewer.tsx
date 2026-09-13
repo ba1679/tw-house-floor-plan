@@ -21,7 +21,13 @@ import { planViewBox } from "@/lib/floorplan/drawing";
 import { roomOfHotspot, type RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
 import type { SymbolRecord } from "@/lib/symbols/types";
-import { createViewerState, reduceViewer, selectedOccurrence } from "@/lib/viewer/interaction";
+import { SYMBOL_NOT_FOUND, highlightStatus } from "@/lib/ui/copy";
+import {
+  createViewerState,
+  occurrencesOf,
+  reduceViewer,
+  selectedOccurrence,
+} from "@/lib/viewer/interaction";
 import { canvasTransform, isFitView } from "@/lib/viewer/view";
 import styles from "./FloorPlanViewer.module.css";
 
@@ -95,9 +101,20 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
 
   // 從符號頁按轉換點進來的人（`?symbol=`，M3 票 08）：那個符號在圖上的每一處一起亮。
   // 網址由 `HighlightFromQuery` 讀，它自己待在一個 Suspense 邊界裡——理由寫在那個元件上。
+  //
+  // **對不到任何符號的 id 不交給狀態機**（規格主人 2026-09-13 的決定 D4）：網址打錯或剪壞了，
+  // 狀態列說一聲找不到就好。擋在這裡，狀態機的 `highlightedSymbol` 永遠是一個真的符號——
+  // 「高亮了、但圖上 0 處」因此只會是樑那一種（票 09），不會混進一個打錯的網址。
+  //
+  // 用 `Object.hasOwn` 而不是「查不查得到」：`symbols` 是一個普通物件，`symbols["constructor"]`
+  // 查得到 Object 原型上的東西，會被當成一個真的符號。
+  const [symbolNotFound, setSymbolNotFound] = useState(false);
   const highlightSymbol = useCallback(
-    (symbolId: string) => dispatch({ type: "HIGHLIGHT_SYMBOL", symbolId }),
-    [],
+    (symbolId: string) => {
+      if (Object.hasOwn(symbols, symbolId)) dispatch({ type: "HIGHLIGHT_SYMBOL", symbolId });
+      else setSymbolNotFound(true);
+    },
+    [symbols],
   );
 
   // 使用者發起的手勢：拖曳平移、雙指縮放、雙擊放大，以及「哪一下才算點擊」。
@@ -113,6 +130,8 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
   const onPointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       dismiss();
+      // 「找不到網址指定的符號」與引導同一個時機退場：那一句的話也說完了。
+      setSymbolNotFound(false);
       // 手指一碰到圖，鍵盤那條路就結束了。少了這一行，用鍵盤開過卡片的人改用手指點圖時，
       // 下一張卡片會把焦點搶進去，關掉之後又跳回一個他根本沒碰過的熱區、順便把圖平移過去。
       setKeyboardOrigin(null);
@@ -155,6 +174,8 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
     if (event.key !== "Enter" && event.key !== " ") return;
     event.preventDefault();
     setKeyboardOrigin(event.currentTarget.id);
+    // 選定了一個熱區，「找不到網址指定的符號」那一句也說完了——不收的話，關掉卡片回到 browsing 時它又冒出來。
+    setSymbolNotFound(false);
     dispatch({ type: "SELECT_HOTSPOT", id: event.currentTarget.id });
   }, []);
 
@@ -207,6 +228,20 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
   const occurrence = selectedOccurrence(state);
   const nameOf = (symbolId: string | null) =>
     (symbolId && symbols[symbolId]?.name) || symbolId || "";
+
+  /**
+   * 落地時狀態列說的那一句（M3 票 08；規格主人 2026-09-13 的決定 D2、D4）。
+   *
+   * 讀螢幕的人看不到圖亮起來，而狀態列是 role="status"，它說的話會被唸出來；看得見的人也從「共 N 處」確認
+   * 全部都亮了。處數由 hotspots 算（`occurrencesOf`，與說明卡的「共 N 處」同一個算法）。
+   * **對到 0 處時不說**——那是樑，由橫幅接手（票 09）。
+   */
+  const highlightTotal = occurrencesOf(state, state.highlightedSymbol).length;
+  const landingLine = symbolNotFound
+    ? SYMBOL_NOT_FOUND
+    : highlightTotal > 0
+      ? highlightStatus(nameOf(state.highlightedSymbol), highlightTotal)
+      : "";
 
   const controls =
     state.stage === "candidates" ? (
@@ -313,9 +348,9 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
               : `放大了，圈出 ${state.candidates.length} 個候選。再點一次確認你要的那一個。`
             : state.lastTap
               ? "這附近沒有可以點的東西，換個地方點點看，或連點兩下放大這一區。"
-              : hint.visible
-                ? TAP_HINT
-                : ""}
+              : // 第一次進站的引導不讓位給落地那一句，接在它後面（決定 D2）：從符號頁進來的人
+                // 多半是第一次打開平面圖，而引導一出現就記成看過——讓位的話他從此聽不到它。
+                `${landingLine}${hint.visible ? TAP_HINT : ""}`}
       </p>
 
       {selectedSymbol && occurrence && (

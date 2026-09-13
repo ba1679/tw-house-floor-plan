@@ -296,14 +296,17 @@ function confirmSelection(
  * browsing 與 confirmed 都當作新的第一段：看完一張說明卡後直接點圖上別的地方就能看下一個，
  * 「重選」是明確的退出鍵，不是看下一個符號的必經步驟（PRD §11 #20）。
  *
- * **任何一下都清掉高亮**（M3 票 08）。高亮是從符號頁帶進來的脈絡，使用者一動手點圖，就是開始自己看了。
- * 點在一扇亮著的窗上也一樣：那一下是新的第一段，不是第二段的確認——stage 仍是 browsing，
- * 他從符號頁進來時根本沒有點過任何東西。雙擊的第一下同樣會清掉它（手勢層先把那一下當成一次點擊送出來，
- * 第二下才認得出是雙擊）——這一點與「縮放時高亮留著」互相拉扯，還沒定案（docs/adr/0006「後果」）。
+ * **開始選東西的那一下清掉高亮**（M3 票 08；規格主人 2026-09-13 的決定 D1）。高亮是從符號頁帶進來的脈絡，
+ * 使用者圈出候選，就是開始自己看了。點在一扇亮著的窗上也一樣：那一下是新的第一段，不是第二段的確認——
+ * stage 仍是 browsing，他從符號頁進來時根本沒有點過任何東西。第二段的確認由 `confirmSelection` 清。
+ *
+ * **點到空白處不清**：那一下沒有開始選任何東西。雙擊的第一下正是這種（手勢層要到第二下才認得出是雙擊），
+ * 清掉的話雙擊放大之後圖上什麼都不亮——想湊近看某一扇窗的人，用雙擊與用雙指該得到同一個結果。
  */
 function tap(s: ViewerState, x: number, y: number): ViewerState {
-  const cleared = { ...s, highlightedSymbol: null };
-  return cleared.stage === "candidates" ? confirmTap(cleared, x, y) : firstTap(cleared, x, y);
+  if (s.stage === "candidates") return confirmTap(s, x, y);
+  const next = firstTap(s, x, y);
+  return next.stage === "candidates" ? { ...next, highlightedSymbol: null } : next;
 }
 
 export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState {

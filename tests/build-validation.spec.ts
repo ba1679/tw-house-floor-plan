@@ -349,4 +349,21 @@ test.describe("related_layouts", () => {
     expect(output).toContain("layout_that_does_not_exist");
     expect(output).toContain("通往 404");
   });
+
+  // 空的 related_layouts 不會讓任何東西報錯，只會讓那一頁**安靜地沒有按鈕**——而那顆按鈕是把搜尋流量帶進平面圖的
+  // 唯一入口。所以它是必填（規格主人 2026-09-13 的決定 D3）。連樑都填得出值：它在圖上沒有熱區，我們照樣帶讀者去看。
+  test("related_layouts 是空陣列時，建置失敗，而且說得出那一頁會少什麼", () => {
+    const dir = sandbox();
+    const path = join(dir, SYMBOLS);
+    const data = JSON.parse(readFileSync(path, "utf8"));
+    const symbol = data.symbols[0];
+    symbol.related_layouts = [];
+    writeFileSync(path, JSON.stringify(data, null, 2));
+
+    const { code, output } = runValidator(dir);
+    expect(code, output).not.toBe(0);
+    expect(output).toContain(symbol.id);
+    expect(output).toContain("related_layouts");
+    expect(output).toContain("安靜地沒有按鈕");
+  });
 });

@@ -46,7 +46,7 @@ _Avoid_: 拿「來源」單獨指涉它（會與 source tier 混）、把它讀�
 _Avoid_: 狀態、進度、拿 `partial` 當「可能畫錯」的意思（畫法對不對是 source tier 那條軸的事）、把 `caution` 算成查證完備性的一部分
 
 **`related_layouts`**：
-這個符號的頁面該把讀者帶去哪幾張格局圖——一個**編輯決定**，不是統計結果。
+這個符號的頁面該把讀者帶去哪幾個 layout——一個**編輯決定**，不是統計結果。
 所以樑填 `['3b2l_standard']` 是對的：它在那張圖上沒有熱區，而我們**就是要**帶他去看那張看不到樑的圖（PRD §6.2.1 的特例）。
 「這張圖上有沒有這個符號」不靠這個欄位，直接數 `floorplan.hotspots`——那是唯一不會與資料分岔的算法（說明卡的「共 N 處」已經這樣算）。
 _Avoid_: 把它讀成「出現在哪些格局範例中」（PRD §7.2 的字面說法，會讓樑變成空陣列、按鈕沒有目標）
@@ -86,7 +86,8 @@ _Avoid_: tab 順序（它同時是 DOM 順序、也是讀螢幕的順序，不�
 單一 hotspot 此刻的狀態（`normal` / `candidate` / `selected` / `highlighted` / `quiz-target` / `discovered`）。純執行期資料，**不進任何資料檔**。
 `candidate` 是兩段式點擊第一段圈出的候選之一，`selected` 是第二段確認的那一個——兩件不同的事，
 不可用 `highlighted` 概括。`highlighted` 是 M3「符號頁 → 平面圖」的自動高亮（PRD §6.2.1）：
-從網址的 `?symbol=` 帶進來、那個 symbol 在圖上的每一處，使用者一點圖或按 Enter 選定一個就清掉（`docs/adr/0006`）。
+從網址的 `?symbol=` 帶進來、那個 symbol 在圖上的每一處。使用者開始選東西（點出候選、或按 Enter）就清掉；
+點到空白處、縮放、拖曳不清（`docs/adr/0006`）。
 _Avoid_: 模式、mode、idle（要說「沒有在互動」就用 `normal`）
 
 **Stage（互動階段）**：

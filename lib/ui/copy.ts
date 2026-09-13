@@ -89,6 +89,21 @@ export const occurrenceLabel = (total: number, index: number) =>
  */
 export const SYMBOL_LAYOUT_BUTTON = "這個符號在真實格局裡長怎樣";
 
+/**
+ * 從符號頁落地時，平面圖的狀態列說的那一句（M3 票 08；規格主人 2026-09-13 的決定 D2）。
+ * N 由 floorplan.hotspots 算出來，不得寫死（同 `occurrenceLabel`）。對到 0 處時呼叫端不說這一句——那是樑，由橫幅接手。
+ */
+export const highlightStatus = (name: string, total: number) =>
+  `${name}在這張圖上共 ${total} 處，都亮起來了。`;
+
+/**
+ * 網址的 `?symbol=` 對不到任何符號時，平面圖的狀態列說的那一句（決定 D4）。
+ *
+ * **不照印網址裡的字。**網址是別人造得出來的，照印等於讓第三方在這一頁上寫字——這與 `searchNoResult`
+ * 把讀者打的字複述回去不同，那是他自己打的。後半句給一個看得懂的原因，他才知道不是網站壞了。
+ */
+export const SYMBOL_NOT_FOUND = "找不到網址指定的符號，網址可能不完整。";
+
 /** 「跟○○的差別」——容易搞混區塊裡每一則的標題。 */
 export const confusedWithLabel = (otherName: string) => `跟${otherName}的差別`;
 

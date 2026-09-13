@@ -139,12 +139,22 @@ test.describe("高亮之中，browsing 的行為照常", () => {
     expect(await highlightedIds(page)).toEqual(expected);
   });
 
-  // 雙擊照樣放大一級（票面「高亮期間 pan / zoom / 雙擊 / 一鍵回全圖照常」）。
-  //
-  // **這條刻意不問高亮還在不在。** 雙擊的第一下在手勢層就是一次點擊（第二下才認得出是雙擊），而 spec 寫
-  // 「任何 TAP 清掉高亮」——所以現在雙擊之後高亮是清掉的。那與「縮放時高亮留著」（user story 16）互相拉扯，
-  // 留給規格的主人決定（票 08 的 Comments、docs/adr/0006「後果」）；在那之前不拿一條綠燈替其中一邊背書。
-  test("高亮之中雙擊照樣放大一級", async ({ page }) => {
+  // 點到空白處：這一下沒有開始選任何東西，高亮留著（規格主人 2026-09-13 的決定 D1）。
+  // 清掉高亮的是「開始選東西」——圈出候選的那一下、或 Enter——不是「手指碰到圖」。
+  test("點到空白處：高亮留著", async ({ page }) => {
+    await land(page);
+    const fit = (await planOf(page).boundingBox())!;
+
+    await page.mouse.click(blankSpot(fit).x, blankSpot(fit).y);
+
+    // 先等這一下畫上去（狀態列換成落空的提示），再問高亮——兩者在同一個 state 裡、同一次畫上去。
+    await expect(page.getByRole("status")).toContainText("換個地方");
+    expect(await highlightedIds(page)).toEqual(hotspotIdsOf("window", layoutId));
+  });
+
+  // 雙擊的第一下就是上面那種「點到空白處」（手勢層要到第二下才認得出是雙擊），所以高亮一路留到放大之後：
+  // 想湊近看某一扇窗的人，用雙擊與用雙指得到的是同一個結果（user story 16、決定 D1）。
+  test("雙擊放大一級，高亮仍然留著", async ({ page }) => {
     await land(page);
     const plan = planOf(page);
     const fit = (await plan.boundingBox())!;
@@ -152,6 +162,7 @@ test.describe("高亮之中，browsing 的行為照常", () => {
     await page.mouse.dblclick(blankSpot(fit).x, blankSpot(fit).y);
 
     await expect.poll(async () => (await plan.boundingBox())!.width).toBeCloseTo(fit.width * 2, 0);
+    expect(await highlightedIds(page)).toEqual(hotspotIdsOf("window", layoutId));
   });
 
   // CONTEXT.md 把 highlighted 與 candidate 分開登錄、明講不可互相概括，這一條是那句話在畫面上的樣子。
@@ -175,6 +186,55 @@ test.describe("高亮之中，browsing 的行為照常", () => {
     const candidate = await markingOf(page, "#hs-win-living");
     expect(highlighted.fill).not.toBe(candidate.fill);
     expect(highlighted.stroke).not.toBe(candidate.stroke);
+  });
+});
+
+test.describe("落地時的狀態列", () => {
+  const [layoutId] = symbols.find((s) => s.id === "window")!.related_layouts;
+  const statusOf = (page: Page) => page.getByRole("status");
+  /** 第一次進站的引導（票 05）。與 affordance-hint.spec.ts 同一句。 */
+  const TAP_HINT = "點圖上任何一個位置，我們會放大讓你看清楚";
+
+  // 讀螢幕的人看不到圖亮起來。狀態列是 role="status"，它說的話會被唸出來；看得見的人也從這一句確認「全部」都亮了
+  // （規格主人 2026-09-13 的決定 D2）。
+  // 第一次進站的引導**不讓位**：從 Google 經符號頁進來的人多半是第一次打開平面圖，而引導一出現就記成看過——
+  // 讓給高亮的話，他從此聽不到那句話。
+  test("說出這個符號在圖上共幾處；第一次來的人後面接著引導，回訪的人沒有", async ({ page }) => {
+    const symbol = symbols.find((s) => s.id === "window")!;
+    const sentence = `${symbol.name}在這張圖上共 ${hotspotIdsOf("window", layoutId).length} 處，都亮起來了。`;
+
+    await page.goto(`/layouts/${layoutId}?symbol=window`);
+    await expect(statusOf(page)).toHaveText(`${sentence}${TAP_HINT}`);
+
+    await page.reload();
+    // 等 client 決定完「以前來過沒有」再斷言：決定之前狀態列裡沒有引導，會用錯的理由通過（affordance-hint.spec.ts 的 decided）。
+    await expect(page.locator("#hotspot-layer")).toHaveAttribute("data-hint", /on|off/);
+    await expect(statusOf(page)).toHaveText(sentence);
+  });
+
+  // 網址打錯或剪壞了（決定 D4）：什麼都不亮，狀態列說找不到——不是一張什麼都沒發生的圖，
+  // 也不是樑的那條橫幅（樑是真的符號，只是圖上 0 處，票 09）。
+  test("網址帶的符號對不到：什麼都不亮，狀態列說找不到，而且不照印網址裡的字", async ({ page }) => {
+    // 兩種對不到：
+    //  - 一句像公告的話。網址是別人造得出來的，照印網址裡的字等於讓第三方在這一頁上寫字。
+    //  - `constructor`。符號表是一個普通物件，`symbols["constructor"]` 查得到 Object 原型上的東西——
+    //    用「查不查得到」判斷存在的話，它會被當成一個真的符號，以「0 處」的樣子混進樑的那條路（票 09）。
+    for (const bogus of ["本建案已售完請洽客服", "constructor"]) {
+      await page.goto(`/layouts/${layoutId}?symbol=${encodeURIComponent(bogus)}`);
+
+      await expect(statusOf(page), bogus).toContainText("找不到網址指定的符號");
+      await expect(statusOf(page), bogus).not.toContainText(bogus);
+      await expect(page.locator('#hotspot-layer [data-state="highlighted"]'), bogus).toHaveCount(0);
+    }
+
+    // 提示說完就退場，同第一次進站的引導：手指一碰到圖，接下來狀態列要說的是當下的事。
+    // 「重選」退回 browsing 之後才看得出它有沒有真的退場——那時狀態列又輪到落地那一句了。
+    const win = page.locator("#hs-win-living");
+    const box = (await win.boundingBox())!;
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    await page.getByRole("button", { name: "重選" }).click();
+    await expect(page.getByRole("button", { name: "重選" })).toBeHidden();
+    await expect(statusOf(page)).not.toContainText("找不到");
   });
 });
 

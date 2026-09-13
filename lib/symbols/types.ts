@@ -84,7 +84,8 @@ export type SymbolPageRecord = SymbolRecord & {
   /**
    * 這個符號的頁面該把讀者帶去哪幾個 layout（`/layouts/<id>`）——**編輯決定，不是統計**（CONTEXT.md「related_layouts」）。
    * 符號頁底部的轉換點由它決定去處（M3 票 08）。所以樑也有值：它在圖上沒有熱區，而我們就是要帶他去看那張看不到樑的圖。
-   * 每個 id 都對得到實際存在的格局，由 `scripts/validate_data.py` 在建置前擋。
+   * 至少一個，而且每個 id 都對得到實際存在的格局，由 `scripts/validate_data.py` 在建置前擋——
+   * 空陣列不會讓任何東西報錯，只會讓那一頁安靜地沒有按鈕（規格主人 2026-09-13 的決定 D3）。
    */
   related_layouts: string[];
 };
