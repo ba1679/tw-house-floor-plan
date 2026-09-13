@@ -108,6 +108,33 @@ export const symbolPageDescription = (plainMeaning: string) =>
 export const symbolArtLabel = (name: string) => `${name}在平面圖上的畫法`;
 
 /**
+ * 分類頁的標題——與符號頁同一個作法：**長得像使用者打進 Google 的那句話**
+ * （「平面圖 門窗符號 有哪些」），不是把分類的中文名直接當標題。
+ * 頁面的 `<title>` 與 `<h1>` 同一句，理由同 `symbolPageTitle`。
+ *
+ * 中文名由呼叫端從 `CATEGORY_LABELS` 取來再傳進來，這裡不自己查：查中文名那件事有它自己的
+ * 那一份常數，而那份常數的型別正是「少一類就編譯失敗」的那道保證——在這裡多開一條
+ * 用字串去查的路，就是多一個繞過它的地方。
+ */
+export const categoryPageTitle = (zh: string) => `平面圖上的${zh}符號有哪些？`;
+
+/**
+ * 分類頁的 meta description——**把這一類有哪些符號直接數給搜尋結果看**。
+ *
+ * 三張分類頁共用一句「瀏覽本站收錄的符號」的話，搜尋引擎會把它們當成同一頁（spec user story 31）；
+ * 名字則是從資料算出來的，哪天某一類多收一個符號，這一行自己跟著長。
+ */
+export const categoryPageDescription = (zh: string, names: string[]) =>
+  `${zh}類的平面圖符號共 ${names.length} 個：${names.join("、")}。` +
+  `每一個都說得出它是什麼，以及這個說法出自哪一級文件。`;
+
+/**
+ * 「共 N 個符號」。N 由該分類底下的符號算出來，不得寫死（同 `occurrenceLabel`）——
+ * 讀者往下捲之前先知道這一類有幾個，捲完之後自己數得出來的必須是同一個數字。
+ */
+export const categoryCountLabel = (count: number) => `共 ${count} 個符號`;
+
+/**
  * 轉載那一行：經由他人文件讀到某份標準，而未核對標準原文（CONTEXT.md「轉載」）。
  *
  * 印出來的成本是承認自己沒翻過原文，不印的代價是讀者以為我們翻過——

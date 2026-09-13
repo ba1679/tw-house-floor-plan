@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { SymbolPageRecord, SymbolRecord } from "./types";
+import type { SymbolCategory, SymbolPageRecord, SymbolRecord } from "./types";
 
 // Symbol（符號）是內容，與任何一張圖無關（CONTEXT.md）。資料在 build 時讀入，
 // 執行期不打 API。前台看得見的字全部從這裡來——內容維護者改一次資料，
@@ -71,4 +71,44 @@ export function loadSymbolsForPages(): Record<string, SymbolPageRecord> {
       { ...viewerFields(s), svg_ref: s.svg_ref, source_refs: s.source_refs },
     ]),
   );
+}
+
+/** 一張分類頁的內容：它是哪一類，以及該類底下有哪些符號。 */
+export type SymbolCategoryPage = {
+  id: SymbolCategory;
+  symbols: SymbolPageRecord[];
+};
+
+/**
+ * 站上有哪些分類，以及每一類底下有哪些符號。
+ *
+ * **不是投影，是一個由投影算出來的分組**——形狀仍然由消費者決定（分類頁要的是「一類一串」
+ * 而不是「id → 符號」），但欄位沿用符號頁那一份：兩種頁面顯示的是同一批字，差別只在
+ * 一次顯示幾個。
+ *
+ * **分類清單由資料算出，不寫死。** 掃過每個符號的 `category`，出現過的才算一類——今天是
+ * 3 類。另外手寫一份「就這 3 類」的常數會變成第二份會跟資料分岔的名單，正是 PRD §9
+ * 「不得各自維護副本」要防的事；而沒有符號的分類**不該有頁面**：`plumbing_electric` 與
+ * `fire_safety` 在 v0.4 被砍出範圍（PRD §4.1），替它們留一張「此分類階段一尚未收錄」
+ * 對讀者沒有價值，Google 則會把它當 thin content，連帶拖累整站。
+ *
+ * `id` 的型別是 `SymbolCategory` 而不是 `string`，而這件事是有作用的：分類頁拿它去查
+ * `lib/ui/copy.ts` 的 `CATEGORY_LABELS`（型別是以 `SymbolCategory` 為 key 的 `Record`），
+ * 所以**少一個分類的中文名就是編譯失敗**。這是那條建置檢查的一半；另一半是
+ * 「資料裡的分類合不合法」，由 `scripts/validate_data.py` 顧著——它是 Python，讀不到
+ * 這邊的常數，兩半因此各自用看得到事實的語言把關，而不是在兩邊各抄一份中文名。
+ *
+ * **順序照資料檔**：分類之間、以及一類之內的符號都是。另外排一套等於在資料之外再做一個
+ * 編輯決定，而那個決定過幾個月沒有人記得寫在哪裡；要換順序就換資料檔裡的順序。
+ */
+export function loadCategories(): SymbolCategoryPage[] {
+  const grouped = new Map<SymbolCategory, SymbolPageRecord[]>();
+
+  for (const symbol of Object.values(loadSymbolsForPages())) {
+    const listed = grouped.get(symbol.category);
+    if (listed) listed.push(symbol);
+    else grouped.set(symbol.category, [symbol]);
+  }
+
+  return [...grouped].map(([id, symbols]) => ({ id, symbols }));
 }

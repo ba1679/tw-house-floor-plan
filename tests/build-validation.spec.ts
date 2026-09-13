@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { execFileSync } from "node:child_process";
-import { cpSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 // scripts/validate_data.py 掛在 prebuild：非零退出即中斷建置，壞資料進不了正式站。
 // 這裡不改動 repo 裡的資料——複製一份到 tmp 再改壞，才不會讓一次測試把真資料留在壞掉的狀態。
@@ -211,5 +211,98 @@ test.describe("符號的必填內容欄位", () => {
     writeFileSync(path, JSON.stringify(data, null, 2));
 
     expect(runValidator(dir).code).not.toBe(0);
+  });
+});
+
+// 分類頁的清單由資料算出：掃過所有 symbol 的 category，出現過的才產生頁面（M3 票 05）。
+// 這條保證因此**刻意拆成兩半**，各自用看得到事實的語言把關：
+//
+//   Python（下面第一條）    ── 資料裡的分類合不合法
+//   TypeScript（下面第二條）── 合法的分類有沒有中文名
+//
+// 為什麼不寫成一條「每個分類都要有中文名」：中文名在 `lib/ui/copy.ts` 的 `CATEGORY_LABELS`，
+// 那是 TypeScript，而掛在 prebuild 的驗證器是 Python——它讀不到那個常數。寫成一條就得在
+// Python 裡再抄一份中文名，變成第二份會跟 UI 分岔的清單，正是這張票要防的事。
+// 兩半合起來的保證與原本那一條相同，但沒有重複的資料。
+test.describe("分類：兩半各自把關", () => {
+  test("category 是 v0.4 砍掉的設備類時，建置失敗，而且說得出那不是打錯字", () => {
+    const dir = sandbox();
+    const path = join(dir, SYMBOLS);
+    const data = JSON.parse(readFileSync(path, "utf8"));
+    const symbol = data.symbols[0];
+    symbol.category = "plumbing_electric";
+    writeFileSync(path, JSON.stringify(data, null, 2));
+
+    const { code, output } = runValidator(dir);
+    expect(code, output).not.toBe(0);
+    expect(output).toContain(symbol.id);
+    expect(output).toContain("plumbing_electric");
+    // 訊息要說得出這是**範圍決定**而不是打錯字——不然下一個撞到它的人會以為是清單漏打了，
+    // 把設備類加回去。釘的是那一句理由本身，不只是版本號：只釘「v0.4」的話，
+    // 訊息退回「category 非法值」這幾個字，這條測試照樣是綠的。
+    expect(output).toContain("v0.4");
+    expect(output).toContain("不是打錯字");
+  });
+
+  /**
+   * TypeScript 那一半：把 `CATEGORY_LABELS` 少一個 key 之後，`tsc --noEmit` 真的會紅。
+   *
+   * 沿用上面那套 sandbox 的手法（複製到 tmp、改壞、跑檢查、斷言非零退出），只是這次複製的
+   * 是 TS 原始碼而不是資料。`node_modules` 用 symlink：沙盒要的只是 `next` 與 `react` 的型別，
+   * 為了它們把整個 `node_modules` 複製進 tmp，才是這條測試真正會慢的地方。
+   */
+  function typecheckSandbox() {
+    const dir = mkdtempSync(join(tmpdir(), "floorplan-typecheck-"));
+    for (const entry of ["app", "components", "lib", "tsconfig.json"]) {
+      cpSync(entry, join(dir, entry), { recursive: true });
+    }
+    symlinkSync(resolve("node_modules"), join(dir, "node_modules"), "dir");
+    // `next-env.d.ts` 自己寫一份最小的，不照抄 repo 那一份：那一份還 import 了
+    // `.next/types/*`（`next build` 產生的路由型別），沙盒裡沒有建置產物，照抄會讓 tsc
+    // 死在找不到那兩個檔案上——而那不是這條測試要問的事。這兩行帶進來的是 CSS Modules
+    // 與 next 的全域型別宣告，少了它們 `import styles from "./page.module.css"` 會先報錯。
+    writeFileSync(
+      join(dir, "next-env.d.ts"),
+      '/// <reference types="next" />\n/// <reference types="next/image-types/global" />\n',
+    );
+    return dir;
+  }
+
+  /** 跑 repo 自己那一份 tsc（`npm run typecheck` 跑的同一支），cwd 在沙盒裡。 */
+  function runTypecheck(cwd: string): { code: number; output: string } {
+    const tsc = resolve("node_modules/typescript/bin/tsc");
+    try {
+      return { code: 0, output: execFileSync(process.execPath, [tsc, "--noEmit"], { cwd, encoding: "utf8" }) };
+    } catch (error) {
+      const failure = error as { status?: number; stdout?: string; stderr?: string };
+      return { code: failure.status ?? 1, output: `${failure.stdout ?? ""}${failure.stderr ?? ""}` };
+    }
+  }
+
+  test("文案常數少一個分類的中文名時，typecheck 失敗，而且說得出少了哪一類", () => {
+    const dir = typecheckSandbox();
+
+    // 先證明沒動過的沙盒是綠的。少了這一步，下面那個「失敗」可能只是沙盒自己搭壞了，
+    // 而這條測試會在 `CATEGORY_LABELS` 的保證早就沒了之後繼續保持綠色。
+    const clean = runTypecheck(dir);
+    expect(clean.code, `沙盒沒動過就已經不過，這條測試證明不了任何事：\n${clean.output}`).toBe(0);
+
+    // 不寫死拿哪一類開刀：從資料算出站上有哪些分類，取第一個。寫死的那一天資料改了，
+    // 這條測試會默默變成在守一個不存在的分類。
+    const symbols: { category: string }[] = JSON.parse(readFileSync(SYMBOLS, "utf8")).symbols;
+    const category = [...new Set(symbols.map((s) => s.category))][0];
+
+    const path = join(dir, "lib/ui/copy.ts");
+    const before = readFileSync(path, "utf8");
+    const after = before.replace(new RegExp(`\\n[ \\t]*${category}:[^\\n]*\\n`), "\n");
+    expect(after, `lib/ui/copy.ts 裡找不到 ${category} 的中文名那一行`).not.toBe(before);
+    expect(after.split("\n")).toHaveLength(before.split("\n").length - 1);
+    writeFileSync(path, after);
+
+    const { code, output } = runTypecheck(dir);
+    expect(code, output).not.toBe(0);
+    // 訊息要點名那一類：只說「型別不合」的話，下一個人得自己去比對哪一個 key 不見了。
+    expect(output).toContain(category);
+    expect(output).toContain("copy.ts");
   });
 });

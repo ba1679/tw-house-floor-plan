@@ -50,7 +50,22 @@ REQUIRED_CONTENT = {
 }
 VALID_TIERS = {"cns", "regulation", "convention", "varies"}
 VALID_STATUS = {"verified", "partial", "pending_purchase", "blocked"}
-VALID_CATEGORIES = {"structure", "door_window", "plumbing_electric", "fire_safety", "furniture"}
+# 階段一只收這三類（PRD §4.1）。plumbing_electric 與 fire_safety 曾經也在這裡——它們是
+# v0.4 刻意砍出範圍的設備類，**不是打錯字**：《室內設計裝修製圖規範》p9 表 3 把開關插座
+# 位置圖、消防設備圖、給排水配置圖與平面配置圖列為不同的圖，設備符號本來就不畫在建案
+# 平面圖上，而階段一教的正是看懂建案平面圖。
+#
+# 收窄有實際的後果，不只是清單短了兩項：分類頁的清單由資料算出（出現過的分類才產生頁面，
+# lib/symbols/data.ts 的 loadCategories），放行一個設備類符號就會多長一張分類頁，而
+# lib/ui/copy.ts 的 CATEGORY_LABELS 裡沒有它的中文名——next build 會死在渲染那一頁的
+# 時候，而那個 TypeError 不會說是哪一個符號。
+#
+# **「每個合法分類都有中文名」刻意不在這裡檢查。** 中文名在 TypeScript 的文案常數裡，
+# 這支 Python 讀不到它；在這裡檢查就得再抄一份中文名，變成第二份會跟 UI 分岔的清單。
+# 所以這條保證拆成兩半，各自用看得到事實的語言把關：Python 管「資料裡的分類合不合法」，
+# TypeScript 管「合法的分類有沒有中文名」（CATEGORY_LABELS 的型別是以 SymbolCategory
+# 為 key 的 Record，少一個 key 直接編譯失敗）。兩半合起來的保證相同，但沒有重複的資料。
+VALID_CATEGORIES = {"structure", "door_window", "furniture"}
 SPRITE_PATH = "data/symbols.sprite.svg"
 SPRITE_VIEWBOX = "0 0 140 140"
 VALID_HOTSPOT_SOURCES = set(['auto_door', 'auto_window', 'auto_column', 'auto_canopy', 'auto_furniture', 'auto_room', 'manual'])
@@ -92,7 +107,12 @@ for s in symbols:
 
 # --- enum 值合法 ---
 for s in symbols:
-    check(s.get("category") in VALID_CATEGORIES, "%s: category 非法值 %r" % (s["id"], s.get("category")))
+    check(s.get("category") in VALID_CATEGORIES,
+          "%s: category 非法值 %r——階段一只收 %s。設備類（plumbing_electric／fire_safety）"
+          "不在清單上不是打錯字，是 v0.4 刻意砍出範圍的：設備符號畫在開關插座、消防、給排水"
+          "那幾張圖上，不畫在建案平面圖上（PRD §4.1）。要收回來得先改 PRD 的範圍，不是在這裡"
+          "加回去——分類頁由資料算出，放行一類就多長一張頁面，而文案常數裡沒有它的中文名"
+          % (s["id"], s.get("category"), "、".join(sorted(VALID_CATEGORIES))))
     check(s["verification_status"] in VALID_STATUS, "%s: verification_status 非法值 %r" % (s["id"], s["verification_status"]))
     if s.get("source_tier") is not None:
         check(s["source_tier"] in VALID_TIERS, "%s: source_tier 非法值 %r" % (s["id"], s["source_tier"]))
@@ -283,7 +303,7 @@ if not errors:
     print("  ✓ hotspot.symbol_id 指到的 symbol 都存在（null = 查證未完成，合法）")
     print("  ✓ hotspot.source 合法")
     print("  ✓ confused_with 雙向一致")
-    print("  ✓ enum 值合法")
+    print("  ✓ enum 值合法（category 只收階段一三類，設備類已在 v0.4 砍出範圍）")
     print("  ✓ 符號的必填內容欄位非空（符號頁渲染得出一頁）")
     print("  ✓ risk_flags 已移除")
     print("  ✓ verified 符號的查證紀錄完整（caution 不綁在查證完備性上，它要的是法規來源）")
