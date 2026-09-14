@@ -261,4 +261,21 @@ test("revealed、highlighted、candidate、selected 四種 State 畫出來彼此
 
   const all = { revealed, highlighted, candidate, selected };
   expect(new Set(Object.values(all).map((m) => JSON.stringify(m))).size, JSON.stringify(all, null, 2)).toBe(4);
+
+  // 形狀相同的那兩個（一個符號的每一處）不只靠色相分：分不出顏色的人靠線型——revealed 是虛線，高亮是實線。
+  expect(await page.locator(`#${other}`).evaluate((el) => getComputedStyle(el).strokeDasharray)).not.toBe("none");
+  await page.goto(`${PLAN}?symbol=window`);
+  await expect(page.locator("#hs-win-living")).toHaveAttribute("data-state", "highlighted");
+  expect(await page.locator("#hs-win-living").evaluate((el) => getComputedStyle(el).strokeDasharray)).toBe("none");
+});
+
+// 只有一處的符號，「共 N 處」那一行整行不印：規格主人 2026-09-14 裁定照 M2 票 03 決議 2（票 02 的 Comments）。
+test("只有一處的符號（浴缸）：找找看的說明卡不印「共 1 處」", async ({ page }) => {
+  await startRoundAt(page, "bathtub");
+  await answerByTwoTaps(page, cleanHotspotsOf("bathtub")[0]);
+  await showSheetOf(page).click();
+
+  const sheet = sheetOf(page);
+  await expect(sheet.getByRole("heading", { name: "浴缸" })).toBeVisible();
+  await expect(sheet).not.toContainText("這張圖上共");
 });

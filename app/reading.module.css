@@ -46,6 +46,19 @@
    主要動作要一眼就與那些連結分得開。紙色字壓在墨色上的對比約 15.8:1，滑過時的 `--ink2` 約 6.5:1。
    高度超過 44px（PRD §9），手機上整條寬度都按得到。 */
 .primaryAction {
+  composes: actionShape;
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.primaryAction:hover {
+  background: var(--ink2);
+}
+
+/* 動作按鈕的共同形狀：大小、排版、鍵盤焦點框。填不填底色由各自決定——
+   `primaryAction` 填墨色；首頁找找看的入口（M4 票 06）只描一圈框線，因為填滿底色的那一顆要留給進平面圖。
+   形狀抽出來共用，不各抄一份：抄的那一份曾經漏掉焦點框。 */
+.actionShape {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,16 +67,10 @@
   padding: 12px 20px;
   font-size: 16px;
   font-weight: 700;
-  color: var(--paper);
-  background: var(--ink);
   text-decoration: none;
 }
 
-.primaryAction:hover {
-  background: var(--ink2);
-}
-
-.primaryAction:focus-visible {
+.actionShape:focus-visible {
   outline: 2px solid var(--accent2);
   outline-offset: 2px;
 }

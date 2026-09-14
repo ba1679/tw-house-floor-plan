@@ -11,6 +11,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { FloorPlanRenderer, type RoomState } from "./FloorPlanRenderer";
+import { useEscapeKey } from "./useEscapeKey";
 import type { FirstVisitHint } from "./useFirstVisitHint";
 import { useViewerGestures } from "./useViewerGestures";
 import { planViewBox } from "@/lib/floorplan/drawing";
@@ -172,16 +173,7 @@ export function FloorPlanViewport({
   );
 
   // Esc 在第二段進行中退回第一段。說明卡開著時的 Esc 是呼叫端的事——卡片是它的。
-  // 掛在 window 上而不是熱區上：焦點可能在熱區上、或在「重選」那顆按鈕上，
-  // 而 Esc 在兩個地方的意思是同一件事。
-  useEffect(() => {
-    if (viewer.stage !== "candidates") return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") reselect();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [viewer.stage, reselect]);
+  useEscapeKey(viewer.stage === "candidates", reselect);
 
   const candidateIds = new Set(viewer.candidates.map((h) => h.id));
 
@@ -198,20 +190,21 @@ export function FloorPlanViewport({
    *
    * 這是圖面第一次依互動狀態改變畫法。做得到這件事，正是這一層從產生器的靜態產物
    * 換成 React renderer 的理由（`docs/adr/0005`）。
+   *
+   * useMemo 不是為了省這幾行的計算，是為了**同一個物件**：平移的每一次 pointermove
+   * 都會重畫一輪，而圖面那一層靠 props 沒變才跳得過去（`PlanArtwork` 的 memo）。
+   * 每輪新做一個內容相同的物件，等於那層 memo 不存在。依賴全是平移時不會變的值。
    */
-  const litRooms = dimRooms
-    ? roomsWith(readingOrder, (h) => h.id === selectedHotspot || h.symbol_id === revealedSymbol).join(" ")
-    : "";
-  // useMemo 不是為了省這幾行的計算，是為了**同一個物件**：平移的每一次 pointermove
-  // 都會重畫一輪，而圖面那一層靠 props 沒變才跳得過去（`PlanArtwork` 的 memo）。
-  // 每輪新做一個內容相同的物件，等於那層 memo 不存在。依賴因此是串成字串的房間 id，不是每輪新做的陣列。
   const roomStates = useMemo<Record<string, RoomState> | undefined>(() => {
-    if (!litRooms) return undefined;
-    const lit = new Set(litRooms.split(" "));
+    if (!dimRooms) return undefined;
+    const lit = new Set(
+      roomsWith(readingOrder, (h) => h.id === selectedHotspot || h.symbol_id === revealedSymbol),
+    );
+    if (lit.size === 0) return undefined;
     return Object.fromEntries(
       floorplan.rooms.filter((room) => !lit.has(room.id)).map((room) => [room.id, "muted" as const]),
     );
-  }, [litRooms, floorplan.rooms]);
+  }, [dimRooms, selectedHotspot, revealedSymbol, readingOrder, floorplan.rooms]);
 
   const nameOf = (symbolId: string | null) =>
     (symbolId && symbols[symbolId]?.name) || symbolId || "";

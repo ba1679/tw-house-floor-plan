@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { FloorPlanViewport, initialViewerConfig } from "./FloorPlanViewport";
 import { InfoSheet, type SheetNote } from "./InfoSheet";
-import { saveAnswer } from "./progressStorage";
+import { useEscapeKey } from "./useEscapeKey";
 import { useFirstVisitHint } from "./useFirstVisitHint";
+import { useSaveAnswers } from "./useLearningProgress";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
 import {
@@ -36,7 +37,7 @@ import styles from "./Quiz.module.css";
 //
 // **狀態機是一局的**（`lib/quiz/round.ts`，docs/adr/0007）：檢視器的 reducer 包在它裡面，
 // 圖框（`FloorPlanViewport`）拿到的 dispatch 先經過一局。作答後的暫停、說明卡開沒開、圖上的標記都由一局決定，
-// 這個元件把它們畫出來，外加兩件平台的事：寫學習進度、搬鍵盤焦點。
+// 這個元件把它們畫出來，並替鍵盤使用者搬焦點。學習進度的寫入交給 `useSaveAnswers`。
 // 不掛 `HighlightFromQuery`：網址帶進來的高亮會把一個符號的每一處同時圈亮，在這裡就是把答案畫在圖上。
 
 type Props = {
@@ -78,6 +79,9 @@ export function QuizRound({ floorplan, symbols, readingOrder, questions, onPlayA
     [],
   );
 
+  // 每作答一題立刻寫進學習進度（spec「學習進度」）。
+  useSaveAnswers(floorplan.id, round.answers);
+
   /**
    * 鍵盤焦點要不要跟著一局走（票 01 留下的：作答後「下一題」排在所有熱區之後，要 Tab 很多下才到）。
    *
@@ -100,14 +104,7 @@ export function QuizRound({ floorplan, symbols, readingOrder, questions, onPlayA
   const closeSheet = useCallback(() => dispatch({ type: "CLOSE_SHEET" }), []);
 
   // Esc 關掉說明卡，與關閉鍵同一個 action。卡片沒開時 Esc 什麼都不做。
-  useEffect(() => {
-    if (!round.sheetOpen) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeSheet();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [round.sheetOpen, closeSheet]);
+  useEscapeKey(round.sheetOpen, closeSheet);
 
   const questionRef = useRef<HTMLDivElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
@@ -117,15 +114,6 @@ export function QuizRound({ floorplan, symbols, readingOrder, questions, onPlayA
     if (round.phase === "answered" && !round.sheetOpen) nextRef.current?.focus();
     if (round.phase === "question" && round.answers.length > 0) questionRef.current?.focus();
   }, [focusFollows, round.phase, round.sheetOpen, round.answers.length]);
-
-  // 每作答一題立刻寫進學習進度（spec「學習進度」）。一局本身是純的、不碰 localStorage，所以由這裡在作答多一筆時寫。
-  // 記到第幾筆存在 ref 裡，不是「寫最後一筆」：開發時 Strict Mode 會重跑 effect，同一筆不能記兩次。
-  const saved = useRef(0);
-  useEffect(() => {
-    for (; saved.current < round.answers.length; saved.current++) {
-      saveAnswer(floorplan.id, round.answers[saved.current]);
-    }
-  }, [round.answers, floorplan.id]);
 
   // 首次引導與平面圖頁共用同一句、同一個記錄（spec「首次引導」）：在哪一頁先看到都算看過。
   const hint = useFirstVisitHint();

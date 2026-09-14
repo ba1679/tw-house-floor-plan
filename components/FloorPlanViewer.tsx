@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useReducer, useState } from "react";
 import { FloorPlanViewport, initialViewerConfig } from "./FloorPlanViewport";
 import { HighlightFromQuery } from "./HighlightFromQuery";
 import { InfoSheet } from "./InfoSheet";
+import { useEscapeKey } from "./useEscapeKey";
 import { useFirstVisitHint } from "./useFirstVisitHint";
 import { isSymbolAbsent } from "@/lib/floorplan/hotspots";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
@@ -120,15 +121,7 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
   const sheetOpen = selectedSymbol !== null && occurrence !== null;
 
   // Esc 關掉說明卡——與關閉鍵同一個 action。第二段進行中的 Esc 由圖框自己處理。
-  // 掛在 window 上而不是卡片上：焦點可能在卡片裡、也可能還在熱區上，而 Esc 在兩個地方的意思是同一件事。
-  useEffect(() => {
-    if (!sheetOpen) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [sheetOpen, close]);
+  useEscapeKey(sheetOpen, close);
 
   const nameOf = (symbolId: string | null) =>
     (symbolId && symbols[symbolId]?.name) || symbolId || "";

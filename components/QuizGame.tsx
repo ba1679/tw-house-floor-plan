@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { loadLayoutProgress } from "./progressStorage";
 import { QuizRound } from "./QuizRound";
+import { loadLayoutProgress } from "./useLearningProgress";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
 import { pickQuestions, roundSize } from "@/lib/quiz/questions";

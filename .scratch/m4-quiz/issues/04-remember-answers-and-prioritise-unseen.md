@@ -40,11 +40,11 @@
   - 熟悉度三態：程式裡叫 `known` / `missed` / `unseen`。
   - 取一張圖的紀錄：這張圖沒有紀錄時是空的。
 - **`pickQuestions` 吃進度**：還沒遇到 → 還不熟（錯多的在前、同數隨機）→ 已認識，填到題數，再整局打亂。
-- **`components/progressStorage.ts`**：localStorage 的讀與寫，丟例外時當作空紀錄。
+- **`components/useLearningProgress.ts`**：localStorage 的讀與寫，丟例外時當作空紀錄。
   - 每一次讀寫都重讀整份紀錄：別的分頁剛寫過的不會被蓋掉。
 - **找找看**：
-  - 「開始」與「再玩一次」按下去的那一刻讀進度、出題。
-  - 一局每多一筆作答，就寫一筆。
+  - 「開始」與「再玩一次」按下去的那一刻讀進度、出題（`loadLayoutProgress`）。
+  - 一局每多一筆作答，就寫一筆（`useSaveAnswers`）。
 - **測試**：
   - node：`tests/quiz-questions.spec.ts`。
   - 瀏覽器：`tests/quiz-progress.spec.ts`。
@@ -57,3 +57,10 @@
 - **多一條「空白紀錄連打兩局，考遍 13 個」**：這是票面那句話本身，把記帳、「再玩一次」與出題串起來走一次。
 - **`startRoundAt` 靠這張的優先序決定題目**：除了目標以外全部塞成已認識，目標就一定在這一局。
   02 的測試要知道題目是誰（例如「題目柱、點牆」），用的就是它。
+
+### 兩軸 review 之後改的
+
+- **`components/progressStorage.ts` 改成 `components/useLearningProgress.ts`**：
+  - 平台的東西留在 `components/use*.ts` 是 `useFirstVisitHint` 那裡寫下的規矩，原本的檔名不合。
+  - 寫入的那個 effect 原本在 `QuizRound` 裡，讓那個元件多一個與畫面無關的改動理由。現在寫入是 `useSaveAnswers`。
+  - 讀取仍是按下「開始」那一刻呼叫的 `loadLayoutProgress`：出題讀的就是那一刻的紀錄，不需要是 hook。

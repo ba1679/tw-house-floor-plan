@@ -218,6 +218,18 @@
 }
 
 
+/* 找找看的出現次數：只有「共 N 處」，不是按鈕（M4 票 02）——每一處都已經標在圖上，沒有「其他位置」可去。
+   與上面那一列同一條分隔線、同一個準星，但不撐到 56px：它不是控制元件，而卡片離 46dvh 的上限本來就不遠。 */
+.occurrenceTotal {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 20px;
+  padding: 10px 0;
+  border-top: 1px solid var(--rule2);
+}
+
 .occurrenceMark {
   flex-shrink: 0;
   color: var(--accent);

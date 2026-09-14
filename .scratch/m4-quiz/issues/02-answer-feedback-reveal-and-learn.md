@@ -142,3 +142,24 @@
 
 - **答錯時也有「看說明」**：關掉自動打開的卡片之後，想再看一次就按它。卡片上仍有「你點的是 X」。
 - **沒有另外畫「打勾」**（spec Solution 的敘事）：被點中的那一處是 `selected`，狀態列說「答對了。」。
+
+### 兩軸 review 之後改的
+
+- **找找看卡片的「共 N 處」那一行沒有樣式**：元件寫了 class，CSS 裡沒有。補上 `.occurrenceTotal`。
+- **測試補兩條**：
+  - revealed 是虛線、高亮是實線。原本只比 fill、stroke、線寬，虛線這條給分不出顏色的人的線索沒有被測到。
+  - 只有一處的符號（浴缸）不印「共 1 處」。
+- **Esc 的監聽抽成 `components/useEscapeKey.ts`**：自由看圖、圖框、找找看三處原本各抄一份。
+- **房間變暗的 memo 不再把房間 id 串成字串當依賴**：直接依 `dimRooms`、`selectedHotspot`、`revealedSymbol` 算。
+- **ADR-0003 補註**：找找看頁卡片展開時可視帶是 0，以及 0 高的框那個洞。
+
+### review 提過、沒改的
+
+- **`selectedHotspot`、`revealedSymbol`、`paused` 總是一起傳**（Data Clumps）：上面 `/codebase-design` 的結論就是三個分開的輸入。
+- **`pickedNote` 在元件裡查 `confused_with`**（Feature Envy）：上面寫明「在找找看那一側算好再交給卡片」。
+- **「標記」這個詞**：CONTEXT.md 的 Hotspot 避免用「標記」指熱區；這張與 ADR-0007 用它指 `selected`、`revealed` 這類畫面上的標示。
+  不是誤用，是詞彙表少一條，留給 `/domain-modeling`。
+- **0 寬高的框沒有專屬的測試**：spec 的 seam ③ 只給出題函式。「下一題」那條瀏覽器測試走得到它——修之前它就是紅在這裡。
+- **答錯時也有「看說明」、作答後鍵盤焦點會搬**：review 列為票面沒寫的行為。留著：
+  - 前者是關掉自動打開的卡片之後，唯一再看一次的路。
+  - 後者是票 01 的 Comments 明講留給這張的。

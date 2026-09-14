@@ -68,18 +68,29 @@ const isOutside = (h: Hotspot) =>
     );
   });
 
-/** Tab 一路走到底，記下每一站停在哪個熱區、頁面說它屬於哪一間房。 */
+/** 圖前面最多有幾個可聚焦的東西要先 Tab 過去。今天只有標題列上找找看的入口（M4 票 06）。 */
+const BEFORE_PLAN_STOPS = 10;
+
+/**
+ * Tab 一路走到底，記下每一站停在哪個熱區、頁面說它屬於哪一間房。
+ *
+ * 圖前面可以有別的可聚焦的東西——標題列排在圖的上面，Tab 先經過它是對的（焦點順序跟著畫面由上而下）。
+ * 所以走到第一個熱區才開始記；之後遇到第一個不是熱區的東西就停：熱區之間不該夾著任何別的東西。
+ */
 async function tabThroughHotspots(page: Page) {
   const stops: { id: string; room: string }[] = [];
   const ids = new Set(readable.map((h) => h.id));
-  for (let i = 0; i < readable.length + 5; i++) {
+  for (let i = 0; i < readable.length + BEFORE_PLAN_STOPS; i++) {
     await page.keyboard.press("Tab");
     const stop = await page.evaluate(() => {
       const el = document.activeElement;
       if (!el || !(el instanceof SVGElement)) return null;
       return { id: el.id, room: el.closest("[data-room]")?.getAttribute("data-room") ?? "" };
     });
-    if (!stop || !ids.has(stop.id)) break;
+    if (!stop || !ids.has(stop.id)) {
+      if (stops.length === 0) continue;
+      break;
+    }
     stops.push(stop);
   }
   return stops;
@@ -244,8 +255,12 @@ test("焦點移到畫面外的熱區時，圖自動平移讓它看得見", async
 test("焦點所在的熱區，畫面上看得出來", async ({ page }) => {
   await page.goto(PLAN);
 
-  await page.keyboard.press("Tab");
+  // 用 Tab 走到第一個熱區，不直接 focus()：這條問的是鍵盤使用者看到的焦點。圖前面的東西（標題列）先 Tab 過去。
   const focused = page.locator("#hs-door-entry");
+  for (let i = 0; i < BEFORE_PLAN_STOPS; i++) {
+    await page.keyboard.press("Tab");
+    if (await focused.evaluate((el) => el === document.activeElement)) break;
+  }
   await expect(focused).toBeFocused();
 
   const strokeOf = (locator: ReturnType<Page["locator"]>) =>

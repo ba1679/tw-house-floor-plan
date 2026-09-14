@@ -39,21 +39,16 @@
   composes: primaryAction from "./reading.module.css";
 }
 
-/* 找找看的入口（M4 票 06）：與進平面圖的按鈕同樣大、同樣點得到，但**不填底色**——
-   填滿底色的仍然只有進平面圖那一顆。不 composes `primaryAction` 再蓋掉底色：
-   兩份 CSS Module 誰先載入不是誰的約定，蓋不蓋得掉要看運氣。 */
+/* 找找看的入口（M4 票 06）：與進平面圖的按鈕同一個形狀（`reading.module.css` 的 `actionShape`，含焦點框），
+   但**不填底色**——填滿底色的仍然只有進平面圖那一顆。 */
 .quizButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 52px;
-  padding: 12px 20px;
-  font-size: 16px;
-  font-weight: 700;
+  composes: actionShape from "./reading.module.css";
   color: var(--ink);
   border: 1px solid var(--ink);
-  text-decoration: none;
+}
+
+.quizButton:hover {
+  background: var(--paper2);
 }
 
 .browse {
