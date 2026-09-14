@@ -43,3 +43,118 @@
 - [ ] 第一次進站的引導與平面圖頁**共用同一句、同一個記錄**：在平面圖頁看過，找找看不再出現；清空之後直接進找找看會出現
 - [ ] 可出題符號與題數是不碰 DOM、不讀 localStorage 的純函式；node context 測試餵手寫小輸入，涵蓋可出題數 13 → 7、12 → 6、1 → 1、0 → 0
 - [ ] 既有測試維持綠
+
+## Comments
+
+**2026-09-14：`/codebase-design` 的結論。** 三件事都定了，暫停的形狀寫成 `docs/adr/0007`。
+
+這張落地的是第 3 件，外加第 1 件的骨架：作答總要有個地方認，這張就得有。第 1、2 件接下來怎麼長，寫在 02 的 Comments；中性標籤寫在 03 的 Comments。
+
+### 模組怎麼切
+
+```
+平面圖頁 ── FloorPlanViewer（自由看圖，持有 reduceViewer）────────┐
+                                                               ├─> FloorPlanViewport（框，不持有 reducer）
+找找看頁 ── 找找看（持有 reduceRound，reduceViewer 包在它裡面）───┘
+```
+
+框有兩個呼叫端，接縫是真的（不是只為了測試假想出來的）。一局只有一個呼叫端，它不是接縫，是一個模組：
+介面很小（建一局、轉一個 action），背後藏的是認作答、暫停與標記。
+
+#### 1. 先做一次純搬移，自己一個 commit
+
+把 `FloorPlanViewer` 拆成**不持有狀態機的框**，與自由看圖那一側。平面圖頁照舊寫 `<FloorPlanViewer floorplan symbols readingOrder />`。
+**既有測試一條不改、全綠**，就是這一步的驗收。
+
+**放進框裡的：**
+- 量框（`RESIZE`）
+- 手勢
+- 畫布位移
+- 圖面與房間變暗
+- 熱區層：閱讀順序、焦點平移、Enter／空白鍵
+- 容錯圈
+- 「重選／回到全圖」那一列
+- 兩段式進行中的三句狀態列：圈出 N 個候選、還是沒點到、這附近沒有
+- 第二段的 Esc
+
+**留在自由看圖那一側的：**
+- `useReducer(reduceViewer)`
+- `?symbol=` 高亮與樑的橫幅
+- `?fitLocked=1`（07 拆）
+- 說明卡：開哪張、關了做什麼、焦點還回哪個熱區，以及卡片開著時的 Esc
+- 狀態列在兩段式沒在進行時說什麼
+- 首次引導的 hook：呼叫之後交給框
+
+`TAP_HINT` 搬進文案模組，兩側共用同一句。
+
+框的介面大約是這個形狀（草稿，名字實作時可以換）：
+
+```ts
+type FloorPlanViewportProps = {
+  floorplan: FloorPlan;
+  symbols: Record<string, SymbolRecord>;
+  readingOrder: RoomHotspots[];
+  /** 狀態機由呼叫端持有：找找看要在它外面包一層，框不能自己 useReducer。 */
+  viewer: ViewerState;
+  dispatch: Dispatch<ViewerAction>;
+  /** 說明卡開著：房間變暗打開。 */
+  dimRooms: boolean;
+  /** 兩段式沒在進行時（不在第二段、也不是剛點到空白處），狀態列說這一句。 */
+  restingStatus: string;
+  hint: FirstVisitHint;
+  /** 手指碰到圖、鍵盤選定熱區時，呼叫端各自要收掉自己的東西（「找不到網址指定的符號」那句、鍵盤來源）。 */
+  onTouch?: () => void;
+  onKeyboardSelect?: (hotspotId: string) => void;
+};
+```
+
+02、03 會再加 `selectedHotspot`、`revealedSymbol`、`paused`、`names` 四個輸入，這張不先加。
+
+#### 2. `lib/quiz/questions.ts`（純函式，seam ③）
+
+- 包含 `quizzableSymbols`、`roundSize`、`pickQuestions`。
+- 誰問它：找找看頁產不產生、題數、題目池；05 的分母、06 的首頁入口也問它。
+- 建在 `lib/floorplan/hotspots.ts` 既有的判斷上：「可出題」與 `isSymbolAbsent` 必須是同一件事的正反兩面。
+- 這張的 `pickQuestions` 是均勻隨機，依進度排優先序是 04 加。
+
+#### 3. `lib/quiz/round.ts`（純 reducer）
+
+一局，把 `ViewerState` 包在裡面：
+
+```ts
+type Answer = { target: string; picked: string; hotspotId: string };
+type RoundState = {
+  questions: string[];
+  answers: Answer[];
+  phase: "question" | "answered" | "finished";
+  viewer: ViewerState;
+};
+type RoundAction = { type: "VIEWER"; action: ViewerAction } | { type: "NEXT" };
+
+function createRound(viewer: ViewerConfig, questions: string[]): RoundState; // 檢視器一建出來就 fitLocked
+function reduceRound(s: RoundState, a: RoundAction): RoundState;
+```
+
+以下規則就是它的介面，02、03 照著長：
+
+- **出題中**：action 照轉 `reduceViewer`。轉完之後檢視器若走進 `confirmed`，那一下就是作答，在**同一次轉移**裡做三件事：
+  1. 記下 `Answer`
+  2. 派 `RESELECT` 讓檢視器回到閒著
+  3. `phase` 變成 `answered`
+
+  第一段圈出候選、重選、第二段沒點中都走不進 `confirmed`，不必另外判斷。
+- **`answered`**：只有 `RESIZE`、`FOCUS_HOTSPOT`、`RESET_VIEW` 轉得進去，其餘原樣回傳（同一個物件，不重畫）。
+  這條擋法這張就做，不擋的話作答後還能再圈出候選。暫停的畫法與測試是 02 的事。
+- **`NEXT`**：最後一題 → `finished`；否則回到出題中，並對檢視器派 `RESET_VIEW`。
+- **`finished`**：什麼都不收。
+- **不寫 localStorage**：04 的「每作答一題立刻寫入」，由頁面在 `answers` 變長時寫。
+- **`phase` 不叫 stage**：`CONTEXT.md` 的 Stage 指的是檢視器。
+
+不另寫 node 測試：spec 的 seam ③ 只給出題函式；一局的規則由找找看頁的瀏覽器測試走過。
+
+#### 4. 找找看頁
+
+- 開場畫面不掛檢視器。按「開始」才用 `Math.random` 出題、建一局。
+- 一局一個 `key`：「再玩一次」換一個 key，就是乾淨的新局。
+- **不掛 `HighlightFromQuery`**：網址高亮只存在於自由看圖那一側，03 補測試釘住就好。
+- 題目列與作答後的回饋、「下一題」若能共用一列，框就少被挖一列高度。找找看頁有自己的版面，但 ADR-0003 的道理一樣適用。

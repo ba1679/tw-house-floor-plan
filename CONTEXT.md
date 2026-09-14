@@ -98,6 +98,7 @@ _Avoid_: 模式、mode、idle（要說「沒有在互動」就用 `normal`）、
 State 描述**單一 hotspot**，兩者不可互換：`candidates` 階段裡有一群 `candidate` 狀態的 hotspot。
 **高亮不是第四個 stage**：高亮期間該有的行為全是 browsing 的行為（縮放、拖曳、直接點圖開始第一段），
 所以 stage 維持 `browsing`，高亮疊在上面另外記（`docs/adr/0006`）。
+**找找看作答後的暫停也不是 stage**：那段時間檢視器上沒有任何選擇在進行，圖不回應，是因為這一局還停在這一題的答案上（`docs/adr/0007`）。
 _Avoid_: 步驟、step、模式、「高亮模式」
 
 **View（視野）**：
