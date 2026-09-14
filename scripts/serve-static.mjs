@@ -9,12 +9,14 @@ import { join, extname, normalize } from "node:path";
 const root = join(process.cwd(), process.argv[2] ?? "out");
 const port = Number(process.env.PORT ?? 3000);
 
-// out/ 目前只有這四種副檔名。多的等站上真的有那種檔案再加，不先列。
+// out/ 目前只有這五種副檔名。多的等站上真的有那種檔案再加，不先列。
+// 表外的一律當二進位檔送，瀏覽器會把它下載下來而不是顯示——`.xml` 是 sitemap 那一份（票 10）。
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".txt": "text/plain; charset=utf-8",
+  ".xml": "application/xml; charset=utf-8",
 };
 
 async function resolveFile(pathname) {

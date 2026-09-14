@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { readFileSync, readdirSync } from "node:fs";
 import type { SymbolCategory } from "@/lib/symbols/types";
 import { CATEGORY_LABELS } from "@/lib/ui/copy";
-import { descriptionOf, rootLayoutFallback, titleOf } from "./built-html";
+import { contentPages, descriptionOf, rootLayoutFallback, titleOf } from "./built-html";
 
 // 首頁是「首頁 → 平面圖」那條入站路徑的起點（PRD §8）。它不是主要入口——大多數人從 Google 直接
 // 落在符號頁（§6.2.1）——但它是唯一一條產品敘事的路，而根網址回 404 的網站拿不出手。
@@ -107,10 +107,8 @@ test.describe("/ 首頁", () => {
     expect(fallback.titles, "首頁用的還是根版面的標題").not.toContain(titleOf(home));
     expect(descriptionOf(home), "首頁用的還是根版面的描述").not.toBe(fallback.description);
 
-    // 404 與 `_not-found` 是根版面的後備頁，本來就沒有自己的標題，不在比較之列。
-    const others = readdirSync("out", { recursive: true, encoding: "utf8" })
-      .filter((path) => path.endsWith(".html"))
-      .filter((path) => !["index.html", "404.html", "_not-found.html"].includes(path));
+    // 404 與 `_not-found` 是根版面的後備頁，本來就沒有自己的標題，`contentPages()` 不含它們。
+    const others = contentPages().filter((path) => path !== "index.html");
     // 票面點名的那一頁要在掃描範圍裡：掃到零頁時底下的迴圈會安靜地全過。
     expect(others).toContain(`layouts/${floorplans[0].id}.html`);
 

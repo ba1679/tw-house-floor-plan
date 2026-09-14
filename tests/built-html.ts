@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 
 // 讀 `out/` 建置產物的測試共用的幾個小工具：問的是「靜態 HTML 裡帶了什麼出去」（spec user story 33）。
 //
@@ -26,3 +26,15 @@ export function rootLayoutFallback() {
     description: descriptionOf(html),
   };
 }
+
+/**
+ * `out/` 裡每一張有自己內容的頁，相對 `out/` 的路徑（`index.html`、`symbols/wall.html`⋯）。
+ *
+ * 掃 `out/` 而不列舉路由：列舉的清單明天多一頁時不會紅，只會少測一頁（理由同 site-footer.spec.ts）。
+ * 404 與 `_not-found` 不算——它們是根版面的後備頁，沒有自己的標題，也不是讓人從搜尋結果點進來的頁。
+ * site-footer.spec.ts 自己那一份掃描**連 404 一起算**（免責聲明落在哪一頁都要有），所以它不用這個。
+ */
+export const contentPages = () =>
+  readdirSync("out", { recursive: true, encoding: "utf8" })
+    .filter((path) => path.endsWith(".html"))
+    .filter((path) => !["404.html", "_not-found.html"].includes(path));
