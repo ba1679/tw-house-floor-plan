@@ -154,8 +154,9 @@ export function QuizRound({ floorplan, symbols, readingOrder, quizzable, questio
         </LabelledList>
 
         {/* 這一局寫完之後讀回來的那一份（`useSaveAnswers`），所以已經是這一局之後的數字。
-            localStorage 被封鎖時讀回來的是空紀錄，印的就是 0：這一局沒有被記住，「再玩一次」出題讀到的也是那份空紀錄。 */}
-        {stored && <KnownCount layoutName={floorplan.name} quizzable={quizzable} progress={stored} />}
+            localStorage 被封鎖時讀回來的是空紀錄，印的就是 0：這一局沒有被記住，「再玩一次」出題讀到的也是那份空紀錄。
+            為什麼是 0，`KnownCount` 在數字底下說。 */}
+        {stored && <KnownCount layoutName={floorplan.name} quizzable={quizzable} stored={stored} />}
 
         <div className={styles.actions}>
           <button type="button" className={styles.primary} onClick={onPlayAgain}>

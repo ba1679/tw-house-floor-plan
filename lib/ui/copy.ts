@@ -331,6 +331,13 @@ export const quizReviewRow = (targetName: string, pickedName: string) =>
 /** 結算的另一個出口。想自由看圖、湊近看標記的人從這裡走（PRD §6.3.3）。 */
 export const QUIZ_BACK_TO_PLAN = "回到平面圖";
 
+/**
+ * 瀏覽器不讓網站存資料時，「你認得 N / M」底下那一句（M4 票 05，規格主人 2026-09-15 裁定）。
+ * 那時照樣出題、照樣作答，只是不記，數字永遠是 0（PRD §6.3.3）。只印一個 0，剛答對幾題的人會以為網站壞了
+ * （spec user story 42 要防的正是這件事）：說出是瀏覽器不讓存，他才知道不是網站壞了。
+ */
+export const STORAGE_BLOCKED_NOTE = "這台瀏覽器不讓網站存資料，答過的題目不會被記住。";
+
 /** PRD §6.4 的完整一句，一字不改。每頁固定顯示。 */
 export const DISCLAIMER =
   "本網站符號說明為一般通用慣例，不同建商 / 設計師畫法可能有差異，實際請以個案圖說或現場人員說明為準。";

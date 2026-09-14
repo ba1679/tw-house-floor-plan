@@ -56,7 +56,7 @@ export function QuizGame({ floorplan, symbols, readingOrder, quizzable }: Props)
    * 讀到進度就表示 client 已經接手，兩件事是同一刻，所以不另外記一個「接手了沒」。
    * 也因此清單出現、把按鈕往下推的那一刻，按鈕才剛變得按得下去：不會有人按到一半被推走。
    */
-  const progress = useLayoutProgress(floorplan.id);
+  const stored = useLayoutProgress(floorplan.id);
 
   if (round) {
     return (
@@ -74,14 +74,14 @@ export function QuizGame({ floorplan, symbols, readingOrder, quizzable }: Props)
 
   // 清單的分組與出題是同一個算法（`groupByFamiliarity`），還不熟那一組也是同一個排法：錯最多的在前。
   // 組與組的先後刻意不同：出題先考還沒遇到的（打完兩局才考得遍），開場先列還不熟的（使用者來這裡是想知道還差什麼）。
-  const groups = progress && groupByFamiliarity(quizzable, progress);
+  const groups = stored && groupByFamiliarity(quizzable, stored.progress);
   const nameOf = (id: string) => symbolName(symbols, id);
 
   return (
     <section className={styles.screen}>
-      {progress && groups && (
+      {stored && groups && (
         <>
-          <KnownCount layoutName={floorplan.name} quizzable={quizzable} progress={progress} />
+          <KnownCount layoutName={floorplan.name} quizzable={quizzable} stored={stored} />
           <p className={styles.definition}>{KNOWN_DEFINITION}</p>
 
           {/* 還不熟排最前面、錯最多的在前：使用者來這裡是想知道還差什麼（PRD §6.6.1）。 */}
@@ -89,7 +89,7 @@ export function QuizGame({ floorplan, symbols, readingOrder, quizzable }: Props)
             {groups.missed.map((id) => (
               <li key={id}>
                 <span>{nameOf(id)}</span>{" "}
-                <span className={styles.wrongCount}>{wrongTimesLabel(wrongCount(progress, id))}</span>
+                <span className={styles.wrongCount}>{wrongTimesLabel(wrongCount(stored.progress, id))}</span>
               </li>
             ))}
           </LabelledList>
@@ -108,7 +108,7 @@ export function QuizGame({ floorplan, symbols, readingOrder, quizzable }: Props)
 
       <p className={styles.lead}>{quizIntro(roundSize(quizzable.length))}</p>
       {/* 全部認得之後照樣按得下去（PRD §6.6）：出題就在已認識的那一組裡隨機。 */}
-      <button type="button" className={styles.primary} onClick={start} disabled={!progress}>
+      <button type="button" className={styles.primary} onClick={start} disabled={!stored}>
         {QUIZ_START}
       </button>
     </section>

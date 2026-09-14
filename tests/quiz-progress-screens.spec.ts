@@ -32,6 +32,9 @@ const escapeRe = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const knownCountOf = (page: Page) => page.getByText(/你認得 \d+ \/ \d+/);
 const knownCountText = (known: number) => `這張${plan.name}你認得 ${known} / ${QUIZZABLE_COUNT}`;
 
+/** 瀏覽器不讓網站存資料時，數字旁邊那一句（規格主人 2026-09-15 裁定）。 */
+const STORAGE_BLOCKED_NOTE = "這台瀏覽器不讓網站存資料，答過的題目不會被記住。";
+
 /** 開場的三份清單，以及結算的答錯清單，都以標題命名（`aria-labelledby`）。 */
 const listOf = (page: Page, name: string | RegExp) => page.getByRole("list", { name });
 
@@ -145,6 +148,8 @@ test.describe("結算", () => {
 
     // 寫進去之後的數字：這一局答對的 5 個已經算進去，答錯的 2 個還不算。
     await expect(knownCountOf(page)).toHaveText(knownCountText(11));
+    // 存得了的時候不說那一句：它只給封鎖儲存的瀏覽器。
+    await expect(page.getByText(STORAGE_BLOCKED_NOTE)).toHaveCount(0);
 
     await page.getByRole("link", { name: "回到平面圖" }).click();
     await expect(page).toHaveURL(PLAN);
@@ -188,14 +193,15 @@ test.describe("結算", () => {
   });
 });
 
-// spec user story 42、PRD §6.3.3：localStorage 被封鎖時照樣可玩，只是不記——開場每次都是全部還沒遇到。封鎖的寫法同 affordance-hint.spec.ts。
-test("瀏覽器封鎖 localStorage：開場與結算照樣顯示，都當成空紀錄", async ({ page }) => {
+// spec user story 42、PRD §6.3.3：localStorage 被封鎖時照樣可玩，只是不記——開場每次都是全部還沒遇到。
+test("瀏覽器封鎖 localStorage：開場與結算照樣顯示、都當成空紀錄，數字旁邊說出為什麼不會被記住", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await blockLocalStorage(page);
 
   await page.goto(QUIZ);
   await expect(knownCountOf(page)).toHaveText(knownCountText(0));
+  await expect(page.getByText(STORAGE_BLOCKED_NOTE)).toBeVisible();
   expect(await sortedItems(page, "還沒遇到")).toEqual(sortedNames(onPlan));
 
   await page.getByRole("button", { name: "開始" }).click();
@@ -205,5 +211,7 @@ test("瀏覽器封鎖 localStorage：開場與結算照樣顯示，都當成空�
   // 結算印的是讀得到的那一份——空的。這一局答對的 7 個沒有被記住，「再玩一次」出題依據的也是空紀錄；
   // 在這裡印 7 / 13，下一局卻又把它們當成還沒遇到來考，數字就與出題各說各話（票 05 的 Comments）。
   await expect(knownCountOf(page)).toHaveText(knownCountText(0));
+  // 但只印 0 / 13，剛答對 7 題的人會以為網站壞了（user story 42 要防的正是這件事）：數字旁邊說出為什麼。
+  await expect(page.getByText(STORAGE_BLOCKED_NOTE)).toBeVisible();
   expect(errors).toEqual([]);
 });

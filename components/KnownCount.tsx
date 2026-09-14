@@ -1,5 +1,6 @@
-import { groupByFamiliarity, type LayoutProgress } from "@/lib/quiz/progress";
-import { knownCountLabel } from "@/lib/ui/copy";
+import type { StoredProgress } from "./useLearningProgress";
+import { groupByFamiliarity } from "@/lib/quiz/progress";
+import { STORAGE_BLOCKED_NOTE, knownCountLabel } from "@/lib/ui/copy";
 import styles from "./Quiz.module.css";
 
 // 「這張三房兩廳你認得 N / M」與底下的刻度（PRD §6.6「進度條」）。找找看的開場與結算各印一次（M4 票 05）。
@@ -13,12 +14,12 @@ type Props = {
   layoutName: string;
   /** 這張圖的可出題符號（`quizzableSymbols`）：分母，也是分子只數的範圍。 */
   quizzable: string[];
-  /** 這張圖的學習進度。 */
-  progress: LayoutProgress;
+  /** 這張圖的學習進度，以及這台瀏覽器記不記得住（`useLayoutProgress`、`useSaveAnswers`）。 */
+  stored: StoredProgress;
 };
 
-export function KnownCount({ layoutName, quizzable, progress }: Props) {
-  const known = groupByFamiliarity(quizzable, progress).known.length;
+export function KnownCount({ layoutName, quizzable, stored }: Props) {
+  const known = groupByFamiliarity(quizzable, stored.progress).known.length;
   const total = quizzable.length;
   return (
     <div className={styles.known}>
@@ -29,6 +30,8 @@ export function KnownCount({ layoutName, quizzable, progress }: Props) {
           <span key={i} className={i < known ? styles.filled : undefined} />
         ))}
       </div>
+      {/* 記不住的瀏覽器上，數字永遠是 0。緊貼著數字說出為什麼：他剛答對幾題，只看到 0 會以為網站壞了。 */}
+      {!stored.canRemember && <p className={styles.storageNote}>{STORAGE_BLOCKED_NOTE}</p>}
     </div>
   );
 }

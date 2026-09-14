@@ -113,6 +113,14 @@
   background: var(--ink);
 }
 
+/* 記不住的瀏覽器上，數字底下說出為什麼是 0。與「認得」的定義同一個字級：是說明，不是警告。 */
+.storageNote {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink2);
+}
+
 /* 開場數字底下「認得」的定義。 */
 .definition {
   margin: 0 0 20px;
