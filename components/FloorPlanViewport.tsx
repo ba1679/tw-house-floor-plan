@@ -13,10 +13,17 @@ import {
 import { FloorPlanRenderer, type RoomState } from "./FloorPlanRenderer";
 import type { FirstVisitHint } from "./useFirstVisitHint";
 import { useViewerGestures } from "./useViewerGestures";
+import { planViewBox } from "@/lib/floorplan/drawing";
 import { roomOfHotspot, type RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
 import type { SymbolRecord } from "@/lib/symbols/types";
-import type { ViewerAction, ViewerState } from "@/lib/viewer/interaction";
+import {
+  BLANK_TAP_STATUS,
+  CONFIRM_MISSED_STATUS,
+  VIEWER_CONTROLS,
+  candidatesStatus,
+} from "@/lib/ui/copy";
+import type { ViewerAction, ViewerConfig, ViewerState } from "@/lib/viewer/interaction";
 import { canvasTransform, isFitView } from "@/lib/viewer/view";
 import styles from "./FloorPlanViewer.module.css";
 
@@ -27,6 +34,24 @@ import styles from "./FloorPlanViewer.module.css";
 // **它不持有狀態機**（docs/adr/0007）。自由看圖（`FloorPlanViewer`）與找找看各自持有自己的 reducer、
 // 再把狀態與 dispatch 交進來：找找看要在檢視器的狀態機外面包一層「一局」，這個框若自己 useReducer，
 // 那一層就無從包起。說明卡、網址高亮、題目與回饋也都不在這裡——它們是呼叫端的事。
+
+/**
+ * 檢視器狀態機的初始設定，自由看圖與找找看都從這裡拿。
+ *
+ * 圖面與命中判定必須在同一個座標系裡，所以 viewBox 只有一份算法（`planViewBox`），renderer 與狀態機各自去問它。
+ * 尺寸先給一個占位值：zoom 1 的 transform 是 translate(0,0) scale(1)，與尺寸無關，
+ * 所以 SSR 出來的靜態頁面就已經是正確的全圖，掛載後不會跳動；真正的框由掛載後的 RESIZE 量。
+ * 兩頁各寫一份的話，占位值只改了一邊，兩頁在量到真正的框之前的比例尺就不一樣。
+ */
+export function initialViewerConfig(floorplan: FloorPlan): ViewerConfig {
+  const viewBox = planViewBox(floorplan);
+  return {
+    hotspots: floorplan.hotspots,
+    viewBox,
+    viewportWidth: 375,
+    viewportHeight: (375 * viewBox.height) / viewBox.width,
+  };
+}
 
 type Props = {
   floorplan: FloorPlan;
@@ -177,11 +202,11 @@ export function FloorPlanViewport({
   const controls =
     viewer.stage === "candidates" ? (
       <button type="button" className={styles.control} onClick={reselect}>
-        重選
+        {VIEWER_CONTROLS.reselect}
       </button>
     ) : viewer.stage === "browsing" && !isFitView(viewer) ? (
       <button type="button" className={styles.control} onClick={resetView}>
-        回到全圖
+        {VIEWER_CONTROLS.resetView}
       </button>
     ) : null;
 
@@ -266,10 +291,10 @@ export function FloorPlanViewport({
       <p className={styles.status} role="status">
         {viewer.stage === "candidates"
           ? viewer.confirmMissed
-            ? "還是沒點到。再點一次，或按「重選」退回第一段。"
-            : `放大了，圈出 ${viewer.candidates.length} 個候選。再點一次確認你要的那一個。`
+            ? CONFIRM_MISSED_STATUS
+            : candidatesStatus(viewer.candidates.length)
           : viewer.stage === "browsing" && viewer.lastTap
-            ? "這附近沒有可以點的東西，換個地方點點看，或連點兩下放大這一區。"
+            ? BLANK_TAP_STATUS
             : restingStatus}
       </p>
     </>

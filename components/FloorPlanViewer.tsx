@@ -1,11 +1,10 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useReducer, useState } from "react";
-import { FloorPlanViewport } from "./FloorPlanViewport";
+import { FloorPlanViewport, initialViewerConfig } from "./FloorPlanViewport";
 import { HighlightFromQuery } from "./HighlightFromQuery";
 import { InfoSheet } from "./InfoSheet";
 import { useFirstVisitHint } from "./useFirstVisitHint";
-import { planViewBox } from "@/lib/floorplan/drawing";
 import { isSymbolAbsent } from "@/lib/floorplan/hotspots";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
@@ -31,21 +30,9 @@ type Props = {
 };
 
 export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
-  // 圖面與命中判定必須在同一個座標系裡，所以 viewBox 只有一份算法
-  // （`lib/floorplan/drawing.ts` 的 `planViewBox`），renderer 與狀態機各自去問它。
-  const viewBox = planViewBox(floorplan);
-
-  // 初始尺寸先給一個占位值：zoom 1 的 transform 是 translate(0,0) scale(1)，
-  // 與尺寸無關，所以 SSR 出來的靜態頁面就已經是正確的全圖，掛載後不會跳動。
-  const [state, dispatch] = useReducer(
-    reduceViewer,
-    {
-      hotspots: floorplan.hotspots,
-      viewBox,
-      viewportWidth: 375,
-      viewportHeight: (375 * viewBox.height) / viewBox.width,
-    },
-    createViewerState,
+  // 初始尺寸是占位值，SSR 出來的靜態頁面就已經是正確的全圖（`initialViewerConfig`）。
+  const [state, dispatch] = useReducer(reduceViewer, floorplan, (fp: FloorPlan) =>
+    createViewerState(initialViewerConfig(fp)),
   );
 
   // 視野鎖定的網址參數 `?fitLocked=1`：M2 替還不存在的找找看留的測試入口。

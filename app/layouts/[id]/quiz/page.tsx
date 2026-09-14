@@ -14,7 +14,7 @@ export const dynamicParams = false;
 
 /**
  * 有找找看頁的 layout：**有可出題符號的那幾張**（spec「路由與頁面」，取代 PRD 舊 schema 的 `quiz_enabled`）。
- * 一個符號都出不了題的圖產生一頁，按下「開始」是一局 0 題。可出題與否只問 `quizzableSymbols`——題數與題目池也問它。
+ * 一個符號都出不了題的圖**不產生**這一頁：產生了，按下「開始」就是一局 0 題。可出題與否只問 `quizzableSymbols`，題數與題目池也問它。
  */
 function quizLayoutIds(): string[] {
   return listLayoutIds().filter((id) => quizzableSymbols(loadFloorPlan(id).hotspots).length > 0);

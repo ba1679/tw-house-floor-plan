@@ -139,6 +139,22 @@ export const SYMBOL_NOT_FOUND = "找不到網址指定的符號，網址可能�
  */
 export const TAP_HINT = "點圖上任何一個位置，我們會放大讓你看清楚";
 
+/** 檢視器控制列的兩顆按鈕（M2 票 03、04）。平面圖頁與找找看共用同一個圖框，也共用這兩個字。 */
+export const VIEWER_CONTROLS = { reselect: "重選", resetView: "回到全圖" } as const;
+
+/**
+ * 第一段圈出候選之後狀態列那一句。**只說數量、不說是哪些符號**：找找看作答前，
+ * 畫面與讀螢幕軟體念得出來的東西都不得出現熱區的符號名字（PRD §6.3.1）。
+ */
+export const candidatesStatus = (count: number) =>
+  `放大了，圈出 ${count} 個候選。再點一次確認你要的那一個。`;
+
+/** 第二段沒點中。沒有這一句，畫面上的字跟成功時一模一樣，使用者不知道剛剛那一下有沒有被聽見。 */
+export const CONFIRM_MISSED_STATUS = `還是沒點到。再點一次，或按「${VIEWER_CONTROLS.reselect}」退回第一段。`;
+
+/** 點到附近沒有熱區的地方。雙擊只在這之後成立，而那一刻畫面上唯一的字就是這句——沒有它，手機上沒有人會去猜雙擊。 */
+export const BLANK_TAP_STATUS = "這附近沒有可以點的東西，換個地方點點看，或連點兩下放大這一區。";
+
 /** 「跟○○的差別」——容易搞混區塊裡每一則的標題。 */
 export const confusedWithLabel = (otherName: string) => `跟${otherName}的差別`;
 
@@ -231,9 +247,8 @@ export const QUIZ_PROMPT_LEAD = "找出這張圖上的";
 export const QUIZ_CORRECT = "答對了。";
 export const QUIZ_WRONG = "答錯了。";
 
+/** 作答之後前進的那一顆。最後一題按下去是結算，字照樣是「下一題」（spec「作答之後」的原文）。 */
 export const QUIZ_NEXT = "下一題";
-/** 最後一題的「下一題」：按下去不是另一題，是結算。 */
-export const QUIZ_TO_RESULTS = "看結果";
 
 /** 結算那一行。兩個數字都由一局算，不寫死。 */
 export const quizScore = (correct: number, total: number) => `答對 ${correct} / ${total} 題`;

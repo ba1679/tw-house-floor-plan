@@ -1,9 +1,8 @@
 "use client";
 
 import { useCallback, useReducer } from "react";
-import { FloorPlanViewport } from "./FloorPlanViewport";
+import { FloorPlanViewport, initialViewerConfig } from "./FloorPlanViewport";
 import { useFirstVisitHint } from "./useFirstVisitHint";
-import { planViewBox } from "@/lib/floorplan/drawing";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
 import {
@@ -20,7 +19,6 @@ import {
   QUIZ_NEXT,
   QUIZ_PLAY_AGAIN,
   QUIZ_PROMPT_LEAD,
-  QUIZ_TO_RESULTS,
   QUIZ_WRONG,
   TAP_HINT,
   quizProgress,
@@ -45,19 +43,10 @@ type Props = {
 };
 
 export function QuizRound({ floorplan, symbols, readingOrder, questions, onPlayAgain }: Props) {
-  const viewBox = planViewBox(floorplan);
-  // 初始尺寸是占位值，與自由看圖同一個理由（`FloorPlanViewer`）：真正的框掛載後由 RESIZE 量。
+  // 初始尺寸是占位值，與自由看圖同一份（`initialViewerConfig`）：真正的框掛載後由 RESIZE 量。
   const [round, dispatch] = useReducer(
     reduceRound,
-    {
-      viewer: {
-        hotspots: floorplan.hotspots,
-        viewBox,
-        viewportWidth: 375,
-        viewportHeight: (375 * viewBox.height) / viewBox.width,
-      },
-      questions,
-    },
+    { viewer: initialViewerConfig(floorplan), questions },
     createRound,
   );
 
@@ -86,7 +75,6 @@ export function QuizRound({ floorplan, symbols, readingOrder, questions, onPlayA
   const index = questionIndex(round);
   const target = questions[index];
   const answer = pendingAnswer(round);
-  const isLast = index + 1 === questions.length;
 
   // 作答之後說對或錯；出題中只有第一題說引導——那句話教的是怎麼點，第二題的時候他已經點過一次了。
   const restingStatus = answer
@@ -125,7 +113,7 @@ export function QuizRound({ floorplan, symbols, readingOrder, questions, onPlayA
       {answer && (
         <div className={styles.next}>
           <button type="button" className={styles.primary} onClick={next}>
-            {isLast ? QUIZ_TO_RESULTS : QUIZ_NEXT}
+            {QUIZ_NEXT}
           </button>
         </div>
       )}

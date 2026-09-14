@@ -22,6 +22,12 @@ const symbols: { id: string; name: string }[] = JSON.parse(
 const PLAN = "/layouts/3b2l_standard";
 const QUIZ = `${PLAN}/quiz`;
 
+/**
+ * 主圖一局的題數。**spec 寫下的字面值**（13 個可出題符號 → 7 題），不拿 `roundSize` 算：
+ * 用程式自己那條公式算期望值，公式錯了兩邊一起錯、一起過。主圖多一個有熱區的符號時，改這一行。
+ */
+const ROUND_SIZE = 7;
+
 /** 首次引導那一句（與 affordance-hint.spec.ts 同一句：兩頁共用）。 */
 const TAP_HINT = "點圖上任何一個位置，我們會放大讓你看清楚";
 
@@ -34,10 +40,12 @@ const progressOf = (page: Page) => page.locator("#quiz-progress");
 /** 題目裡的符號名字。題目文字是 `symbol.name` 原文（spec「一局的流程」），所以用名字就對得回資料。 */
 const questionNameOf = (page: Page) => page.locator("#quiz-question-name");
 const statusOf = (page: Page) => page.getByRole("status");
-/** 作答之後前進的那一顆。最後一題的字不同（進結算），兩種都認。 */
-const nextOf = (page: Page) => page.getByRole("button", { name: /下一題|看結果/ });
+/** 作答之後前進的那一顆。最後一題按下去是結算，字照樣是「下一題」。 */
+const nextOf = (page: Page) => page.getByRole("button", { name: "下一題" });
 const planOf = (page: Page) => page.getByRole("group", { name: /三房兩廳/ });
 const viewportOf = (page: Page) => page.locator("#floorplan-viewport");
+
+const progressText = (index: number) => `第 ${index} / ${ROUND_SIZE} 題`;
 
 /** 現在這一題的題目符號（symbol id）。 */
 const currentTarget = async (page: Page) => idOfName((await questionNameOf(page).textContent())!)!;
@@ -45,7 +53,7 @@ const currentTarget = async (page: Page) => idOfName((await questionNameOf(page)
 async function startRound(page: Page) {
   await page.goto(QUIZ);
   await page.getByRole("button", { name: "開始" }).click();
-  await expect(progressOf(page)).toHaveText(/^第 1 \//);
+  await expect(progressOf(page)).toHaveText(progressText(1));
 }
 
 const centerOf = (h: Hotspot) => ({ x: h.coords[0] + h.coords[2] / 2, y: h.coords[1] + h.coords[3] / 2 });
@@ -82,16 +90,7 @@ async function answerByTwoTaps(page: Page, hotspotId: string) {
   await expect(target, `${hotspotId} 沒有被圈成候選`).toHaveAttribute("data-state", "candidate");
   const zoomed = (await target.boundingBox())!;
   await page.mouse.click(zoomed.x + zoomed.width / 2, zoomed.y + zoomed.height / 2);
-  await expect(nextOf(page), "作答之後沒有出現前進的按鈕").toBeVisible();
-}
-
-/** 從第 from 題答到最後一題，每一題都答對。 */
-async function answerRestCorrectly(page: Page, from: number) {
-  for (let i = from; i <= 7; i++) {
-    await expect(progressOf(page)).toHaveText(`第 ${i} / 7 題`);
-    await answerByTwoTaps(page, cleanHotspotsOf(await currentTarget(page))[0]);
-    await nextOf(page).click();
-  }
+  await expect(nextOf(page), "作答之後沒有出現「下一題」").toBeVisible();
 }
 
 /**
@@ -129,12 +128,11 @@ test.describe("找找看頁", () => {
     }
   });
 
-  // 7 是 spec 寫下的字面值：主圖 13 個可出題符號，一局 ⌈13 ÷ 2⌉ 題。
   test("按「開始」出第 1 題：題號 1 / 7，題目是這張圖上某個符號的名字原文", async ({ page }) => {
     await page.goto(QUIZ);
     await page.getByRole("button", { name: "開始" }).click();
 
-    await expect(progressOf(page)).toHaveText("第 1 / 7 題");
+    await expect(progressOf(page)).toHaveText(progressText(1));
     const name = (await questionNameOf(page).textContent())!;
     expect(onPlan.has(idOfName(name)!), `「${name}」不是這張圖上有熱區的符號`).toBe(true);
   });
@@ -143,8 +141,8 @@ test.describe("找找看頁", () => {
     await startRound(page);
 
     const asked: string[] = [];
-    for (let i = 1; i <= 7; i++) {
-      await expect(progressOf(page)).toHaveText(`第 ${i} / 7 題`);
+    for (let i = 1; i <= ROUND_SIZE; i++) {
+      await expect(progressOf(page)).toHaveText(progressText(i));
       const target = await currentTarget(page);
       asked.push(target);
 
@@ -153,9 +151,9 @@ test.describe("找找看頁", () => {
       await nextOf(page).click();
     }
 
-    expect(new Set(asked).size, `一局出了重複的題目：${asked}`).toBe(7);
+    expect(new Set(asked).size, `一局出了重複的題目：${asked}`).toBe(ROUND_SIZE);
     for (const id of asked) expect(onPlan.has(id), `${id} 不是這張圖上有熱區的符號`).toBe(true);
-    await expect(page.getByText("答對 7 / 7 題")).toBeVisible();
+    await expect(page.getByText(`答對 ${ROUND_SIZE} / ${ROUND_SIZE} 題`)).toBeVisible();
     await expect(progressOf(page)).toBeHidden();
   });
 
@@ -167,14 +165,14 @@ test.describe("找找看頁", () => {
     await nextOf(page).click();
 
     // 第 2 題起點題目符號的**最後一處**：上一條測試點的是第一處。窗有 9 處，點中哪一扇都是窗（PRD §6.3.2）。
-    for (let i = 2; i <= 7; i++) {
-      await expect(progressOf(page)).toHaveText(`第 ${i} / 7 題`);
+    for (let i = 2; i <= ROUND_SIZE; i++) {
+      await expect(progressOf(page)).toHaveText(progressText(i));
       await answerByTwoTaps(page, cleanHotspotsOf(await currentTarget(page)).at(-1)!);
       await expect(statusOf(page)).toHaveText("答對了。");
       await nextOf(page).click();
     }
 
-    await expect(page.getByText("答對 6 / 7 題")).toBeVisible();
+    await expect(page.getByText(`答對 ${ROUND_SIZE - 1} / ${ROUND_SIZE} 題`)).toBeVisible();
   });
 
   // CONTEXT.md「作答」：第一段圈出候選、「重選」、第二段沒點中都不是作答。步驟照 two-stage-tap.spec.ts 那幾條。
@@ -196,7 +194,7 @@ test.describe("找找看頁", () => {
     await page.getByRole("button", { name: "重選" }).click();
     await expect(door).toHaveAttribute("data-state", "normal");
     await expect(nextOf(page), "重選不是作答").toBeHidden();
-    await expect(progressOf(page)).toHaveText("第 1 / 7 題");
+    await expect(progressOf(page)).toHaveText(progressText(1));
   });
 
   // 從平面圖頁的 fitLocked 測試（pan-zoom.spec.ts）搬過來的同一組步驟，入口換成找找看的「開始」。
@@ -220,6 +218,7 @@ test.describe("找找看頁", () => {
     const zoomed = (await door.boundingBox())!;
     expect(zoomed.width, "第一段的自動 3× 不該被鎖定擋住").toBeGreaterThan(before.width * 2.5);
 
+    // 拖曳在放大之後才問得出來：全圖時整張圖都看得到，拖不拖都不會動。
     const frame = (await viewportOf(page).boundingBox())!;
     await dragLeft(page, { x: frame.x + frame.width / 2, y: frame.y + frame.height / 2 }, 80);
     const dragged = (await door.boundingBox())!;
@@ -239,7 +238,7 @@ test.describe("找找看頁", () => {
     await expect(statusOf(page)).toHaveText("答對了。");
     await nextOf(page).click();
 
-    await expect(progressOf(page)).toHaveText("第 2 / 7 題");
+    await expect(progressOf(page)).toHaveText(progressText(2));
     await page.locator(`#${cleanHotspotsOf(otherThan(await currentTarget(page)))[0]}`).focus();
     await page.keyboard.press(" ");
     await expect(statusOf(page)).toHaveText("答錯了。");
@@ -250,7 +249,7 @@ test.describe("找找看頁", () => {
     await startRound(page);
     await answerByTwoTaps(page, cleanHotspotsOf(await currentTarget(page))[0]);
     await nextOf(page).click();
-    await expect(progressOf(page)).toHaveText("第 2 / 7 題");
+    await expect(progressOf(page)).toHaveText(progressText(2));
 
     await page.reload();
 
