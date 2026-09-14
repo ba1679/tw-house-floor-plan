@@ -14,7 +14,7 @@ import { FloorPlanRenderer, type RoomState } from "./FloorPlanRenderer";
 import type { FirstVisitHint } from "./useFirstVisitHint";
 import { useViewerGestures } from "./useViewerGestures";
 import { planViewBox } from "@/lib/floorplan/drawing";
-import { roomOfHotspot, type RoomHotspots } from "@/lib/floorplan/reading-order";
+import { roomsWith, type RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
 import type { SymbolRecord } from "@/lib/symbols/types";
 import {
@@ -68,7 +68,20 @@ type Props = {
   /** 檢視器的狀態機由呼叫端持有（見檔頭）。 */
   viewer: ViewerState;
   dispatch: Dispatch<ViewerAction>;
-  /** 說明卡此刻升起來了沒。升起來時，沒被選到的房間暗下去。 */
+  /**
+   * 此刻標成 `selected` 的熱區。自由看圖是檢視器的 `selected`；找找看作答之後是被點中的那一個——
+   * 那時檢視器已經退回閒著，被點中的是哪一個由一局記著（docs/adr/0007「標記住在結束它的那一層」）。
+   */
+  selectedHotspot: string | null;
+  /** 此刻標成 `revealed` 的符號：找找看作答之後的題目符號，它在圖上的每一處。自由看圖永遠是 null。 */
+  revealedSymbol: string | null;
+  /**
+   * 圖暫停中：找找看作答之後、按「下一題」之前。擋 action 的是一局，這裡只管畫——
+   * 檢視器那時是閒著的 browsing，而 browsing 那層「這裡可以點」的提示在一張點不動的圖上不該亮起來
+   * （docs/adr/0007「後果」）。
+   */
+  paused: boolean;
+  /** 說明卡此刻升起來了沒。升起來時，沒有標記的房間暗下去。 */
   dimRooms: boolean;
   /** 兩段式沒在進行時（不在第二段、也不是剛點到空白處），狀態列說這一句。 */
   restingStatus: string;
@@ -86,6 +99,9 @@ export function FloorPlanViewport({
   readingOrder,
   viewer,
   dispatch,
+  selectedHotspot,
+  revealedSymbol,
+  paused,
   dimRooms,
   restingStatus,
   hint,
@@ -170,31 +186,32 @@ export function FloorPlanViewport({
   const candidateIds = new Set(viewer.candidates.map((h) => h.id));
 
   /**
-   * 說明卡開著時，**沒被選到的房間暗下去**（票 07）。
+   * 說明卡開著時，**沒有標記的房間暗下去**（票 07；M4 票 02 放寬成「有標記」）。
    *
    * 說明卡是版面裡的一格（票 03），它升起來就把平面圖壓成一條可視帶。在那條帶子裡
    * 「我現在看的東西在哪一間」是最容易掉的一件事，所以把其餘房間退成背景。
    * 兩段式進行中不做——那時該亮的是候選，多一層明暗只是雜訊。
    *
+   * 亮著的是有 `selected` 或 `revealed` 熱區的每一間。自由看圖只有 `selected`，結果就是「被選到的那一間」；
+   * 找找看答錯時，被點中的與題目符號多半不在同一間——只亮被點中的那一間，題目符號所在的房間反而被壓暗。
+   * 沒有任何標記落在房間裡時不壓暗。
+   *
    * 這是圖面第一次依互動狀態改變畫法。做得到這件事，正是這一層從產生器的靜態產物
    * 換成 React renderer 的理由（`docs/adr/0005`）。
    */
-  const focusedRoomId =
-    dimRooms && viewer.selected ? roomOfHotspot(readingOrder, viewer.selected.id) : null;
+  const litRooms = dimRooms
+    ? roomsWith(readingOrder, (h) => h.id === selectedHotspot || h.symbol_id === revealedSymbol).join(" ")
+    : "";
   // useMemo 不是為了省這幾行的計算，是為了**同一個物件**：平移的每一次 pointermove
   // 都會重畫一輪，而圖面那一層靠 props 沒變才跳得過去（`PlanArtwork` 的 memo）。
-  // 每輪新做一個內容相同的物件，等於那層 memo 不存在。
-  const roomStates = useMemo<Record<string, RoomState> | undefined>(
-    () =>
-      focusedRoomId
-        ? Object.fromEntries(
-            floorplan.rooms
-              .filter((room) => room.id !== focusedRoomId)
-              .map((room) => [room.id, "muted" as const]),
-          )
-        : undefined,
-    [focusedRoomId, floorplan.rooms],
-  );
+  // 每輪新做一個內容相同的物件，等於那層 memo 不存在。依賴因此是串成字串的房間 id，不是每輪新做的陣列。
+  const roomStates = useMemo<Record<string, RoomState> | undefined>(() => {
+    if (!litRooms) return undefined;
+    const lit = new Set(litRooms.split(" "));
+    return Object.fromEntries(
+      floorplan.rooms.filter((room) => !lit.has(room.id)).map((room) => [room.id, "muted" as const]),
+    );
+  }, [litRooms, floorplan.rooms]);
 
   const nameOf = (symbolId: string | null) =>
     (symbolId && symbols[symbolId]?.name) || symbolId || "";
@@ -227,6 +244,7 @@ export function FloorPlanViewport({
               className={styles.hotspots}
               data-hint={hint.visible === null ? undefined : hint.visible ? "on" : "off"}
               data-stage={viewer.stage}
+              data-paused={paused ? "true" : undefined}
             >
               {/* 第一段看了多大一圈。半徑用命中判定當下存下的 tolCmAtTap，**不在放大後重算**：
                   重算是拿 3× 的比例尺去換同樣的 46px，畫出來只有實際的三分之一，
@@ -259,14 +277,19 @@ export function FloorPlanViewport({
                       aria-label={nameOf(h.symbol_id)}
                       onFocus={focusHotspot}
                       onKeyDown={activateHotspot}
+                      // 優先序 selected > candidate > revealed > highlighted > normal。
+                      // 後三者不會同時出現在同一張圖上（高亮只在自由看圖、revealed 只在找找看），
+                      // 排這個順序只是讓同一條式子兩頁都能用。
                       data-state={
-                        viewer.selected?.id === h.id
+                        h.id === selectedHotspot
                           ? "selected"
                           : candidateIds.has(h.id)
                             ? "candidate"
-                            : h.symbol_id === viewer.highlightedSymbol
-                              ? "highlighted"
-                              : "normal"
+                            : h.symbol_id === revealedSymbol
+                              ? "revealed"
+                              : h.symbol_id === viewer.highlightedSymbol
+                                ? "highlighted"
+                                : "normal"
                       }
                       x={h.coords[0]}
                       y={h.coords[1]}

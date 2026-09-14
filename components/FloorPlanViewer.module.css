@@ -61,8 +61,12 @@
 
    不用動畫：**不得持續閃爍**是明令，而這張圖本身就是學習對象（PRD §6.1.2）。
    進入候選或說明卡階段就收起來——那時該亮的是候選與選取，多一層底色只是雜訊，
-   而且第二段只認第一段圈出的候選，把其餘 36 個也標起來是騙人的（PRD §11 #19）。 */
-.hotspots[data-stage="browsing"] rect[data-state="normal"] {
+   而且第二段只認第一段圈出的候選，把其餘 36 個也標起來是騙人的（PRD §11 #19）。
+
+   **找找看作答之後的暫停也收起來**（`data-paused`，M4 票 02）。那時檢視器是閒著的 browsing，
+   但圖點不動——不收的話，其餘熱區會在一張點不動的圖上全部亮起來（docs/adr/0007「後果」）。
+   `:not([data-paused])` 包在 `:where()` 裡：不包的話這條的特異度多出一截，蓋過最底下鍵盤焦點那條規則。 */
+.hotspots[data-stage="browsing"]:where(:not([data-paused])) rect[data-state="normal"] {
   fill: oklch(0.55 0.17 232 / 0.1);
   stroke: oklch(0.55 0.17 232 / 0.5);
   stroke-width: 1;
@@ -71,12 +75,12 @@
 /* 桌機的 hover。手機沒有 hover，上面那層必須自己就夠明確——hover 是加分，不是提示的本體。 */
 @media (hover: hover) and (pointer: fine) {
   /* 只在真的有 hover 規則的地方打開命中，其餘維持 pointer-events: none。 */
-  .hotspots[data-stage="browsing"] rect[data-state="normal"],
+  .hotspots[data-stage="browsing"]:where(:not([data-paused])) rect[data-state="normal"],
   .hotspots rect[data-state="candidate"] {
     pointer-events: fill;
   }
 
-  .hotspots[data-stage="browsing"] rect[data-state="normal"]:hover {
+  .hotspots[data-stage="browsing"]:where(:not([data-paused])) rect[data-state="normal"]:hover {
     fill: oklch(0.55 0.17 232 / 0.22);
     stroke: oklch(0.55 0.17 232 / 0.9);
   }
@@ -123,6 +127,19 @@
   fill: oklch(0.9 0.17 95 / 0.5);
   stroke: oklch(0.68 0.15 75);
   stroke-width: 3;
+}
+
+/* 找找看作答之後標出的答案（M4 票 02）：題目符號在圖上的其餘各處（答錯時是每一處）。
+
+   與高亮**形狀相同、壽命不同**（CONTEXT.md「State」），畫面上也必須分得出來：從符號頁帶著高亮進平面圖的人，
+   不該以為自己在答題，反過來也一樣。所以色相避開高亮的黃、候選的藍、選中的紅，而且邊是**虛線**——
+   分不出顏色的人靠線型也分得開。不用綠：回饋不用紅綠（spec「文案與畫面」），答對答錯它說的都是「答案在這裡」。
+   不閃、不動（PRD §6.1.2「不得持續閃爍」）。 */
+.hotspots rect[data-state="revealed"] {
+  fill: oklch(0.52 0.17 300 / 0.2);
+  stroke: oklch(0.5 0.17 300);
+  stroke-width: 3;
+  stroke-dasharray: 6 3;
 }
 
 /* 鍵盤的焦點（票 06）。焦點框由瀏覽器畫，這裡再加一層熱區自己的強調——

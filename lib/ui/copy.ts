@@ -72,11 +72,14 @@ export const SHEET_CONTROLS = {
 } as const;
 
 /**
- * 「這張圖上共 N 處 · 目前第 M 處」。
- * N 由 floorplan.hotspots 算出來，不得寫死（PRD §6.3.2）。
+ * 「這張圖上共 N 處」。N 由 floorplan.hotspots 算出來，不得寫死（PRD §6.3.2）。
+ * 找找看的說明卡只印這一句（M4 票 02）：每一處已經都標在圖上了。
  */
+export const occurrenceTotalLabel = (total: number) => `這張圖上共 ${total} 處`;
+
+/** 「這張圖上共 N 處 · 目前第 M 處」：自由看圖的說明卡。前半與找找看是同一句。 */
 export const occurrenceLabel = (total: number, index: number) =>
-  `這張圖上共 ${total} 處 · 目前第 ${index} 處`;
+  `${occurrenceTotalLabel(total)} · 目前第 ${index} 處`;
 
 /**
  * 符號頁底部那顆轉換點按鈕的字，照 PRD §6.2.1 的原句。它是把搜尋流量帶進平面圖的唯一入口（M3 票 08）。
@@ -249,6 +252,15 @@ export const QUIZ_WRONG = "答錯了。";
 
 /** 作答之後前進的那一顆。最後一題按下去是結算，字照樣是「下一題」（spec「作答之後」的原文）。 */
 export const QUIZ_NEXT = "下一題";
+
+/** 作答之後打開題目符號說明卡的那一顆（M4 票 02）。答對時卡片不自動打開，想看的人按它。 */
+export const QUIZ_SHOW_SHEET = "看說明";
+
+/**
+ * 答錯時說明卡最上面那一句（spec「作答之後」）。卡片講的是題目符號，這一句先告訴他：他把什麼當成了它。
+ * 名字是 `symbol.name` 原文，由呼叫端從資料取來。
+ */
+export const quizPicked = (pickedName: string) => `你點的是${pickedName}。`;
 
 /** 結算那一行。兩個數字都由一局算，不寫死。 */
 export const quizScore = (correct: number, total: number) => `答對 ${correct} / ${total} 題`;

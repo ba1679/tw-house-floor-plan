@@ -11,6 +11,7 @@ import {
   SECTION_LABELS,
   confusedWithLabel,
   occurrenceLabel,
+  occurrenceTotalLabel,
 } from "@/lib/ui/copy";
 import styles from "./InfoSheet.module.css";
 
@@ -21,21 +22,39 @@ import styles from "./InfoSheet.module.css";
 // （票 03 決議 3）。浮層版本會把圖的下半（次臥、後陽台、主臥衛浴那一帶）壓在卡片底下，
 // 「一邊看說明一邊知道它在圖上哪裡」在那半張圖就不成立。
 //
-// 畫面上的字全部來自 symbol 資料或 lib/ui/copy.ts，一字不散在這裡。
+// 卡片講哪個符號由呼叫端給（`symbol`）。自由看圖給的是選中的那一個；找找看答錯時給的是**題目符號**，
+// 而被點中的是另一個（M4 票 02）——所以卡片自己不去問「選中了誰」。
+//
+// 畫面上的字全部來自 symbol 資料、lib/ui/copy.ts，或呼叫端交進來的 `note`，一字不散在這裡。
+
+/**
+ * 這個符號在這張圖上的出現次數，兩種形狀擇一（M4 票 02）：
+ * - 自由看圖：共 N 處、現在看第 M 處，加上換看下一處的那一鍵。
+ * - 找找看：只有共 N 處。每一處已經都標在圖上，而答錯時被點中的不是這個符號，「第 M 處」數不出來。
+ *
+ * 綁成一個值、而不是兩個選填欄位：「有第 M 處卻沒有切換鍵」這種組合就寫不出來。
+ */
+export type SheetOccurrence = (Occurrence & { onNext: () => void }) | Pick<Occurrence, "total">;
+
+/**
+ * 卡片最上面多出來的那一段，內容由呼叫端給：找找看答錯時的「你點的是 X」與差異句（M4 票 02）。
+ * 卡片不必知道什麼是作答——它只負責把這一段排在最先讀到的位置。
+ */
+export type SheetNote = { lead: string; detail: string | null };
 
 type Props = {
   symbol: SymbolRecord;
   /** 整份符號表。容易搞混區塊要顯示對方的名字，而 confused_with 裡只有 id。 */
   symbols: Record<string, SymbolRecord>;
-  /** 這個符號在這張圖上共 N 處、現在看的是第 M 處。由 floorplan 算出來，不得寫死。 */
-  occurrence: Occurrence;
+  /** 由 floorplan 算出來，不得寫死。見 `SheetOccurrence`。 */
+  occurrence: SheetOccurrence;
+  note?: SheetNote;
   /**
    * 卡片開啟時把焦點收進來。鍵盤打開的卡片才給 true（票 06）：
    * 焦點留在圖上的話，Tab 的下一站是圖上的下一個熱區，卡片裡的內容永遠走不到。
    */
   takeFocus: boolean;
   onClose: () => void;
-  onNextOccurrence: () => void;
 };
 
 /** 圖上那個十字準星，兩種呈現共用。 */
@@ -48,14 +67,7 @@ function OccurrenceMark() {
   );
 }
 
-export function InfoSheet({
-  symbol,
-  symbols,
-  occurrence,
-  takeFocus,
-  onClose,
-  onNextOccurrence,
-}: Props) {
+export function InfoSheet({ symbol, symbols, occurrence, note, takeFocus, onClose }: Props) {
   const sheetRef = useRef<HTMLElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState(false);
@@ -106,7 +118,8 @@ export function InfoSheet({
             {category.zh} / {category.en}
           </p>
         </div>
-        {/* 關卡片＝回到 browsing 並還原視野，就是現有「重選」的語意，不新增第四個 stage。 */}
+        {/* 關卡片之後發生什麼是呼叫端的事：自由看圖是「重選」（回到 browsing 並還原視野，票 03），
+            找找看只是把卡片收起來，標記與暫停都留著（M4 票 02）。 */}
         <button
           type="button"
           className={styles.close}
@@ -121,6 +134,15 @@ export function InfoSheet({
 
       <div className={styles.bodyWrap}>
         <div className={styles.body} ref={bodyRef}>
+          {/* 排在最前面、跟著內容捲：它是這張卡此刻為什麼打開的理由，但不該佔住不捲的標題列——
+              差異句可能有三行，而卡片的高度上限是 46dvh。 */}
+          {note && (
+            <section className={styles.note} data-section="note">
+              <p className={styles.noteLead}>{note.lead}</p>
+              {note.detail && <p className={styles.noteDetail}>{note.detail}</p>}
+            </section>
+          )}
+
           <div className={styles.badgeRow}>
             {/* source_tier 與 verification_status 是兩條不同的軸（CONTEXT.md）：
                 這裡呈現的是「答案從哪來」，「我們查證做到哪」不上前台。 */}
@@ -173,21 +195,28 @@ export function InfoSheet({
           代價是「共 1 處」這個事實也跟著不見——那是 spec user story 17 想說的話。
           2026-09-07 裁定維持現狀：這一列量起來約 43px，而卡片離 46vh 的上限只剩 14px，
           補回去就 14/14 全部頂到上限，決議 1 的「高度隨內容走」在這張圖上再也沒有例子。
-          不必再回頭翻這個問題，來龍去脈在票 03 的 comments。 */}
-      {occurrence.total > 1 && (
-        <button type="button" className={styles.occurrences} onClick={onNextOccurrence}>
-          <OccurrenceMark />
-          <span className={styles.occurrenceText}>
-            <span className={styles.occurrenceTitle}>{SHEET_CONTROLS.otherOccurrences}</span>
-            <span className={styles.occurrenceCount}>
-              {occurrenceLabel(occurrence.total, occurrence.index)}
+          不必再回頭翻這個問題，來龍去脈在票 03 的 comments。
+          找找看那一列（只有「共 N 處」）同一條規矩：2026-09-14 規格主人裁定照決議 2（M4 票 02 的 Comments）。 */}
+      {occurrence.total > 1 &&
+        ("onNext" in occurrence ? (
+          <button type="button" className={styles.occurrences} onClick={occurrence.onNext}>
+            <OccurrenceMark />
+            <span className={styles.occurrenceText}>
+              <span className={styles.occurrenceTitle}>{SHEET_CONTROLS.otherOccurrences}</span>
+              <span className={styles.occurrenceCount}>
+                {occurrenceLabel(occurrence.total, occurrence.index)}
+              </span>
             </span>
-          </span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      )}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        ) : (
+          <p className={styles.occurrenceTotal}>
+            <OccurrenceMark />
+            <span className={styles.occurrenceCount}>{occurrenceTotalLabel(occurrence.total)}</span>
+          </p>
+        ))}
 
       {/* 免責固定在最底，不隨捲動消失（PRD §6.4）。 */}
       <p className={styles.disclaimer}>{DISCLAIMER}</p>

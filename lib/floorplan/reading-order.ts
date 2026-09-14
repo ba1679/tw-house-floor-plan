@@ -160,15 +160,12 @@ export function readingOrder(
 }
 
 /**
- * 這個熱區屬於哪一間房（沒有這個熱區時是 null）。
+ * 有任何一個熱區符合條件的房間，依閱讀順序。
  *
  * 問的是**已經排好的閱讀順序**，不是把 `assignRoom` 再跑一次：房間歸屬只能有一份答案，
- * 而那份答案在 build 時就算完了。說明卡開著時要把其他房間畫暗（票 07），
+ * 而那份答案在 build 時就算完了。說明卡開著時要把沒有標記的房間畫暗（票 07、M4 票 02），
  * 靠的就是這個對照。
  */
-export function roomOfHotspot(order: RoomHotspots[], hotspotId: string): string | null {
-  for (const room of order) {
-    if (room.hotspots.some((hotspot) => hotspot.id === hotspotId)) return room.roomId;
-  }
-  return null;
+export function roomsWith(order: RoomHotspots[], matches: (hotspot: Hotspot) => boolean): string[] {
+  return order.filter((room) => room.hotspots.some(matches)).map((room) => room.roomId);
 }

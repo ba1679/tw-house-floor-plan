@@ -346,6 +346,12 @@ export function reduceViewer(s: ViewerState, action: ViewerAction): ViewerState 
       };
 
     case "RESIZE": {
+      // 框被壓成 0：不收。fit 是框高除以圖高，0 高的框算出 fit 0，之後每一次等比調整都是拿 0 去乘，
+      // 框長回來那一次的比例又是除以 0——視野就此回不來，圖停在 scale(0)。
+      // 找找看頁多了題目與作答後兩列，說明卡一展開就把可視帶吃光（M4 票 02 量到 0px），而矮的螢幕上平面圖頁也會。
+      // 0 高的框上什麼都畫不出來、也點不到，留著上一個真的框就好：框長回來的那一次 RESIZE 照它等比調回來。
+      if (action.viewportWidth <= 0 || action.viewportHeight <= 0) return s;
+
       const widthChanged = action.viewportWidth !== s.viewportWidth;
       const heightChanged = action.viewportHeight !== s.viewportHeight;
       if (!widthChanged && !heightChanged) return s;

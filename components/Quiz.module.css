@@ -62,11 +62,18 @@
   font-weight: 700;
 }
 
-/* 作答之後「下一題」那一列。只在作答後出現：出題中它若佔著位子，就是白白從圖框挖走一列。 */
+/* 作答之後那一列：「下一題」與「看說明」。只在作答後出現：出題中它若佔著位子，就是白白從圖框挖走一列。
+   兩顆擠在同一列，不各佔一列——多一列就從圖框多挖一列的高度（ADR-0003）。 */
 .next {
   flex: 0 0 auto;
   display: flex;
+  gap: 8px;
   margin-top: 12px;
+}
+
+/* 次要的那一顆：與檢視器控制列的按鈕同一個樣子，墨色底留給「下一題」。 */
+.secondary {
+  composes: control from "./FloorPlanViewer.module.css";
 }
 
 .score {

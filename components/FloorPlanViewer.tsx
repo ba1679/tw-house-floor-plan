@@ -193,6 +193,10 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
         readingOrder={readingOrder}
         viewer={state}
         dispatch={dispatch}
+        // 自由看圖的標記就是檢視器自己的選取；`revealed` 與暫停是找找看的事（docs/adr/0007）。
+        selectedHotspot={state.selected?.id ?? null}
+        revealedSymbol={null}
+        paused={false}
         dimRooms={sheetOpen}
         restingStatus={restingStatus}
         hint={hint}
@@ -200,14 +204,14 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
         onKeyboardSelect={onKeyboardSelect}
       />
 
+      {/* 卡片講的就是選中的那一個：自由看圖時兩者永遠相同（找找看答錯時不同，所以這一行留在這一側）。 */}
       {sheetOpen && (
         <InfoSheet
           symbol={selectedSymbol}
           symbols={symbols}
-          occurrence={occurrence}
+          occurrence={{ ...occurrence, onNext: nextOccurrence }}
           takeFocus={keyboardOrigin !== null}
           onClose={close}
-          onNextOccurrence={nextOccurrence}
         />
       )}
     </>
