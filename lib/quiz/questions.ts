@@ -1,5 +1,6 @@
 import { hasSymbol } from "@/lib/floorplan/hotspots";
 import type { Hotspot } from "@/lib/floorplan/types";
+import { familiarityOf, wrongCount, type Familiarity, type LayoutProgress } from "./progress";
 
 // 找找看從哪些符號出題、一局幾題（spec「可出題符號、題數與出題」）。
 // 純函式：不碰 DOM、不讀 localStorage，與搜尋比對同一種定位，測試在 node context 餵手寫的小輸入。
@@ -21,18 +22,43 @@ export function quizzableSymbols(hotspots: Hotspot[]): string[] {
  */
 export const roundSize = (quizzableCount: number) => Math.ceil(quizzableCount / 2);
 
-/**
- * 一局依序要出的 symbol id：從可出題符號裡挑 `roundSize` 個、不重複，順序隨機。
- *
- * 亂數來源由呼叫端傳入——頁面傳 `Math.random`，測試傳固定序列——所以這個函式本身是純的。
- * **目前是均勻隨機**；依熟悉度的優先序（還沒遇到 → 還不熟 → 已認識，PRD §6.3）是 M4 票 04 的事。
- */
-export function pickQuestions(quizzable: string[], random: () => number): string[] {
-  // Fisher–Yates：每一種排列機率相同。`sort(() => random() - 0.5)` 不是——它的偏差取決於排序演算法。
-  const pool = [...quizzable];
+/** Fisher–Yates：每一種排列機率相同。`sort(() => random() - 0.5)` 不是——它的偏差取決於排序演算法。 */
+function shuffle<T>(items: T[], random: () => number): T[] {
+  const pool = [...items];
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
-  return pool.slice(0, roundSize(quizzable.length));
+  return pool;
+}
+
+/**
+ * 一局依序要出的 symbol id（spec「可出題符號、題數與出題」，PRD §6.3）：
+ *
+ * 1. 依熟悉度分三層：**還沒遇到** → **還不熟**（錯最多的在前，同數隨機）→ **已認識**（隨機）
+ * 2. 依層序填到 `roundSize` 題為止
+ * 3. 選出來的那幾題**整局打亂**再出。不打亂的話題序就洩漏了熟悉度：前幾題一定是沒遇過的，最後幾題一定是他會的
+ *
+ * 所以第二局必定先考第一局沒考過的，打完兩局考遍每一個；之後每一局先考還不熟的。
+ *
+ * 只走 `quizzable`、從不走紀錄：紀錄裡有、但已經不是可出題符號的 id（日後資料改了）自然不會被挑到。
+ * 亂數來源由呼叫端傳入——頁面傳 `Math.random`，測試傳固定序列——所以這個函式本身是純的。
+ */
+export function pickQuestions(
+  quizzable: string[],
+  progress: LayoutProgress,
+  random: () => number,
+): string[] {
+  const tier = (familiarity: Familiarity) =>
+    shuffle(
+      quizzable.filter((id) => familiarityOf(progress, id) === familiarity),
+      random,
+    );
+
+  const unseen = tier("unseen");
+  // 先打亂再依錯誤次數排：sort 是穩定的，同數的幾個因此維持打亂後的先後——同數隨機。
+  const missed = tier("missed").sort((a, b) => wrongCount(progress, b) - wrongCount(progress, a));
+  const known = tier("known");
+
+  return shuffle([...unseen, ...missed, ...known].slice(0, roundSize(quizzable.length)), random);
 }

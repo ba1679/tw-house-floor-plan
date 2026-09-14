@@ -1,97 +1,33 @@
 import { test, expect, type Page } from "@playwright/test";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { descriptionOf, isNoindex, titleOf } from "./built-html";
+import {
+  PLAN,
+  QUIZ,
+  ROUND_SIZE,
+  answerByTwoTaps,
+  cleanHotspotsOf,
+  currentTarget,
+  floorplans,
+  idOfName,
+  nextOf,
+  onPlan,
+  otherThan,
+  planOf,
+  progressOf,
+  progressText,
+  questionNameOf,
+  startRound,
+  statusOf,
+  viewportOf,
+} from "./quiz-play";
 import { blankSpot, dragLeft, pinch } from "./viewer-page";
 
 // 找找看頁（M4 票 01）：一局從「開始」玩到結算。
-//
-// 題目是隨機的，測試不猜：讀畫面上的題目文字（＝ `symbol.name`），用資料檔對回 symbol id，
-// 再從 floorplan 資料找出它的熱區（spec「Testing Decisions」①）。命中怎麼算不在測試裡重算一次。
-
-type Hotspot = { id: string; symbol_id: string | null; coords: [number, number, number, number] };
-type Floorplan = { id: string; name: string; hotspots: Hotspot[] };
-
-const floorplans: Floorplan[] = readdirSync("data/layouts")
-  .filter((name) => name.endsWith(".floorplan.json"))
-  .map((name) => JSON.parse(readFileSync(`data/layouts/${name}`, "utf8")));
-
-const symbols: { id: string; name: string }[] = JSON.parse(
-  readFileSync("data/symbols.sample.json", "utf8"),
-).symbols;
-
-const PLAN = "/layouts/3b2l_standard";
-const QUIZ = `${PLAN}/quiz`;
-
-/**
- * 主圖一局的題數。**spec 寫下的字面值**（13 個可出題符號 → 7 題），不拿 `roundSize` 算：
- * 用程式自己那條公式算期望值，公式錯了兩邊一起錯、一起過。主圖多一個有熱區的符號時，改這一行。
- */
-const ROUND_SIZE = 7;
+// 資料、定位、怎麼作答收在 `quiz-play.ts`：作答之後（票 02）、學習進度（票 04）問的是同一局。
 
 /** 首次引導那一句（與 affordance-hint.spec.ts 同一句：兩頁共用）。 */
 const TAP_HINT = "點圖上任何一個位置，我們會放大讓你看清楚";
-
-const plan = floorplans.find((fp) => fp.id === "3b2l_standard")!;
-/** 主圖上有熱區的符號（CONTEXT.md「可出題符號」的定義本身，不是出題的演算法）。 */
-const onPlan = new Set(plan.hotspots.map((h) => h.symbol_id).filter((id) => id !== null));
-const idOfName = (name: string) => symbols.find((s) => s.name === name)?.id;
-
-const progressOf = (page: Page) => page.locator("#quiz-progress");
-/** 題目裡的符號名字。題目文字是 `symbol.name` 原文（spec「一局的流程」），所以用名字就對得回資料。 */
-const questionNameOf = (page: Page) => page.locator("#quiz-question-name");
-const statusOf = (page: Page) => page.getByRole("status");
-/** 作答之後前進的那一顆。最後一題按下去是結算，字照樣是「下一題」。 */
-const nextOf = (page: Page) => page.getByRole("button", { name: "下一題" });
-const planOf = (page: Page) => page.getByRole("group", { name: /三房兩廳/ });
-const viewportOf = (page: Page) => page.locator("#floorplan-viewport");
-
-const progressText = (index: number) => `第 ${index} / ${ROUND_SIZE} 題`;
-
-/** 現在這一題的題目符號（symbol id）。 */
-const currentTarget = async (page: Page) => idOfName((await questionNameOf(page).textContent())!)!;
-
-async function startRound(page: Page) {
-  await page.goto(QUIZ);
-  await page.getByRole("button", { name: "開始" }).click();
-  await expect(progressOf(page)).toHaveText(progressText(1));
-}
-
-const centerOf = (h: Hotspot) => ({ x: h.coords[0] + h.coords[2] / 2, y: h.coords[1] + h.coords[3] / 2 });
-const covers = (h: Hotspot, p: { x: number; y: number }) =>
-  p.x >= h.coords[0] && p.x <= h.coords[0] + h.coords[2] && p.y >= h.coords[1] && p.y <= h.coords[1] + h.coords[3];
-
-/**
- * 這個符號在圖上、正中央**沒有疊著別的熱區**的每一處。
- *
- * 選這種熱區不是在測試裡重算命中：柱與窗重疊的地方選到的是柱（面積小者優先，two-stage-tap.spec.ts 測過），
- * 這裡要的是「點下去一定是它」的輸入，好讓斷言只問作答被判成什麼。
- */
-function cleanHotspotsOf(symbolId: string): string[] {
-  const clean = plan.hotspots
-    .filter((h) => h.symbol_id === symbolId)
-    .filter((h) => plan.hotspots.every((o) => o === h || o.symbol_id === null || !covers(o, centerOf(h))))
-    .map((h) => h.id);
-  if (clean.length === 0) throw new Error(`${symbolId} 在圖上的每一處正中央都疊著別的熱區`);
-  return clean;
-}
-
-/** 題目以外的另一個可出題符號——拿來答錯。 */
-const otherThan = (symbolId: string) => [...onPlan].find((id) => id !== symbolId)!;
-
-/**
- * 用手指作答：點熱區正中央圈出候選並放大，再點一次放大後的正中央確認——那一下就是答案。
- * 放大之後同一個熱區換了螢幕座標，所以第二下之前重新量，不自己推算（同 `viewer-page.ts` 的 `selectByTwoTaps`）。
- * 不能直接用 `selectByTwoTaps`：作答之後被點中的熱區由一局標記，不在檢視器的 `selected` 裡。
- */
-async function answerByTwoTaps(page: Page, hotspotId: string) {
-  const target = page.locator(`#${hotspotId}`);
-  const before = (await target.boundingBox())!;
-  await page.mouse.click(before.x + before.width / 2, before.y + before.height / 2);
-  await expect(target, `${hotspotId} 沒有被圈成候選`).toHaveAttribute("data-state", "candidate");
-  const zoomed = (await target.boundingBox())!;
-  await page.mouse.click(zoomed.x + zoomed.width / 2, zoomed.y + zoomed.height / 2);
-  await expect(nextOf(page), "作答之後沒有出現「下一題」").toBeVisible();
-}
 
 /**
  * 等 client 決定了要不要說首次引導（同 affordance-hint.spec.ts 的 `decided`）。
@@ -134,7 +70,7 @@ test.describe("找找看頁", () => {
 
     await expect(progressOf(page)).toHaveText(progressText(1));
     const name = (await questionNameOf(page).textContent())!;
-    expect(onPlan.has(idOfName(name)!), `「${name}」不是這張圖上有熱區的符號`).toBe(true);
+    expect(onPlan.includes(idOfName(name)!), `「${name}」不是這張圖上有熱區的符號`).toBe(true);
   });
 
   test("一局照順序玩到結算：7 題互不重複、都是這張圖上的符號，全部答對就是 7 / 7", async ({ page }) => {
@@ -152,7 +88,7 @@ test.describe("找找看頁", () => {
     }
 
     expect(new Set(asked).size, `一局出了重複的題目：${asked}`).toBe(ROUND_SIZE);
-    for (const id of asked) expect(onPlan.has(id), `${id} 不是這張圖上有熱區的符號`).toBe(true);
+    for (const id of asked) expect(onPlan.includes(id), `${id} 不是這張圖上有熱區的符號`).toBe(true);
     await expect(page.getByText(`答對 ${ROUND_SIZE} / ${ROUND_SIZE} 題`)).toBeVisible();
     await expect(progressOf(page)).toBeHidden();
   });

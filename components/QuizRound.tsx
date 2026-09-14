@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useReducer } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 import { FloorPlanViewport, initialViewerConfig } from "./FloorPlanViewport";
+import { saveAnswer } from "./progressStorage";
 import { useFirstVisitHint } from "./useFirstVisitHint";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
@@ -57,6 +58,15 @@ export function QuizRound({ floorplan, symbols, readingOrder, questions, onPlayA
   );
 
   const next = useCallback(() => dispatch({ type: "NEXT" }), []);
+
+  // 每作答一題立刻寫進學習進度（spec「學習進度」）。一局本身是純的、不碰 localStorage，所以由這裡在作答多一筆時寫。
+  // 記到第幾筆存在 ref 裡，不是「寫最後一筆」：開發時 Strict Mode 會重跑 effect，同一筆不能記兩次。
+  const saved = useRef(0);
+  useEffect(() => {
+    for (; saved.current < round.answers.length; saved.current++) {
+      saveAnswer(floorplan.id, round.answers[saved.current]);
+    }
+  }, [round.answers, floorplan.id]);
 
   // 首次引導與平面圖頁共用同一句、同一個記錄（spec「首次引導」）：在哪一頁先看到都算看過。
   const hint = useFirstVisitHint();

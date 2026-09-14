@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { loadLayoutProgress } from "./progressStorage";
 import { QuizRound } from "./QuizRound";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
@@ -28,11 +29,12 @@ export function QuizGame({ floorplan, symbols, readingOrder, quizzable }: Props)
    */
   const [round, setRound] = useState<{ key: number; questions: string[] } | null>(null);
 
-  // 出題用 `Math.random`，只能在瀏覽器裡、按下去的那一刻做：在伺服器上先出好，靜態 HTML 裡的題目每個人都一樣。
+  // 出題只能在瀏覽器裡、按下去的那一刻做：題目依 localStorage 裡的進度排優先序，再用 `Math.random` 挑——
+  // 在伺服器上先出好，靜態 HTML 裡的題目每個人都一樣。「再玩一次」也走這裡，所以讀到的是剛打完那一局之後的進度。
   const start = useCallback(() => {
-    const questions = pickQuestions(quizzable, Math.random);
+    const questions = pickQuestions(quizzable, loadLayoutProgress(floorplan.id), Math.random);
     setRound((current) => ({ key: (current?.key ?? 0) + 1, questions }));
-  }, [quizzable]);
+  }, [quizzable, floorplan.id]);
 
   /**
    * 「開始」在 client 接手之前是停用的。靜態 HTML 裡的按鈕按了沒有反應——那一瞬間的死按鈕，
