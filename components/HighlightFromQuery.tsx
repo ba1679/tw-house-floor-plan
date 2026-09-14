@@ -15,8 +15,8 @@ import { HIGHLIGHT_PARAM } from "@/lib/viewer/highlight";
  *    掛載後不跳動（`FloorPlanViewer` 的初始尺寸那一段）全部作廢。
  * 包住這個什麼都不畫的元件，被改成瀏覽器渲染的就只有它自己。
  *
- * 不像 `?fitLocked=1` 那樣在 effect 裡讀 `window.location`：從符號頁按下去是 `<Link>` 的
- * client 端換頁，網址什麼時候換好由 router 決定；`useSearchParams` 是 router 自己交出來的那一份。
+ * 不在 effect 裡讀 `window.location`：從符號頁按下去是 `<Link>` 的 client 端換頁，
+ * 網址什麼時候換好由 router 決定；`useSearchParams` 是 router 自己交出來的那一份。
  */
 export function HighlightFromQuery({ onSymbol }: { onSymbol: (symbolId: string) => void }) {
   const symbolId = useSearchParams().get(HIGHLIGHT_PARAM);

@@ -157,39 +157,20 @@ test("放大 4 倍之後，兩段式仍然選得到大門——46 CSS px 在任�
   await expect(page.getByRole("status")).toContainText("雙開門");
 });
 
-test("fitLocked：擋得住使用者發起的縮放，擋不住第一段的自動放大", async ({ page }) => {
-  // 找找看（M4）鎖住視野，題目才不會被「自己放大來找」破解；但兩段式是作答的機制本身，
-  // 它的自動 3× 照常發生。M2 不接 UI，用網址參數把這個輸入打開來測（票 04）。
+// `?fitLocked=1` 是 M2 替還不存在的找找看留的測試入口（票 04）。找找看上線之後，視野鎖定只在出題期間由一局打開，
+// 「擋得住使用者發起的縮放，擋不住第一段的自動放大」那條測試搬到了 `quiz-page.spec.ts`。
+// 平面圖頁的網址不再是入口（M4 票 07）：加一個參數就把圖鎖死、畫面上又沒有任何東西解得開。
+test("網址帶 ?fitLocked=1 不再鎖住視野：雙指縮放照常", async ({ page }) => {
   await page.goto(`${PLAN}?fitLocked=1`);
+  // 等 client 接手、掛載後的 effect 都跑完（首次引導決定了要不要說）才縮放：
+  // 在那之前雙指本來就沒有反應，量到的是「還沒接手」，不是「有沒有被鎖」。
+  await expect(page.locator("#hotspot-layer")).toHaveAttribute("data-hint", /on|off/);
   const plan = planOf(page);
   const fit = (await plan.boundingBox())!;
   const center = { x: fit.x + fit.width / 2, y: fit.y + fit.height / 2 };
 
-  await page.mouse.dblclick(blankSpot(fit).x, blankSpot(fit).y);
-  expect((await plan.boundingBox())!.width, "雙擊放大應該被擋下").toBeCloseTo(fit.width, 0);
-
-  await pinch(page, center, 100, 300);
-  expect((await plan.boundingBox())!.width, "雙指放大應該被擋下").toBeCloseTo(fit.width, 0);
-
-  const door = page.locator("#hs-door-entry");
-  const before = (await door.boundingBox())!;
-  await page.mouse.click(before.x + before.width + 13, before.y + before.height / 2);
-
-  const zoomed = (await door.boundingBox())!;
-  expect(zoomed.width, "第一段的自動 3× 不該被 fitLocked 擋住").toBeGreaterThan(
-    before.width * 2.5,
-  );
-  await expect(door).toHaveAttribute("data-state", "candidate");
-
-  // 拖曳也擋。擋了縮放卻放行平移，使用者只要點一下拿到第一段的 3×，
-  // 就能用那個倍率把整張圖逛完——鎖住視野要防的正是這件事。
-  const frame = (await viewportOf(page).boundingBox())!;
-  await dragLeft(page, { x: frame.x + frame.width / 2, y: frame.y + frame.height / 2 }, 80);
-  const dragged = (await door.boundingBox())!;
-  expect(dragged.x, "鎖住視野時拖曳不該移動圖面").toBeCloseTo(zoomed.x, 0);
-
-  await page.mouse.click(dragged.x + dragged.width / 2, dragged.y + dragged.height / 2);
-  await expect(page.getByRole("status")).toContainText("雙開門");
+  await pinch(page, center, 100, 250);
+  expect((await plan.boundingBox())!.width, "雙指放大被網址參數擋下了").toBeCloseTo(fit.width * 2.5, 0);
 });
 
 test("關掉說明卡之後點回原處，是重新選一個，不是雙擊放大", async ({ page }) => {
@@ -301,43 +282,41 @@ function visiblePart(target: BoundingBox, frame: BoundingBox): BoundingBox | nul
 // 票 08：說明卡展開之後，圖被壓成一條很矮的可視帶，fit 隨之變得很小。第一段若照那個框
 // 把視野定好位，`fit × 3` 仍可能小於 1，clampView 就把中心夾回圖面正中央——使用者點的
 // 那個位置在那一刻被丟掉了，而接在後面的 RESIZE 只調得回倍率，調不回已經沒有的中心。
-// 鎖定視野時連補救的平移都沒有，這一次選取就此走不完。
-for (const [label, query] of [
-  ["一般模式", ""],
-  ["鎖定視野", "?fitLocked=1"],
-] as const) {
-  test(`展開說明卡後直接點圖上另一個符號，收合後仍然選得到它（${label}）`, async ({ page }) => {
-    await page.goto(`${PLAN}${query}`);
-    const plan = planOf(page);
+//
+// 原本還有一個「鎖定視野」的變體（`?fitLocked=1`），M4 票 07 刪掉了。鎖定視野只在找找看出題時打開，
+// 而找找看裡這個情境不會發生：說明卡只在作答後打開、作答後圖暫停、「下一題」一律收起卡片——
+// 最後一條由 `quiz-feedback.spec.ts`「說明卡展開著也一起收起」釘住。
+test("展開說明卡後直接點圖上另一個符號，收合後仍然選得到它", async ({ page }) => {
+  await page.goto(PLAN);
+  const plan = planOf(page);
 
-    // 雨遮是唯一有注意事項的符號，內容塞不下——「上拉看完整內容」只在它身上出現。
-    await selectByTwoTaps(page, "hs-canopy-master");
-    const withSheet = (await plan.boundingBox())!;
-    await page.getByRole("button", { name: /上拉看完整內容/ }).click();
-    // 卡片長高，圖被擠得更扁：等這一輪 RESIZE 走完，才是使用者看到的那個畫面。
-    await expect
-      .poll(async () => (await plan.boundingBox())!.height)
-      .toBeLessThan(withSheet.height);
+  // 雨遮是唯一有注意事項的符號，內容塞不下——「上拉看完整內容」只在它身上出現。
+  await selectByTwoTaps(page, "hs-canopy-master");
+  const withSheet = (await plan.boundingBox())!;
+  await page.getByRole("button", { name: /上拉看完整內容/ }).click();
+  // 卡片長高，圖被擠得更扁：等這一輪 RESIZE 走完，才是使用者看到的那個畫面。
+  await expect
+    .poll(async () => (await plan.boundingBox())!.height)
+    .toBeLessThan(withSheet.height);
 
-    // 圖面左下角的柱：邊緣的目標，正是被夾回中央時第一個掉出畫面的東西。
-    const column = page.locator("#hs-col-sw");
-    const tiny = (await column.boundingBox())!;
-    await page.mouse.click(tiny.x + tiny.width / 2, tiny.y + tiny.height / 2);
+  // 圖面左下角的柱：邊緣的目標，正是被夾回中央時第一個掉出畫面的東西。
+  const column = page.locator("#hs-col-sw");
+  const tiny = (await column.boundingBox())!;
+  await page.mouse.click(tiny.x + tiny.width / 2, tiny.y + tiny.height / 2);
 
-    // 這一下是新的第一段：卡片收起來，圖長回來。
-    await expect(page.locator("#info-sheet")).toBeHidden();
-    await expect(column).toHaveAttribute("data-state", "candidate");
-    await expect.poll(async () => (await plan.boundingBox())!.height).toBeGreaterThan(
-      withSheet.height,
-    );
+  // 這一下是新的第一段：卡片收起來，圖長回來。
+  await expect(page.locator("#info-sheet")).toBeHidden();
+  await expect(column).toHaveAttribute("data-state", "candidate");
+  await expect.poll(async () => (await plan.boundingBox())!.height).toBeGreaterThan(
+    withSheet.height,
+  );
 
-    // 第二段要點得到它：不必先關卡片、不必重選、也不必自己把圖拖回來。
-    const frame = (await viewportOf(page).boundingBox())!;
-    const seen = visiblePart((await column.boundingBox())!, frame);
-    expect(seen, "柱被推出畫面外了，第二段無從點起").not.toBeNull();
-    await page.mouse.click(seen!.x + seen!.width / 2, seen!.y + seen!.height / 2);
+  // 第二段要點得到它：不必先關卡片、不必重選、也不必自己把圖拖回來。
+  const frame = (await viewportOf(page).boundingBox())!;
+  const seen = visiblePart((await column.boundingBox())!, frame);
+  expect(seen, "柱被推出畫面外了，第二段無從點起").not.toBeNull();
+  await page.mouse.click(seen!.x + seen!.width / 2, seen!.y + seen!.height / 2);
 
-    await expect(column).toHaveAttribute("data-state", "selected");
-    await expect(page.locator("#info-sheet-name")).toHaveText("柱");
-  });
-}
+  await expect(column).toHaveAttribute("data-state", "selected");
+  await expect(page.locator("#info-sheet-name")).toHaveText("柱");
+});

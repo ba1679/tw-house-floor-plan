@@ -21,3 +21,21 @@
 - [ ] 找找看頁出題期間：使用者發起的縮放被擋、第一段的自動 3× 照常（搬過去的那條測試）
 - [ ] 「鎖定視野」變體已刪除；「一般模式」變體仍在且綠
 - [ ] 程式裡不再有從網址讀視野鎖定的地方
+
+## Comments
+
+**2026-09-14：做完了。** 瀏覽器測試 1 條新增、2 條刪除（`tests/pan-zoom.spec.ts`）。`pan-zoom.spec.ts` 與 `quiz-page.spec.ts` 全綠，`npm run typecheck` 乾淨。
+
+### 做了什麼
+
+- **`FloorPlanViewer.tsx`**：刪掉在 effect 裡讀 `?fitLocked=1` 的那一段。狀態機的 `fitLocked` 與 `SET_FIT_LOCKED` 不動，現在只有 `createRound` 打開它。
+- **測試**：
+  - 新增「網址帶 `?fitLocked=1` 不再鎖住視野：雙指縮放照常」。先紅過：拆之前雙指撐開 2.5 倍，量到的寬度停在全圖（343px，期望 857px）。
+  - 刪掉平面圖頁那條「fitLocked：擋得住使用者發起的縮放，擋不住第一段的自動放大」。票 01 已經在 `quiz-page.spec.ts` 照同一組步驟寫好「出題期間擋得住使用者發起的縮放與拖曳，擋不住第一段的自動放大」，這次跑過、綠。
+  - 刪掉「展開說明卡後直接點圖上另一個符號」的「鎖定視野」變體，「一般模式」留下、改成單一一條。
+    前提照票面先查過：`quiz-feedback.spec.ts`「『下一題』：說明卡展開著也一起收起…」在展開狀態下按「下一題」，驗了卡片收起、視野回到全圖、第一段照常。
+- **註解**：`HighlightFromQuery.tsx` 原本拿 `?fitLocked=1` 當對照說明，`lib/viewer/interaction.ts` 的 `fitLocked` 還寫著「M2 不接 UI」。兩處改成現況。
+
+### 小決定
+
+- **新測試先等 client 接手才縮放**（`#hotspot-layer` 的 `data-hint` 變成 on／off）。在那之前雙指本來就沒有反應，量到的是「還沒接手」，不是「有沒有被鎖」。拆之前，這道閘門也保證讀網址的 effect 已經跑過，紅的理由才是對的。

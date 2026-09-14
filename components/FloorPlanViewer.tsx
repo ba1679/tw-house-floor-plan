@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useReducer, useState } from "react";
+import { Suspense, useCallback, useReducer, useState } from "react";
 import { FloorPlanViewport, initialViewerConfig } from "./FloorPlanViewport";
 import { HighlightFromQuery } from "./HighlightFromQuery";
 import { InfoSheet } from "./InfoSheet";
@@ -35,14 +35,6 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
   const [state, dispatch] = useReducer(reduceViewer, floorplan, (fp: FloorPlan) =>
     createViewerState(initialViewerConfig(fp)),
   );
-
-  // 視野鎖定的網址參數 `?fitLocked=1`：M2 替還不存在的找找看留的測試入口。
-  // 找找看已經在一局開始時打開同一個開關（`lib/quiz/round.ts` 的 `createRound`），
-  // 這個入口只剩「網址加一個參數就把圖鎖死、畫面上又沒有東西解得開」的副作用——M4 票 07 拆掉。
-  useEffect(() => {
-    const locked = new URLSearchParams(window.location.search).get("fitLocked") === "1";
-    dispatch({ type: "SET_FIT_LOCKED", locked });
-  }, []);
 
   // 從符號頁按轉換點進來的人（`?symbol=`，M3 票 08）：那個符號在圖上的每一處一起亮。
   // 網址由 `HighlightFromQuery` 讀，它自己待在一個 Suspense 邊界裡——理由寫在那個元件上。
