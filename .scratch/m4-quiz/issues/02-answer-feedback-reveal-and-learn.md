@@ -79,7 +79,7 @@
 - **`onClose` 本來就由外部給**：自由看圖接 `RESELECT`，找找看接 `CLOSE_SHEET`。
 - **N = 1 的時候**：自由看圖那一列在 N = 1 時整列不出現（M2 票 03 決議 2，理由是卡片高度）。
   找找看「只有共 N 處」那一行在 N = 1 時要不要印，票面沒說；可出題的 13 個符號裡有 4 個只有 1 處：
-  `door_double_swing`、`kitchen_counter`、`bathtub`、`pipe_shaft`。**沒有另外裁定就照決議 2，不印**；測試用窗（9 處）。
+  `door_double_swing`、`kitchen_counter`、`bathtub`、`pipe_shaft`。**2026-09-14 規格主人裁定：照決議 2，不印**；測試用窗（9 處）。
 
 ### 「下一題」收起展開的卡
 
