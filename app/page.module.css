@@ -25,7 +25,7 @@
   color: var(--ink2);
 }
 
-/* 今天只有一個 layout，所以只有一個按鈕；M6 多一張圖就多一個，排成一欄。 */
+/* 今天只有一個 layout，所以是進圖與找找看各一個按鈕；M6 多一張圖就多一組，排成一欄。 */
 .layouts {
   display: flex;
   flex-direction: column;
@@ -37,6 +37,23 @@
    畫法與符號頁底部的轉換點同一套（`reading.module.css` 的 `primaryAction`），墨色底的理由寫在那裡。 */
 .layoutButton {
   composes: primaryAction from "./reading.module.css";
+}
+
+/* 找找看的入口（M4 票 06）：與進平面圖的按鈕同樣大、同樣點得到，但**不填底色**——
+   填滿底色的仍然只有進平面圖那一顆。不 composes `primaryAction` 再蓋掉底色：
+   兩份 CSS Module 誰先載入不是誰的約定，蓋不蓋得掉要看運氣。 */
+.quizButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  text-decoration: none;
 }
 
 .browse {

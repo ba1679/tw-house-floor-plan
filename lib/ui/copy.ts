@@ -196,6 +196,18 @@ export const HOME_PAGE_DESCRIPTION = `教買房的人看懂建案平面圖：${S
  */
 export const homeLayoutButton = (layoutName: string) => `開始探索${layoutName}`;
 
+/**
+ * 首頁進找找看的入口，一張有可出題符號的圖一個（M4 票 06）。第一次到首頁的人可以直接從玩開始。
+ * 格局名由呼叫端從 floorplan 取來，理由同 `homeLayoutButton`。
+ */
+export const homeQuizButton = (layoutName: string) => `${layoutName}找找看：你認得幾個？`;
+
+/**
+ * 平面圖頁標題列上那個進找找看的入口（M4 票 06）。**不帶格局名**：它就排在寫著格局名的 `<h1>` 旁邊。
+ * **短**：與 `<h1>` 擠在 375px 的同一列，折成兩行就從圖框挖走一行的高度（ADR-0003）。
+ */
+export const LAYOUT_QUIZ_LINK = "找找看：你認得幾個？";
+
 /** 首頁分類入口那一區的標題。 */
 export const HOME_BROWSE_LABEL = "依分類瀏覽";
 

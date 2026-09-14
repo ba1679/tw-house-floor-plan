@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Fragment } from "react";
 import { SearchBox } from "@/components/SearchBox";
 import { listLayoutIds, loadFloorPlan } from "@/lib/floorplan/data";
+import { hasQuiz } from "@/lib/quiz/questions";
 import { loadCategories, loadSearchIndex } from "@/lib/symbols/data";
 import {
   CATEGORY_LABELS,
@@ -12,11 +14,12 @@ import {
   SITE_NAME,
   SITE_TAGLINE,
   homeLayoutButton,
+  homeQuizButton,
 } from "@/lib/ui/copy";
 import styles from "./page.module.css";
 
 // 首頁是「首頁 → 平面圖」那條入站路徑的起點（PRD §8）。它**不是**主要入口——大多數人從 Google
-// 直接落在符號頁（§6.2.1）——所以這一頁要小：一句主張、一個進平面圖的按鈕、搜尋框、分類入口。
+// 直接落在符號頁（§6.2.1）——所以這一頁要小：一句主張、進平面圖與找找看的按鈕、搜尋框、分類入口。
 // 不做長篇產品敘事、示意圖、統計數字、動畫（票 07）。
 //
 // 先後照票面那一句話的先後：先知道這裡在幹嘛，然後直接進圖；想查特定符號的往下一格，想瀏覽的再往下。
@@ -31,7 +34,10 @@ export default function HomePage() {
   // **有幾個 layout 就有幾個按鈕，由 `data/layouts/` 決定。** 今天只有三房兩廳，所以就是一個。
   // 不挑「第一張」當主打：哪一張該被主打是一個編輯決定，而那個決定不該藏在排序裡；
   // 也不寫死 `3b2l_standard`（spec「路由」）——M6 加第 2 張圖時，它自己長出第二個按鈕。
-  const layouts = listLayoutIds().map((id) => ({ id, name: loadFloorPlan(id).name }));
+  const layouts = listLayoutIds().map((id) => {
+    const floorplan = loadFloorPlan(id);
+    return { id, name: floorplan.name, hasQuiz: hasQuiz(floorplan.hotspots) };
+  });
 
   return (
     <main className={styles.page}>
@@ -42,11 +48,21 @@ export default function HomePage() {
 
         <div className={styles.layouts}>
           {layouts.map((layout) => (
-            <Link key={layout.id} className={styles.layoutButton} href={`/layouts/${layout.id}`}>
-              {homeLayoutButton(layout.name)}
-              {/* 箭頭是給看得見的人的方向感；讀螢幕的人聽到「開始探索三房兩廳」就夠了。 */}
-              <span aria-hidden="true">→</span>
-            </Link>
+            <Fragment key={layout.id}>
+              <Link className={styles.layoutButton} href={`/layouts/${layout.id}`}>
+                {homeLayoutButton(layout.name)}
+                {/* 箭頭是給看得見的人的方向感；讀螢幕的人聽到「開始探索三房兩廳」就夠了。 */}
+                <span aria-hidden="true">→</span>
+              </Link>
+              {/* 找找看的入口（M4 票 06）：想從玩開始的人從這裡走。與進圖的按鈕同樣由資料產生，
+                  只替有找找看頁的圖產生——與找找看頁產不產生問的是同一句 `hasQuiz`。 */}
+              {layout.hasQuiz && (
+                <Link className={styles.quizButton} href={`/layouts/${layout.id}/quiz`}>
+                  {homeQuizButton(layout.name)}
+                  <span aria-hidden="true">→</span>
+                </Link>
+              )}
+            </Fragment>
           ))}
         </div>
 

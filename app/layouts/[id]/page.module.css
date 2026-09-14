@@ -27,3 +27,37 @@
   font-size: 20px;
   font-weight: 700;
 }
+
+/* 平面圖頁的標題列：`<h1>` 與找找看的入口並排（M4 票 06）。
+   **這一列的高度就是 `<h1>` 那一行**：入口不得把它撐高——撐高多少，圖框就矮多少（ADR-0003）。 */
+.titleRow {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 12px;
+}
+
+.titleRow .title {
+  margin: 0;
+}
+
+/* 點得到（44px，PRD §9），但不撐高這一列：padding 把點擊範圍撐開，同樣大小的負 margin 把它從版面上收回去——
+   排版看到的只有文字那一行（24px），比 `<h1>` 那一行矮。 */
+.quizLink {
+  flex: none;
+  margin: -10px -12px;
+  padding: 10px 12px;
+  font-size: 14px;
+  line-height: 24px;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.quizLink:hover,
+.quizLink:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

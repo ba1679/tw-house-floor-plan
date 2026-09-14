@@ -17,6 +17,14 @@ export function quizzableSymbols(hotspots: Hotspot[]): string[] {
 }
 
 /**
+ * 這張圖有沒有找找看：至少一個可出題符號。
+ *
+ * 找找看頁產不產生（M4 票 01）、平面圖頁與首頁要不要放入口（票 06），問的都是這一句。
+ * 各寫一次的話，會有「入口放了、頁面卻 404」或「頁面產生了、卻沒有入口」的那一天。
+ */
+export const hasQuiz = (hotspots: Hotspot[]) => quizzableSymbols(hotspots).length > 0;
+
+/**
  * 一局的題數：可出題數的一半，無條件進位，不設上限（PRD §6.3、CONTEXT.md「一局」）。
  * 進位是為了讓**連續打完兩局必定考遍**——13 個符號兩局各 6 題會漏一個。
  */

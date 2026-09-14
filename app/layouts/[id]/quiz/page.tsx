@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { QuizGame } from "@/components/QuizGame";
 import { listLayoutIds, loadFloorPlan } from "@/lib/floorplan/data";
 import { readingOrder } from "@/lib/floorplan/reading-order";
-import { quizzableSymbols } from "@/lib/quiz/questions";
+import { hasQuiz, quizzableSymbols } from "@/lib/quiz/questions";
 import { loadSymbolsForViewer } from "@/lib/symbols/data";
 import { quizHeading, quizPageDescription, quizPageTitle } from "@/lib/ui/copy";
 // 與平面圖頁同一套「一個螢幕就是一頁」的版面：理由寫在那一份 CSS 上，不抄第二份。
@@ -14,10 +14,11 @@ export const dynamicParams = false;
 
 /**
  * 有找找看頁的 layout：**有可出題符號的那幾張**（spec「路由與頁面」，取代 PRD 舊 schema 的 `quiz_enabled`）。
- * 一個符號都出不了題的圖**不產生**這一頁：產生了，按下「開始」就是一局 0 題。可出題與否只問 `quizzableSymbols`，題數與題目池也問它。
+ * 一個符號都出不了題的圖**不產生**這一頁：產生了，按下「開始」就是一局 0 題。
+ * 可出題與否只問 `hasQuiz`——平面圖頁與首頁要不要放入口也問它（M4 票 06），題數與題目池問的是它底下的 `quizzableSymbols`。
  */
 function quizLayoutIds(): string[] {
-  return listLayoutIds().filter((id) => quizzableSymbols(loadFloorPlan(id).hotspots).length > 0);
+  return listLayoutIds().filter((id) => hasQuiz(loadFloorPlan(id).hotspots));
 }
 
 export function generateStaticParams() {
