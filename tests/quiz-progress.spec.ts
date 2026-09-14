@@ -15,6 +15,7 @@ import {
   startRound,
   storedProgress,
 } from "./quiz-play";
+import { blockLocalStorage } from "./storage";
 
 // 學習進度（M4 票 04）：每一次作答立刻寫進 localStorage，下一局依熟悉度出題。
 // 斷言看的是 localStorage 裡寫了什麼、這一局出了哪幾題（spec「什麼是好的測試」），不看元件的 state。
@@ -98,17 +99,11 @@ test.describe("學習進度的記帳", () => {
     expect(record.wrong).toEqual({});
   });
 
-  // spec user story 42：用無痕視窗的人照樣能玩，只是不會被記住。封鎖的寫法同 affordance-hint.spec.ts。
+  // spec user story 42：用無痕視窗的人照樣能玩，只是不會被記住。
   test("瀏覽器封鎖 localStorage：一局走得完、再玩一次也出得了題，不丟例外", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
-    await page.addInitScript(() => {
-      Object.defineProperty(window, "localStorage", {
-        get() {
-          throw new DOMException("Storage blocked", "SecurityError");
-        },
-      });
-    });
+    await blockLocalStorage(page);
 
     await startRound(page);
     await playToResults(page);

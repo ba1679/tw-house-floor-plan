@@ -4,7 +4,7 @@
 
 **Blocked by:** 04（開場與結算要讀得到進度紀錄）
 
-**Status:** ready-for-agent
+**Status:** done
 
 規格：`.scratch/m4-quiz/spec.md` 的「學習進度」「一局的流程」；PRD §6.3.3、§6.6。
 
@@ -80,3 +80,24 @@
 
 - **封鎖時結算印 0 / 13，玩的人可能以為網站壞了**：他剛答對 7 題。要不要多一句「這台瀏覽器不讓網站存資料，這一局沒有被記住」？
   要說的話，hook 得分得出「空紀錄」與「讀不到」，這張沒做。
+
+### 兩軸 review 之後改的
+
+與票 03、07 一起審（`245b511` 之後的三個 commit）。Spec 軸沒有缺漏、沒有做錯的；以下都是 Standards 軸的。
+
+- **「你點的是 X」改用 `symbolName`**：結算的「你答成了 X」已經用它，同一個檔裡同一個名字原本有兩種查法（`?? id` 與 `|| id`）。
+- **一句與程式不符的註解**：`QuizGame` 寫「開場說你最該練的，就是出題最先考的」，但開場先列還不熟、出題先考還沒遇到。
+  改成實情：兩邊共用的是分組與還不熟那一組的排法，組與組的先後刻意不同。分組函式的註解有同樣的暗示，一起改。
+- **`KnownCount` 自己算分子與分母**：原本開場與結算各算一次「已認識幾個、可出題幾個」，檔頭卻寫著「各寫一份，遲早長成兩個樣子」。
+  現在收可出題符號與紀錄，照舊不自己讀 localStorage。
+- **「標題加一份以標題命名的清單」抽成 `components/LabelledList.tsx`**：開場的三份清單與結算的答錯清單原本各寫一份。標題的 id 不變。
+- **`familiarityTiers` 改名 `groupByFamiliarity`**（型別 `FamiliarityGroups`、開場的 `TierList` 換成 `LabelledList`）：
+  tier 在這個 repo 指來源層級（CONTEXT.md「Source Tier」），`lib/ui/copy.ts` 同一個檔裡原本有兩種意思的 tier。
+- **封鎖 localStorage 的測試寫法抽成 `tests/storage.ts` 的 `blockLocalStorage`**：這張加的是第三份，另兩份在 `affordance-hint.spec.ts`、`quiz-progress.spec.ts`，三份一起換掉。
+
+### review 提過、沒改的
+
+- **開場印出「認得」的定義**（`KNOWN_DEFINITION`）：Spec 軸列為輕微的 scope creep，spec 列舉的開場內容裡沒有這一句。留著：
+  - spec 的 Solution 自己寫了這兩句：「進度只存在這台裝置上。『認得』只有一個定義：在找找看裡答對過至少一次。」
+  - user story 37 要的是進度條不說謊，而看數字的人得知道「認得」不含看過說明卡。
+  - 規格主人要拿掉的話，是刪一行。

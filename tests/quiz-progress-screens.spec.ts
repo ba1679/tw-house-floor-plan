@@ -18,6 +18,7 @@ import {
   startRound,
   symbolOf,
 } from "./quiz-play";
+import { blockLocalStorage } from "./storage";
 
 // 開場與結算看得到你認得幾個（M4 票 05）。沒有獨立的進度頁：想知道自己還差什麼的那一刻，正是要開始玩的那一刻（PRD §11 #28）。
 //
@@ -38,15 +39,6 @@ const listOf = (page: Page, name: string | RegExp) => page.getByRole("list", { n
 const sortedItems = async (page: Page, name: string) =>
   (await listOf(page, name).getByRole("listitem").allTextContents()).map((text) => text.trim()).sort();
 const sortedNames = (ids: string[]) => ids.map(nameOf).sort();
-
-const blockLocalStorage = (page: Page) =>
-  page.addInitScript(() => {
-    Object.defineProperty(window, "localStorage", {
-      get() {
-        throw new DOMException("Storage blocked", "SecurityError");
-      },
-    });
-  });
 
 const record = (correct: Record<string, number>, wrong: Record<string, number> = {}) => ({
   version: 1,

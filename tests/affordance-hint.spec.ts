@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { blockLocalStorage } from "./storage";
 import { markingOf, painted } from "./viewer-page";
 
 // 這個檢視器最危險的失敗不是「點不到」，是**看起來不能點**：整張圖都是熱區卻毫無提示，
@@ -187,13 +188,7 @@ test.describe("桌機 hover", () => {
 });
 
 test("瀏覽器封鎖 localStorage 時，引導與兩段式選取仍可使用", async ({ page }) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(window, "localStorage", {
-      get() {
-        throw new DOMException("Storage blocked", "SecurityError");
-      },
-    });
-  });
+  await blockLocalStorage(page);
   await page.goto(PLAN);
   await decided(page);
   await expect(statusOf(page)).toContainText(TAP_HINT);

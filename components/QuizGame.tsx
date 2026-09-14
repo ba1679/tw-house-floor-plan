@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useState, type ReactElement } from "react";
+import { useCallback, useState } from "react";
 import { KnownCount } from "./KnownCount";
+import { LabelledList } from "./LabelledList";
 import { QuizRound } from "./QuizRound";
 import { loadLayoutProgress, useLayoutProgress } from "./useLearningProgress";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
-import { familiarityTiers, wrongCount } from "@/lib/quiz/progress";
+import { groupByFamiliarity, wrongCount } from "@/lib/quiz/progress";
 import { pickQuestions, roundSize } from "@/lib/quiz/questions";
 import { symbolName } from "@/lib/symbols/name";
 import type { SymbolRecord } from "@/lib/symbols/types";
@@ -31,27 +32,6 @@ type Props = {
   /** 這張圖的可出題符號（`quizzableSymbols`，在 build 時算好）。 */
   quizzable: string[];
 };
-
-/** 開場的一份熟悉度清單：標題加清單，清單以標題命名。這一層一個符號都沒有時整份不印——只有標題的空清單是雜訊。 */
-function TierList({ id, label, className, children }: {
-  id: string;
-  label: string;
-  className: string;
-  children: ReactElement[];
-}) {
-  if (children.length === 0) return null;
-  const headingId = `${id}-heading`;
-  return (
-    <>
-      <h2 id={headingId} className={styles.listHeading}>
-        {label}
-      </h2>
-      <ul aria-labelledby={headingId} className={className}>
-        {children}
-      </ul>
-    </>
-  );
-}
 
 export function QuizGame({ floorplan, symbols, readingOrder, quizzable }: Props) {
   /**
@@ -92,41 +72,42 @@ export function QuizGame({ floorplan, symbols, readingOrder, quizzable }: Props)
     );
   }
 
-  // 分層與出題是同一個算法（`familiarityTiers`）：開場說你最該練的，就是出題最先考的。
-  const tiers = progress && familiarityTiers(quizzable, progress);
+  // 清單的分組與出題是同一個算法（`groupByFamiliarity`），還不熟那一組也是同一個排法：錯最多的在前。
+  // 組與組的先後刻意不同：出題先考還沒遇到的（打完兩局才考得遍），開場先列還不熟的（使用者來這裡是想知道還差什麼）。
+  const groups = progress && groupByFamiliarity(quizzable, progress);
   const nameOf = (id: string) => symbolName(symbols, id);
 
   return (
     <section className={styles.screen}>
-      {progress && tiers && (
+      {progress && groups && (
         <>
-          <KnownCount layoutName={floorplan.name} known={tiers.known.length} total={quizzable.length} />
+          <KnownCount layoutName={floorplan.name} quizzable={quizzable} progress={progress} />
           <p className={styles.definition}>{KNOWN_DEFINITION}</p>
 
           {/* 還不熟排最前面、錯最多的在前：使用者來這裡是想知道還差什麼（PRD §6.6.1）。 */}
-          <TierList id="quiz-missed" label={FAMILIARITY_LABELS.missed} className={styles.missed}>
-            {tiers.missed.map((id) => (
+          <LabelledList id="quiz-missed" heading={FAMILIARITY_LABELS.missed} className={styles.missed}>
+            {groups.missed.map((id) => (
               <li key={id}>
                 <span>{nameOf(id)}</span>{" "}
                 <span className={styles.wrongCount}>{wrongTimesLabel(wrongCount(progress, id))}</span>
               </li>
             ))}
-          </TierList>
-          <TierList id="quiz-unseen" label={FAMILIARITY_LABELS.unseen} className={styles.names}>
-            {tiers.unseen.map((id) => (
+          </LabelledList>
+          <LabelledList id="quiz-unseen" heading={FAMILIARITY_LABELS.unseen} className={styles.names}>
+            {groups.unseen.map((id) => (
               <li key={id}>{nameOf(id)}</li>
             ))}
-          </TierList>
-          <TierList id="quiz-known" label={FAMILIARITY_LABELS.known} className={styles.names}>
-            {tiers.known.map((id) => (
+          </LabelledList>
+          <LabelledList id="quiz-known" heading={FAMILIARITY_LABELS.known} className={styles.names}>
+            {groups.known.map((id) => (
               <li key={id}>{nameOf(id)}</li>
             ))}
-          </TierList>
+          </LabelledList>
         </>
       )}
 
       <p className={styles.lead}>{quizIntro(roundSize(quizzable.length))}</p>
-      {/* 全部認得之後照樣按得下去（PRD §6.6）：出題就在已認識的層裡隨機。 */}
+      {/* 全部認得之後照樣按得下去（PRD §6.6）：出題就在已認識的那一組裡隨機。 */}
       <button type="button" className={styles.primary} onClick={start} disabled={!progress}>
         {QUIZ_START}
       </button>

@@ -1,6 +1,6 @@
 import { hasSymbol } from "@/lib/floorplan/hotspots";
 import type { Hotspot } from "@/lib/floorplan/types";
-import { familiarityTiers, type LayoutProgress } from "./progress";
+import { groupByFamiliarity, type LayoutProgress } from "./progress";
 
 // 找找看從哪些符號出題、一局幾題（spec「可出題符號、題數與出題」）。
 // 純函式：不碰 DOM、不讀 localStorage，與搜尋比對同一種定位，測試在 node context 餵手寫的小輸入。
@@ -57,9 +57,9 @@ export function pickQuestions(
   progress: LayoutProgress,
   random: () => number,
 ): string[] {
-  // 分層與還不熟的排法是 `familiarityTiers` 的，開場的清單問的是同一個。這裡只決定同一層裡隨機：
-  // 每一層先打亂，還不熟再依錯誤次數排——sort 是穩定的，同數的幾個因此維持打亂後的先後，也就是同數隨機。
-  const { unseen, missed, known } = familiarityTiers(quizzable, progress, (ids) => shuffle(ids, random));
+  // 分組與還不熟的排法是 `groupByFamiliarity` 的，開場的清單問的是同一個。這裡只決定同一組裡隨機：
+  // 每一組先打亂，還不熟再依錯誤次數排——sort 是穩定的，同數的幾個因此維持打亂後的先後，也就是同數隨機。
+  const { unseen, missed, known } = groupByFamiliarity(quizzable, progress, (ids) => shuffle(ids, random));
 
   return shuffle([...unseen, ...missed, ...known].slice(0, roundSize(quizzable.length)), random);
 }

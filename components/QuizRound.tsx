@@ -5,12 +5,12 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { FloorPlanViewport, initialViewerConfig } from "./FloorPlanViewport";
 import { InfoSheet, type SheetNote } from "./InfoSheet";
 import { KnownCount } from "./KnownCount";
+import { LabelledList } from "./LabelledList";
 import { useEscapeKey } from "./useEscapeKey";
 import { useFirstVisitHint } from "./useFirstVisitHint";
 import { useSaveAnswers } from "./useLearningProgress";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
-import { familiarityTiers } from "@/lib/quiz/progress";
 import {
   createRound,
   isCorrect,
@@ -69,7 +69,7 @@ function pickedNote(answer: Answer, symbols: Record<string, SymbolRecord>): Shee
     (other) => other.symbol_id === answer.picked,
   )?.difference;
   return {
-    lead: quizPicked(symbols[answer.picked]?.name ?? answer.picked),
+    lead: quizPicked(symbolName(symbols, answer.picked)),
     detail: difference ?? null,
   };
 }
@@ -142,33 +142,20 @@ export function QuizRound({ floorplan, symbols, readingOrder, quizzable, questio
           {quizScore(scoreOf(round), questions.length)}
         </p>
 
-        {missed.length > 0 && (
-          <>
-            <h2 id="quiz-review-heading" className={styles.listHeading}>
-              {QUIZ_REVIEW_HEADING}
-            </h2>
-            {/* 每一列連到**題目**的符號頁，不是被點中的那一個：要再讀一次的是他沒認出來的東西（PRD §6.3.3）。 */}
-            <ul aria-labelledby="quiz-review-heading" className={styles.review}>
-              {missed.map((a) => (
-                <li key={a.target}>
-                  <Link href={`/symbols/${a.target}`} className={styles.reviewLink}>
-                    {quizReviewRow(symbolName(symbols, a.target), symbolName(symbols, a.picked))}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
+        {/* 每一列連到**題目**的符號頁，不是被點中的那一個：要再讀一次的是他沒認出來的東西（PRD §6.3.3）。 */}
+        <LabelledList id="quiz-review" heading={QUIZ_REVIEW_HEADING} className={styles.review}>
+          {missed.map((a) => (
+            <li key={a.target}>
+              <Link href={`/symbols/${a.target}`} className={styles.reviewLink}>
+                {quizReviewRow(symbolName(symbols, a.target), symbolName(symbols, a.picked))}
+              </Link>
+            </li>
+          ))}
+        </LabelledList>
 
         {/* 這一局寫完之後讀回來的那一份（`useSaveAnswers`），所以已經是這一局之後的數字。
             localStorage 被封鎖時讀回來的是空紀錄，印的就是 0：這一局沒有被記住，「再玩一次」出題讀到的也是那份空紀錄。 */}
-        {stored && (
-          <KnownCount
-            layoutName={floorplan.name}
-            known={familiarityTiers(quizzable, stored).known.length}
-            total={quizzable.length}
-          />
-        )}
+        {stored && <KnownCount layoutName={floorplan.name} quizzable={quizzable} progress={stored} />}
 
         <div className={styles.actions}>
           <button type="button" className={styles.primary} onClick={onPlayAgain}>
