@@ -131,6 +131,14 @@ export const highlightStatus = (name: string, total: number) =>
  */
 export const SYMBOL_NOT_FOUND = "找不到網址指定的符號，網址可能不完整。";
 
+/**
+ * 第一次進站的那一句話（PRD §6.1.2 v0.5）。它刻意不說「點擊圖上的標記」——
+ * 那句話要求使用者點準一個比指尖還小的東西，而兩段式存在的理由正是拆掉這個預設。
+ *
+ * 平面圖頁與找找看頁**共用同一句、同一個記錄**（`useFirstVisitHint`）：在哪一頁先看到都算看過。
+ */
+export const TAP_HINT = "點圖上任何一個位置，我們會放大讓你看清楚";
+
 /** 「跟○○的差別」——容易搞混區塊裡每一則的標題。 */
 export const confusedWithLabel = (otherName: string) => `跟${otherName}的差別`;
 

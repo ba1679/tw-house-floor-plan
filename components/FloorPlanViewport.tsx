@@ -1,0 +1,277 @@
+"use client";
+
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  type Dispatch,
+  type FocusEvent as ReactFocusEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
+import { FloorPlanRenderer, type RoomState } from "./FloorPlanRenderer";
+import type { FirstVisitHint } from "./useFirstVisitHint";
+import { useViewerGestures } from "./useViewerGestures";
+import { roomOfHotspot, type RoomHotspots } from "@/lib/floorplan/reading-order";
+import type { FloorPlan } from "@/lib/floorplan/types";
+import type { SymbolRecord } from "@/lib/symbols/types";
+import type { ViewerAction, ViewerState } from "@/lib/viewer/interaction";
+import { canvasTransform, isFitView } from "@/lib/viewer/view";
+import styles from "./FloorPlanViewer.module.css";
+
+// PRD §10.1 的分層：Layout Data → SVG Renderer → Hotspot Layer → Interaction State → Info Panel。
+// 這個元件是 Hotspot Layer 與 Interaction State 的接線處：它把使用者點在哪個 CSS 像素上
+// 換算成圖面座標交給純狀態機，再把回傳的狀態畫成畫面。判斷邏輯一條都不在這裡。
+//
+// **它不持有狀態機**（docs/adr/0007）。自由看圖（`FloorPlanViewer`）與找找看各自持有自己的 reducer、
+// 再把狀態與 dispatch 交進來：找找看要在檢視器的狀態機外面包一層「一局」，這個框若自己 useReducer，
+// 那一層就無從包起。說明卡、網址高亮、題目與回饋也都不在這裡——它們是呼叫端的事。
+
+type Props = {
+  floorplan: FloorPlan;
+  /** symbol id → 該符號的內容。畫面上的字取自 symbol 資料，不在元件裡寫死。 */
+  symbols: Record<string, SymbolRecord>;
+  /**
+   * 熱區依「依房間、房間內依類別」排好（票 06）。**熱區按這個順序進 DOM，焦點與讀螢幕
+   * 都跟著 DOM 走**，不靠 tabindex 排號碼；正的 tabindex 一旦出現，之後每加一個可聚焦的
+   * 東西都要回頭重編一次全站的號碼。
+   *
+   * 在 build 時算好（`lib/floorplan/reading-order.ts`），這裡只負責畫。
+   */
+  readingOrder: RoomHotspots[];
+  /** 檢視器的狀態機由呼叫端持有（見檔頭）。 */
+  viewer: ViewerState;
+  dispatch: Dispatch<ViewerAction>;
+  /** 說明卡此刻升起來了沒。升起來時，沒被選到的房間暗下去。 */
+  dimRooms: boolean;
+  /** 兩段式沒在進行時（不在第二段、也不是剛點到空白處），狀態列說這一句。 */
+  restingStatus: string;
+  /** 「這張圖可以點」的一次性引導（票 05）。hook 由呼叫端呼叫——狀態列那一句要不要接上它，是呼叫端決定的。 */
+  hint: FirstVisitHint;
+  /** 手指碰到圖了。呼叫端各自有要跟著收掉的東西。 */
+  onTouch?: () => void;
+  /** 鍵盤在這個熱區上按了 Enter／空白鍵（選定它的 action 已經派出去了）。 */
+  onKeyboardSelect?: (hotspotId: string) => void;
+};
+
+export function FloorPlanViewport({
+  floorplan,
+  symbols,
+  readingOrder,
+  viewer,
+  dispatch,
+  dimRooms,
+  restingStatus,
+  hint,
+  onTouch,
+  onKeyboardSelect,
+}: Props) {
+  const viewportRef = useRef<HTMLDivElement>(null);
+
+  // 真正的尺寸只有瀏覽器知道。寬度同時是 px ↔ cm 的比例尺，所以量錯就整條命中判定都錯；
+  // 高度則是說明卡升起來之後圖能用的那條可視帶（票 03 決議 3）。
+  // 兩個數字來自**同一次觀測的同一個框**——不是分兩處各量一次。
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      dispatch({
+        type: "RESIZE",
+        viewportWidth: entry.contentRect.width,
+        viewportHeight: entry.contentRect.height,
+      });
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [dispatch]);
+
+  // 使用者發起的手勢：拖曳平移、雙指縮放、雙擊放大，以及「哪一下才算點擊」。
+  const gestures = useViewerGestures(viewportRef, viewer, dispatch);
+
+  const { dismiss } = hint;
+  // 引導在**手指碰到圖的那一刻**收起來，不等 TAP 派出去——拖曳與雙指也算碰到。
+  // 使用者已經發現這張圖會回應他，那句話就沒有事情可做了；接下來狀態列要說的是
+  // 「圈出了幾個候選」這種當下的事。
+  const { onPointerDown: startGesture } = gestures;
+  const onPointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      dismiss();
+      onTouch?.();
+      startGesture(event);
+    },
+    [dismiss, onTouch, startGesture],
+  );
+  // 覆寫寫在同一個物件裡，不是在 JSX 上疊第二個 onPointerDown：
+  // 疊的那種寫法對屬性順序敏感，有人調換一次就把 dismiss 靜靜地弄丟了。
+  const viewportHandlers = { ...gestures, onPointerDown };
+
+  const reselect = useCallback(() => dispatch({ type: "RESELECT" }), [dispatch]);
+  const resetView = useCallback(() => dispatch({ type: "RESET_VIEW" }), [dispatch]);
+
+  // 焦點走到畫面外的熱區時，圖跟著移過去（票 06）。id 從事件的 currentTarget 拿，
+  // 不是替 37 個熱區各做一個 closure。
+  const focusHotspot = useCallback(
+    (event: ReactFocusEvent<SVGRectElement>) => {
+      dispatch({ type: "FOCUS_HOTSPOT", id: event.currentTarget.id });
+    },
+    [dispatch],
+  );
+
+  // Enter（與 role="button" 一併要求的 Space）直接選定：鍵盤不走兩段式。
+  const activateHotspot = useCallback(
+    (event: ReactKeyboardEvent<SVGRectElement>) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      const { id } = event.currentTarget;
+      onKeyboardSelect?.(id);
+      dispatch({ type: "SELECT_HOTSPOT", id });
+    },
+    [dispatch, onKeyboardSelect],
+  );
+
+  // Esc 在第二段進行中退回第一段。說明卡開著時的 Esc 是呼叫端的事——卡片是它的。
+  // 掛在 window 上而不是熱區上：焦點可能在熱區上、或在「重選」那顆按鈕上，
+  // 而 Esc 在兩個地方的意思是同一件事。
+  useEffect(() => {
+    if (viewer.stage !== "candidates") return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") reselect();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [viewer.stage, reselect]);
+
+  const candidateIds = new Set(viewer.candidates.map((h) => h.id));
+
+  /**
+   * 說明卡開著時，**沒被選到的房間暗下去**（票 07）。
+   *
+   * 說明卡是版面裡的一格（票 03），它升起來就把平面圖壓成一條可視帶。在那條帶子裡
+   * 「我現在看的東西在哪一間」是最容易掉的一件事，所以把其餘房間退成背景。
+   * 兩段式進行中不做——那時該亮的是候選，多一層明暗只是雜訊。
+   *
+   * 這是圖面第一次依互動狀態改變畫法。做得到這件事，正是這一層從產生器的靜態產物
+   * 換成 React renderer 的理由（`docs/adr/0005`）。
+   */
+  const focusedRoomId =
+    dimRooms && viewer.selected ? roomOfHotspot(readingOrder, viewer.selected.id) : null;
+  // useMemo 不是為了省這幾行的計算，是為了**同一個物件**：平移的每一次 pointermove
+  // 都會重畫一輪，而圖面那一層靠 props 沒變才跳得過去（`PlanArtwork` 的 memo）。
+  // 每輪新做一個內容相同的物件，等於那層 memo 不存在。
+  const roomStates = useMemo<Record<string, RoomState> | undefined>(
+    () =>
+      focusedRoomId
+        ? Object.fromEntries(
+            floorplan.rooms
+              .filter((room) => room.id !== focusedRoomId)
+              .map((room) => [room.id, "muted" as const]),
+          )
+        : undefined,
+    [focusedRoomId, floorplan.rooms],
+  );
+
+  const nameOf = (symbolId: string | null) =>
+    (symbolId && symbols[symbolId]?.name) || symbolId || "";
+
+  const controls =
+    viewer.stage === "candidates" ? (
+      <button type="button" className={styles.control} onClick={reselect}>
+        重選
+      </button>
+    ) : viewer.stage === "browsing" && !isFitView(viewer) ? (
+      <button type="button" className={styles.control} onClick={resetView}>
+        回到全圖
+      </button>
+    ) : null;
+
+  return (
+    <>
+      <div
+        id="floorplan-viewport"
+        ref={viewportRef}
+        className={styles.viewport}
+        style={{ aspectRatio: `${viewer.viewBox.width} / ${viewer.viewBox.height}` }}
+        {...viewportHandlers}
+      >
+        <div className={styles.canvas} style={{ transform: canvasTransform(viewer) }}>
+          <FloorPlanRenderer floorplan={floorplan} roomStates={roomStates}>
+            {/* aria-hidden 在票 06 拿掉了：這一層現在是這張圖讀得出來的那一版。 */}
+            <g
+              id="hotspot-layer"
+              className={styles.hotspots}
+              data-hint={hint.visible === null ? undefined : hint.visible ? "on" : "off"}
+              data-stage={viewer.stage}
+            >
+              {/* 第一段看了多大一圈。半徑用命中判定當下存下的 tolCmAtTap，**不在放大後重算**：
+                  重算是拿 3× 的比例尺去換同樣的 46px，畫出來只有實際的三分之一，
+                  圈外的熱區卻亮著。原型自己踩過這個坑。 */}
+              {viewer.stage === "candidates" && viewer.lastTap && viewer.tolCmAtTap !== null && (
+                <circle
+                  id="tap-tolerance"
+                  cx={viewer.lastTap.x}
+                  cy={viewer.lastTap.y}
+                  r={viewer.tolCmAtTap}
+                  aria-hidden="true"
+                />
+              )}
+              {/* DOM 的順序就是焦點走過的順序，所以熱區依房間分段、依閱讀順序畫（票 06）。
+                  一間房一個 <g>：讀螢幕的人聽得到自己走到哪一間，而 data-room 讓測試
+                  問得出「頁面自己說這個熱區屬於哪一間」，不必在測試裡把演算法再寫一次。 */}
+              {readingOrder.map((room) => (
+                <g
+                  key={room.roomId}
+                  role="group"
+                  data-room={room.roomId}
+                  aria-label={room.roomName}
+                >
+                  {room.hotspots.map((h) => (
+                    <rect
+                      key={h.id}
+                      id={h.id}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={nameOf(h.symbol_id)}
+                      onFocus={focusHotspot}
+                      onKeyDown={activateHotspot}
+                      data-state={
+                        viewer.selected?.id === h.id
+                          ? "selected"
+                          : candidateIds.has(h.id)
+                            ? "candidate"
+                            : h.symbol_id === viewer.highlightedSymbol
+                              ? "highlighted"
+                              : "normal"
+                      }
+                      x={h.coords[0]}
+                      y={h.coords[1]}
+                      width={h.coords[2]}
+                      height={h.coords[3]}
+                    />
+                  ))}
+                </g>
+              ))}
+            </g>
+          </FloorPlanRenderer>
+        </div>
+      </div>
+
+      {/* 這一列一次只養得起一顆按鈕：它一出現就從平面圖那條可視帶挖走 56px。
+          - candidates：「重選」是退出第二段的路，這時最需要它。
+          - browsing 且視野不是全圖：使用者自己放大或平移過，「回到全圖」才有事情做。
+          - confirmed：「重選」由說明卡的關閉鍵擔任（關卡片＝回到 browsing，是同一個
+            action，票 03），而卡片開著時可視帶本來就只剩一條，不再擺第二顆按鈕。 */}
+      {controls && <div className={styles.controls}>{controls}</div>}
+
+      <p className={styles.status} role="status">
+        {viewer.stage === "candidates"
+          ? viewer.confirmMissed
+            ? "還是沒點到。再點一次，或按「重選」退回第一段。"
+            : `放大了，圈出 ${viewer.candidates.length} 個候選。再點一次確認你要的那一個。`
+          : viewer.stage === "browsing" && viewer.lastTap
+            ? "這附近沒有可以點的東西，換個地方點點看，或連點兩下放大這一區。"
+            : restingStatus}
+      </p>
+    </>
+  );
+}
