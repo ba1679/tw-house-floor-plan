@@ -9,6 +9,7 @@ import { useFirstVisitHint } from "./useFirstVisitHint";
 import { isSymbolAbsent } from "@/lib/floorplan/hotspots";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
+import { symbolName } from "@/lib/symbols/name";
 import type { SymbolRecord } from "@/lib/symbols/types";
 import { SYMBOL_NOT_FOUND, TAP_HINT, absentSymbolBanner, highlightStatus } from "@/lib/ui/copy";
 import {
@@ -115,9 +116,6 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
   // Esc 關掉說明卡——與關閉鍵同一個 action。第二段進行中的 Esc 由圖框自己處理。
   useEscapeKey(sheetOpen, close);
 
-  const nameOf = (symbolId: string | null) =>
-    (symbolId && symbols[symbolId]?.name) || symbolId || "";
-
   /**
    * 落地時狀態列說的那一句（M3 票 08；規格主人 2026-09-13 的決定 D2、D4）。
    *
@@ -129,13 +127,13 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
   const landingLine = symbolNotFound
     ? SYMBOL_NOT_FOUND
     : highlightTotal > 0
-      ? highlightStatus(nameOf(state.highlightedSymbol), highlightTotal)
+      ? highlightStatus(symbolName(symbols, state.highlightedSymbol), highlightTotal)
       : "";
   // 第一次進站的引導不讓位給落地那一句，接在它後面（決定 D2）：從符號頁進來的人
   // 多半是第一次打開平面圖，而引導一出現就記成看過——讓位的話他從此聽不到它。
   const restingStatus =
     state.stage === "confirmed"
-      ? nameOf(state.selected?.symbol_id ?? null)
+      ? symbolName(symbols, state.selected?.symbol_id ?? null)
       : `${landingLine}${hint.visible ? TAP_HINT : ""}`;
 
   /**
@@ -147,7 +145,7 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
    */
   const banner =
     absentSymbol && !sheetOpen
-      ? absentSymbolBanner(floorplan.name, nameOf(absentSymbol))
+      ? absentSymbolBanner(floorplan.name, symbolName(symbols, absentSymbol))
       : null;
 
   return (
@@ -182,6 +180,8 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
         selectedHotspot={state.selected?.id ?? null}
         revealedSymbol={null}
         paused={false}
+        // 自由看圖的熱區照舊念符號名字：藏名字只在找找看（spec「作答之前不露名字」）。
+        names="all"
         dimRooms={sheetOpen}
         restingStatus={restingStatus}
         hint={hint}

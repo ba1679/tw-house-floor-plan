@@ -169,6 +169,8 @@ export function QuizRound({ floorplan, symbols, readingOrder, questions, onPlayA
         // 作答之前，題目的答案不是任何一種 State（CONTEXT.md）。
         selectedHotspot={answer?.hotspotId ?? null}
         revealedSymbol={answer?.target ?? null}
+        // 熱區只有圖上標出來的那幾個念名字：作答之前一個都沒有，作答之後只放開這一題的（spec「作答之前不露名字」）。
+        names="marked"
         paused={round.phase === "answered"}
         dimRooms={round.sheetOpen}
         restingStatus={restingStatus}

@@ -17,12 +17,14 @@ import { useViewerGestures } from "./useViewerGestures";
 import { planViewBox } from "@/lib/floorplan/drawing";
 import { roomsWith, type RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
+import { symbolName } from "@/lib/symbols/name";
 import type { SymbolRecord } from "@/lib/symbols/types";
 import {
   BLANK_TAP_STATUS,
   CONFIRM_MISSED_STATUS,
   VIEWER_CONTROLS,
   candidatesStatus,
+  neutralHotspotLabel,
 } from "@/lib/ui/copy";
 import type { ViewerAction, ViewerConfig, ViewerState } from "@/lib/viewer/interaction";
 import { canvasTransform, isFitView } from "@/lib/viewer/view";
@@ -82,6 +84,17 @@ type Props = {
    * （docs/adr/0007「後果」）。
    */
   paused: boolean;
+  /**
+   * 熱區的替代文字念不念符號名字（M4 票 03）。
+   * - `all`：自由看圖。每一個熱區念自己的符號名字。
+   * - `marked`：找找看。只有圖上標成 `selected` 或 `revealed` 的念名字，其餘念「房間名 · 第 k 個可以點的東西」。
+   *   作答之前圖上沒有任何標記，整張圖都不念；作答之後放開的只有這一題的那幾個——全部放開的話，
+   *   Tab 一圈就知道這一局後面題目在哪（spec「作答之前不露名字」）。
+   *
+   * **是二選一，不是「給我每個熱區的替代文字」的函式**：誰念名字跟著圖上的標記走，只在這裡決定一次。
+   * 收函式的話，每個呼叫端各自決定誰露名字，「作答後只放開這一題的」這條規矩就散到頁面各處去了。
+   */
+  names: "all" | "marked";
   /** 說明卡此刻升起來了沒。升起來時，沒有標記的房間暗下去。 */
   dimRooms: boolean;
   /** 兩段式沒在進行時（不在第二段、也不是剛點到空白處），狀態列說這一句。 */
@@ -103,6 +116,7 @@ export function FloorPlanViewport({
   selectedHotspot,
   revealedSymbol,
   paused,
+  names,
   dimRooms,
   restingStatus,
   hint,
@@ -206,9 +220,6 @@ export function FloorPlanViewport({
     );
   }, [dimRooms, selectedHotspot, revealedSymbol, readingOrder, floorplan.rooms]);
 
-  const nameOf = (symbolId: string | null) =>
-    (symbolId && symbols[symbolId]?.name) || symbolId || "";
-
   const controls =
     viewer.stage === "candidates" ? (
       <button type="button" className={styles.control} onClick={reselect}>
@@ -261,35 +272,45 @@ export function FloorPlanViewport({
                   data-room={room.roomId}
                   aria-label={room.roomName}
                 >
-                  {room.hotspots.map((h) => (
-                    <rect
-                      key={h.id}
-                      id={h.id}
-                      role="button"
-                      tabIndex={0}
-                      aria-label={nameOf(h.symbol_id)}
-                      onFocus={focusHotspot}
-                      onKeyDown={activateHotspot}
-                      // 優先序 selected > candidate > revealed > highlighted > normal。
-                      // 後三者不會同時出現在同一張圖上（高亮只在自由看圖、revealed 只在找找看），
-                      // 排這個順序只是讓同一條式子兩頁都能用。
-                      data-state={
-                        h.id === selectedHotspot
-                          ? "selected"
-                          : candidateIds.has(h.id)
-                            ? "candidate"
-                            : h.symbol_id === revealedSymbol
-                              ? "revealed"
-                              : h.symbol_id === viewer.highlightedSymbol
-                                ? "highlighted"
-                                : "normal"
-                      }
-                      x={h.coords[0]}
-                      y={h.coords[1]}
-                      width={h.coords[2]}
-                      height={h.coords[3]}
-                    />
-                  ))}
+                  {room.hotspots.map((h, index) => {
+                    // 優先序 selected > candidate > revealed > highlighted > normal。
+                    // 後三者不會同時出現在同一張圖上（高亮只在自由看圖、revealed 只在找找看），
+                    // 排這個順序只是讓同一條式子兩頁都能用。
+                    const state =
+                      h.id === selectedHotspot
+                        ? "selected"
+                        : candidateIds.has(h.id)
+                          ? "candidate"
+                          : h.symbol_id === revealedSymbol
+                            ? "revealed"
+                            : h.symbol_id === viewer.highlightedSymbol
+                              ? "highlighted"
+                              : "normal";
+                    // `marked` 時念名字的就是畫上標記的那幾個，問的是同一個 state，不另外比一次 id：
+                    // 兩處各比各的，哪天優先序一改，念出名字的與畫出標記的就對不上。
+                    // k 從 1 起，是它在這一間房裡的閱讀順序——讀螢幕的人聽到的「第幾個」就是 Tab 走到它的先後。
+                    const named = names === "all" || state === "selected" || state === "revealed";
+                    return (
+                      <rect
+                        key={h.id}
+                        id={h.id}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={
+                          named
+                            ? symbolName(symbols, h.symbol_id)
+                            : neutralHotspotLabel(room.roomName, index + 1)
+                        }
+                        onFocus={focusHotspot}
+                        onKeyDown={activateHotspot}
+                        data-state={state}
+                        x={h.coords[0]}
+                        y={h.coords[1]}
+                        width={h.coords[2]}
+                        height={h.coords[3]}
+                      />
+                    );
+                  })}
                 </g>
               ))}
             </g>

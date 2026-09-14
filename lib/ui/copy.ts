@@ -158,6 +158,17 @@ export const CONFIRM_MISSED_STATUS = `還是沒點到。再點一次，或按「
 /** 點到附近沒有熱區的地方。雙擊只在這之後成立，而那一刻畫面上唯一的字就是這句——沒有它，手機上沒有人會去猜雙擊。 */
 export const BLANK_TAP_STATUS = "這附近沒有可以點的東西，換個地方點點看，或連點兩下放大這一區。";
 
+/**
+ * 找找看裡熱區的替代文字：「主臥 · 第 3 個可以點的東西」（M4 票 03）。**不含符號名字**——作答之前，
+ * 讀螢幕軟體念得出來的東西裡不得有答案（PRD §6.3.1）；作答之後也只有圖上標出來的那幾個改念名字（圖框的 `names`）。
+ *
+ * 「可以點的東西」沿用上面那句狀態列的說法（CONTEXT.md 的 Hotspot 避免用「標記」）。
+ * k 是熱區在那一間房裡的閱讀順序，也就是 Tab 走到它的先後。房間內依類別排，會透露一點類別資訊，spec 寫明接受：
+ * 改依座標的話，這一個念「第 3 個」、Tab 的下一個念「第 1 個」。
+ */
+export const neutralHotspotLabel = (roomName: string, k: number) =>
+  `${roomName} · 第 ${k} 個可以點的東西`;
+
 /** 「跟○○的差別」——容易搞混區塊裡每一則的標題。 */
 export const confusedWithLabel = (otherName: string) => `跟${otherName}的差別`;
 
