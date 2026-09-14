@@ -194,6 +194,52 @@ export const layoutPageTitle = (layoutName: string) => `${layoutName}平面圖�
 export const layoutPageDescription = (layoutName: string) =>
   `一張點得動的${layoutName}平面圖。${SITE_TAGLINE}`;
 
+/**
+ * 找找看頁的標題與描述（M4）。這一頁 noindex、不進 sitemap——一局的題目是隨機的，搜尋結果上沒有東西可給人看——
+ * 但分頁上、瀏覽紀錄裡仍然看得到標題，所以它要與平面圖頁分得開。格局名由呼叫端從 floorplan 取來，理由同 `homeLayoutButton`。
+ */
+export const quizPageTitle = (layoutName: string) => `${layoutName}找找看：這張平面圖上的符號你認得幾個？`;
+
+export const quizPageDescription = (layoutName: string) =>
+  `在一張${layoutName}平面圖上，照題目把符號找出來，看看自己認得幾個。`;
+
+/**
+ * 找找看頁的 `<h1>`。**短**：這一頁與平面圖頁一樣是 100dvh 的版面，`<h1>` 在 375px 上折成兩行，
+ * 圖框就跟著變矮（ADR-0003，理由寫在 `app/layouts/[id]/page.tsx` 的 `generateMetadata`）。
+ */
+export const quizHeading = (layoutName: string) => `${layoutName}找找看`;
+
+/**
+ * 開場那一句。**說出一局幾題**（題數由可出題符號算，不得寫死），並告訴他作答就是平常看圖的點法——
+ * 他不必另外學一套操作：點大略位置、圖放大、再點一下確認，那一下就是答案。
+ */
+export const quizIntro = (total: number) =>
+  `一局 ${total} 題。題目說一個符號，你在圖上把它找出來——照平常看圖的方式點就好，確認的那一下就是你的答案。`;
+
+export const QUIZ_START = "開始";
+
+/** 「第 3 / 7 題」。兩個數字都由呼叫端算，不寫死。 */
+export const quizProgress = (index: number, total: number) => `第 ${index} / ${total} 題`;
+
+/** 題目句型。後面接的符號名字是 `symbol.name` 原文，含括號（spec「一局的流程」）。 */
+export const QUIZ_PROMPT_LEAD = "找出這張圖上的";
+
+/**
+ * 作答之後狀態列那一句。**只說對或錯**，不誇獎、不責備（spec「一局的流程」）：這是工具，不是遊戲化產品。
+ * 放在狀態列（role="status"）而不是另外一行：用鍵盤作答的人聽得到結果。
+ */
+export const QUIZ_CORRECT = "答對了。";
+export const QUIZ_WRONG = "答錯了。";
+
+export const QUIZ_NEXT = "下一題";
+/** 最後一題的「下一題」：按下去不是另一題，是結算。 */
+export const QUIZ_TO_RESULTS = "看結果";
+
+/** 結算那一行。兩個數字都由一局算，不寫死。 */
+export const quizScore = (correct: number, total: number) => `答對 ${correct} / ${total} 題`;
+
+export const QUIZ_PLAY_AGAIN = "再玩一次";
+
 /** PRD §6.4 的完整一句，一字不改。每頁固定顯示。 */
 export const DISCLAIMER =
   "本網站符號說明為一般通用慣例，不同建商 / 設計師畫法可能有差異，實際請以個案圖說或現場人員說明為準。";

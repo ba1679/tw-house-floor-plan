@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { contentPages } from "./built-html";
+import { contentPages, isNoindex } from "./built-html";
 
 // 搜尋引擎抓得到這個網站的全部頁面，不必靠自己爬連結猜（spec user story 32、票 10）。
 //
@@ -67,8 +67,13 @@ test.describe("sitemap", () => {
 
   // 票面點名的 `plumbing_electric` 這種沒有符號的分類不必另外點名：它沒有頁面，列在 sitemap 上的話
   // 這裡兩邊就不相等。
-  test("列的每一頁都真的產出了，產出的每一頁都列在上面", () => {
-    const built = contentPages().map(pagePathOf);
+  //
+  // **自己宣告 noindex 的頁不算**（M4 票 01）：找找看頁產出了、卻刻意不給搜尋引擎收，列上 sitemap 就是自相矛盾。
+  // 排除條件看頁面自己的宣告（`isNoindex`），不另列一份路徑名單——那份名單明天多一種 noindex 頁時不會紅。
+  test("列的每一頁都真的產出了，產出的每一頁都列在上面（自己宣告 noindex 的除外）", () => {
+    const built = contentPages()
+      .filter((path) => !isNoindex(readFileSync(`out/${path}`, "utf8")))
+      .map(pagePathOf);
 
     // 掃到零頁、sitemap 也是空的時候，兩邊照樣相等——先確認真的有東西可比（同 home-page.spec.ts）。
     expect(built).toContain(`/layouts/${layoutIds[0]}`);

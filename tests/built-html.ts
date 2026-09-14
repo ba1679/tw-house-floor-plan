@@ -12,6 +12,13 @@ export const descriptionOf = (html: string) =>
   /<meta name="description" content="([^"]*)"/.exec(html)?.[1];
 
 /**
+ * 這一頁自己宣告了不給搜尋引擎收（`<meta name="robots" content="noindex">`）。
+ * 看的是頁面自己的宣告，不是一份「哪些路徑不算」的名單：名單明天多一種 noindex 頁時不會跟著變。
+ */
+export const isNoindex = (html: string) =>
+  /<meta name="robots" content="[^"]*\bnoindex\b/.test(html);
+
+/**
  * 一頁**沒有宣告自己的標題與描述時**拿到的是什麼——看 404 頁：它由根版面產出，沒有自己的 metadata。
  * 從建置產物讀，不從 `app/layout.tsx` 抄：根版面哪天換了字，問「有沒有沿用它」的測試不必跟著改。
  *

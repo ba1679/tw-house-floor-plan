@@ -48,9 +48,9 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
     createViewerState,
   );
 
-  // 找找看（M4）的視野鎖定。M2 沒有 UI 打開它（spec「為 M4 預留的介面」），而它擋得住
-  // 什麼、擋不住什麼是這張票的驗收條件之一，所以留一個網址參數當入口：`?fitLocked=1`。
-  // M4 接上遊戲狀態時改成在該處派同一個 action，狀態機不必回頭改。
+  // 視野鎖定的網址參數 `?fitLocked=1`：M2 替還不存在的找找看留的測試入口。
+  // 找找看已經在一局開始時打開同一個開關（`lib/quiz/round.ts` 的 `createRound`），
+  // 這個入口只剩「網址加一個參數就把圖鎖死、畫面上又沒有東西解得開」的副作用——M4 票 07 拆掉。
   useEffect(() => {
     const locked = new URLSearchParams(window.location.search).get("fitLocked") === "1";
     dispatch({ type: "SET_FIT_LOCKED", locked });

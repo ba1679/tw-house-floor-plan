@@ -1,0 +1,77 @@
+/* 找找看頁自己的幾列。整頁的「一個螢幕就是一頁」由 app/layouts/[id]/page.module.css 管，
+   這裡的每一列都排在那個 column 裡：出題期間它們與圖框搶同一條高度（ADR-0003），所以一律 flex: 0 0 auto，
+   被壓縮的只有圖框自己（FloorPlanViewer.module.css 的 .viewport）。 */
+
+/* 開場與結算：沒有圖框，內容也可能比一個螢幕長，所以這一格自己捲，頁面照樣不捲。 */
+.screen {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.lead {
+  margin: 0 0 16px;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* 手機優先：站著單手操作，按鈕一律點得到（44px，與檢視器的控制列同一條規矩）。 */
+.primary {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 20px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 0;
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+}
+
+.primary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* 題目列：題號在左、題目在右，一行放得下就不佔兩行——多一行就從圖框挖一行的高度。 */
+.question {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 10px;
+  margin: 0 0 12px;
+}
+
+.progress {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink2);
+  font-variant-numeric: tabular-nums;
+}
+
+.prompt {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.target {
+  font-weight: 700;
+}
+
+/* 作答之後「下一題」那一列。只在作答後出現：出題中它若佔著位子，就是白白從圖框挖走一列。 */
+.next {
+  flex: 0 0 auto;
+  display: flex;
+  margin-top: 12px;
+}
+
+.score {
+  margin: 0 0 16px;
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
