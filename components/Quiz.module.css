@@ -82,3 +82,129 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+
+/* 「你認得 N / M」與刻度（M4 票 05，`KnownCount`）：開場與結算共用。 */
+.known {
+  margin: 0 0 16px;
+}
+
+.knownCount {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 刻度：一格一個可出題符號，不用百分比條——使用者要數得出還差幾個（design/Progress.dc.html 的流程參考）。
+   格子等分寬度，格數由資料來：主圖 13 格在 375px 上每格約 23px，數得清。 */
+.meter {
+  display: flex;
+  gap: 3px;
+}
+
+.meter > span {
+  flex: 1 1 0;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--rule);
+}
+
+.meter > .filled {
+  background: var(--ink);
+}
+
+/* 開場數字底下「認得」的定義。 */
+.definition {
+  margin: 0 0 20px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink2);
+}
+
+/* 開場三份清單與結算答錯清單的標題。 */
+.listHeading {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink2);
+}
+
+/* 還不熟：一列一個，次數靠右。不可點，所以不套 44px。 */
+.missed {
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.missed li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--rule2);
+  font-size: 15px;
+}
+
+.wrongCount {
+  flex: none;
+  color: var(--ink2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 還沒遇到、已認識：只列名字，排成會折行的一串。13 個各佔一列的話，「開始」會被推出第一個螢幕。不可點，所以不套 44px。 */
+.names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.names li {
+  padding: 2px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* 結算的答錯清單：每一列是連到題目符號頁的連結，整列點得到（44px）。連結色與站上其他連結同一個 `--accent`。 */
+.review {
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.reviewLink {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--rule2);
+  font-size: 15px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.reviewLink:hover,
+.reviewLink:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* 結算的兩個出口排同一列。 */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* 「回到平面圖」是換頁的連結，長得像次要的那一顆按鈕：墨色底留給「再玩一次」。 */
+.secondaryLink {
+  composes: control from "./FloorPlanViewer.module.css";
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}

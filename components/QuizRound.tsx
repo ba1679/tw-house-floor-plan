@@ -1,13 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { FloorPlanViewport, initialViewerConfig } from "./FloorPlanViewport";
 import { InfoSheet, type SheetNote } from "./InfoSheet";
+import { KnownCount } from "./KnownCount";
 import { useEscapeKey } from "./useEscapeKey";
 import { useFirstVisitHint } from "./useFirstVisitHint";
 import { useSaveAnswers } from "./useLearningProgress";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
+import { familiarityTiers } from "@/lib/quiz/progress";
 import {
   createRound,
   isCorrect,
@@ -17,17 +20,21 @@ import {
   scoreOf,
   type Answer,
 } from "@/lib/quiz/round";
+import { symbolName } from "@/lib/symbols/name";
 import type { SymbolRecord } from "@/lib/symbols/types";
 import {
+  QUIZ_BACK_TO_PLAN,
   QUIZ_CORRECT,
   QUIZ_NEXT,
   QUIZ_PLAY_AGAIN,
   QUIZ_PROMPT_LEAD,
+  QUIZ_REVIEW_HEADING,
   QUIZ_SHOW_SHEET,
   QUIZ_WRONG,
   TAP_HINT,
   quizPicked,
   quizProgress,
+  quizReviewRow,
   quizScore,
 } from "@/lib/ui/copy";
 import { occurrencesOf, type ViewerAction } from "@/lib/viewer/interaction";
@@ -44,6 +51,8 @@ type Props = {
   floorplan: FloorPlan;
   symbols: Record<string, SymbolRecord>;
   readingOrder: RoomHotspots[];
+  /** 這張圖的可出題符號：結算「你認得 N / M」的分母，分子也只數它們（M4 票 05）。 */
+  quizzable: string[];
   /** 這一局依序要出的 symbol id。 */
   questions: string[];
   onPlayAgain: () => void;
@@ -65,7 +74,7 @@ function pickedNote(answer: Answer, symbols: Record<string, SymbolRecord>): Shee
   };
 }
 
-export function QuizRound({ floorplan, symbols, readingOrder, questions, onPlayAgain }: Props) {
+export function QuizRound({ floorplan, symbols, readingOrder, quizzable, questions, onPlayAgain }: Props) {
   // 初始尺寸是占位值，與自由看圖同一份（`initialViewerConfig`）：真正的框掛載後由 RESIZE 量。
   const [round, dispatch] = useReducer(
     reduceRound,
@@ -79,8 +88,8 @@ export function QuizRound({ floorplan, symbols, readingOrder, questions, onPlayA
     [],
   );
 
-  // 每作答一題立刻寫進學習進度（spec「學習進度」）。
-  useSaveAnswers(floorplan.id, round.answers);
+  // 每作答一題立刻寫進學習進度（spec「學習進度」）。回傳的是寫完之後讀回來的那一份：結算的「你認得」要算進這一局。
+  const stored = useSaveAnswers(floorplan.id, round.answers);
 
   /**
    * 鍵盤焦點要不要跟著一局走（票 01 留下的：作答後「下一題」排在所有熱區之後，要 Tab 很多下才到）。
@@ -108,23 +117,67 @@ export function QuizRound({ floorplan, symbols, readingOrder, questions, onPlayA
 
   const questionRef = useRef<HTMLDivElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
-  // 說明卡開著時焦點由卡片自己收（`takeFocus`），其餘兩個去處在這裡。
+  const scoreRef = useRef<HTMLParagraphElement>(null);
+  // 說明卡開著時焦點由卡片自己收（`takeFocus`），其餘的去處在這裡。
+  // 最後一題的「下一題」按下去就不在了（M4 票 05）：焦點接在成績上，不然掉回頁面最開頭，讀螢幕的人聽不到這一局的結果。
   useEffect(() => {
     if (!focusFollows) return;
     if (round.phase === "answered" && !round.sheetOpen) nextRef.current?.focus();
     if (round.phase === "question" && round.answers.length > 0) questionRef.current?.focus();
+    if (round.phase === "finished") scoreRef.current?.focus();
   }, [focusFollows, round.phase, round.sheetOpen, round.answers.length]);
 
   // 首次引導與平面圖頁共用同一句、同一個記錄（spec「首次引導」）：在哪一頁先看到都算看過。
   const hint = useFirstVisitHint();
 
   if (round.phase === "finished") {
+    // 答錯清單只從這一局的作答來：「你答成了 X」只在記憶體裡，不進 localStorage（M4 票 05；票 04 的紀錄格式不變）。
+    // 一局裡題目不重複，所以一個題目符號最多一列。全部答對時整份不印——不誇獎，也就不需要一句「沒有答錯」。
+    const missed = round.answers.filter((a) => !isCorrect(a));
+
     return (
       <section className={styles.screen}>
-        <p className={styles.score}>{quizScore(scoreOf(round), questions.length)}</p>
-        <button type="button" className={styles.primary} onClick={onPlayAgain}>
-          {QUIZ_PLAY_AGAIN}
-        </button>
+        {/* tabIndex -1：用鍵盤按下最後一題「下一題」之後焦點的落點。不進 Tab 序列。 */}
+        <p ref={scoreRef} tabIndex={-1} className={styles.score}>
+          {quizScore(scoreOf(round), questions.length)}
+        </p>
+
+        {missed.length > 0 && (
+          <>
+            <h2 id="quiz-review-heading" className={styles.listHeading}>
+              {QUIZ_REVIEW_HEADING}
+            </h2>
+            {/* 每一列連到**題目**的符號頁，不是被點中的那一個：要再讀一次的是他沒認出來的東西（PRD §6.3.3）。 */}
+            <ul aria-labelledby="quiz-review-heading" className={styles.review}>
+              {missed.map((a) => (
+                <li key={a.target}>
+                  <Link href={`/symbols/${a.target}`} className={styles.reviewLink}>
+                    {quizReviewRow(symbolName(symbols, a.target), symbolName(symbols, a.picked))}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+
+        {/* 這一局寫完之後讀回來的那一份（`useSaveAnswers`），所以已經是這一局之後的數字。
+            localStorage 被封鎖時讀回來的是空紀錄，印的就是 0：這一局沒有被記住，「再玩一次」出題讀到的也是那份空紀錄。 */}
+        {stored && (
+          <KnownCount
+            layoutName={floorplan.name}
+            known={familiarityTiers(quizzable, stored).known.length}
+            total={quizzable.length}
+          />
+        )}
+
+        <div className={styles.actions}>
+          <button type="button" className={styles.primary} onClick={onPlayAgain}>
+            {QUIZ_PLAY_AGAIN}
+          </button>
+          <Link href={`/layouts/${floorplan.id}`} className={styles.secondaryLink}>
+            {QUIZ_BACK_TO_PLAN}
+          </Link>
+        </div>
       </section>
     );
   }

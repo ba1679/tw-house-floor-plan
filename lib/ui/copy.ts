@@ -4,6 +4,7 @@
 // 中文名是介面文案不是內容，散在元件裡的話，同一個 tier 在說明卡、符號頁、找找看
 // 會各長一個樣子，而它正是這個產品的核心主張（PRD §6.5）。
 
+import type { Familiarity } from "@/lib/quiz/progress";
 import type { SymbolCategory, SourceTier } from "@/lib/symbols/types";
 
 /** 分類的中文名。英文小字沿用 design/Main.dc.html 的「中文 / ENGLISH」排法。 */
@@ -289,6 +290,46 @@ export const quizPicked = (pickedName: string) => `你點的是${pickedName}。`
 export const quizScore = (correct: number, total: number) => `答對 ${correct} / ${total} 題`;
 
 export const QUIZ_PLAY_AGAIN = "再玩一次";
+
+/**
+ * 開場與結算那一行，照 PRD §6.6 的原句（「這張三房兩廳你認得 11 / 13」）。M4 票 05。
+ * **分母是可出題符號數**，由資料算、不寫死；格局名由呼叫端從 floorplan 取來，理由同 `homeLayoutButton`。
+ * 這一行只在讀到 localStorage 之後才印：靜態 HTML 先印一個 0 再跳成真的數字，那一瞬間的 0 就是進度條在說謊。
+ */
+export const knownCountLabel = (layoutName: string, known: number, total: number) =>
+  `這張${layoutName}你認得 ${known} / ${total}`;
+
+/** 「認得」只有一個定義（spec Solution），開場印在數字底下：看過說明卡不算；這份紀錄也不跟著人換裝置走。 */
+export const KNOWN_DEFINITION = "在找找看裡答對過至少一次，就算你認得了。進度只存在這台裝置上。";
+
+/**
+ * 開場三份清單的標題（PRD §6.6.1 的三態）。還不熟排最前面：使用者來這裡是想知道還差什麼。
+ * 「錯 N 次」與「還沒遇到」是兩種不熟，所以是兩份清單，不併成一份。
+ */
+export const FAMILIARITY_LABELS: Record<Familiarity, string> = {
+  missed: "還不熟",
+  unseen: "還沒遇到",
+  known: "已認識",
+};
+
+/** 還不熟清單每一列後面的次數。N 由紀錄算。 */
+export const wrongTimesLabel = (count: number) => `錯 ${count} 次`;
+
+/**
+ * 結算的答錯清單標題。寫「**之後**會再出現」，不寫「下一局」：出題優先的是還沒遇到的，
+ * 主圖第二局只剩 1 個空位給答錯過的（PRD §6.3）。只說它會回來，不誇獎、不責備。
+ */
+export const QUIZ_REVIEW_HEADING = "答錯的，之後會再出現";
+
+/**
+ * 答錯清單的一列，點下去到題目符號的符號頁（spec「一局的流程」的原句）——那是比說明卡完整的第二次學習。
+ * 兩個名字都是 `symbol.name` 原文，由呼叫端從資料取來。
+ */
+export const quizReviewRow = (targetName: string, pickedName: string) =>
+  `${targetName} · 你答成了${pickedName}`;
+
+/** 結算的另一個出口。想自由看圖、湊近看標記的人從這裡走（PRD §6.3.3）。 */
+export const QUIZ_BACK_TO_PLAN = "回到平面圖";
 
 /** PRD §6.4 的完整一句，一字不改。每頁固定顯示。 */
 export const DISCLAIMER =

@@ -29,6 +29,9 @@ export const QUIZ = `${PLAN}/quiz`;
  */
 export const ROUND_SIZE = 7;
 
+/** 主圖的可出題符號數，也就是「你認得 N / M」的 M（PRD §6.6：13）。字面值，理由同 `ROUND_SIZE`。 */
+export const QUIZZABLE_COUNT = 13;
+
 export const plan = floorplans.find((fp) => fp.id === LAYOUT_ID)!;
 
 /** 主圖上有熱區的符號，依第一次出現的順序（CONTEXT.md「可出題符號」的定義本身，不是出題的演算法）。 */
@@ -101,14 +104,20 @@ export async function answerByTwoTaps(page: Page, hotspotId: string) {
   await expect(nextOf(page), "作答之後沒有出現「下一題」").toBeVisible();
 }
 
-/** 從現在這一題玩到結算：每一題都答對、按「下一題」。回傳依序出了哪幾題。 */
-export async function playToResults(page: Page): Promise<string[]> {
+/**
+ * 從現在這一題玩到結算：每一題作答、按「下一題」。回傳依序出了哪幾題。
+ * `wrong` 列出要答錯的題號（從 1 起）：點 `otherThan(題目)` 的熱區，所以答成了什麼由題目決定、測試算得出來。其餘答對。
+ */
+export async function playToResults(
+  page: Page,
+  { wrong = [] }: { wrong?: number[] } = {},
+): Promise<string[]> {
   const asked: string[] = [];
   for (let i = 1; i <= ROUND_SIZE; i++) {
     await expect(progressOf(page)).toHaveText(progressText(i));
     const target = await currentTarget(page);
     asked.push(target);
-    await answerByTwoTaps(page, cleanHotspotsOf(target)[0]);
+    await answerByTwoTaps(page, cleanHotspotsOf(wrong.includes(i) ? otherThan(target) : target)[0]);
     await nextOf(page).click();
   }
   return asked;
