@@ -1,5 +1,7 @@
 {
+  "_note": "前四案是人工檢查描述，並非全部已自動化。3b2l_before 是可執行的淨空與管道距離回歸；門／櫃門完整包絡不在本 validator 覆蓋範圍。",
   "cases":[
+    {"case_id":"3b2l_before","problem":"seven_front_clearance_failures","category":"human_factors","severity":"warning","rule_id":"fixture_front_clearance","fixture":"tests/fixtures/3b2l_before.floorplan.json","regression":"tests/test_validate_domain_rules.py","expected_blockers":7,"reason":"本體無交疊仍有衣櫃8cm、書桌26cm、客浴馬桶35cm等使用淨空不足","fix":"調整房間比例及設備方向，保留外框與柱，重新展開後驗證","source":"repository 原三房兩廳圖，d1819e6 時的資料","confidence":"high"},
     {"case_id":"bad_plan_001","problem":"bathroom_far_from_pipe_shaft","category":"plumbing","severity":"warning","reason":"可能造成水平排水路徑、坡度、維修與成本風險","rule_id":"wet_area_pipe_shaft_proximity","fix":"優先將衛浴移近管道間，或補充實際管路與樓板資料","confidence":"medium"},
     {"case_id":"bad_plan_002","problem":"bathroom_door_hits_fixture","category":"human_factors","severity":"error","reason":"門扇開啟掃掠區與衛浴設備重疊","rule_id":"fixture_clearance_and_door_swing","fix":"改門向、改滑門或重新配置設備","confidence":"high"},
     {"case_id":"bad_plan_003","problem":"bedroom_used_as_through_route","category":"circulation","severity":"warning","reason":"臥室成為主要空間的必要通道，降低私密性","rule_id":"avoid_bedroom_through_route","fix":"增加走道或調整公共區與臥室的鄰接","confidence":"medium"},

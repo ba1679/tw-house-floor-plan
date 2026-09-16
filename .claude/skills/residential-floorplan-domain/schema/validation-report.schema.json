@@ -1,13 +1,129 @@
 {
-  "$schema":"http://json-schema.org/draft-07/schema#",
-  "title":"住宅平面圖 domain validation report",
-  "type":"object",
-  "required":["plan_id","status","findings","assumptions","professional_review_required"],
-  "properties":{
-    "plan_id":{"type":"string"},
-    "status":{"enum":["pass","pass_with_warnings","needs_revision","unknown"]},
-    "findings":{"type":"array","items":{"type":"object","required":["id","category","severity","message"],"properties":{"id":{"type":"string"},"category":{"type":"string"},"severity":{"enum":["error","warning","preference","info"]},"message":{"type":"string"},"objects":{"type":"array","items":{"type":"string"}},"rule_id":{"type":"string"},"confidence":{"enum":["high","medium","low"]},"recommendation":{"type":"string"},"source":{"type":"array","items":{"type":"object"}}},"additionalProperties":false}},
-    "assumptions":{"type":"array","items":{"type":"string"}},
-    "professional_review_required":{"type":"boolean"}
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "住宅平面圖 domain validation report",
+  "type": "object",
+  "required": [
+    "plan_id",
+    "status",
+    "findings",
+    "assumptions",
+    "professional_review_required"
+  ],
+  "properties": {
+    "plan_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "pass",
+        "pass_with_warnings",
+        "needs_revision",
+        "unknown"
+      ]
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "category",
+          "severity",
+          "message",
+          "status",
+          "blocking"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "error",
+              "warning",
+              "preference",
+              "info"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "objects": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rule_id": {
+            "type": "string"
+          },
+          "confidence": {
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "recommendation": {
+            "type": "string"
+          },
+          "source": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "status": {
+            "enum": [
+              "fail",
+              "warning",
+              "unknown"
+            ]
+          },
+          "blocking": {
+            "type": "boolean"
+          },
+          "rule_type": {
+            "enum": [
+              "HARD_CONSTRAINT",
+              "SOFT_CONSTRAINT",
+              "DESIGN_PREFERENCE"
+            ]
+          },
+          "measurement": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "professional_review_required": {
+      "type": "boolean"
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "objects",
+          "status",
+          "measured_cm",
+          "target_cm"
+        ]
+      }
+    },
+    "scope": {
+      "type": "string"
+    }
   }
 }

@@ -7,7 +7,7 @@ description: 為台灣住宅平面圖生成與檢查提供住宅建築、濕區�
 
 這個 skill 將「什麼樣的住宅配置合理」與 `floorplan-generator` 的「如何展開與繪圖」分開。
 
-## SOP
+# SOP
 
 ## Phase 1 -- 建立住宅配置模型
 
@@ -23,14 +23,15 @@ description: 為台灣住宅平面圖生成與檢查提供住宅建築、濕區�
 
 ## Phase 3 -- 驗證與解釋
 
-1. DELEGATE 對既有 `floorplan.json` 執行 `uv run scripts/validate_domain_rules.py --plan <floorplan.json> --rules knowledge/adjacency-rules.json --fixtures knowledge/fixture-dimensions.json --output <validation-report.json>`。
-2. THINK 將 geometry error、domain error、warning 與 preference 分開；不得把距離偏好誤報成法規違規。
-3. READ 若有不確定或來源衝突，讀取 `rules/source-hierarchy.md`，保留來源、版本、信心與適用範圍。
-4. WRITE 依 `schema/validation-report.schema.json`、`templates/validation-report.md` 與 `templates/validation-report.example.md` 產出可讀報告；若存在 high severity 問題，提出重新配置建議，不宣稱平面圖已符合施工或申照要求。
+1. READ 依 `rules/human-factors.md` 確認方向與使用目標；若已知餐桌用餐側／淋浴入口，依 `schema/validation-context.schema.json` 提供 context，不可猜測缺漏。
+2. DELEGATE 先跑 `floorplan-generator` 的 geometry validator；再從本 skill 目錄執行 `uv run scripts/validate_domain_rules.py --plan <floorplan.json> --rules knowledge/adjacency-rules.json --fixtures knowledge/fixture-dimensions.json --output <validation-report.json>`，有 context 時加 `--context <context.json>`。回傳 1 為概念配置需修改，2 為輸入錯誤；0 仍須讀取 unknown 與 warning，不表示合規。
+3. THINK 區分 geometry error、概念設計 blocker、warning 與 preference；檢查 report.checks 的方向、實測值、採用目標和阻擋物，不把中心距離當實際管長或法律上限。
+4. READ 若有不確定或來源衝突，讀取 `rules/source-hierarchy.md`，保留來源、版本、信心與適用範圍。
+5. WRITE 依 `schema/validation-report.schema.json`、`templates/validation-report.md` 與 `templates/validation-report.example.md` 產出可讀報告；有 blocker 時回 Phase 2 修改 layout 後重新展開。無 blocker 但有未驗證項仍標 unknown；不得宣稱合規。
 
 ## Phase 4 -- 回歸檢查
 
-1. DELEGATE 對至少一份正常案例與 `knowledge/bad-examples.json` 的代表案例重演 domain validator，確認能找出管道距離、門／設備干涉、家具使用空間與錯誤分類問題。
+1. DELEGATE 執行 `uv run python -m unittest discover -s tests -v`；`tests/fixtures/3b2l_before.floorplan.json` 固定原圖的 7 個淨空不足，測試同時檢查目前圖面、方向、單位、來源距離物件與 CLI 錯誤。`knowledge/bad-examples.json` 其餘案例是人工檢查清單，不得宣稱已全部自動化。
 2. READ 回頭檢查所有新增規則是否有 `source`、`rule_type`、`confidence`、適用範圍與不確定性說明，且每個 module 都由本 SOP 回掛。
 
 ## 邊界

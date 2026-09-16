@@ -2,7 +2,7 @@
   "schema_version": 1,
   "id": "3b2l_standard",
   "name": "三房兩廳",
-  "note": "PRD 階段一的唯一主圖。28 坪權狀、公設比 0.32，室內約 19 坪——台灣首購三房的真實尺度，擠是它的特徵不是缺點。公私分離：客餐廚在北段，走道橫貫，三房兩衛在南段；玄關貼東側外牆，大門因此開在圖面右方（p16 §10(b)）。限制：本模型沒有「梯廳側」的概念，所以大門所在的東側外牆仍可開窗，實際建案不會這樣。",
+  "note": "住宅概念配置，不供申照或施工。34 坪權狀、公設比 0.32，外框約 23.11 坪（含牆線內及陽台，不等於淨使用面積）。保留 977×782 cm 外框及原五根柱座標；西側管道間仍在濕區一側、濕區集中，屬概念設計假設，既有建築不可據此移改。餐桌南北側各兩席、客浴淋浴入口朝北，見同名 domain-context。固定窗、排水接點、檢修與櫃門操作仍待專業確認。",
   "area": {
     "deed_ping": 34,
     "public_ratio": 0.32,
@@ -11,37 +11,25 @@
   "tree": {
     "stack": "rows",
     "ratios": [
-      0.46,
-      0.16,
-      0.38
+      320,
+      130,
+      332
     ],
     "children": [
       {
         "stack": "cols",
         "ratios": [
-          0.28,
-          0.2,
-          0.34,
-          0.18
+          274,
+          226,
+          277,
+          200
         ],
         "children": [
           {
-            "id": "room-living",
-            "room": "living_room"
-          },
-          {
-            "id": "room-dining",
-            "room": "dining_room"
-          },
-          {
-            "id": "room-kitchen",
-            "room": "kitchen"
-          },
-          {
             "stack": "rows",
             "ratios": [
-              0.45,
-              0.55
+              110,
+              210
             ],
             "children": [
               {
@@ -50,19 +38,32 @@
                 "name": "後陽台"
               },
               {
-                "id": "room-entry",
-                "room": "entrance",
-                "name": "玄關"
+                "id": "room-kitchen",
+                "room": "kitchen"
               }
             ]
+          },
+          {
+            "id": "room-dining",
+            "room": "dining_room"
+          },
+          {
+            "id": "room-living",
+            "room": "living_room"
+          },
+          {
+            "id": "room-bed3",
+            "room": "bedroom",
+            "name": "小孩房"
           }
         ]
       },
       {
         "stack": "cols",
         "ratios": [
-          0.1,
-          0.9
+          98,
+          703,
+          176
         ],
         "children": [
           {
@@ -73,22 +74,27 @@
             "id": "room-hall",
             "room": "hallway",
             "name": "走道"
+          },
+          {
+            "id": "room-entry",
+            "room": "entrance",
+            "name": "玄關"
           }
         ]
       },
       {
         "stack": "cols",
         "ratios": [
-          0.3,
-          0.17,
-          0.23,
-          0.12,
-          0.18
+          177,
+          230,
+          300,
+          270
         ],
         "children": [
           {
-            "id": "room-master",
-            "room": "master_bedroom"
+            "id": "room-bath-g",
+            "room": "bathroom",
+            "name": "客浴"
           },
           {
             "id": "room-bath-m",
@@ -96,19 +102,13 @@
             "name": "主浴"
           },
           {
+            "id": "room-master",
+            "room": "master_bedroom"
+          },
+          {
             "id": "room-bed2",
             "room": "bedroom",
             "name": "次臥"
-          },
-          {
-            "id": "room-bath-g",
-            "room": "bathroom",
-            "name": "客浴"
-          },
-          {
-            "id": "room-bed3",
-            "room": "bedroom",
-            "name": "小孩房"
           }
         ]
       }
@@ -122,7 +122,7 @@
         "room": "room-entry",
         "side": "e"
       },
-      "width": 130,
+      "width": 110,
       "at": 0.5,
       "role": "entrance",
       "opens_to": "room-entry"
@@ -134,7 +134,7 @@
         "room-entry",
         "room-hall"
       ],
-      "width": 110,
+      "width": 100,
       "at": 0.5
     },
     {
@@ -145,7 +145,7 @@
         "room-hall"
       ],
       "width": 150,
-      "at": 0.5
+      "at": 0.25
     },
     {
       "id": "door-hall-dining",
@@ -154,8 +154,8 @@
         "room-dining",
         "room-hall"
       ],
-      "width": 140,
-      "at": 0.5
+      "width": 100,
+      "at": 0.8
     },
     {
       "id": "door-dining-kitchen",
@@ -164,8 +164,8 @@
         "room-dining",
         "room-kitchen"
       ],
-      "width": 130,
-      "at": 0.6
+      "width": 90,
+      "at": 0.85
     },
     {
       "id": "door-balcony",
@@ -176,7 +176,7 @@
       ],
       "width": 100,
       "role": "balcony",
-      "at": 0.15
+      "at": 0.45
     },
     {
       "id": "door-master",
@@ -207,7 +207,7 @@
         "room-bed2"
       ],
       "width": 90,
-      "at": 0.9,
+      "at": 0.12,
       "opens_to": "room-bed2"
     },
     {
@@ -218,17 +218,18 @@
         "room-bath-g"
       ],
       "width": 70,
-      "opens_to": "room-bath-g"
+      "opens_to": "room-bath-g",
+      "at": 0.5
     },
     {
       "id": "door-bed3",
       "type": "single",
       "between": [
-        "room-hall",
+        "room-entry",
         "room-bed3"
       ],
       "width": 90,
-      "at": 0.1,
+      "at": 0.3,
       "opens_to": "room-bed3"
     }
   ],
@@ -250,17 +251,17 @@
     {
       "id": "win-kitchen",
       "room": "room-kitchen",
-      "side": "n",
-      "type": "fixed",
+      "side": "w",
+      "type": "casement",
       "width": 90,
-      "at": 0.15
+      "at": 0.4
     },
     {
       "id": "win-balcony",
       "room": "room-balcony",
-      "side": "e",
+      "side": "n",
       "type": "sliding",
-      "width": 90
+      "width": 160
     },
     {
       "id": "win-master",
@@ -268,7 +269,7 @@
       "side": "s",
       "type": "sliding",
       "width": 150,
-      "at": 0.85
+      "at": 0.7
     },
     {
       "id": "win-bath-m",
@@ -283,7 +284,7 @@
       "side": "s",
       "type": "sliding",
       "width": 140,
-      "at": 0.15
+      "at": 0.4
     },
     {
       "id": "win-bath-g",
@@ -295,36 +296,36 @@
     {
       "id": "win-bed3",
       "room": "room-bed3",
-      "side": "s",
+      "side": "n",
       "type": "sliding",
       "width": 100,
-      "at": 0.5
+      "at": 0.45
     }
   ],
   "columns": [
     {
       "id": "col-nw",
-      "room": "room-living",
+      "room": "room-balcony",
       "corner": "nw"
     },
     {
       "id": "col-ne",
-      "room": "room-balcony",
+      "room": "room-bed3",
       "corner": "ne"
     },
     {
       "id": "col-sw",
-      "room": "room-master",
+      "room": "room-bath-g",
       "corner": "sw"
     },
     {
       "id": "col-se",
-      "room": "room-bed3",
+      "room": "room-bed2",
       "corner": "se"
     },
     {
       "id": "col-living-ne",
-      "room": "room-living",
+      "room": "room-balcony",
       "corner": "ne"
     }
   ],
@@ -347,14 +348,14 @@
       "id": "f-sofa",
       "type": "sofa",
       "room": "room-living",
-      "anchor": "s",
+      "anchor": "e",
       "at": 0.5
     },
     {
       "id": "f-tv",
       "type": "tv",
       "room": "room-living",
-      "anchor": "n",
+      "anchor": "w",
       "at": 0.5
     },
     {
@@ -368,92 +369,93 @@
       "id": "f-counter",
       "type": "kitchen_counter",
       "room": "room-kitchen",
-      "anchor": "e",
-      "at": 0.5
+      "anchor": "w",
+      "at": 0.5,
+      "width": 180
     },
     {
       "id": "f-fridge",
       "type": "refrigerator",
       "room": "room-kitchen",
-      "anchor": "w",
-      "at": 0.2
+      "anchor": "n",
+      "at": 0.95
     },
     {
       "id": "f-bed-m",
       "type": "bed",
       "room": "room-master",
       "anchor": "s",
-      "at": 0.75
+      "at": 0.8
     },
     {
       "id": "f-wardrobe-m",
       "type": "wardrobe",
       "room": "room-master",
       "anchor": "w",
-      "at": 0.35
+      "at": 0.65
     },
     {
       "id": "f-toilet-m",
       "type": "toilet",
       "room": "room-bath-m",
-      "anchor": "n",
-      "at": 0.5
+      "anchor": "e",
+      "at": 0.1
     },
     {
       "id": "f-sink-m",
       "type": "sink",
       "room": "room-bath-m",
-      "anchor": "s",
-      "at": 0.5
+      "anchor": "e",
+      "at": 0.9
     },
     {
       "id": "f-bathtub-m",
       "type": "bathtub",
       "room": "room-bath-m",
-      "anchor": "e",
+      "anchor": "w",
       "at": 0.5
     },
     {
       "id": "f-bed-2",
       "type": "bed",
       "room": "room-bed2",
-      "anchor": "n",
-      "at": 0.4
+      "anchor": "e",
+      "at": 0.75
     },
     {
       "id": "f-desk-2",
       "type": "desk",
       "room": "room-bed2",
-      "anchor": "s",
-      "at": 0.8
+      "anchor": "n",
+      "at": 0.65
     },
     {
       "id": "f-toilet-g",
       "type": "toilet",
       "room": "room-bath-g",
       "anchor": "n",
-      "at": 0.5
+      "at": 0.2
     },
     {
       "id": "f-shower-g",
       "type": "shower",
       "room": "room-bath-g",
       "anchor": "s",
-      "at": 0.5
+      "at": 0.85
     },
     {
       "id": "f-bed-3",
       "type": "single_bed",
       "room": "room-bed3",
-      "anchor": "n",
-      "at": 0.3
+      "anchor": "s",
+      "at": 0.8
     },
     {
       "id": "f-sink-g",
       "type": "sink",
       "room": "room-bath-g",
       "anchor": "w",
-      "at": 0.5
+      "at": 0.58
     }
   ],
   "hotspots": [
@@ -462,8 +464,8 @@
       "symbol_id": "wall",
       "shape": "rect",
       "coords": [
-        262,
-        90,
+        488,
+        70,
         24,
         140
       ]
@@ -474,7 +476,7 @@
       "shape": "rect",
       "coords": [
         -12,
-        520,
+        540,
         24,
         140
       ]

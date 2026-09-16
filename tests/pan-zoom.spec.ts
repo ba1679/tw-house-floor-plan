@@ -201,6 +201,8 @@ test("關掉說明卡之後點回原處，是重新選一個，不是雙擊放�
 test("使用者自己調好的視野撐得過說明卡的開與關", async ({ page }) => {
   // `docs/adr/0003` 的欠帳：卡片升起是按 fit 的變化比例調整縮放，等於等比縮放使用者的視野，
   // 沒有把它丟掉——但 M2 在票 04 之前沒有自由縮放，這條路徑從沒被真的走過。這裡走一次。
+  // 使用較矮螢幕，確保新圖的餐廳窗說明卡確實壓縮 fit；高螢幕可能仍由寬度限制，不必縮圖。
+  await page.setViewportSize({ width: 375, height: 700 });
   await page.goto(PLAN);
   const plan = planOf(page);
   const fit = (await plan.boundingBox())!;
@@ -209,8 +211,8 @@ test("使用者自己調好的視野撐得過說明卡的開與關", async ({ pa
   const mine = (await plan.boundingBox())!;
   expect(mine.width).toBeCloseTo(fit.width * 2, 0);
 
-  // 放大之後只剩圖的中間那一塊在畫面上，所以選一個還看得到的符號：廚房的窗。
-  const window_ = page.locator("#hs-win-kitchen");
+  // 新圖廚房在西側，放大後改選仍在可視區內的餐廳窗。
+  const window_ = page.locator("#hs-win-dining");
   const box = (await window_.boundingBox())!;
   await page.mouse.click(box.x + box.width + 13, box.y + box.height / 2);
   const candidate = (await window_.boundingBox())!;
@@ -219,7 +221,7 @@ test("使用者自己調好的視野撐得過說明卡的開與關", async ({ pa
   // 卡片升起：圖被擠進上方那條可視帶並等比縮小，但那不是「使用者的視野作廢了」。
   const sheet = page.locator("#info-sheet");
   await expect(sheet).toBeVisible();
-  expect((await plan.boundingBox())!.width).toBeLessThan(mine.width);
+  await expect.poll(async () => (await plan.boundingBox())!.width).toBeLessThan(mine.width);
 
   await sheet.getByRole("button", { name: "關閉說明" }).click();
   await expect(sheet).toBeHidden();

@@ -1,0 +1,298 @@
+{
+  "schema_version": 1,
+  "region": "TW",
+  "building_type": "集合住宅概念示意，非既有建築施工案",
+  "spaces": [
+    {
+      "id": "room-balcony",
+      "type": "balcony",
+      "name": "後陽台",
+      "space_class": "DRY_AREA",
+      "fixtures": [],
+      "requirements": {
+        "plumbing_dependency": "none_or_unspecified",
+        "ventilation_requirement": "use_specific_review",
+        "natural_light_requirement": "use_specific_review",
+        "door_requirement": "connected_to_public_route_or_ensuite",
+        "circulation_requirement": "continuous_clear_path_manual_review",
+        "maintenance_requirement": "fixture_specific_unverified"
+      }
+    },
+    {
+      "id": "room-kitchen",
+      "type": "kitchen",
+      "name": "kitchen",
+      "space_class": "WET_AREA",
+      "fixtures": [
+        "f-counter",
+        "f-fridge"
+      ],
+      "requirements": {
+        "plumbing_dependency": "vertical_stack_unverified",
+        "ventilation_requirement": "window_or_equipment_to_verify",
+        "natural_light_requirement": "use_specific_review",
+        "door_requirement": "connected_to_public_route_or_ensuite",
+        "circulation_requirement": "continuous_clear_path_manual_review",
+        "maintenance_requirement": "fixture_specific_unverified"
+      }
+    },
+    {
+      "id": "room-dining",
+      "type": "dining_room",
+      "name": "dining_room",
+      "space_class": "DRY_AREA",
+      "fixtures": [
+        "f-dining"
+      ],
+      "requirements": {
+        "plumbing_dependency": "none_or_unspecified",
+        "ventilation_requirement": "use_specific_review",
+        "natural_light_requirement": "use_specific_review",
+        "door_requirement": "connected_to_public_route_or_ensuite",
+        "circulation_requirement": "continuous_clear_path_manual_review",
+        "maintenance_requirement": "fixture_specific_unverified"
+      }
+    },
+    {
+      "id": "room-living",
+      "type": "living_room",
+      "name": "living_room",
+      "space_class": "DRY_AREA",
+      "fixtures": [
+        "f-sofa",
+        "f-tv"
+      ],
+      "requirements": {
+        "plumbing_dependency": "none_or_unspecified",
+        "ventilation_requirement": "use_specific_review",
+        "natural_light_requirement": "exterior_window_area_to_verify",
+        "door_requirement": "connected_to_public_route_or_ensuite",
+        "circulation_requirement": "continuous_clear_path_manual_review",
+        "maintenance_requirement": "fixture_specific_unverified"
+      }
+    },
+    {
+      "id": "room-bed3",
+      "type": "bedroom",
+      "name": "小孩房",
+      "space_class": "DRY_AREA",
+      "fixtures": [
+        "f-bed-3"
+      ],
+      "requirements": {
+        "plumbing_dependency": "none_or_unspecified",
+        "ventilation_requirement": "use_specific_review",
+        "natural_light_requirement": "exterior_window_area_to_verify",
+        "door_requirement": "connected_to_public_route_or_ensuite",
+        "circulation_requirement": "continuous_clear_path_manual_review",
+        "maintenance_requirement": "fixture_specific_unverified"
+      }
+    },
+    {
+      "id": "room-ps",
+      "type": "pipe_shaft",
+      "name": "pipe_shaft",
+      "space_class": "SERVICE_AREA",
+      "fixtures": [],
+      "requirements": {
+        "plumbing_dependency": "none_or_unspecified",
+        "ventilation_requirement": "use_specific_review",
+        "natural_light_requirement": "use_specific_review",
+        "door_requirement": "maintenance_access_to_verify",
+        "circulation_requirement": "continuous_clear_path_manual_review",
+        "maintenance_requirement": "shaft_access_unverified"
+      }
+    },
+    {
+      "id": "room-hall",
+      "type": "hallway",
+      "name": "走道",
+      "space_class": "DRY_AREA",
+      "fixtures": [],
+      "requirements": {
+        "plumbing_dependency": "none_or_unspecified",
+        "ventilation_requirement": "use_specific_review",
+        "natural_light_requirement": "use_specific_review",
+        "door_requirement": "connected_to_public_route_or_ensuite",
+        "circulation_requirement": "continuous_clear_path_manual_review",
+        "maintenance_requirement": "fixture_specific_unverified"
+      }
+    },
+    {
+      "id": "room-entry",
+      "type": "entrance",
+      "name": "玄關",
+      "space_class": "DRY_AREA",
+      "fixtures": [],
+      "requirements": {
+        "plumbing_dependency": "none_or_unspecified",
+        "ventilation_requirement": "use_specific_review",
+        "natural_light_requirement": "use_specific_review",
+        "door_requirement": "connected_to_public_route_or_ensuite",
+        "circulation_requirement": "continuous_clear_path_manual_review",
+        "maintenance_requirement": "fixture_specific_unverified"
+      }
+    },
+    {
+      "id": "room-bath-g",
+      "type": "bathroom",
+      "name": "客浴",
+      "space_class": "WET_AREA",
+      "fixtures": [
+        "f-toilet-g",
+        "f-shower-g",
+        "f-sink-g"
+      ],
+      "requirements": {
+        "plumbing_dependency": "vertical_stack_unverified",
+        "ventilation_requirement": "window_or_equipment_to_verify",
+        "natural_light_requirement": "use_specific_review",
+        "door_requirement": "connected_to_public_route_or_ensuite",
+        "circulation_requirement": "continuous_clear_path_manual_review",
+        "maintenance_requirement": "fixture_specific_unverified"
+      }
+    },
+    {
+      "id": "room-bath-m",
+      "type": "bathroom",
+      "name": "主浴",
+      "space_class": "WET_AREA",
+      "fixtures": [
+        "f-toilet-m",
+        "f-sink-m",
+        "f-bathtub-m"
+      ],
+      "requirements": {
+        "plumbing_dependency": "vertical_stack_unverified",
+        "ventilation_requirement": "window_or_equipment_to_verify",
+        "natural_light_requirement": "use_specific_review",
+        "door_requirement": "connected_to_public_route_or_ensuite",
+        "circulation_requirement": "continuous_clear_path_manual_review",
+        "maintenance_requirement": "fixture_specific_unverified"
+      }
+    },
+    {
+      "id": "room-master",
+      "type": "master_bedroom",
+      "name": "master_bedroom",
+      "space_class": "DRY_AREA",
+      "fixtures": [
+        "f-bed-m",
+        "f-wardrobe-m"
+      ],
+      "requirements": {
+        "plumbing_dependency": "none_or_unspecified",
+        "ventilation_requirement": "use_specific_review",
+        "natural_light_requirement": "exterior_window_area_to_verify",
+        "door_requirement": "connected_to_public_route_or_ensuite",
+        "circulation_requirement": "continuous_clear_path_manual_review",
+        "maintenance_requirement": "fixture_specific_unverified"
+      }
+    },
+    {
+      "id": "room-bed2",
+      "type": "bedroom",
+      "name": "次臥",
+      "space_class": "DRY_AREA",
+      "fixtures": [
+        "f-bed-2",
+        "f-desk-2"
+      ],
+      "requirements": {
+        "plumbing_dependency": "none_or_unspecified",
+        "ventilation_requirement": "use_specific_review",
+        "natural_light_requirement": "exterior_window_area_to_verify",
+        "door_requirement": "connected_to_public_route_or_ensuite",
+        "circulation_requirement": "continuous_clear_path_manual_review",
+        "maintenance_requirement": "fixture_specific_unverified"
+      }
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "room-kitchen",
+      "relation": "prefer_near",
+      "to": "room-ps",
+      "reason": "濕區集中於西側，中心距離只是篩查；實際排水路徑未設計。"
+    },
+    {
+      "from": "room-bath-g",
+      "relation": "prefer_near",
+      "to": "room-ps",
+      "reason": "濕區集中於西側，中心距離只是篩查；實際排水路徑未設計。"
+    },
+    {
+      "from": "room-bath-m",
+      "relation": "prefer_near",
+      "to": "room-ps",
+      "reason": "濕區集中於西側，中心距離只是篩查；實際排水路徑未設計。"
+    },
+    {
+      "from": "room-kitchen",
+      "relation": "must_connect",
+      "to": "room-dining",
+      "reason": "備餐通路不穿越臥室"
+    },
+    {
+      "from": "room-master",
+      "relation": "must_connect",
+      "to": "room-bath-m",
+      "reason": "主浴為套房，其他公共空間不得經此穿越"
+    }
+  ],
+  "constraints": [
+    {
+      "rule_id": "fixture_front_clearance",
+      "rule_type": "SOFT_CONSTRAINT",
+      "status": "pass",
+      "note": "本專案採用目標需滿足；不是法規最低。量測見 domain report。"
+    },
+    {
+      "rule_id": "wet_area_pipe_shaft_proximity",
+      "rule_type": "SOFT_CONSTRAINT",
+      "status": "warning",
+      "note": "主浴仍超過中心距離300cm篩查值，保留警告；不移動既有柱來消除此警告。"
+    },
+    {
+      "rule_id": "ventilation_and_systems",
+      "rule_type": "HARD_CONSTRAINT",
+      "status": "unknown",
+      "note": "通風、結構、給排水實際要求依案確認；不編造合規結果。"
+    }
+  ],
+  "known_service_points": [
+    {
+      "id": "col-nw",
+      "type": "column",
+      "location": "保留原圖世界座標，見 before regression fixture 與生成圖；僅是示意圖資料"
+    },
+    {
+      "id": "col-ne",
+      "type": "column",
+      "location": "保留原圖世界座標，見 before regression fixture 與生成圖；僅是示意圖資料"
+    },
+    {
+      "id": "col-sw",
+      "type": "column",
+      "location": "保留原圖世界座標，見 before regression fixture 與生成圖；僅是示意圖資料"
+    },
+    {
+      "id": "col-se",
+      "type": "column",
+      "location": "保留原圖世界座標，見 before regression fixture 與生成圖；僅是示意圖資料"
+    },
+    {
+      "id": "col-living-ne",
+      "type": "column",
+      "location": "保留原圖世界座標，見 before regression fixture 與生成圖；僅是示意圖資料"
+    }
+  ],
+  "assumptions": [
+    "34坪權狀扣32%公設，外框977×782cm約23.11坪含牆中心線內及陽台，非淨面積。",
+    "不變：外框、五根柱位置、三房兩廳兩浴及既有家具種類。可變：示意圖內隔間、門窗與服務區；實屋改造不可直接套用。",
+    "保留浴缸；廚具由240縮至180cm作概念檯面，爐具與抽油煙未建模。",
+    "餐桌南北各兩席（無端座），淋浴入口北側；只是意圖，椅子和淋浴門實體仍未建模。",
+    "陽台未建模洗衣機、晾曬與排水，不能宣稱具備完整洗衣機能。",
+    "管道間仍在西側但縱向位置隨分區調整；未提供現況不可移動的管道或上下層資料。"
+  ]
+}

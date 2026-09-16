@@ -1,0 +1,7 @@
+{
+  "note": "僅為本版概念設計意圖；非實測或產品規格。餐桌南北各兩席，無東西端座；淋浴北側開放入口。",
+  "fixtures": {
+    "f-dining": {"seating_sides": ["n", "s"]},
+    "f-shower-g": {"entrance_side": "n"}
+  }
+}

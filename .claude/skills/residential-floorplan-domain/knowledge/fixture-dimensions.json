@@ -1,9 +1,176 @@
 {
-  "_note":"以下為設計參考，不是完整法規資料庫；使用前需依產品、地區與實案確認。",
-  "fixtures":[
-    {"type":"toilet","typical_width_mm":400,"typical_depth_mm":700,"front_clearance_mm":600,"side_clearance_mm":300,"knowledge_level":"DESIGN_GUIDELINE","source":[{"title":"HCG 衛浴空間規劃","url":"https://hcg.com.tw/tw/service/plan/space"}]},
-    {"type":"sink","typical_width_mm":600,"typical_depth_mm":500,"front_clearance_mm":600,"knowledge_level":"DESIGN_GUIDELINE","source":[{"title":"HCG 衛浴空間規劃","url":"https://hcg.com.tw/tw/service/plan/space"}]},
-    {"type":"shower","typical_width_mm":900,"typical_depth_mm":900,"front_clearance_mm":600,"knowledge_level":"DESIGN_GUIDELINE","source":[{"title":"HCG 衛浴空間規劃","url":"https://hcg.com.tw/tw/service/plan/space"}]},
-    {"type":"kitchen_counter","typical_width_mm":2400,"typical_depth_mm":600,"front_clearance_mm":600,"knowledge_level":"COMMON_PRACTICE","source":[]}
+  "_note": "只提供前方淨空的可追溯目標，不把範例 footprint 當產品型錄。mm / 10 = cm；非法律最低值。側向、櫃門、連續動線等另行檢查。",
+  "fixtures": [
+    {
+      "type": "toilet",
+      "front_clearance_mm": 600,
+      "knowledge_level": "DESIGN_GUIDELINE",
+      "confidence": "medium",
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "source": [
+        {
+          "title": "HCG 衛浴空間規劃",
+          "url": "https://hcg.com.tw/tw/service/plan/space",
+          "checked_at": "2026-09-16",
+          "locator": "前方活動空間 60 cm；不是設備本體型錄尺寸"
+        }
+      ]
+    },
+    {
+      "type": "sink",
+      "front_clearance_mm": 600,
+      "knowledge_level": "DESIGN_GUIDELINE",
+      "confidence": "medium",
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "source": [
+        {
+          "title": "HCG 衛浴空間規劃",
+          "url": "https://hcg.com.tw/tw/service/plan/space",
+          "checked_at": "2026-09-16",
+          "locator": "前方活動空間 60 cm；不是設備本體型錄尺寸"
+        }
+      ]
+    },
+    {
+      "type": "shower",
+      "front_clearance_mm": 600,
+      "knowledge_level": "DESIGN_GUIDELINE",
+      "confidence": "medium",
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "source": [
+        {
+          "title": "TOTO 淋浴空間規劃",
+          "url": "https://www.twtoto.com.tw/bathroom-school-detail.aspx?id=507",
+          "checked_at": "2026-09-16",
+          "locator": "前方活動空間 60 cm；不是設備本體型錄尺寸"
+        }
+      ]
+    },
+    {
+      "type": "wardrobe",
+      "front_clearance_mm": 600,
+      "knowledge_level": "HEURISTIC",
+      "confidence": "low",
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ]
+    },
+    {
+      "type": "desk",
+      "front_clearance_mm": 600,
+      "knowledge_level": "HEURISTIC",
+      "confidence": "low",
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ]
+    },
+    {
+      "type": "kitchen_counter",
+      "front_clearance_mm": 900,
+      "knowledge_level": "HEURISTIC",
+      "confidence": "low",
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ]
+    },
+    {
+      "type": "refrigerator",
+      "front_clearance_mm": 900,
+      "knowledge_level": "HEURISTIC",
+      "confidence": "low",
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ]
+    },
+    {
+      "type": "dining_table",
+      "front_clearance_mm": 750,
+      "knowledge_level": "HEURISTIC",
+      "confidence": "low",
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ]
+    },
+    {
+      "type": "bed",
+      "front_clearance_mm": 600,
+      "knowledge_level": "HEURISTIC",
+      "confidence": "low",
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ]
+    },
+    {
+      "type": "single_bed",
+      "front_clearance_mm": 600,
+      "knowledge_level": "HEURISTIC",
+      "confidence": "low",
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ]
+    },
+    {
+      "type": "sofa",
+      "front_clearance_mm": 600,
+      "knowledge_level": "HEURISTIC",
+      "confidence": "low",
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ]
+    },
+    {
+      "type": "bathtub",
+      "front_clearance_mm": 600,
+      "knowledge_level": "HEURISTIC",
+      "confidence": "low",
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ]
+    }
   ]
 }

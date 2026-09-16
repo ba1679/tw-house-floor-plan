@@ -18,6 +18,7 @@
 - Level: `MUST`
 - 無法由平面資料判定樓板、管徑、排水坡度、通風設備或結構時，標記 `uncertain`，不得輸出「已合規」。
 - 報告需說明需要確認的實體資料與建議諮詢的專業角色。
+- `blocking=true` 是概念設計採用目標未達的工作流程閘門，不改變規則的來源或強度；任一 blocker 使報告為 `needs_revision`。無 blocker 但有未驗證項時為 `unknown`，不可顯示成已通過。
 
 ## Good Example
 ```text
@@ -28,4 +29,3 @@ WARNING [medium] 衛浴至管道間約 4.8m；實際可行性取決於樓板降�
 ```text
 PASS：所有排水都一定可施工。
 ```
-

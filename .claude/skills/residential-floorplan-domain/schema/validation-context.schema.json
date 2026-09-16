@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "概念使用方向補充（非產品規格或現場驗證）",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "note": {"type": "string"},
+    "fixtures": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "entrance_side": {"enum": ["n", "e", "s", "w"]},
+          "seating_sides": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["n", "e", "s", "w"]}}
+        }
+      }
+    }
+  }
+}

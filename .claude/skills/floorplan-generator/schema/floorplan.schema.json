@@ -346,6 +346,33 @@
         }
       }
     },
+    "columns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "room_id", "geometry"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string"},
+          "room_id": {"type": ["string", "null"]},
+          "geometry": {"$ref": "#/definitions/rect"}
+        }
+      }
+    },
+    "canopies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "window_id", "room_id", "geometry"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string"},
+          "window_id": {"type": "string"},
+          "room_id": {"type": ["string", "null"]},
+          "geometry": {"$ref": "#/definitions/rect"}
+        }
+      }
+    },
     "furniture": {
       "type": "array",
       "items": {

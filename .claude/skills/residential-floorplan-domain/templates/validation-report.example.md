@@ -3,13 +3,13 @@
 ## 結果
 
 - 圖面：25ping-plan
-- 狀態：pass_with_warnings
+- 狀態：unknown（沒有已知 blocker，但仍有未驗證事項）
 - 專業複核：true
 
 ## Findings
 
 - WARNING / plumbing / medium：衛浴至管道間約 480cm，可能增加水平排水與維修複雜度。優先移近服務核心；來源為研究與設計建議，不是單獨法定距離。
-- INFO / ventilation / low：資料未提供衛浴外窗或機械排氣，需補資料。
+- UNKNOWN / ventilation / low：資料未提供衛浴外窗或機械排氣，需補資料；不得當成通過。
 
 ## 假設與未知
 
