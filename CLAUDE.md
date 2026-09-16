@@ -24,6 +24,15 @@ Single-context: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/do
 
 **新 checkout／新 worktree 第一件事**：跑一次 `codegraph init`。`.codegraph/` 是本機產物，不跟著 git 過來。
 
+## Design
+
+設計語言在根目錄的 `DESIGN.md`。**畫任何畫面、寫任何 CSS 之前先讀它。**
+
+- 要偏離，先改 `DESIGN.md`、寫下理由，再寫程式。不要在 CSS 裡偷偷偏離。
+- 它只寫理由與規則，**不寫值**。值在 `design/_tokens.txt`（設計語言實作票落地前）／`app/globals.css` 與各 module（落地後）。
+- 分工：`DESIGN.md` 管視覺語言，`CONTEXT.md` 管詞彙，`docs/adr/` 管推翻既有做法的決定。
+- 格式是 Google 的 DESIGN.md（段落順序固定，八個標準段落用英文原名）。**沒有 YAML frontmatter 是刻意的**：token 值只有一份，在 CSS 裡，不在這裡再抄一份。
+
 ## Workflow
 
 規格 → 架構 → 實作 → 測試 → knowledge update，走 mattpocock skills。`/ask-matt` 是這套流程的地圖。

@@ -2,7 +2,7 @@
 
 **What to build:** 一份與 PRD v0.7 對得上的找找看設計稿，取代現在 `design/` 下那兩份早於 v0.4 的找找看與學習進度設計稿。
 
-**Blocked by:** None (can start immediately)——而且**不擋任何一張票**
+**Blocked by:** 09（照它定下的設計語言與 token 畫）——而且**不擋任何一張票**
 
 **Status:** ready-for-human
 
