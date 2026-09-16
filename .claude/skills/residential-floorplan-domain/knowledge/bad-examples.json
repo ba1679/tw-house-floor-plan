@@ -1,0 +1,8 @@
+{
+  "cases":[
+    {"case_id":"bad_plan_001","problem":"bathroom_far_from_pipe_shaft","category":"plumbing","severity":"warning","reason":"可能造成水平排水路徑、坡度、維修與成本風險","rule_id":"wet_area_pipe_shaft_proximity","fix":"優先將衛浴移近管道間，或補充實際管路與樓板資料","confidence":"medium"},
+    {"case_id":"bad_plan_002","problem":"bathroom_door_hits_fixture","category":"human_factors","severity":"error","reason":"門扇開啟掃掠區與衛浴設備重疊","rule_id":"fixture_clearance_and_door_swing","fix":"改門向、改滑門或重新配置設備","confidence":"high"},
+    {"case_id":"bad_plan_003","problem":"bedroom_used_as_through_route","category":"circulation","severity":"warning","reason":"臥室成為主要空間的必要通道，降低私密性","rule_id":"avoid_bedroom_through_route","fix":"增加走道或調整公共區與臥室的鄰接","confidence":"medium"},
+    {"case_id":"bad_plan_004","problem":"wardrobe_door_blocked","category":"human_factors","severity":"error","reason":"家具放得下但櫃門活動範圍被床或牆阻擋","rule_id":"fixture_clearance_and_door_swing","fix":"保留開門掃掠區或調整家具方向","confidence":"high"}
+  ]
+}

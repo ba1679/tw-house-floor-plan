@@ -1,0 +1,7 @@
+{
+  "rules":[
+    {"id":"wet_area_cluster","category":"adjacency","rule_type":"SOFT_CONSTRAINT","severity":"warning","description":"濕區宜集中，降低服務管線分散與維護複雜度。","spaces":["bathroom","toilet","kitchen","laundry"],"validation":{"type":"cluster"},"source":[{"title":"建築物給水排水設備設計技術規範","url":"https://www.nlma.gov.tw/ch/legislation/regsearch/1487","version":"111.12.29 修正"}],"confidence":"medium","needs_verification":true,"uncertainty_note":"實際路徑仍需依樓板、管徑、坡度、立管與維修方式確認。"},
+    {"id":"wet_area_pipe_shaft_proximity","category":"plumbing","rule_type":"SOFT_CONSTRAINT","severity":"warning","description":"衛浴、廚房與洗衣區宜靠近垂直管道或合理服務核心。","spaces":["bathroom","toilet","kitchen","laundry"],"validation":{"type":"distance_to_service","max_preferred_distance_cm":300},"source":[{"title":"建築物同層排水系統設計及技術應用之研究","url":"https://www.abri.gov.tw/News_Content_Table.aspx?n=807&s=261550"}],"confidence":"medium","needs_verification":true,"uncertainty_note":"距離門檻是本工具的風險 heuristic，不是單獨的法定距離。"},
+    {"id":"kitchen_near_dining","category":"adjacency","rule_type":"DESIGN_PREFERENCE","severity":"preference","description":"廚房宜靠近餐區，縮短備餐動線。","spaces":["kitchen","dining_room"],"validation":{"type":"adjacency"},"source":[],"confidence":"low","needs_verification":true}
+  ]
+}

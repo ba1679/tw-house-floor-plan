@@ -1,0 +1,9 @@
+{
+  "_note":"以下為設計參考，不是完整法規資料庫；使用前需依產品、地區與實案確認。",
+  "fixtures":[
+    {"type":"toilet","typical_width_mm":400,"typical_depth_mm":700,"front_clearance_mm":600,"side_clearance_mm":300,"knowledge_level":"DESIGN_GUIDELINE","source":[{"title":"HCG 衛浴空間規劃","url":"https://hcg.com.tw/tw/service/plan/space"}]},
+    {"type":"sink","typical_width_mm":600,"typical_depth_mm":500,"front_clearance_mm":600,"knowledge_level":"DESIGN_GUIDELINE","source":[{"title":"HCG 衛浴空間規劃","url":"https://hcg.com.tw/tw/service/plan/space"}]},
+    {"type":"shower","typical_width_mm":900,"typical_depth_mm":900,"front_clearance_mm":600,"knowledge_level":"DESIGN_GUIDELINE","source":[{"title":"HCG 衛浴空間規劃","url":"https://hcg.com.tw/tw/service/plan/space"}]},
+    {"type":"kitchen_counter","typical_width_mm":2400,"typical_depth_mm":600,"front_clearance_mm":600,"knowledge_level":"COMMON_PRACTICE","source":[]}
+  ]
+}
