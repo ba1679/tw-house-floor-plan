@@ -8,9 +8,8 @@ import type { SymbolCategory, SymbolRecord } from "@/lib/symbols/types";
 // 為什麼是房間而不是座標掃描：使用者的心智模型是「看屋時一間一間看」，不是「由上到下掃過一張圖」。
 // 一間房走完才走下一間，順序就可預期；照座標掃會在客廳與餐廳之間來回跳。
 //
-// 房間歸屬**由 floorplan.rooms 的幾何算出，不進 floorplan schema**——floorplan 由程式產生、
-// 不得手改（CONTEXT.md），加一個 `room_id` 欄位就要動 `expand_layout.py` 與所有既有產物，
-// 而那個欄位存的是這裡三行就能算出來的東西。
+// 房間歸屬先使用既有門的 opens_to，再以房間幾何推斷其餘熱區；不手改產生器資料。
+// 房間縮放後「較小者」可能變成走道，不能拿面積覆蓋明確的開門方向。
 
 /** 一間房與它的熱區，依閱讀順序排好。沒有熱區的房間不會出現。 */
 export type RoomHotspots = {
@@ -75,6 +74,7 @@ const centerGap = (a: PlanRect, b: PlanRect) =>
 
 /**
  * 這個熱區屬於哪一間房。
+ * 有門扇的自動門熱區優先依 opens_to；以下幾何規則是其他熱區或舊資料的 fallback。
  *
  * 主要規則是**重疊面積最大者**。門窗、柱、外牆都畫在牆上，而 `geometry` 含牆厚，
  * 所以它們多半有一半落在房間裡——「窗屬於它照亮的那間房」因此是算出來的，不是猜的。
@@ -86,8 +86,15 @@ const centerGap = (a: PlanRect, b: PlanRect) =>
  * 完全落在所有房間之外的（雨遮），取貼得最近的那一間；一樣近時取重心較近的——
  * 主臥的雨遮與主浴的距離同為 12cm，少了這一條它會被歸到主浴去。
  */
-function assignRoom(hotspot: Hotspot, rooms: Room[]): { room: Room; outside: boolean } {
+function assignRoom(hotspot: Hotspot, rooms: Room[], floorplan: FloorPlan): { room: Room; outside: boolean } {
   const rect = rectOf(hotspot);
+  const door = hotspot.source === "auto_door"
+    ? floorplan.doors.find((candidate) => candidate.id === hotspot.ref)
+    : undefined;
+  const doorRoom = door && (door.type === "single" || door.type === "double")
+    ? rooms.find((room) => room.id === door.opens_to)
+    : undefined;
+  if (doorRoom) return { room: doorRoom, outside: overlapArea(rect, doorRoom.geometry) === 0 };
 
   const covering = rooms
     .filter((room) => overlapArea(rect, room.geometry) > 0)
@@ -139,7 +146,7 @@ export function readingOrder(
 
   const hotspotsByRoom = new Map<string, { hotspot: Hotspot; outside: boolean }[]>();
   for (const hotspot of floorplan.hotspots.filter(hasSymbol)) {
-    const { room, outside } = assignRoom(hotspot, rooms);
+    const { room, outside } = assignRoom(hotspot, rooms, floorplan);
     hotspotsByRoom.set(room.id, [...(hotspotsByRoom.get(room.id) ?? []), { hotspot, outside }]);
   }
 

@@ -4,10 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npm run validate",
+    "prebuild": "npm run validate && npm run validate:floorplan",
     "build": "next build",
     "start": "node scripts/serve-static.mjs out",
     "validate": "python3 scripts/validate_data.py",
+    "validate:floorplan": "python3 .claude/skills/floorplan-generator/scripts/validate_floorplan.py data/layouts/3b2l_standard.floorplan.json --symbols data/symbols.sample.json && python3 .claude/skills/residential-floorplan-domain/scripts/validate_domain_rules.py --plan data/layouts/3b2l_standard.floorplan.json --rules .claude/skills/residential-floorplan-domain/knowledge/adjacency-rules.json --fixtures .claude/skills/residential-floorplan-domain/knowledge/fixture-dimensions.json --context data/layouts/3b2l_standard.domain-context.json --summary",
+    "test:domain": "python3 -m unittest discover -s .claude/skills/residential-floorplan-domain/tests -v",
     "typecheck": "tsc --noEmit",
     "test": "playwright test"
   },

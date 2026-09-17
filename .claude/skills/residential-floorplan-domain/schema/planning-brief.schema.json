@@ -1,0 +1,17 @@
+{
+  "$schema":"http://json-schema.org/draft-07/schema#",
+  "title":"住宅平面配置 planning brief",
+  "type":"object",
+  "required":["schema_version","spaces","adjacency","constraints","assumptions"],
+  "additionalProperties":false,
+  "properties":{
+    "schema_version":{"const":1},
+    "building_type":{"type":"string"},
+    "region":{"type":"string","default":"TW"},
+    "spaces":{"type":"array","items":{"type":"object","required":["id","type","space_class"],"properties":{"id":{"type":"string"},"type":{"type":"string"},"name":{"type":"string"},"space_class":{"enum":["DRY_AREA","WET_AREA","SERVICE_AREA"]},"fixtures":{"type":"array","items":{"type":"string"}},"requirements":{"type":"object"}},"additionalProperties":false}},
+    "adjacency":{"type":"array","items":{"type":"object","required":["from","relation","to"],"properties":{"from":{"type":"string"},"relation":{"enum":["prefer_near","prefer_cluster_with","avoid","must_connect"]},"to":{"type":"string"},"reason":{"type":"string"}},"additionalProperties":false}},
+    "constraints":{"type":"array","items":{"type":"object","required":["rule_id","rule_type"],"properties":{"rule_id":{"type":"string"},"rule_type":{"enum":["HARD_CONSTRAINT","SOFT_CONSTRAINT","DESIGN_PREFERENCE"]},"status":{"enum":["pass","warning","unknown"]},"note":{"type":"string"}},"additionalProperties":false}},
+    "known_service_points":{"type":"array","items":{"type":"object","required":["id","type"],"properties":{"id":{"type":"string"},"type":{"enum":["pipe_shaft","column","equipment_space"]},"location":{"type":"string"}},"additionalProperties":false}},
+    "assumptions":{"type":"array","items":{"type":"string"}}
+  }
+}

@@ -147,6 +147,8 @@ test("卡片開啟時，圖面下半部的選中標示仍落在卡片上緣以�
 });
 
 test("關閉鍵就是「重選」：卡片收起、選取清掉、圖回到全圖", async ({ page }) => {
+  // 新圖較扁；用較矮螢幕讓說明卡確實改變 fit，而不只吃掉留白。
+  await page.setViewportSize({ width: 375, height: 700 });
   await page.goto(PLAN);
 
   // 量的是圖本身，不是選中的熱區：熱區選中時會多一圈 3.5px 的框，
@@ -158,6 +160,7 @@ test("關閉鍵就是「重選」：卡片收起、選取清掉、圖回到全�
   await selectByTwoTaps(page, "hs-door-entry");
 
   // 卡片升起來，圖被擠進上方那條可視帶——但仍然看得見，選中標示也還在。
+  await expect.poll(async () => (await plan.boundingBox())!.height).toBeLessThan(fullView.height);
   const withSheet = (await plan.boundingBox())!;
   expect(withSheet.height).toBeLessThan(fullView.height);
   expect(withSheet.height).toBeGreaterThan(0);

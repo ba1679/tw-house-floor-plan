@@ -149,7 +149,7 @@ test.describe("免責聲明的全站頁尾", () => {
 // 581px——同一條 RESIZE 高度的路（stage 不動，ADR-0003），從少有人走變成常見手機的日常。
 // 測試專案的 812px 走不到它，所以把螢幕調矮再走一次兩段式。
 test.describe("矮螢幕：頁尾讓框在兩下點擊之間變矮", () => {
-  test.use({ viewport: { width: 375, height: 568 } });
+  test.use({ viewport: { width: 375, height: 500 } });
 
   test("第一段之後框變矮了，第二下仍然選得中原本那個熱區", async ({ page }) => {
     await page.goto(PLAN);
@@ -165,11 +165,12 @@ test.describe("矮螢幕：頁尾讓框在兩下點擊之間變矮", () => {
       "第一段的候選沒有留下來——在這個高度，候選一出現「重選」列就把框擠矮；多半是那一次高度的 RESIZE 把第一段丟了（只有寬度變才該退回第一段）",
     ).toHaveAttribute("data-state", "candidate");
 
-    // 前提：這個高度真的會讓框在第二段之前變矮。版面哪天改了、568px 擠不到它，這條就不再測
+    // 前提：這個高度真的會讓框在第二段之前變矮。新版圖面較扁，568px 已只會吃掉留白。
+    // 版面哪天改了、500px 擠不到它，這條就不再測
     // 它說它在測的事——帶著訊息失敗，而不是安靜地退化成一條普通的兩段式測試。
     await expect
       .poll(async () => (await frame.boundingBox())!.height, {
-        message: "375×568 下框沒有在第一段之後變矮，這條測試的前提已經不成立——換一個更矮的高度",
+        message: "375×500 下框沒有在第一段之後變矮，這條測試的前提已經不成立——換一個更矮的高度",
       })
       .toBeLessThan(frameBefore - 1);
 

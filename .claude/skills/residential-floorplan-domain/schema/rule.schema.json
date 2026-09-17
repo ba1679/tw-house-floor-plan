@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "住宅平面圖 domain rule",
+  "type": "object",
+  "required": ["id", "category", "rule_type", "severity", "description", "applicability", "source", "confidence"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type":"string"},
+    "category": {"enum":["domain_model","adjacency","plumbing","human_factors","ventilation_lighting","maintenance"]},
+    "spaces": {"type":"array","items":{"type":"string"}},
+    "rule_type": {"enum":["HARD_CONSTRAINT","SOFT_CONSTRAINT","DESIGN_PREFERENCE"]},
+    "severity": {"enum":["error","warning","preference"]},
+    "description": {"type":"string"},
+    "applicability": {"type":"object","required":["regions"],"properties":{"regions":{"type":"array","items":{"type":"string"}},"building_types":{"type":"array","items":{"type":"string"}},"plan_types":{"type":"array","items":{"type":"string"}}},"additionalProperties":false},
+    "validation": {"type":"object"},
+    "source": {"type":"array","items":{"type":"object","required":["title","url"],"properties":{"title":{"type":"string"},"url":{"type":"string","format":"uri"},"locator":{"type":"string"},"version":{"type":"string"},"checked_at":{"type":"string"}},"additionalProperties":false}},
+    "confidence": {"enum":["high","medium","low"]},
+    "needs_verification": {"type":"boolean"},
+    "uncertainty_note": {"type":"string"}
+  }
+}

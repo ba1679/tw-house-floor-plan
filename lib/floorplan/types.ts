@@ -25,6 +25,9 @@ export type Hotspot = {
   /** 目前資料只有 rect 一種；coords 是 [x, y, width, height]，單位 cm。 */
   shape: "rect";
   coords: [number, number, number, number];
+  /** 自動熱區可追溯到門、窗等來源；舊資料可省略並退回幾何判斷。 */
+  source?: string;
+  ref?: string | null;
 };
 
 /**

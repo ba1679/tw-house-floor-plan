@@ -8,12 +8,12 @@ import { expect, type Page } from "@playwright/test";
 type Box = { x: number; y: number; width: number; height: number };
 
 /**
- * 圖的最上緣、房子外面的那條留白。全圖時 46px 容錯換算成圖面約 160cm，
- * 而這裡離最近的熱區還有 200cm 以上——點下去不會有候選，第一段因此不會放大。
+ * 新圖上緣偏左的留白，避開北側餐廳平開窗與客廳雨遮的熱區。
+ * 以落空／雙擊測試持續驗證這裡沒有候選，不能沿用舊格局的中央留白。
  * 雙擊要成立就需要這種地方：第一下什麼都沒選到，第二下才會被當成「放大這一區」。
  */
 export const blankSpot = (frame: Box) => ({
-  x: frame.x + frame.width * 0.7,
+  x: frame.x + frame.width * 0.3,
   y: frame.y + frame.height * 0.03,
 });
 

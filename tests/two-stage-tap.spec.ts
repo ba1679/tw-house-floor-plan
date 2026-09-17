@@ -1,4 +1,7 @@
 import { test, expect } from "@playwright/test";
+import { blankSpot } from "./viewer-page";
+import { createViewerState, reduceViewer } from "@/lib/viewer/interaction";
+import type { Hotspot } from "@/lib/floorplan/types";
 
 // 兩段式點擊是全站的基礎操作（PRD §6.1.1）：這張圖 37 個熱區沒有一個滿足 44×44px，
 // 所以不要求使用者點準——先點大略位置放大，再點一次確認。
@@ -29,32 +32,33 @@ test("點在大門右邊 13px——沒點準——仍然選得到大門", async 
   await expect(page.getByRole("status")).toContainText("雙開門");
 });
 
-test("柱與窗重疊的地方，選到的是柱——面積小者優先", async ({ page }) => {
+test("重疊熱區的面積小者優先：保留舊圖柱窗交疊的獨立回歸案例", () => {
+  const column: Hotspot = { id: "column", symbol_id: "column", shape: "rect", coords: [0, 0, 40, 40] };
+  const window_: Hotspot = { id: "window", symbol_id: "window", shape: "rect", coords: [37, -12, 200, 24] };
+  for (const hotspots of [[window_, column], [column, window_]]) {
+    const initial = createViewerState({ hotspots, viewBox: { x: -100, y: -200, width: 1197, height: 1100 }, viewportWidth: 343, viewportHeight: 600 });
+    const candidates = reduceViewer(initial, { type: "TAP", x: 38, y: 6 });
+    expect(candidates.candidates).toHaveLength(2);
+    const selected = reduceViewer(candidates, { type: "TAP", x: 38, y: 6 });
+    expect(selected.selected?.id).toBe("column");
+  }
+});
+
+test("相鄰的柱與窗都成為候選，第二段仍能準確選柱", async ({ page }) => {
   await page.goto(PLAN);
 
-  const column = page.locator("#hs-col-nw");
-  const window_ = page.locator("#hs-win-living");
+  const column = page.locator("#hs-col-ne");
+  const window_ = page.locator("#hs-win-bed3");
 
-  // 第一段：點客廳西北角，柱與壓在它上面的窗都進候選。
+  // 新圖已避開柱窗實體交疊，改驗證相鄰候選的觸控辨識。
   const col = (await column.boundingBox())!;
   await page.mouse.click(col.x + col.width / 2, col.y + col.height / 2);
   await expect(column).toHaveAttribute("data-state", "candidate");
   await expect(window_).toHaveAttribute("data-state", "candidate");
 
-  // 第二段：點在兩者重疊的那一小塊上。柱若輸，它到處都被窗蓋住，等於永遠點不到。
+  // 第二段：點在柱本身；不能誤選旁邊同屬候選的窗。
   const zoomedCol = (await column.boundingBox())!;
-  const zoomedWin = (await window_.boundingBox())!;
-  const overlap = {
-    left: Math.max(zoomedCol.x, zoomedWin.x),
-    right: Math.min(zoomedCol.x + zoomedCol.width, zoomedWin.x + zoomedWin.width),
-    top: Math.max(zoomedCol.y, zoomedWin.y),
-    bottom: Math.min(zoomedCol.y + zoomedCol.height, zoomedWin.y + zoomedWin.height),
-  };
-  expect(overlap.right, "柱與窗沒有重疊，這條測試等於沒測").toBeGreaterThan(overlap.left);
-  // 重疊區放大 3× 之後仍然遠小於 44px 的觸控規格——這正是兩段式存在的理由。
-  expect(overlap.right - overlap.left).toBeLessThan(44);
-
-  await page.mouse.click((overlap.left + overlap.right) / 2, (overlap.top + overlap.bottom) / 2);
+  await page.mouse.click(zoomedCol.x + zoomedCol.width / 2, zoomedCol.y + zoomedCol.height / 2);
 
   await expect(page.getByRole("status")).toContainText("柱");
   await expect(column).toHaveAttribute("data-state", "selected");
@@ -68,12 +72,9 @@ test("點在房子外面的留白處：給提示，而且不放大", async ({ pa
   const door = page.locator("#hs-door-entry");
   const before = (await door.boundingBox())!;
 
-  // 圖的最上緣、房子外面的那條留白：46px 容錯之內沒有任何熱區（最近的還有 212cm）。
-  // spec 原本指定「玄關左邊的空白」，那是原型在 375px 全出血下量的；現在圖被頁面的
-  // 左右留白擠成 343px，容錯換算成圖面是 161cm 而不是 147cm，房子裡已經沒有一個
-  // 點是空的（最寬的客廳也只剩 159cm 淨空）。留白處在任何合理寬度下都空，因此改點這裡。
+  // 使用新版圖面經量測的留白，不再假定上緣正中央沒有雨遮／平開窗。
   const frame = (await plan.boundingBox())!;
-  await page.mouse.click(frame.x + frame.width / 2, frame.y + frame.height * 0.03);
+  await page.mouse.click(blankSpot(frame).x, blankSpot(frame).y);
 
   await expect(page.getByRole("status")).toContainText("換個地方");
 
@@ -84,30 +85,29 @@ test("點在房子外面的留白處：給提示，而且不放大", async ({ pa
   await expect(door).toHaveAttribute("data-state", "normal");
 });
 
-test("最壞情況：主臥衛浴一次圈出 9 個候選，9 個都選得到", async ({ page }) => {
+test("密集情況：客浴周邊一次圈出 8 個候選，8 個都選得到", async ({ page }) => {
   await page.goto(PLAN);
 
   const plan = page.getByRole("group", { name: /三房兩廳/ });
   // 全圖時畫布與可視區域重疊，所以這個框就是可視區域的框。放大之後它不再是——
   // 但框本身不會動，之後裁切用的是這一份。
   const frame = (await plan.boundingBox())!;
-  const bathroom = (await page.locator("#room-bath-m").boundingBox())!;
+  const bathroom = (await page.locator("#room-bath-g").boundingBox())!;
   const worstTap = {
-    x: bathroom.x + bathroom.width * 0.5,
-    y: bathroom.y + bathroom.height * 0.75,
+    x: bathroom.x + bathroom.width * 0.2,
+    y: bathroom.y + bathroom.height * 0.5,
   };
 
   await page.mouse.click(worstTap.x, worstTap.y);
 
-  // 9 是原型在這張圖上實測出來的最壞情況（門＋三窗＋兩雨遮＋馬桶＋洗臉盆＋浴缸）。
-  // 這個數字會隨可視區域的寬度變動——它變了就代表最壞情況搬家了，值得知道。
+  // 新版格局實測的密集場景，不能沿用舊主浴的 9 個候選；仍逐一確認可見、可選。
   const candidates = page.locator('[data-state="candidate"]');
-  await expect(candidates).toHaveCount(9);
+  await expect(candidates).toHaveCount(8);
   const ids = await candidates.evaluateAll((els) => els.map((el) => el.id));
 
   for (const id of ids) {
-    // 每一輪的開頭都停在第一段：候選是同一組 9 個（迴圈尾端會再點一次回到這裡）。
-    await expect(candidates).toHaveCount(9);
+    // 每一輪的開頭都停在第一段：候選是同一組 8 個。
+    await expect(candidates).toHaveCount(8);
 
     const target = page.locator(`#${id}`);
     const box = (await target.boundingBox())!;
@@ -123,7 +123,7 @@ test("最壞情況：主臥衛浴一次圈出 9 個候選，9 個都選得到", 
     expect(visible.bottom, `${id} 放大後完全不在畫面上，點不到`).toBeGreaterThan(visible.top);
 
     await page.mouse.click((visible.left + visible.right) / 2, (visible.top + visible.bottom) / 2);
-    await expect(target, `${id} 在 9 個候選裡選不到`).toHaveAttribute("data-state", "selected");
+    await expect(target, `${id} 在 8 個候選裡選不到`).toHaveAttribute("data-state", "selected");
 
     // 說明卡是版面裡的一格，升起來會把圖收進上方那條可視帶（票 03 決議 3）——
     // 圖上同一個位置因此換了螢幕座標。關掉卡片讓視野還原，再重新量一次那個位置，
@@ -134,8 +134,8 @@ test("最壞情況：主臥衛浴一次圈出 9 個候選，9 個都選得到", 
     await expect
       .poll(async () => Math.round((await plan.boundingBox())!.height))
       .toBe(Math.round(frame.height));
-    const room = (await page.locator("#room-bath-m").boundingBox())!;
-    await page.mouse.click(room.x + room.width * 0.5, room.y + room.height * 0.75);
+    const room = (await page.locator("#room-bath-g").boundingBox())!;
+    await page.mouse.click(room.x + room.width * 0.2, room.y + room.height * 0.5);
   }
 });
 

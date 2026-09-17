@@ -1,0 +1,524 @@
+{
+  "plan_id": "3b2l_standard",
+  "status": "unknown",
+  "findings": [
+    {
+      "id": "wet_area_cluster_manual",
+      "category": "adjacency",
+      "severity": "warning",
+      "status": "unknown",
+      "message": "尚未自動化，須人工檢查：濕區宜集中，降低服務管線分散與維護複雜度。",
+      "objects": [],
+      "confidence": "low",
+      "blocking": false
+    },
+    {
+      "id": "room-bath-m_far_from_service",
+      "category": "plumbing",
+      "severity": "warning",
+      "status": "warning",
+      "blocking": false,
+      "message": "管道間中心距離 335 cm 超過篩查偏好 300 cm；不是實際管長或法定上限。",
+      "objects": [
+        "room-bath-m",
+        "room-ps"
+      ],
+      "rule_id": "wet_area_pipe_shaft_proximity",
+      "rule_type": "SOFT_CONSTRAINT",
+      "confidence": "medium",
+      "source": [
+        {
+          "title": "建築物同層排水系統設計及技術應用之研究",
+          "url": "https://www.abri.gov.tw/News_Content_Table.aspx?n=807&s=261550"
+        }
+      ],
+      "recommendation": "檢查接管點、實際路徑、坡度、樓板及檢修方式。"
+    },
+    {
+      "id": "kitchen_near_dining_manual",
+      "category": "adjacency",
+      "severity": "warning",
+      "status": "unknown",
+      "message": "尚未自動化，須人工檢查：廚房宜靠近餐區，縮短備餐動線。",
+      "objects": [],
+      "confidence": "low",
+      "blocking": false
+    },
+    {
+      "id": "f-counter_operation_unknown",
+      "category": "human_factors",
+      "severity": "warning",
+      "status": "unknown",
+      "message": "只檢查站立區；櫃門、抽屜／冰箱門型式與開啟包絡尚未驗證。",
+      "objects": [
+        "f-counter"
+      ],
+      "confidence": "low",
+      "blocking": false
+    },
+    {
+      "id": "f-fridge_operation_unknown",
+      "category": "human_factors",
+      "severity": "warning",
+      "status": "unknown",
+      "message": "只檢查站立區；櫃門、抽屜／冰箱門型式與開啟包絡尚未驗證。",
+      "objects": [
+        "f-fridge"
+      ],
+      "confidence": "low",
+      "blocking": false
+    },
+    {
+      "id": "f-wardrobe-m_operation_unknown",
+      "category": "human_factors",
+      "severity": "warning",
+      "status": "unknown",
+      "message": "只檢查站立區；櫃門、抽屜／冰箱門型式與開啟包絡尚未驗證。",
+      "objects": [
+        "f-wardrobe-m"
+      ],
+      "confidence": "low",
+      "blocking": false
+    },
+    {
+      "id": "room-kitchen_ventilation_unknown",
+      "category": "ventilation_lighting",
+      "severity": "warning",
+      "status": "unknown",
+      "message": "圖示有可開窗；有效面積、外部條件及設備待確認。",
+      "objects": [
+        "room-kitchen",
+        "win-kitchen"
+      ],
+      "confidence": "low",
+      "blocking": false
+    },
+    {
+      "id": "room-bath-g_ventilation_unknown",
+      "category": "ventilation_lighting",
+      "severity": "warning",
+      "status": "unknown",
+      "message": "未見可開啟外窗；固定窗不代表自然通風，須補通風設備／外部條件。",
+      "objects": [
+        "room-bath-g"
+      ],
+      "confidence": "low",
+      "blocking": false
+    },
+    {
+      "id": "room-bath-m_ventilation_unknown",
+      "category": "ventilation_lighting",
+      "severity": "warning",
+      "status": "unknown",
+      "message": "未見可開啟外窗；固定窗不代表自然通風，須補通風設備／外部條件。",
+      "objects": [
+        "room-bath-m"
+      ],
+      "confidence": "low",
+      "blocking": false
+    },
+    {
+      "id": "systems_unverified",
+      "category": "plumbing",
+      "severity": "warning",
+      "status": "unknown",
+      "message": "實際立管接點、坡度、通氣、防水、結構可變性及檢修通道未驗證。",
+      "objects": [],
+      "confidence": "low",
+      "blocking": false
+    },
+    {
+      "id": "coverage_unverified",
+      "category": "human_factors",
+      "severity": "warning",
+      "status": "unknown",
+      "message": "側向淨空、連續通行、床側上下床、門扇與使用區及維修包絡仍須人工檢查；門與本體碰撞另跑 geometry validator。",
+      "objects": [],
+      "confidence": "low",
+      "blocking": false
+    }
+  ],
+  "checks": [
+    {
+      "id": "room-kitchen_service_distance",
+      "objects": [
+        "room-kitchen",
+        "room-ps"
+      ],
+      "measured_cm": 191.43,
+      "target_cm": 300,
+      "status": "pass",
+      "method": "center_distance_only"
+    },
+    {
+      "id": "room-bath-g_service_distance",
+      "objects": [
+        "room-bath-g",
+        "room-ps"
+      ],
+      "measured_cm": 234.35,
+      "target_cm": 300,
+      "status": "pass",
+      "method": "center_distance_only"
+    },
+    {
+      "id": "room-bath-m_service_distance",
+      "objects": [
+        "room-bath-m",
+        "room-ps"
+      ],
+      "measured_cm": 335.28,
+      "target_cm": 300,
+      "status": "warning",
+      "method": "center_distance_only"
+    },
+    {
+      "id": "f-sofa_front_w",
+      "objects": [
+        "f-sofa"
+      ],
+      "side": "w",
+      "measured_cm": 175,
+      "target_cm": 60.0,
+      "blocker": "room_boundary",
+      "status": "pass",
+      "knowledge_level": "HEURISTIC",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ],
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "confidence": "low"
+    },
+    {
+      "id": "f-dining_front_n",
+      "objects": [
+        "f-dining"
+      ],
+      "side": "n",
+      "measured_cm": 111,
+      "target_cm": 75.0,
+      "blocker": "room_boundary",
+      "status": "pass",
+      "knowledge_level": "HEURISTIC",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ],
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "confidence": "low"
+    },
+    {
+      "id": "f-dining_front_s",
+      "objects": [
+        "f-dining"
+      ],
+      "side": "s",
+      "measured_cm": 111,
+      "target_cm": 75.0,
+      "blocker": "room_boundary",
+      "status": "pass",
+      "knowledge_level": "HEURISTIC",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ],
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "confidence": "low"
+    },
+    {
+      "id": "f-counter_front_e",
+      "objects": [
+        "f-counter"
+      ],
+      "side": "e",
+      "measured_cm": 126,
+      "target_cm": 90.0,
+      "blocker": "f-fridge",
+      "status": "pass",
+      "knowledge_level": "HEURISTIC",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ],
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "confidence": "low"
+    },
+    {
+      "id": "f-fridge_front_s",
+      "objects": [
+        "f-fridge"
+      ],
+      "side": "s",
+      "measured_cm": 128,
+      "target_cm": 90.0,
+      "blocker": "room_boundary",
+      "status": "pass",
+      "knowledge_level": "HEURISTIC",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ],
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "confidence": "low"
+    },
+    {
+      "id": "f-bed-m_front_n",
+      "objects": [
+        "f-bed-m"
+      ],
+      "side": "n",
+      "measured_cm": 66,
+      "target_cm": 60.0,
+      "blocker": "f-wardrobe-m",
+      "status": "pass",
+      "knowledge_level": "HEURISTIC",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ],
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "confidence": "low"
+    },
+    {
+      "id": "f-wardrobe-m_front_s",
+      "objects": [
+        "f-wardrobe-m"
+      ],
+      "side": "s",
+      "measured_cm": 66,
+      "target_cm": 60.0,
+      "blocker": "f-bed-m",
+      "status": "pass",
+      "knowledge_level": "HEURISTIC",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ],
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "confidence": "low"
+    },
+    {
+      "id": "f-toilet-m_front_w",
+      "objects": [
+        "f-toilet-m"
+      ],
+      "side": "w",
+      "measured_cm": 148,
+      "target_cm": 60.0,
+      "blocker": "room_boundary",
+      "status": "pass",
+      "knowledge_level": "DESIGN_GUIDELINE",
+      "source": [
+        {
+          "title": "HCG 衛浴空間規劃",
+          "url": "https://hcg.com.tw/tw/service/plan/space",
+          "checked_at": "2026-09-16",
+          "locator": "前方活動空間 60 cm；不是設備本體型錄尺寸"
+        }
+      ],
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "confidence": "medium"
+    },
+    {
+      "id": "f-sink-m_front_w",
+      "objects": [
+        "f-sink-m"
+      ],
+      "side": "w",
+      "measured_cm": 168,
+      "target_cm": 60.0,
+      "blocker": "room_boundary",
+      "status": "pass",
+      "knowledge_level": "DESIGN_GUIDELINE",
+      "source": [
+        {
+          "title": "HCG 衛浴空間規劃",
+          "url": "https://hcg.com.tw/tw/service/plan/space",
+          "checked_at": "2026-09-16",
+          "locator": "前方活動空間 60 cm；不是設備本體型錄尺寸"
+        }
+      ],
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "confidence": "medium"
+    },
+    {
+      "id": "f-bathtub-m_front_e",
+      "objects": [
+        "f-bathtub-m"
+      ],
+      "side": "e",
+      "measured_cm": 148,
+      "target_cm": 60.0,
+      "blocker": "room_boundary",
+      "status": "pass",
+      "knowledge_level": "HEURISTIC",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ],
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "confidence": "low"
+    },
+    {
+      "id": "f-bed-2_front_w",
+      "objects": [
+        "f-bed-2"
+      ],
+      "side": "w",
+      "measured_cm": 64,
+      "target_cm": 60.0,
+      "blocker": "room_boundary",
+      "status": "pass",
+      "knowledge_level": "HEURISTIC",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ],
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "confidence": "low"
+    },
+    {
+      "id": "f-desk-2_front_s",
+      "objects": [
+        "f-desk-2"
+      ],
+      "side": "s",
+      "measured_cm": 70,
+      "target_cm": 60.0,
+      "blocker": "f-bed-2",
+      "status": "pass",
+      "knowledge_level": "HEURISTIC",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ],
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "confidence": "low"
+    },
+    {
+      "id": "f-toilet-g_front_s",
+      "objects": [
+        "f-toilet-g"
+      ],
+      "side": "s",
+      "measured_cm": 82,
+      "target_cm": 60.0,
+      "blocker": "f-sink-g",
+      "status": "pass",
+      "knowledge_level": "DESIGN_GUIDELINE",
+      "source": [
+        {
+          "title": "HCG 衛浴空間規劃",
+          "url": "https://hcg.com.tw/tw/service/plan/space",
+          "checked_at": "2026-09-16",
+          "locator": "前方活動空間 60 cm；不是設備本體型錄尺寸"
+        }
+      ],
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "confidence": "medium"
+    },
+    {
+      "id": "f-shower-g_front_n",
+      "objects": [
+        "f-shower-g"
+      ],
+      "side": "n",
+      "measured_cm": 224,
+      "target_cm": 60.0,
+      "blocker": "room_boundary",
+      "status": "pass",
+      "knowledge_level": "DESIGN_GUIDELINE",
+      "source": [
+        {
+          "title": "TOTO 淋浴空間規劃",
+          "url": "https://www.twtoto.com.tw/bathroom-school-detail.aspx?id=507",
+          "checked_at": "2026-09-16",
+          "locator": "前方活動空間 60 cm；不是設備本體型錄尺寸"
+        }
+      ],
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "confidence": "medium"
+    },
+    {
+      "id": "f-bed-3_front_s",
+      "objects": [
+        "f-bed-3"
+      ],
+      "side": "s",
+      "measured_cm": 114,
+      "target_cm": 60.0,
+      "blocker": "room_boundary",
+      "status": "pass",
+      "knowledge_level": "HEURISTIC",
+      "source": [
+        {
+          "title": "本專案概念設計淨空目標（非外部標準）",
+          "url": "../rules/human-factors.md",
+          "locator": "Rule 3"
+        }
+      ],
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "confidence": "low"
+    },
+    {
+      "id": "f-sink-g_front_e",
+      "objects": [
+        "f-sink-g"
+      ],
+      "side": "e",
+      "measured_cm": 109,
+      "target_cm": 60.0,
+      "blocker": "room_boundary",
+      "status": "pass",
+      "knowledge_level": "DESIGN_GUIDELINE",
+      "source": [
+        {
+          "title": "HCG 衛浴空間規劃",
+          "url": "https://hcg.com.tw/tw/service/plan/space",
+          "checked_at": "2026-09-16",
+          "locator": "前方活動空間 60 cm；不是設備本體型錄尺寸"
+        }
+      ],
+      "applicability": "一般成人住宅概念配置；非無障礙、非施工驗收；床只檢查床尾，淋浴須另給入口方向。",
+      "confidence": "medium"
+    }
+  ],
+  "scope": "2D 概念設計篩查；unknown 不代表通過",
+  "assumptions": [
+    "cm 圖面；mm 參考尺寸除以 10。沿設備整條前緣量至牆內緣或實體障礙。",
+    "blocking 是本專案的概念設計驗收阻擋，不代表法規違規。",
+    "不同使用區可共用；未模擬同時使用、椅子實體、櫃門與設備維修。"
+  ],
+  "professional_review_required": true
+}
