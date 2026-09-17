@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    :root {
+      --paper: oklch(1 0 0);
+      --paper2: oklch(0.962 0.002 265);
+      --ink: oklch(0.21 0.006 265);
+      --ink2: oklch(0.47 0.008 265);
+      --ink3: oklch(0.62 0.006 265);
+      --rule: oklch(0.89 0.003 265);
+      --rule2: oklch(0.935 0.002 265);
+      --fp-paper: #ffffff;
+      --fp-room: oklch(0.967 0 0);
+      --fp-room-wet: oklch(0.935 0 0);
+      --fp-room-balcony: oklch(0.985 0 0);
+      --fp-wall: #a8a8a8;
+      --fp-column: #585858;
+      --fp-structure: #2b2b2b;
+      --fp-line: #4a4a4a;
+      --fp-text: #2b2b2b;
+      --fp-muted: #767676;
+      --fp-furn: #ffffff;
+      --fp-furn-line: #8a8a8a;
+      --state-normal-fill: oklch(0.965 0.018 250);
+      --state-normal-stroke: oklch(0.44 0.15 256);
+      --state-candidate-fill: oklch(0.905 0.045 250);
+      --state-candidate-stroke: oklch(0.44 0.15 256);
+      --state-selected-fill: oklch(0.82 0.085 252);
+      --state-selected-stroke: oklch(0.44 0.15 256);
+      --state-highlighted-fill: oklch(0.85 0.17 90);
+      --state-highlighted-stroke: oklch(0.45 0.1 65);
+      --state-revealed-stroke: oklch(0.45 0.1 65);
+      --state-casing: #ffffff;
+      --mark-circle-stroke: oklch(0.44 0.15 256);
+      --mark-check-stroke: oklch(0.2 0 0);
+      --focus-dark: #000000;
+      --focus-light: #ffffff;
+      --sans: -apple-system, BlinkMacSystemFont, "PingFang TC", "Segoe UI", "Microsoft JhengHei", "Noto Sans CJK TC", sans-serif;
+    }
+    html, body { margin: 0; background: var(--paper); }
+    body { font-family: var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; }
+    p, h1, h2, h3 { margin: 0; }
+    a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+    a:hover { color: var(--ink2); }
+    button { font: inherit; color: inherit; }
+    .st-normal-fill{fill:var(--state-normal-fill);stroke:none}
+    .st-normal-stroke{fill:none;stroke:var(--state-normal-stroke);stroke-width:1px}
+    .st-candidate-fill{fill:var(--state-candidate-fill);stroke:none}
+    .st-candidate-stroke{fill:none;stroke:var(--state-candidate-stroke);stroke-width:2px}
+    .st-selected-fill{fill:var(--state-selected-fill);stroke:none}
+    .st-selected-stroke{fill:none;stroke:var(--state-selected-stroke);stroke-width:3px}
+    .st-selected-casing{stroke-width:1.5px}
+    .st-highlighted-fill{fill:var(--state-highlighted-fill);stroke:none}
+    .st-highlighted-stroke{fill:none;stroke:var(--state-highlighted-stroke);stroke-width:2px}
+    .st-casing{fill:none;stroke:var(--state-casing)}
+    .st-revealed-stroke{fill:none;stroke:var(--state-revealed-stroke);stroke-width:3px;stroke-linecap:square}
+    .st-revealed-casing{stroke-width:6px;stroke-linecap:square}
+    .mark-circle{fill:none;stroke:var(--mark-circle-stroke);stroke-width:1.5px}
+    .mark-check-ink{fill:none;stroke:var(--mark-check-stroke);stroke-width:3px;stroke-linecap:round;stroke-linejoin:round}
+    .mark-check-ink-casing{fill:none;stroke:var(--state-casing);stroke-width:7px;stroke-linecap:round;stroke-linejoin:round}
+    .mark-check-large{fill:none;stroke:var(--mark-check-stroke);stroke-width:4px;stroke-linecap:round;stroke-linejoin:round}
+    .mark-check-large-casing{fill:none;stroke:var(--state-casing);stroke-width:9px;stroke-linecap:round;stroke-linejoin:round}
+    .mark-check-stamp-disc{fill:var(--mark-check-stroke);stroke:var(--state-casing);stroke-width:2px}
+    .mark-check-stamp-tick{fill:none;stroke:var(--state-casing);stroke-width:2.5px;stroke-linecap:round;stroke-linejoin:round}
+    .focus-light{fill:none;stroke:var(--focus-light);stroke-width:6px}
+    .focus-dark{fill:none;stroke:var(--focus-dark);stroke-width:2px}
+  </style>
+</helmet>
+<div style="position: relative; width: 375px; height: 812px; overflow: hidden; display: flex; flex-direction: column; background: var(--paper); color: var(--ink); font-family: var(--sans); filter: grayscale(1);">
+  <main style="flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; padding: 16px; overflow: hidden;">
+    <div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px;">
+      <h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 700;">三房兩廳</h1>
+      <a href="#" style="flex: none; display: flex; align-items: center; height: 32px; margin: -6px 0; padding: 0 14px; border-radius: 999px; background: var(--paper2); font-size: 14px; line-height: 20px; font-weight: 600; color: var(--ink); text-decoration: none; box-sizing: content-box; border: 6px solid transparent; background-clip: padding-box;">找找看：你認得幾個？</a>
+    </div>
+    <div style="position: relative; flex: none; width: 343px; height: 359.91px; overflow: hidden; background: var(--fp-paper); border-radius: 16px; box-shadow: 0 0 0 1px var(--rule);">
+      <img src="plan.svg" alt="" style="position: absolute; left: 0px; top: 0px; width: 343px; height: 359.91px; max-width: none;">
+      <svg width="343" height="359.91" viewBox="0 0 343 359.91" style="position: absolute; left: 0; top: 0; mix-blend-mode: multiply;"><rect class="st-normal-fill" x="308.04" y="131.24" width="6.88" height="37.25"></rect><rect class="st-normal-fill" x="270.5" y="174.8" width="31.52" height="6.88"></rect><rect class="st-normal-fill" x="63.33" y="174.8" width="42.98" height="6.88"></rect><rect class="st-normal-fill" x="118.06" y="174.8" width="40.12" height="6.88"></rect><rect class="st-normal-fill" x="162.47" y="118.35" width="6.88" height="37.25"></rect><rect class="st-normal-fill" x="257.61" y="75.08" width="6.88" height="28.65"></rect><rect class="st-normal-fill" x="89.69" y="210.61" width="25.79" height="6.88"></rect><rect class="st-normal-fill" x="112.04" y="246.72" width="6.88" height="20.06"></rect><rect class="st-normal-fill" x="201.73" y="210.61" width="25.79" height="6.88"></rect><rect class="st-normal-fill" x="234.4" y="210.61" width="20.06" height="6.88"></rect><rect class="st-normal-fill" x="261.05" y="210.61" width="25.79" height="6.88"></rect><rect class="st-normal-fill" x="31.52" y="75.08" width="11.46" height="11.46"></rect><rect class="st-normal-fill" x="300.02" y="75.08" width="11.46" height="11.46"></rect><rect class="st-normal-fill" x="31.52" y="287.7" width="11.46" height="11.46"></rect><rect class="st-normal-fill" x="300.02" y="287.7" width="11.46" height="11.46"></rect><rect class="st-normal-fill" x="98.57" y="75.08" width="11.46" height="11.46"></rect><rect class="st-normal-fill" x="42.12" y="45.85" width="57.31" height="25.79"></rect><rect class="st-normal-fill" x="72.5" y="302.6" width="42.98" height="25.79"></rect><rect class="st-normal-fill" x="163.05" y="302.6" width="40.12" height="25.79"></rect><rect class="st-normal-fill" x="242.13" y="104.59" width="17.19" height="68.77"></rect><rect class="st-normal-fill" x="133.53" y="215.77" width="11.46" height="20.06"></rect><rect class="st-normal-fill" x="130.67" y="281.39" width="17.19" height="14.33"></rect><rect class="st-normal-fill" x="141.27" y="235.83" width="20.06" height="42.98"></rect><rect class="st-normal-fill" x="239.27" y="250.16" width="20.06" height="11.46"></rect><rect class="st-normal-fill" x="229.24" y="232.96" width="14.33" height="17.19"></rect><rect class="st-normal-fill" x="34.96" y="179.95" width="22.92" height="32.38"></rect><rect class="st-normal-fill" x="106.6" y="100.87" width="6.88" height="40.12"></rect><rect class="st-normal-fill" x="28.08" y="224.08" width="6.88" height="40.12"></rect><rect class="st-highlighted-fill" x="42.12" y="71.64" width="57.31" height="6.88"></rect><rect class="st-highlighted-fill" x="118.06" y="71.64" width="40.12" height="6.88"></rect><rect class="st-highlighted-fill" x="167.35" y="71.64" width="25.79" height="6.88"></rect><rect class="st-highlighted-fill" x="308.04" y="85.39" width="6.88" height="25.79"></rect><rect class="st-highlighted-fill" x="72.5" y="295.72" width="42.98" height="6.88"></rect><rect class="st-highlighted-fill" x="130.67" y="295.72" width="17.19" height="6.88"></rect><rect class="st-highlighted-fill" x="163.05" y="295.72" width="40.12" height="6.88"></rect><rect class="st-highlighted-fill" x="235.83" y="295.72" width="17.19" height="6.88"></rect><rect class="st-highlighted-fill" x="271.94" y="295.72" width="28.65" height="6.88"></rect></svg>
+      <svg width="343" height="359.91" viewBox="0 0 343 359.91" style="position: absolute; left: 0; top: 0;"><rect class="st-normal-stroke" x="307.54" y="130.74" width="7.88" height="38.25"></rect><rect class="st-normal-stroke" x="270" y="174.3" width="32.52" height="7.88"></rect><rect class="st-normal-stroke" x="62.83" y="174.3" width="43.98" height="7.88"></rect><rect class="st-normal-stroke" x="117.56" y="174.3" width="41.12" height="7.88"></rect><rect class="st-normal-stroke" x="161.97" y="117.85" width="7.88" height="38.25"></rect><rect class="st-normal-stroke" x="257.11" y="74.58" width="7.88" height="29.65"></rect><rect class="st-normal-stroke" x="89.19" y="210.11" width="26.79" height="7.88"></rect><rect class="st-normal-stroke" x="111.54" y="246.22" width="7.88" height="21.06"></rect><rect class="st-normal-stroke" x="201.23" y="210.11" width="26.79" height="7.88"></rect><rect class="st-normal-stroke" x="233.9" y="210.11" width="21.06" height="7.88"></rect><rect class="st-normal-stroke" x="260.55" y="210.11" width="26.79" height="7.88"></rect><rect class="st-normal-stroke" x="31.02" y="74.58" width="12.46" height="12.46"></rect><rect class="st-normal-stroke" x="299.52" y="74.58" width="12.46" height="12.46"></rect><rect class="st-normal-stroke" x="31.02" y="287.2" width="12.46" height="12.46"></rect><rect class="st-normal-stroke" x="299.52" y="287.2" width="12.46" height="12.46"></rect><rect class="st-normal-stroke" x="98.07" y="74.58" width="12.46" height="12.46"></rect><rect class="st-normal-stroke" x="41.62" y="45.35" width="58.31" height="26.79"></rect><rect class="st-normal-stroke" x="72" y="302.1" width="43.98" height="26.79"></rect><rect class="st-normal-stroke" x="162.55" y="302.1" width="41.12" height="26.79"></rect><rect class="st-normal-stroke" x="241.63" y="104.09" width="18.19" height="69.77"></rect><rect class="st-normal-stroke" x="133.03" y="215.27" width="12.46" height="21.06"></rect><rect class="st-normal-stroke" x="130.17" y="280.89" width="18.19" height="15.33"></rect><rect class="st-normal-stroke" x="140.77" y="235.33" width="21.06" height="43.98"></rect><rect class="st-normal-stroke" x="238.77" y="249.66" width="21.06" height="12.46"></rect><rect class="st-normal-stroke" x="228.74" y="232.46" width="15.33" height="18.19"></rect><rect class="st-normal-stroke" x="34.46" y="179.45" width="23.92" height="33.38"></rect><rect class="st-normal-stroke" x="106.1" y="100.37" width="7.88" height="41.12"></rect><rect class="st-normal-stroke" x="27.58" y="223.58" width="7.88" height="41.12"></rect><rect class="st-highlighted-stroke" x="41.12" y="70.64" width="59.31" height="8.88"></rect><rect class="st-highlighted-stroke" x="117.06" y="70.64" width="42.12" height="8.88"></rect><rect class="st-highlighted-stroke" x="166.35" y="70.64" width="27.79" height="8.88"></rect><rect class="st-highlighted-stroke" x="307.04" y="84.39" width="8.88" height="27.79"></rect><rect class="st-highlighted-stroke" x="71.5" y="294.72" width="44.98" height="8.88"></rect><rect class="st-highlighted-stroke" x="129.67" y="294.72" width="19.19" height="8.88"></rect><rect class="st-highlighted-stroke" x="162.05" y="294.72" width="42.12" height="8.88"></rect><rect class="st-highlighted-stroke" x="234.83" y="294.72" width="19.19" height="8.88"></rect><rect class="st-highlighted-stroke" x="270.94" y="294.72" width="30.65" height="8.88"></rect></svg>
+    </div>
+
+    <p style="flex: none; margin: 12px 0 0; font-size: 15px; line-height: 24px; color: var(--ink2);">窗在這張圖上共 9 處，都亮起來了。</p>
+
+  </main>
+  <footer style="flex: none; margin-top: auto; background: var(--paper2);">
+    <p style="margin: 0; padding: 10px 20px 12px; font-size: 12px; line-height: 1.7; color: var(--ink2);">本網站符號說明為一般通用慣例，不同建商 / 設計師畫法可能有差異，實際請以個案圖說或現場人員說明為準。</p>
+  </footer>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":375,"height":812}}'>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

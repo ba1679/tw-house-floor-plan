@@ -1,0 +1,268 @@
+{
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "B2 數位圖鑑 App（選定）"
+    },
+    {
+      "id": "page-2",
+      "name": "B1 紙本圖鑑（未選）"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 375,
+      "h": 812,
+      "title": "B2① 全圖提示",
+      "page": "page-1"
+    },
+    {
+      "file": "B2-2-candidates.dc.html",
+      "x": 455,
+      "y": 0,
+      "w": 375,
+      "h": 812,
+      "title": "B2② 3× 候選",
+      "page": "page-1"
+    },
+    {
+      "file": "B2-2-candidates-gray.dc.html",
+      "x": 455,
+      "y": 972,
+      "w": 375,
+      "h": 812,
+      "title": "B2② 3× 候選 灰階",
+      "page": "page-1"
+    },
+    {
+      "file": "B2-3-selected.dc.html",
+      "x": 910,
+      "y": 0,
+      "w": 375,
+      "h": 812,
+      "title": "B2③ 說明卡",
+      "page": "page-1"
+    },
+    {
+      "file": "B2-3-selected-gray.dc.html",
+      "x": 910,
+      "y": 972,
+      "w": 375,
+      "h": 812,
+      "title": "B2③ 說明卡 灰階",
+      "page": "page-1"
+    },
+    {
+      "file": "B2-4-highlighted.dc.html",
+      "x": 1365,
+      "y": 0,
+      "w": 375,
+      "h": 812,
+      "title": "B2④ 高亮",
+      "page": "page-1"
+    },
+    {
+      "file": "B2-4-highlighted-gray.dc.html",
+      "x": 1365,
+      "y": 972,
+      "w": 375,
+      "h": 812,
+      "title": "B2④ 高亮 灰階",
+      "page": "page-1"
+    },
+    {
+      "file": "B2-5-quiz.dc.html",
+      "x": 1820,
+      "y": 0,
+      "w": 375,
+      "h": 812,
+      "title": "B2⑤ 作答後",
+      "page": "page-1"
+    },
+    {
+      "file": "B2-5-quiz-gray.dc.html",
+      "x": 1820,
+      "y": 972,
+      "w": 375,
+      "h": 812,
+      "title": "B2⑤ 作答後 灰階",
+      "page": "page-1"
+    },
+    {
+      "file": "B2-6-focus.dc.html",
+      "x": 2275,
+      "y": 0,
+      "w": 375,
+      "h": 812,
+      "title": "B2⑥ 焦點",
+      "page": "page-1"
+    },
+    {
+      "file": "B2-6-focus-gray.dc.html",
+      "x": 2275,
+      "y": 972,
+      "w": 375,
+      "h": 812,
+      "title": "B2⑥ 焦點 灰階",
+      "page": "page-1"
+    },
+    {
+      "file": "B2-7-symbol.dc.html",
+      "x": 2730,
+      "y": 0,
+      "w": 375,
+      "h": 812,
+      "title": "B2⑦ 符號頁",
+      "page": "page-1"
+    },
+    {
+      "file": "B1-1-browsing.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 375,
+      "h": 812,
+      "title": "B1① 全圖提示",
+      "page": "page-2"
+    },
+    {
+      "file": "B1-2-candidates.dc.html",
+      "x": 455,
+      "y": 0,
+      "w": 375,
+      "h": 812,
+      "title": "B1② 3× 候選",
+      "page": "page-2"
+    },
+    {
+      "file": "B1-2-candidates-gray.dc.html",
+      "x": 455,
+      "y": 972,
+      "w": 375,
+      "h": 812,
+      "title": "B1② 3× 候選 灰階",
+      "page": "page-2"
+    },
+    {
+      "file": "B1-3-selected.dc.html",
+      "x": 910,
+      "y": 0,
+      "w": 375,
+      "h": 812,
+      "title": "B1③ 說明卡",
+      "page": "page-2"
+    },
+    {
+      "file": "B1-3-selected-gray.dc.html",
+      "x": 910,
+      "y": 972,
+      "w": 375,
+      "h": 812,
+      "title": "B1③ 說明卡 灰階",
+      "page": "page-2"
+    },
+    {
+      "file": "B1-4-highlighted.dc.html",
+      "x": 1365,
+      "y": 0,
+      "w": 375,
+      "h": 812,
+      "title": "B1④ 高亮",
+      "page": "page-2"
+    },
+    {
+      "file": "B1-4-highlighted-gray.dc.html",
+      "x": 1365,
+      "y": 972,
+      "w": 375,
+      "h": 812,
+      "title": "B1④ 高亮 灰階",
+      "page": "page-2"
+    },
+    {
+      "file": "B1-5-quiz.dc.html",
+      "x": 1820,
+      "y": 0,
+      "w": 375,
+      "h": 812,
+      "title": "B1⑤ 作答後",
+      "page": "page-2"
+    },
+    {
+      "file": "B1-5-quiz-gray.dc.html",
+      "x": 1820,
+      "y": 972,
+      "w": 375,
+      "h": 812,
+      "title": "B1⑤ 作答後 灰階",
+      "page": "page-2"
+    },
+    {
+      "file": "B1-6-focus.dc.html",
+      "x": 2275,
+      "y": 0,
+      "w": 375,
+      "h": 812,
+      "title": "B1⑥ 焦點",
+      "page": "page-2"
+    },
+    {
+      "file": "B1-6-focus-gray.dc.html",
+      "x": 2275,
+      "y": 972,
+      "w": 375,
+      "h": 812,
+      "title": "B1⑥ 焦點 灰階",
+      "page": "page-2"
+    },
+    {
+      "file": "B1-7-symbol.dc.html",
+      "x": 2730,
+      "y": 0,
+      "w": 375,
+      "h": 812,
+      "title": "B1⑦ 符號頁",
+      "page": "page-2"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "B2-note",
+      "x": 0,
+      "y": 972,
+      "w": 375,
+      "text": "B2 數位圖鑑 App\n\n動機：使用者手上拿的是手機，不是書。純白底、淺灰卡片、大一級的字：強光下靠面積而不是細線分區塊，能按的東西都有一塊看得見的底（找找看入口、重選、其他位置、容易搞混）。說明卡是有圓角與陰影的一張卡。\n\n代價：純白介面與純白圖紙同色，圖框只剩一圈細線加圓角；大字讓說明卡的 46dvh 塞得更少，「容易搞混」幾乎一定要上拉才看得到；卡片一多，圖鑑的「出處註記」口吻會被 App 的口吻蓋過。\n\n2026-09-16 定案選這個方向。檢查後的修正：淺灰表面對白只有 1.12:1，強光下看不見，所以它只負責分組，「可以按」靠墨色的字與圖示；圖上灰字改成 #767676（4.54:1）；圓角收成 8／12／16／20。值在 design/_tokens.txt，規則在 DESIGN.md。",
+      "page": "page-1"
+    },
+    {
+      "id": "B2-state-note",
+      "x": -535,
+      "y": 0,
+      "w": 455,
+      "text": "狀態層（兩個方向共用，原封不動）\n\n藍 = 你的操作：normal 提示、candidate、selected、候選圈\n暖 = 別人替你標的：highlighted（螢光筆滿底）、revealed（四角角標）\n\n線一律畫在熱區外側，不壓住熱區裡的符號線條。\n填色以 multiply 疊上去：像螢光筆，紙變色、墨線不變淡。\nnormal：極淡填色 + 1px 線\ncandidate：中等填色 + 2px 線\nselected：較濃填色 + 3px 線 + 1.5px 白襯邊\nhighlighted：螢光筆滿底 + 2px 暖色實線\nrevealed：不填，3px 暖色角標 + 1.5px 白襯邊\n候選圈：1.5px 藍色實線\n答對的勾：墨色 4px + 2.5px 白襯邊，20px\n鍵盤焦點：白 2 / 黑 2 / 白 2，離熱區 3px\n\n沒有虛線、沒有斜線填充。圖紙固定純白。",
+      "page": "page-1"
+    },
+    {
+      "id": "B1-note",
+      "x": 0,
+      "y": 972,
+      "w": 375,
+      "text": "B1 紙本圖鑑\n\n動機：野外圖鑑就是一本紙本——暖白紙、細墨線、留白。圖紙是純白的，放在暖紙上看起來像夾進圖鑑的一張圖，圖與介面的邊界靠紙色自己說清楚。\n層次靠線不靠面：區塊標題後面拖一條細線，條目之間一條分隔線，說明卡只有一條墨線的上緣，沒有陰影。按鈕是直角。\n\n代價：暖紙與純白圖紙的差很小（戶外強光下幾乎看不出來），能依靠的只剩細線；點擊面靠字與框線表明，沒有面積感，「這裡可以按」要讀才知道。",
+      "page": "page-2"
+    },
+    {
+      "id": "B1-state-note",
+      "x": -535,
+      "y": 0,
+      "w": 455,
+      "text": "狀態層（兩個方向共用，原封不動）\n\n藍 = 你的操作：normal 提示、candidate、selected、候選圈\n暖 = 別人替你標的：highlighted（螢光筆滿底）、revealed（四角角標）\n\n線一律畫在熱區外側，不壓住熱區裡的符號線條。\n填色以 multiply 疊上去：像螢光筆，紙變色、墨線不變淡。\nnormal：極淡填色 + 1px 線\ncandidate：中等填色 + 2px 線\nselected：較濃填色 + 3px 線 + 1.5px 白襯邊\nhighlighted：螢光筆滿底 + 2px 暖色實線\nrevealed：不填，3px 暖色角標 + 1.5px 白襯邊\n候選圈：1.5px 藍色實線\n答對的勾：墨色 4px + 2.5px 白襯邊，20px\n鍵盤焦點：白 2 / 黑 2 / 白 2，離熱區 3px\n\n沒有虛線、沒有斜線填充。圖紙固定純白。",
+      "page": "page-2"
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-1"
+  }
+}
