@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** in-progress —— 2026-09-16 定案：調性與規則（`/grilling`，見「決議」）、畫布比稿選 B2、值寫進 `design/_tokens.txt`（見「比稿定案」）。只剩開「後續實作票」那三張，開完結案。
+**Status:** done —— 2026-09-16 定案：調性與規則（`/grilling`，見「決議」）、畫布比稿選 B2、值寫進 `design/_tokens.txt`（見「比稿定案」）；2026-09-17 已拆出三張後續實作票。
 
 規格：PRD §6.1.2、§6.5；`.scratch/m4-quiz/spec.md` 的「文案與畫面」；`CONTEXT.md`「State」。
 
@@ -115,15 +115,15 @@
 - [x] 四種狀態在色覺障礙模擬下仍分得出來，而且灰階下就分得出來
 - [x] 所有文字與背景的對比達 WCAG AA，含 10.5px 那一批小標籤；狀態線對 `--fp-paper` 與 `--fp-wall` 都達 3:1
 - [x] 驗證稿：兩個方向各七格加灰階版，選定的方向手調到定案
-- [ ] 這張只產出設計語言與設計稿。把 token 套進 CSS 另開實作票（見下）——`app/`、`components/` 一行沒動；三張實作票還沒開
+- [x] 這張只產出設計語言與設計稿。`app/`、`components/` 一行沒動；把 token 套進 CSS 已拆成 `.scratch/design-language/` 的三張實作票
 
 ## 後續實作票（這張結案時開）
 
-放 `.scratch/design-language/`，不併進 M4。三張動的檔案不重疊，票 2、3 可並行：
+已放進 `.scratch/design-language/`，不併進 M4。三張動的檔案不重疊，票 2、3 可並行：
 
-1. **介面 token 與可讀性**：墨色兩階、12px 下限、無彩連結與按鈕、黑白雙環焦點、字體堆疊（順便修掉 `globals.css` 開頭那句「Noto 系列在台灣的手機上多半已經是系統字」——iPhone 不是），外加一支 token 對比測試（node context，讀 `globals.css` 算；prior art `tests/search-matching.spec.ts`）。
-2. **圖面層改用 `--fp-*`**：主圖改讀 sprite 那組名字，消掉 `--paper` 撞名，房間底色去色相。
-3. **熱區狀態與圖上記號**：狀態 token、角標、白襯邊，`revealed` 與候選圈拿掉虛線，外加狀態線對白底與牆灰 3:1 的測試。
+1. [`01-interface-tokens-and-readability.md`](../../design-language/01-interface-tokens-and-readability.md)：墨色兩階、12px 下限、無彩連結與按鈕、黑白雙環焦點、字體堆疊與 token 對比測試。
+2. [`02-floorplan-fp-tokens.md`](../../design-language/02-floorplan-fp-tokens.md)：主圖改讀 sprite 那組 `--fp-*` 名字，消掉 `--paper` 撞名，房間底色去色相。
+3. [`03-hotspot-states-and-marks.md`](../../design-language/03-hotspot-states-and-marks.md)：狀態 token、角標、白襯邊、答對勾，`revealed` 與候選圈拿掉虛線，並測狀態線對白底與牆灰的 3:1。
 
 今天就存在的無障礙缺陷（`--ink3` 當文字、10.5px）不先補：先補一次、定案後再改一次是做兩次工。
 
