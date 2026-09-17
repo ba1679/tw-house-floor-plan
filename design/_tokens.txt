@@ -1,29 +1,156 @@
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
-  <style>
-    :root{
-      --paper:oklch(0.985 0.004 85);
-      --paper2:oklch(0.960 0.006 85);
-      --mount:oklch(0.925 0.005 260);
-      --ink:oklch(0.24 0.010 260);
-      --ink2:oklch(0.47 0.012 260);
-      --ink3:oklch(0.645 0.010 260);
-      --rule:oklch(0.865 0.006 260);
-      --rule2:oklch(0.925 0.005 260);
-      --accent:oklch(0.55 0.17 28);
-      --accent2:oklch(0.55 0.17 232);
-      --accent-soft:oklch(0.955 0.028 28);
-      --sans:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;
-      --serif:'Noto Serif TC','Songti TC',serif;
-      --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,monospace;
-    }
-    body{margin:0;background:var(--mount);font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;text-wrap:pretty;}
-    a{color:var(--accent);text-decoration:none;}
-    a:hover{color:oklch(0.44 0.17 28);}
-    .tag{font-family:var(--mono);font-size:11px;letter-spacing:.10em;color:var(--accent);}
-    .lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink3);}
-    .mono{font-family:var(--mono);}
-    .h1{font-family:var(--serif);font-size:26px;font-weight:600;letter-spacing:.01em;}
-    .note{font-size:13px;color:var(--ink2);line-height:1.85;max-width:640px;}
-    .sec{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--ink3);}
-    .body{font-size:15px;line-height:1.85;color:var(--ink);}
-  </style>
+設計 token：票 09 定案（2026-09-16，B2 數位圖鑑 App）
+
+規則與理由在根目錄的 DESIGN.md，這裡只放值。畫布原始檔在 design/style/。
+設計語言的實作票（.scratch/design-language/）把這些值搬進 CSS 之後，以 CSS 為準，這份檔案刪除。
+只用系統字，不載 webfont；這份檔案裡沒有任何 <link>。
+
+對比數字是定案時算的（WCAG 2.x 相對亮度）。改了值就要重算，
+而且對比要符合 DESIGN.md 的門檻：文字 4.5:1，狀態線對 --fp-paper 與 --fp-wall 3:1。
+
+
+/* ================================================================ 介面 */
+
+:root {
+  color-scheme: light;
+
+  --paper:  oklch(1 0 0);                /* 頁面底，純白 */
+  --paper2: oklch(0.962 0.002 265);      /* 淺灰表面：卡片、次要按鈕、找找看入口、關閉鍵、頁尾。對 --paper 1.12:1，只用來分組 */
+  --ink:    oklch(0.21 0.006 265);       /* 對 --paper 17.72:1，對 --paper2 15.87:1 */
+  --ink2:   oklch(0.47 0.008 265);       /* 對 --paper 6.83:1，對 --paper2 6.11:1 */
+  --ink3:   oklch(0.62 0.006 265);       /* 不給文字用。業界慣例徽章的框：對 --paper 3.64:1，對 --paper2 3.26:1 */
+  --rule:   oklch(0.89 0.003 265);       /* 圖框、符號圖框的 1px 細線、說明卡上緣 */
+  --rule2:  oklch(0.935 0.002 265);      /* 不承載意思的分隔線 */
+
+  --sans: -apple-system, BlinkMacSystemFont, "PingFang TC", "Segoe UI", "Microsoft JhengHei", "Noto Sans CJK TC", sans-serif;
+}
+
+/* ---------------------------------------------------------------- 字級（字級 / 行高 / 粗細）
+   粗細只用 400、600、700。iPhone 的蘋方最粗是 Semibold，所以 700 在 iPhone 上看起來跟 600 一樣。 */
+
+--text-display     30px / 1.35 / 700     符號頁 <h1>
+--text-title       24px / 32px / 700     平面圖頁、找找看頁的 <h1>（行高寫死 32px：這一列多高，圖框就少多高，ADR-0003）
+--text-sheet-name  24px / 1.35 / 700     說明卡的符號名
+--text-reading     17px / 1.75 / 400     符號頁內文
+--text-prompt      17px / 1.5  / 400     找找看題目（符號名 700）
+--text-body        16px / 1.7  / 400     說明卡內文
+--text-button      16px                  主要按鈕 700，次要按鈕 600
+--text-secondary   15px / 1.65 / 400     容易搞混的說明、階層說明（--ink2）
+--text-status      15px / 24px / 400     狀態列（--ink2）
+--text-row-title   15px / 1.5  / 600     「看它在圖上的其他位置」這一類列標題
+--text-link-chip   14px / 20px / 600     找找看入口
+--text-label       13px / 1.5  / 700     區塊標題「白話意思」「容易搞混」（--ink2）
+--text-eyebrow     13px / 1.5  / 400     分類小字，letter-spacing 0.04em（說明卡）/ 0.06em（符號頁），--ink2
+--text-meta        13px                  題號「第 3 / 7 題」，tabular-nums，--ink2
+--text-small       12px / 1.7  / 400     免責、徽章字（徽章階層名 600）、出現次數。手機最小字級，不得再小
+
+/* ---------------------------------------------------------------- 間距 */
+
+--space-1   4px
+--space-2   8px     同一組裡的元素：按鈕之間、卡片之間
+--space-3   12px    版面列與列之間：標題列、圖框、控制列、狀態列
+--space-4   16px    平面圖頁的頁邊距
+--space-5   20px    符號頁左右頁邊距、說明卡內文左右、符號頁區塊之間
+--space-6   24px    符號頁上方頁邊距、符號圖框的上下內距
+
+卡片內距（元件自己的值，不進階梯）：
+  說明卡裡「容易搞混」的卡片   12px 14px
+  說明卡「其他位置」列          6px 12px 6px 14px
+  符號頁階層說明卡             18px
+  符號頁「容易搞混」卡片        標題列 0 12px 0 16px、說明 0 16px 14px
+
+內文行寬：沿用 560px 版心（app/reading.module.css），17px 的字一行約 32 個中文字。
+
+/* ---------------------------------------------------------------- 圓角 */
+
+--radius-s      8px      徽章、階層圖示框
+--radius-m      12px     主要／次要按鈕、說明卡裡的卡片、「其他位置」列
+--radius-l      16px     平面圖圖框、符號圖框、符號頁的卡片
+--radius-sheet  20px     說明卡的上緣（只有上面兩角）
+--radius-pill   999px    找找看入口、關閉鍵
+
+/* ---------------------------------------------------------------- 高度與觸控 */
+
+--touch-min   44px     所有點擊目標（PRD §9）
+--control-h   48px     主要／次要按鈕的最小高度
+--row-h       56px     說明卡「其他位置」列的最小高度；符號頁「容易搞混」標題列 52px
+--chip-h      32px     找找看入口看得見的高度；上下各 6px 透明框把點擊範圍撐到 44px，再用 -6px margin 收回，不撐高標題列
+
+/* ---------------------------------------------------------------- 層次 */
+
+--frame         0 0 0 1px var(--rule)                                      平面圖圖框、符號圖框（純白圖紙放在純白頁面上，靠這一圈與圓角分開）
+--shadow-sheet  0 -1px 0 var(--rule), 0 -12px 32px rgba(0, 0, 0, 0.08)     說明卡。全站唯一的陰影
+淺灰表面（--paper2）不加陰影、不加框。
+
+/* ---------------------------------------------------------------- 鍵盤焦點（全站 :focus-visible 共用） */
+
+--focus-dark    #000000
+--focus-light   #ffffff     兩色之間 21:1（C40 要求 ≥ 9:1）
+介面控制項：box-shadow: 0 0 0 2px var(--focus-light), 0 0 0 4px var(--focus-dark), 0 0 0 6px var(--focus-light);（跟著元件的圓角走）
+圖上熱區：離熱區邊緣 3px 起，白 2px / 黑 2px / 白 2px（畫成一條 6px 白線，中間疊一條 2px 黑線）
+
+
+/* ================================================================ 圖面（--fp-*） */
+
+:root {
+  --fp-paper:        #ffffff;                 /* 固定純白 */
+  --fp-room:         oklch(0.967 0 0);        /* #f4f4f4 */
+  --fp-room-wet:     oklch(0.935 0 0);        /* #e9e9e9 */
+  --fp-room-balcony: oklch(0.985 0 0);        /* #fafafa */
+  --fp-wall:         #a8a8a8;                 /* 鎖死（表 24 筆號 9） */
+  --fp-column:       #585858;                 /* 鎖死（表 24 筆號 8），比牆深 */
+  --fp-structure:    #2b2b2b;                 /* 鎖死 */
+  --fp-line:         #4a4a4a;                 /* 鎖死 */
+  --fp-text:         #2b2b2b;                 /* 鎖死。房名，對 --fp-paper 14.16:1 */
+  --fp-muted:        #767676;                 /* 坪數、尺寸標註、比例尺副標、雨遮線。原本 #7a7a7a 只有 4.29:1，定案改成 4.54:1 */
+  --fp-furn:         #ffffff;
+  --fp-furn-line:    #8a8a8a;                 /* 比 --fp-line 淺 */
+}
+
+--fp-room-dim：說明卡開著時，沒有標記的房間 = color-mix(in oklab, <該房間底色> 74%, #6b6b6b)
+  房間 #cecece、濕區 #c7c7c7、陽台 #d3d3d3；過渡 160ms，尊重 prefers-reduced-motion
+
+圖上文字（圖面公分，跟著縮放）：房名 25、坪數 18、尺寸標註 19、標題 23、副標 17、指北針 15。
+375px 全圖時是 4.3–7.2px；在 3× 候選放大時是 12.9–21.5px，全部 ≥ 12px（DESIGN.md「圖上的字」）。
+
+
+/* ================================================================ 熱區狀態（--state-*）與圖上記號（--mark-*） */
+
+所有線寬都是螢幕 px（non-scaling），線畫在熱區**外側**：線的內緣貼著熱區邊緣，不壓住熱區裡的符號線條。
+填色是不透明色，以 mix-blend-mode: multiply 疊上去：紙變色，熱區裡的墨線不變淡。
+
+:root {
+  --state-blue: oklch(0.44 0.15 256);         /* 你的操作。對 --fp-paper 7.90:1，對 --fp-wall 3.32:1 */
+  --state-warm: oklch(0.45 0.1 65);           /* 別人替你標的。對 --fp-paper 7.64:1，對 --fp-wall 3.21:1 */
+  --state-casing: #ffffff;                    /* 白襯邊 */
+
+  --state-normal-fill:   oklch(0.965 0.018 250);
+  --state-normal-stroke: var(--state-blue);
+  --state-normal-width:  1px;
+
+  --state-candidate-fill:   oklch(0.905 0.045 250);
+  --state-candidate-stroke: var(--state-blue);
+  --state-candidate-width:  2px;
+
+  --state-selected-fill:   oklch(0.82 0.085 252);
+  --state-selected-stroke: var(--state-blue);
+  --state-selected-width:  3px;
+  --state-selected-mark:   1.5px;             /* 白襯邊，接在線的外側 */
+
+  --state-highlighted-fill:   oklch(0.85 0.17 90);   /* 螢光筆滿底，灰階 L 0.85（normal 是 0.97） */
+  --state-highlighted-stroke: var(--state-warm);
+  --state-highlighted-width:  2px;
+
+  --state-revealed-stroke: var(--state-warm);   /* 不填 */
+  --state-revealed-width:  3px;
+  --state-revealed-mark:   9px;               /* 四角 L 形角標的臂長（熱區太小時縮到半邊長）；角標離熱區邊緣 3px，兩側各 1.5px 白襯邊，線端方頭 */
+
+  --mark-circle-stroke: var(--state-blue);    /* 候選圈：實線、不填 */
+  --mark-circle-width:  1.5px;
+
+  --mark-check-stroke: oklch(0.2 0 0);        /* 答對的勾（放大加粗）：對 --fp-paper 18.10:1，對 --fp-wall 7.61:1 */
+  --mark-check-width:  4px;
+  --mark-check-casing: 2.5px;                 /* 兩側白襯邊，圓頭圓角 */
+  --mark-check-size:   20px;                  /* 勾的中心在 selected 右上角往右 22px、往上 12px，讓開鍵盤焦點環 */
+}
+
+各層的疊放順序（下到上）：圖面 → 填色（multiply）→ 候選圈 → normal、highlighted、candidate、revealed、selected 的線 → 答對的勾 → 鍵盤焦點。
