@@ -21,12 +21,12 @@
 
 ## Acceptance criteria
 
-- [ ] 答對 → `correct[題目]` +1；答錯 → `wrong[題目]` +1、`wrong[被點中的符號]` 不變；`updated_at` 更新
-- [ ] 答到第 3 題時重新整理 → 回到開場，前 2 題的紀錄已經在 localStorage
-- [ ] `version` 不符的紀錄視為空紀錄，第一次作答後寫回 `version: 1`
-- [ ] localStorage 被封鎖：一局走得完，不丟例外
-- [ ] 預塞「6 個還沒遇到 + 3 個還不熟（錯 3、2、1）+ 4 個已認識」→ 這一局的題目集合是那 6 個加上錯 3 次的那一個（只斷言集合，不斷言順序）
-- [ ] 純函式測試（node context、手寫小輸入、固定亂數序列）：還沒遇到先於還不熟先於已認識；還不熟依錯誤次數由多到少；某一層不夠時由下一層補；輸出沒有重複；紀錄裡不是可出題符號的 id 不會出成題目；同一個亂數序列下輸出穩定
+- [x] 答對 → `correct[題目]` +1；答錯 → `wrong[題目]` +1、`wrong[被點中的符號]` 不變；`updated_at` 更新
+- [x] 答到第 3 題時重新整理 → 回到開場，前 2 題的紀錄已經在 localStorage
+- [x] `version` 不符的紀錄視為空紀錄，第一次作答後寫回 `version: 1`
+- [x] localStorage 被封鎖：一局走得完，不丟例外
+- [x] 預塞「6 個還沒遇到 + 3 個還不熟（錯 3、2、1）+ 4 個已認識」→ 這一局的題目集合是那 6 個加上錯 3 次的那一個（只斷言集合，不斷言順序）
+- [x] 純函式測試（node context、手寫小輸入、固定亂數序列）：還沒遇到先於還不熟先於已認識；還不熟依錯誤次數由多到少；某一層不夠時由下一層補；輸出沒有重複；紀錄裡不是可出題符號的 id 不會出成題目；同一個亂數序列下輸出穩定
 
 ## Comments
 
@@ -64,3 +64,14 @@
   - 平台的東西留在 `components/use*.ts` 是 `useFirstVisitHint` 那裡寫下的規矩，原本的檔名不合。
   - 寫入的那個 effect 原本在 `QuizRound` 裡，讓那個元件多一個與畫面無關的改動理由。現在寫入是 `useSaveAnswers`。
   - 讀取仍是按下「開始」那一刻呼叫的 `loadLayoutProgress`：出題讀的就是那一刻的紀錄，不需要是 hook。
+
+**2026-09-19：逐條對過 AC，補勾。** 結案時漏勾，不是沒驗：M2、M3 在結案的 commit 裡勾，M4 只改了 Status。
+在 main（`25fa64a`）上全新 build 跑全套（`CI=1 PORT=3417 npx playwright test`，不重用 dev server）：227 條全綠；`npm run typecheck` 乾淨。
+每一條 AC 對到的是**讀過本體、確認有斷言**的測試，不只看測試名稱：
+
+1. `quiz-progress.spec.ts`「答對記在題目的 correct；答錯記在題目的 wrong，被點中的那個不記；updated_at 跟著更新」。
+2. `quiz-progress.spec.ts`「答到第 3 題時重新整理」：另一張圖的紀錄也沒被弄掉。
+3. `quiz-progress.spec.ts`「版本不符的紀錄視為空紀錄」。
+4. `quiz-progress.spec.ts`「瀏覽器封鎖 localStorage：一局走得完、再玩一次也出得了題，不丟例外」。
+5. `quiz-progress.spec.ts`「6 個還沒遇到 + 3 個還不熟（錯 3、2、1）+ 4 個已認識」：只比集合。
+6. `quiz-questions.spec.ts`「一局出哪些題」七條：固定亂數序列，四組序列都要成立。
