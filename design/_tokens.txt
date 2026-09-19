@@ -150,7 +150,7 @@
   --mark-check-stroke: oklch(0.2 0 0);        /* 答對的勾（放大加粗）：對 --fp-paper 18.10:1，對 --fp-wall 7.61:1 */
   --mark-check-width:  4px;
   --mark-check-casing: 2.5px;                 /* 兩側白襯邊，圓頭圓角 */
-  --mark-check-size:   20px;                  /* 勾的中心在 selected 右上角往右 22px、往上 12px，讓開鍵盤焦點環 */
+  --mark-check-size:   20px;                  /* 勾的轉折點在 selected 右上角正上方；勾連白襯邊的下緣貼著鍵盤焦點環的外緣（離熱區 9px）。2026-09-19 改，理由見 DESIGN.md */
 }
 
 各層的疊放順序（下到上）：圖面 → 填色（multiply）→ 候選圈 → normal、highlighted、candidate、revealed、selected 的線 → 答對的勾 → 鍵盤焦點。

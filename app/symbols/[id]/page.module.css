@@ -13,7 +13,7 @@
 
 .article {
   composes: column from "../../reading.module.css";
-  gap: 24px;
+  gap: var(--space-6);
 }
 
 .category {
@@ -33,6 +33,7 @@
   padding: 24px 20px;
   background: var(--paper2);
   border: 1px solid var(--rule);
+  border-radius: var(--radius-l);
 }
 
 /* 底下幾個名字與 `components/InfoSheet.module.css` 重複，**值刻意不同**：說明卡是被
@@ -41,22 +42,23 @@
 .section {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: var(--space-2);
 }
 
 .sectionLabel {
   margin: 0;
-  font-family: var(--mono);
-  font-size: 10.5px;
+  font-family: var(--sans);
+  font-size: var(--text-label-size);
+  line-height: var(--text-label-leading);
   font-weight: 400;
   letter-spacing: 0.16em;
-  color: var(--ink3);
+  color: var(--ink2);
 }
 
 .prose {
   margin: 0;
-  font-size: 15.5px;
-  line-height: 1.9;
+  font-size: var(--text-reading-size);
+  line-height: var(--text-reading-leading);
 }
 
 .confusedList {
@@ -73,7 +75,7 @@
 
 .confusedName {
   margin: 0;
-  font-size: 14.5px;
+  font-size: var(--text-row-title-size);
   font-weight: 700;
 }
 
@@ -81,21 +83,16 @@
 .confusedLink {
   display: flex;
   align-items: center;
-  min-height: 44px;
-  color: var(--accent);
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-}
-
-.confusedLink:hover,
-.confusedLink:focus-visible {
-  border-bottom-color: currentColor;
+  min-height: var(--touch-min);
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .confusedText {
   margin: 0;
-  font-size: 14.5px;
-  line-height: 1.85;
+  font-size: var(--text-secondary-size);
+  line-height: var(--text-secondary-leading);
   color: var(--ink2);
 }
 
@@ -127,16 +124,16 @@
 
 .sourceDoc {
   margin: 0;
-  font-size: 13.5px;
-  line-height: 1.7;
+  font-size: var(--text-secondary-size);
+  line-height: var(--text-secondary-leading);
 }
 
 /* 條次／頁碼與年份：定位資訊，不是內容——比文件名輕一階。 */
 .sourceLocator {
   margin: 0;
-  font-size: 12.5px;
+  font-size: var(--text-small-size);
   line-height: 1.7;
-  color: var(--ink3);
+  color: var(--ink2);
 }
 
 /* 轉載那一行是**對上面那一筆的但書**，所以縮排、掛一條線，讀者看得出它從屬於誰。
@@ -145,8 +142,8 @@
   margin: 2px 0 0;
   border-left: 2px solid var(--rule);
   padding-left: 10px;
-  font-size: 12.5px;
-  line-height: 1.8;
+  font-size: var(--text-small-size);
+  line-height: var(--text-small-leading);
   color: var(--ink2);
 }
 
@@ -155,17 +152,12 @@
 .sourceLink {
   display: flex;
   align-items: center;
-  min-height: 44px;
-  font-size: 13px;
-  color: var(--accent);
-  text-decoration: none;
+  min-height: var(--touch-min);
+  font-size: var(--text-eyebrow-size);
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
   overflow-wrap: anywhere;
-  border-bottom: 1px solid transparent;
-}
-
-.sourceLink:hover,
-.sourceLink:focus-visible {
-  border-bottom-color: currentColor;
 }
 
 /* 轉換點（票 08）：把搜尋流量帶進平面圖的唯一入口（PRD §6.2.1）。與首頁那顆進平面圖的按鈕做的是同一件事，

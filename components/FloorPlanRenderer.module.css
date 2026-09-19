@@ -2,23 +2,9 @@
    分這一刀是票 07 存在的理由：線寬是《室內設計裝修製圖規範》表 24 的階層，
    改它等於改製圖依據；顏色是畫法，而畫法要能依互動狀態改變。
 
-   取值沿用 floorplan-generator 的 PALETTE（表 24 筆號 8／9：柱深灰、牆淺灰），
-   不是為了跟產生器對齊——`docs/adr/0005` 說明兩邊的畫法本來就可以不同——
-   而是因為那組值已經在這張圖上看過、可讀性驗證過了。 */
+   主圖與符號 sprite 讀同一組 --fp-* token，值由 `app/globals.css` 集中定義，
+   讓主圖與符號圖形不會因為各自維護 PALETTE 而分岔。 */
 .plan {
-  --paper: #ffffff;
-  --room: #f4f2ed;
-  --room-wet: #eaf0f2;
-  --room-balcony: #eef1e9;
-  --wall: #a8a8a8;
-  --column: #585858;
-  --structure: #2b2b2b;
-  --line: #4a4a4a;
-  --furn: #ffffff;
-  --furn-line: #8a8a8a;
-  --text: #2b2b2b;
-  --muted: #7a7a7a;
-
   /* 產生器輸出的 <svg> 帶著 width="100%"，React 這一份沒有。
      這三行接手那件事——`FloorPlanViewer.module.css` 裡原本有一條同樣用意的規則，
      但它寫在 CSS Module 裡、選的卻是一個沒被 hash 的字串 class，從來沒生效過。 */
@@ -29,38 +15,33 @@
 }
 
 .paper {
-  fill: var(--paper);
+  fill: var(--fp-paper);
 }
 
 /* --- 房間（圖層 06 地板）--- */
 .room {
-  fill: var(--room);
+  fill: var(--fp-room);
+  --fp-room-dim: color-mix(in oklab, var(--fp-room) 74%, var(--fp-dim-source));
   /* 地板換色要看得出是「暗下去」而不是「閃一下」：兩段式本來就在動，
      再加一個瞬間的跳色只會變成雜訊。 */
   transition: fill 160ms ease-out;
 }
 
 .room[data-room-kind="wet"] {
-  fill: var(--room-wet);
+  fill: var(--fp-room-wet);
+  --fp-room-dim: color-mix(in oklab, var(--fp-room-wet) 74%, var(--fp-dim-source));
 }
 
 .room[data-room-kind="balcony"] {
-  fill: var(--room-balcony);
+  fill: var(--fp-room-balcony);
+  --fp-room-dim: color-mix(in oklab, var(--fp-room-balcony) 74%, var(--fp-dim-source));
 }
 
 /* 圖面依互動狀態改變畫法（票 07）。目前只有一種狀態：說明卡開著時，
    **沒有標記的那些房間**暗下去，讓使用者在被壓縮的可視帶裡找得回自己在看哪一間。
    「標記」在自由看圖是被選到的那一個，在找找看是作答後的 selected 與 revealed（M4 票 02）。 */
 .room[data-state="muted"] {
-  fill: color-mix(in oklab, var(--room) 74%, #6b6b6b);
-}
-
-.room[data-room-kind="wet"][data-state="muted"] {
-  fill: color-mix(in oklab, var(--room-wet) 74%, #6b6b6b);
-}
-
-.room[data-room-kind="balcony"][data-state="muted"] {
-  fill: color-mix(in oklab, var(--room-balcony) 74%, #6b6b6b);
+  fill: var(--fp-room-dim);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -73,46 +54,46 @@
 /* 表 24 筆號 9：牆填淺灰、筆號 8：柱填深灰。兩者的差別是填色深淺，不是形狀——
    這正是「柱不能打掉、牆有些可以」那一課在圖上唯一看得出來的地方。 */
 .wall {
-  fill: var(--wall);
+  fill: var(--fp-wall);
 }
 
 .column {
-  fill: var(--column);
+  fill: var(--fp-column);
 }
 
 /* 建物輪廓：表 6「粗重線—輪廓線」。 */
 .outline {
   fill: none;
-  stroke: var(--structure);
+  stroke: var(--fp-structure);
 }
 
 /* --- 門窗（圖層 04／03）--- */
 .opening {
   fill: none;
-  stroke: var(--line);
+  stroke: var(--fp-line);
 }
 
 /* 出入口的三角記號、拉門中央的交會點——它們是填出來的，不是描出來的。 */
 .openingMark {
-  fill: var(--line);
+  fill: var(--fp-line);
   stroke: none;
 }
 
 /* --- 傢俱（圖層 07 活動 / 08 固定）--- */
 .furniture {
-  fill: var(--furn);
-  stroke: var(--furn-line);
+  fill: var(--fp-furn);
+  stroke: var(--fp-furn-line);
 }
 
 /* 副線：枕頭側、椅背、洗槽、落水口。表 24 細實線。 */
 .furnitureDetail {
   fill: none;
-  stroke: var(--furn-line);
+  stroke: var(--fp-furn-line);
 }
 
 /* 洗臉盆背後那道牆線（表 14 的掛牆式）。sprite 也是這樣畫的。 */
 .fixtureWallLine {
-  fill: var(--wall);
+  fill: var(--fp-wall);
   stroke: none;
 }
 
@@ -121,22 +102,22 @@
    細實線矩形是台灣建案平面圖的普遍做法，屬 convention。 */
 .canopy {
   fill: none;
-  stroke: var(--muted);
+  stroke: var(--fp-muted);
 }
 
 /* --- 文字（圖層 11）--- */
 /* 房名壓在傢俱線上會看不清楚，用紙色描邊當底。 */
 .roomLabel {
-  fill: var(--text);
-  stroke: var(--paper);
+  fill: var(--fp-text);
+  stroke: var(--fp-paper);
   stroke-linejoin: round;
   paint-order: stroke;
   font-weight: 600;
 }
 
 .roomArea {
-  fill: var(--muted);
-  stroke: var(--paper);
+  fill: var(--fp-muted);
+  stroke: var(--fp-paper);
   stroke-linejoin: round;
   paint-order: stroke;
 }
@@ -146,41 +127,41 @@
    這裡一律用 Tick（短斜線）。 */
 .dimension {
   fill: none;
-  stroke: var(--muted);
+  stroke: var(--fp-muted);
 }
 
 .dimensionText {
-  fill: var(--muted);
+  fill: var(--fp-muted);
   stroke: none;
 }
 
 .north {
-  stroke: var(--structure);
+  stroke: var(--fp-structure);
 }
 
 .northNeedle {
-  fill: var(--structure);
+  fill: var(--fp-structure);
   stroke: none;
 }
 
 .northTail {
-  fill: var(--paper);
+  fill: var(--fp-paper);
   stroke: none;
 }
 
 .northLabel {
-  fill: var(--structure);
+  fill: var(--fp-structure);
   stroke: none;
   font-weight: 700;
 }
 
 .title {
-  fill: var(--text);
+  fill: var(--fp-text);
   font-weight: 700;
 }
 
 .titleScale,
 .subtitle {
-  fill: var(--muted);
+  fill: var(--fp-muted);
   font-weight: 400;
 }

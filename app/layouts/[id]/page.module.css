@@ -17,14 +17,15 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  padding: var(--space-4);
   overflow: hidden;
 }
 
 .title {
   flex: 0 0 auto;
   margin: 0 0 12px;
-  font-size: 20px;
+  font-size: var(--text-title-size);
+  line-height: var(--text-title-leading);
   font-weight: 700;
 }
 
@@ -35,29 +36,33 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin: 0 0 12px;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-3);
 }
 
 .titleRow .title {
   margin: 0;
 }
 
-/* 點得到（44px，PRD §9），但不撐高這一列：padding 把點擊範圍撐開，同樣大小的負 margin 把它從版面上收回去——
-   排版看到的只有文字那一行（24px），比 `<h1>` 那一行矮。 */
+/* 找找看入口：膠囊形的次要按鈕（DESIGN.md「連結與按鈕」）。看得見的膠囊 32px 高，
+   上下各一道 6px 的透明框把點擊範圍撐到 44px（PRD §9），同樣大小的負 margin 把它從版面上收回去——
+   排版看到的只有膠囊那 32px，比 `<h1>` 那一行矮，不撐高這一列（ADR-0003）。
+   底色只畫到 padding：透明框是點擊範圍，不是膠囊的一部分。 */
 .quizLink {
   flex: none;
-  margin: -10px -12px;
-  padding: 10px 12px;
-  font-size: 14px;
-  line-height: 24px;
-  font-weight: 700;
-  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  min-height: calc(var(--chip-h) + 12px);
+  margin: -6px 0;
+  padding: 6px 14px;
+  border: 6px solid transparent;
+  border-width: 6px 0;
+  border-radius: var(--radius-pill);
+  background: var(--paper2);
+  background-clip: padding-box;
+  font-size: var(--text-link-chip-size);
+  line-height: var(--text-link-chip-leading);
+  font-weight: 600;
+  color: var(--ink);
   text-decoration: none;
-}
-
-.quizLink:hover,
-.quizLink:focus-visible {
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }

@@ -16,7 +16,8 @@
   margin: 12px -16px -16px;
   background: var(--paper);
   border-top: 1px solid var(--ink);
-  box-shadow: 0 -14px 34px color-mix(in oklch, var(--ink) 9%, transparent);
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  box-shadow: var(--shadow-sheet);
 }
 
 /* 卡片是鍵盤焦點的**落點**，不是一個控制元件（票 06）：它升起來這件事本身就是給眼睛看的
@@ -47,7 +48,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 8px 10px 20px;
+  padding: var(--space-1) 8px 0 20px;
 }
 
 .identity {
@@ -57,18 +58,19 @@
 
 .name {
   margin: 0;
-  font-family: var(--serif);
-  font-size: 19px;
-  font-weight: 600;
-  line-height: 1.35;
+  font-family: var(--sans);
+  font-size: var(--text-sheet-name-size);
+  font-weight: var(--text-sheet-name-weight);
+  line-height: var(--text-sheet-name-leading);
 }
 
 .category {
   margin: 2px 0 0;
-  font-family: var(--mono);
-  font-size: 10.5px;
+  font-family: var(--sans);
+  font-size: var(--text-eyebrow-size);
+  line-height: var(--text-eyebrow-leading);
   letter-spacing: 0.1em;
-  color: var(--ink3);
+  color: var(--ink2);
 }
 
 /* 手機優先：關閉鍵是 M2 完成定義裡「44px」那一條真正指涉的東西。 */
@@ -81,8 +83,9 @@
   justify-content: center;
   padding: 0;
   border: none;
-  background: none;
-  color: var(--ink2);
+  border-radius: var(--radius-pill);
+  background: var(--paper2);
+  color: var(--ink);
   cursor: pointer;
 }
 
@@ -117,42 +120,43 @@
 
 .noteLead {
   margin: 0;
-  font-size: 15px;
+  font-size: var(--text-body-size);
   font-weight: 700;
-  line-height: 1.7;
+  line-height: var(--text-body-leading);
 }
 
 .noteDetail {
   margin: 2px 0 0;
-  font-size: 13.5px;
-  line-height: 1.75;
+  font-size: var(--text-secondary-size);
+  line-height: var(--text-secondary-leading);
   color: var(--ink2);
 }
 
 .section {
-  margin-top: 16px;
+  margin-top: var(--space-3);
 }
 
 .sectionLabel {
   margin: 0 0 6px;
-  font-family: var(--mono);
-  font-size: 10.5px;
+  font-family: var(--sans);
+  font-size: var(--text-label-size);
+  line-height: var(--text-label-leading);
   font-weight: 400;
   letter-spacing: 0.16em;
-  color: var(--ink3);
+  color: var(--ink2);
 }
 
 .prose {
   margin: 0;
-  font-size: 15px;
-  line-height: 1.8;
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-leading);
 }
 
 .confusedList {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .confusedItem {
@@ -162,14 +166,14 @@
 
 .confusedName {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.6;
 }
 
 .confusedText {
   margin: 0;
-  font-size: 13.5px;
-  line-height: 1.75;
+  font-size: var(--text-secondary-size);
+  line-height: var(--text-secondary-leading);
   color: var(--ink2);
 }
 
@@ -192,17 +196,18 @@
     color-mix(in oklch, var(--paper) 0%, transparent),
     var(--paper) 72%
   );
-  font-family: var(--mono);
-  font-size: 10.5px;
+  font-family: var(--sans);
+  font-size: var(--text-small-size);
+  line-height: var(--text-small-leading);
   letter-spacing: 0.1em;
-  color: var(--ink3);
+  color: var(--ink2);
   cursor: pointer;
 }
 
 /* 「其他位置」列與關閉鍵同樣是 44px 那一條指涉的控制元件。 */
 .occurrences {
   flex: 0 0 auto;
-  min-height: 56px;
+  min-height: var(--row-h);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -210,9 +215,10 @@
   padding: 6px 0;
   border: none;
   border-top: 1px solid var(--rule2);
-  background: none;
+  background: var(--paper2);
+  border-radius: var(--radius-m);
   font: inherit;
-  color: inherit;
+  color: var(--ink);
   text-align: left;
   cursor: pointer;
 }
@@ -232,7 +238,7 @@
 
 .occurrenceMark {
   flex-shrink: 0;
-  color: var(--accent);
+  color: var(--ink);
 }
 
 .occurrenceText {
@@ -244,15 +250,15 @@
 }
 
 .occurrenceTitle {
-  font-size: 14.5px;
-  font-weight: 500;
+  font-size: var(--text-row-title-size);
+  line-height: var(--text-row-title-leading);
+  font-weight: 600;
 }
 
 .occurrenceCount {
-  font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: var(--text-small-size);
   letter-spacing: 0.08em;
-  color: var(--ink3);
+  color: var(--ink2);
 }
 
 /* 桌機才有 hover——手機沒有，所以靜態呈現本身必須夠明確，
@@ -270,9 +276,9 @@
 .disclaimer {
   flex: 0 0 auto;
   margin: 0;
-  padding: 10px 20px calc(12px + env(safe-area-inset-bottom));
+  padding: var(--space-1) 20px calc(var(--space-2) + env(safe-area-inset-bottom));
   border-top: 1px solid var(--rule2);
-  font-size: 11px;
-  line-height: 1.7;
-  color: var(--ink3);
+  font-size: var(--text-small-size);
+  line-height: 1.5;
+  color: var(--ink2);
 }

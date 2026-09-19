@@ -59,7 +59,7 @@
      ⚠ 建案平面圖通常不畫樑，所以主圖上沒有它的熱區（PRD §4.2）。 -->
 <symbol id="sym-beam" viewBox="0 0 140 140" data-source="NAID p18 表 6 長虛線">
   <title>樑</title>
-  <rect x="22" y="6" width="96" height="128" fill="var(--fp-room,#f4f2ed)"/>
+  <rect x="22" y="6" width="96" height="128" fill="var(--fp-room,oklch(0.967 0 0))"/>
   <rect x="6" y="6" width="16" height="128" fill="var(--fp-wall,#a8a8a8)"/>
   <rect x="118" y="6" width="16" height="128" fill="var(--fp-wall,#a8a8a8)"/>
   <g stroke="var(--fp-line,#4a4a4a)" stroke-width="2.2" stroke-dasharray="18 10">
@@ -74,9 +74,9 @@
 <symbol id="sym-pipe-shaft" viewBox="0 0 140 140" data-source="NAID p48 表 25 I.P；p51 表 28 PS（僅代號，畫法無標準來源）">
   <title>管道間</title>
   <rect x="26" y="26" width="88" height="88" fill="var(--fp-wall,#a8a8a8)"/>
-  <rect x="42" y="42" width="56" height="56" fill="var(--fp-room,#f4f2ed)"/>
+  <rect x="42" y="42" width="56" height="56" fill="var(--fp-room,oklch(0.967 0 0))"/>
   <text x="70" y="80" text-anchor="middle" font-size="30" font-weight="600"
-        font-family="-apple-system, 'Noto Sans TC', sans-serif"
+        font-family="-apple-system, BlinkMacSystemFont, 'PingFang TC', 'Segoe UI', 'Microsoft JhengHei', 'Noto Sans CJK TC', sans-serif"
         fill="var(--fp-text,#2b2b2b)">PS</text>
 </symbol>
 
@@ -168,7 +168,7 @@
 <symbol id="sym-canopy-rain" viewBox="0 0 140 140" data-source="畫法無標準來源（convention）；定義見地籍測量實施規則、建築技術規則">
   <title>雨遮</title>
   <rect x="22" y="35" width="96" height="38" fill="none"
-        stroke="var(--fp-muted,#7a7a7a)" stroke-width="1.6"/>
+        stroke="var(--fp-muted,#767676)" stroke-width="1.6"/>
   <rect x="4" y="73" width="26" height="32" fill="var(--fp-wall,#a8a8a8)"/>
   <rect x="110" y="73" width="26" height="32" fill="var(--fp-wall,#a8a8a8)"/>
   <g stroke="var(--fp-structure,#2b2b2b)" stroke-width="3.2">

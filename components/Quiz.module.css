@@ -11,20 +11,20 @@
 
 .lead {
   margin: 0 0 16px;
-  font-size: 15px;
-  line-height: 1.7;
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-leading);
 }
 
 /* 手機優先：站著單手操作，按鈕一律點得到（44px，與檢視器的控制列同一條規矩）。 */
 .primary {
-  min-height: 44px;
-  min-width: 44px;
+  min-height: var(--control-h);
+  min-width: var(--touch-min);
   padding: 0 20px;
   font: inherit;
-  font-size: 15px;
+  font-size: var(--text-button-size);
   font-weight: 700;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--radius-m);
   background: var(--ink);
   color: var(--paper);
   cursor: pointer;
@@ -47,15 +47,15 @@
 
 .progress {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--text-meta-size);
   color: var(--ink2);
   font-variant-numeric: tabular-nums;
 }
 
 .prompt {
   margin: 0;
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: var(--text-prompt-size);
+  line-height: var(--text-prompt-leading);
 }
 
 .target {
@@ -172,12 +172,12 @@
 .names li {
   padding: 2px 8px;
   border: 1px solid var(--rule);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 13px;
   line-height: 1.6;
 }
 
-/* 結算的答錯清單：每一列是連到題目符號頁的連結，整列點得到（44px）。連結色與站上其他連結同一個 `--accent`。 */
+/* 結算的答錯清單：每一列是連到題目符號頁的連結，整列點得到（44px）。 */
 .review {
   margin: 0 0 16px;
   padding: 0;
@@ -187,16 +187,11 @@
 .reviewLink {
   display: flex;
   align-items: center;
-  min-height: 44px;
+  min-height: var(--touch-min);
   padding: 6px 0;
   border-bottom: 1px solid var(--rule2);
-  font-size: 15px;
-  color: var(--accent);
-  text-decoration: none;
-}
-
-.reviewLink:hover,
-.reviewLink:focus-visible {
+  font-size: var(--text-row-title-size);
+  color: var(--ink);
   text-decoration: underline;
   text-underline-offset: 3px;
 }

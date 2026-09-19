@@ -11,7 +11,7 @@
    **最底下的 `primaryAction` 是例外**：它不是版心的一部分，是首頁與符號頁各有一顆的那個主要動作（票 08）。
    分類頁沒有它。放在這裡是因為兩顆做的是同一件事，而兩份照抄的按鈕遲早會長得不一樣。 */
 .page {
-  padding: 22px 20px 40px;
+  padding: var(--space-6) var(--space-5) 40px;
 }
 
 /* 手機優先，但寬螢幕上一行字不該橫跨整個視窗——長行讀起來會掉行。 */
@@ -25,24 +25,25 @@
 /* 標題上方那一行小字：符號頁與分類頁放分類名，首頁放站名。 */
 .eyebrow {
   margin: 0;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.1em;
-  color: var(--ink3);
+  font-family: var(--sans);
+  font-size: var(--text-eyebrow-size);
+  line-height: var(--text-eyebrow-leading);
+  letter-spacing: 0.06em;
+  color: var(--ink2);
 }
 
 /* 這一頁唯一的大字。明體：這幾頁是讀物不是介面。 */
 .title {
-  font-family: var(--serif);
-  font-size: 29px;
-  font-weight: 700;
-  line-height: 1.42;
+  font-family: var(--sans);
+  font-size: var(--text-display-size);
+  font-weight: var(--text-display-weight);
+  line-height: var(--text-display-leading);
   letter-spacing: 0.01em;
 }
 
 /* 這幾頁**唯一**填滿底色的東西：首頁那顆進平面圖的按鈕（PRD §8）、符號頁底部的轉換點（PRD §6.2.1）。
    兩顆做的是同一件事——把讀者從讀物帶進平面圖——所以長得一樣。
-   底色用墨色不用 `--accent`：`--accent` 是這個站的連結色——分類入口、搜尋結果、符號頁「容易搞混」的每一則都是它。
+   底色用墨色，連結則沿用站上的一致文字連結樣式。
    主要動作要一眼就與那些連結分得開。紙色字壓在墨色上的對比約 15.8:1，滑過時的 `--ink2` 約 6.5:1。
    高度超過 44px（PRD §9），手機上整條寬度都按得到。 */
 .primaryAction {
@@ -62,15 +63,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 52px;
+  gap: var(--space-2);
+  min-height: var(--control-h);
   padding: 12px 20px;
-  font-size: 16px;
+  font-size: var(--text-button-size);
   font-weight: 700;
   text-decoration: none;
-}
-
-.actionShape:focus-visible {
-  outline: 2px solid var(--accent2);
-  outline-offset: 2px;
+  border-radius: var(--radius-m);
 }

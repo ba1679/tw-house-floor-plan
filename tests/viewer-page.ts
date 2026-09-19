@@ -55,8 +55,14 @@ export async function dragLeft(page: Page, from: { x: number; y: number }, dx: n
  */
 export async function selectByTwoTaps(page: Page, hotspotId: string) {
   const target = page.locator(`#${hotspotId}`);
+  // page.goto() 等待靜態文件完成，不代表 client hydration 與第一個 ResizeObserver
+  // callback 已經完成；這個小等待讓兩段式測試從真實可互動的狀態開始。
+  await page.waitForTimeout(100);
   const before = (await target.boundingBox())!;
   await page.mouse.click(before.x + before.width / 2, before.y + before.height / 2);
+  // 等第一段 state commit 完成再量第二段座標；新增的 SVG 標記層讓立即連點更容易
+  // 在 React re-render 前送出第二下，狀態機就會把它誤認成仍在 browsing 的雙擊。
+  await expect(target).toHaveAttribute("data-state", "candidate");
   const zoomed = (await target.boundingBox())!;
   await page.mouse.click(zoomed.x + zoomed.width / 2, zoomed.y + zoomed.height / 2);
   await expect(target, `${hotspotId} 沒有被選中，後面的斷言都不算數`).toHaveAttribute(

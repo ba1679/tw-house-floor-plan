@@ -8,6 +8,7 @@
   padding: 18px;
   background: var(--paper);
   border: 1px solid var(--ink3);
+  border-radius: var(--radius-l);
 }
 
 .head {
@@ -24,21 +25,23 @@
   width: 34px;
   height: 34px;
   border: 1px solid var(--ink3);
+  border-radius: var(--radius-s);
   color: var(--ink2);
 }
 
 .label {
-  font-family: var(--mono);
-  font-size: 12.5px;
+  font-family: var(--sans);
+  font-size: var(--text-label-size);
+  line-height: var(--text-label-leading);
   letter-spacing: 0.08em;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--ink2);
 }
 
 .explainer {
   margin: 0;
-  font-size: 13.5px;
-  line-height: 1.8;
+  font-size: var(--text-secondary-size);
+  line-height: var(--text-secondary-leading);
   color: var(--ink2);
 }
 

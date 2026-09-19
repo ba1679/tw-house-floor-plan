@@ -125,7 +125,7 @@ const PlanArtwork = memo(function PlanArtwork({
           width={viewBox.width}
           height={viewBox.height}
         >
-          <rect {...viewBox} fill="#fff" />
+          <rect {...viewBox} fill="var(--fp-paper)" />
           {[...floorplan.doors, ...floorplan.windows].map((opening) => {
             const wall = wallById.get(opening.wall_id);
             if (!wall) return null;

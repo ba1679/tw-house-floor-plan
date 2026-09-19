@@ -6,7 +6,7 @@
 
 .column {
   composes: column from "./reading.module.css";
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .site {
@@ -20,8 +20,8 @@
 
 .lede {
   margin: 0;
-  font-size: 15.5px;
-  line-height: 1.9;
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-leading);
   color: var(--ink2);
 }
 
@@ -29,7 +29,7 @@
 .layouts {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-2);
   margin: 14px 0 18px;
 }
 
@@ -44,11 +44,8 @@
 .quizButton {
   composes: actionShape from "./reading.module.css";
   color: var(--ink);
-  border: 1px solid var(--ink);
-}
-
-.quizButton:hover {
   background: var(--paper2);
+  border: 0;
 }
 
 .browse {
@@ -60,11 +57,12 @@
 /* 與搜尋框的標籤同一個畫法：兩區在這一頁上是並列的兩條路，標題長得一樣。 */
 .browseLabel {
   margin: 0;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  font-weight: 400;
+  font-family: var(--sans);
+  font-size: var(--text-label-size);
+  line-height: var(--text-label-leading);
+  font-weight: 700;
   letter-spacing: 0.16em;
-  color: var(--ink3);
+  color: var(--ink2);
 }
 
 /* 一列一格、格與格之間一條細線——與分類頁的清單、搜尋結果同一個畫法。
@@ -87,28 +85,22 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 48px;
+  min-height: var(--touch-min);
   padding: 8px 0;
-  color: inherit;
-  text-decoration: none;
-}
-
-.categoryName {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.categoryLink:hover .categoryName,
-.categoryLink:focus-visible .categoryName {
+  color: var(--ink);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
+.categoryName {
+  font-size: var(--text-row-title-size);
+  font-weight: 700;
+  color: inherit;
+}
+
 .categoryEn {
   flex: none;
-  font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: var(--text-small-size);
   letter-spacing: 0.1em;
-  color: var(--ink3);
+  color: var(--ink2);
 }

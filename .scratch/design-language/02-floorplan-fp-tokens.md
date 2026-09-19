@@ -4,7 +4,7 @@
 
 **Blocked by:** None（可與票 03 並行）
 
-**Status:** ready
+**Status:** done
 
 設計依據：根目錄 `DESIGN.md` 的「圖面」；值：`design/_tokens.txt` 的「圖面（`--fp-*`）」段。
 
@@ -25,11 +25,22 @@
 
 ## Acceptance criteria
 
-- [ ] `FloorPlanRenderer.module.css` 不再宣告或讀取圖面用的 `--paper`、`--wall` 等無前綴名稱，全部改用 `--fp-*`
-- [ ] 主圖與 `data/symbols.sprite.svg` 的同名 token 具有同一組值
-- [ ] 一般房間、濕區、陽台都沒有色相；牆、柱與結構線的既有明度關係未改變
-- [ ] `--fp-muted` 對 `--fp-paper` 的文字對比至少 4.5:1
-- [ ] 說明卡開啟時的房間變暗與 reduced-motion 行為維持不變
-- [ ] 既有 renderer、符號圖與視野互動測試通過，並補足能防止 token 名稱與值再分岔的測試
-- [ ] `npm run typecheck`、`npm test` 通過
+- [x] `FloorPlanRenderer.module.css` 不再宣告或讀取圖面用的 `--paper`、`--wall` 等無前綴名稱，全部改用 `--fp-*`
+- [x] 主圖與 `data/symbols.sprite.svg` 的同名 token 具有同一組值
+- [x] 一般房間、濕區、陽台都沒有色相；牆、柱與結構線的既有明度關係未改變
+- [x] `--fp-muted` 對 `--fp-paper` 的文字對比至少 4.5:1
+- [x] 說明卡開啟時的房間變暗與 reduced-motion 行為維持不變
+- [x] 既有 renderer、符號圖與視野互動測試通過，並補足能防止 token 名稱與值再分岔的測試
+- [x] `npm run typecheck`、`npm test` 通過
 
+
+## Comments
+
+**2026-09-19：做完了。** codex 實作，Claude 驗收並補註解。
+
+- `FloorPlanRenderer.module.css` 的圖面 token 全部改讀 `--fp-*`，值集中在 `app/globals.css`；房間變暗改成每種房間各自的 `--fp-room-dim`（`color-mix(..., 74%, #6b6b6b)`），160ms 與 reduced-motion 不變。
+- `data/symbols.sprite.svg` 的 fallback 對齊定案值（`--fp-room`、`--fp-muted`），`PS` 字的字體堆疊改成系統字。
+- `tests/design-language.spec.ts` 守住：globals 的 `--fp-*` 值、renderer 讀的名稱、sprite fallback 同值、`--fp-muted` 對白 4.5:1。
+- `components/SymbolArt.tsx` 過時的 PALETTE 註解已改寫。
+
+備註：`.claude/skills/floorplan-generator/scripts/render_svg.py` 的 PALETTE 仍是舊色（`#f4f2ed` 等）。它是產生器的靜態產物，依 `docs/adr/0005` 可以與 React renderer 不同，不在本票範圍。
