@@ -11,6 +11,7 @@ import { useFirstVisitHint } from "./useFirstVisitHint";
 import { useSaveAnswers } from "./useLearningProgress";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
+import type { LayoutProgress } from "@/lib/quiz/progress";
 import {
   createRound,
   isCorrect,
@@ -55,6 +56,8 @@ type Props = {
   quizzable: string[];
   /** 這一局依序要出的 symbol id。 */
   questions: string[];
+  /** 這一局開始時的紀錄（出題讀到的那一份）：結算的刻度拿它標出這一局新認得的格子（M4 票 11）。 */
+  progressAtStart: LayoutProgress;
   onPlayAgain: () => void;
 };
 
@@ -74,7 +77,15 @@ function pickedNote(answer: Answer, symbols: Record<string, SymbolRecord>): Shee
   };
 }
 
-export function QuizRound({ floorplan, symbols, readingOrder, quizzable, questions, onPlayAgain }: Props) {
+export function QuizRound({
+  floorplan,
+  symbols,
+  readingOrder,
+  quizzable,
+  questions,
+  progressAtStart,
+  onPlayAgain,
+}: Props) {
   // 初始尺寸是占位值，與自由看圖同一份（`initialViewerConfig`）：真正的框掛載後由 RESIZE 量。
   const [round, dispatch] = useReducer(
     reduceRound,
@@ -155,8 +166,16 @@ export function QuizRound({ floorplan, symbols, readingOrder, quizzable, questio
 
         {/* 這一局寫完之後讀回來的那一份（`useSaveAnswers`），所以已經是這一局之後的數字。
             localStorage 被封鎖時讀回來的是空紀錄，印的就是 0：這一局沒有被記住，「再玩一次」出題讀到的也是那份空紀錄。
-            為什麼是 0，`KnownCount` 在數字底下說。 */}
-        {stored && <KnownCount layoutName={floorplan.name} quizzable={quizzable} stored={stored} />}
+            為什麼是 0，`KnownCount` 在數字底下說。
+            交進開始時的那一份，刻度就把這一局新認得的格子加高（M4 票 11）。 */}
+        {stored && (
+          <KnownCount
+            layoutName={floorplan.name}
+            quizzable={quizzable}
+            stored={stored}
+            progressAtStart={progressAtStart}
+          />
+        )}
 
         <div className={styles.actions}>
           <button type="button" className={styles.primary} onClick={onPlayAgain}>

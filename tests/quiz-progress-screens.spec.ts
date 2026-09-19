@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Locator, type Page } from "@playwright/test";
 import {
   LAYOUT_ID,
   PLAN,
@@ -34,6 +34,41 @@ const knownCountText = (known: number) => `這張${plan.name}你認得 ${known} 
 
 /** 瀏覽器不讓網站存資料時，數字旁邊那一句（規格主人 2026-09-15 裁定）。 */
 const STORAGE_BLOCKED_NOTE = "這台瀏覽器不讓網站存資料，答過的題目不會被記住。";
+
+/** 開場數字底下「認得」的定義（spec Solution）。 */
+const KNOWN_DEFINITION = "在找找看裡答對過至少一次，就算你認得了。進度只存在這台裝置上。";
+
+const startOf = (page: Page) => page.getByRole("button", { name: "開始" });
+
+/**
+ * 「你認得」底下的刻度畫成什麼樣子，一格一個字：`■` 墨色實心、`█` 墨色實心而且比其他格高、`□` 其他。
+ *
+ * 刻度對讀螢幕軟體藏起來（字已經說了數字），沒有名字可找，所以照 DESIGN.md 寫下的位置找：緊貼在「你認得 N / M」底下的那一個元素。
+ * 量的是畫出來的樣子，不看 class：顏色拿一個畫成 `--ink` 的探針讀回瀏覽器算好的值再比，高與底邊量 bounding box。
+ * **底邊沒有對齊就丟例外**：加高的格子要從同一條底線往上長（票 11）。
+ */
+const meterOf = (page: Page) =>
+  knownCountOf(page)
+    .locator("xpath=following-sibling::*[1]")
+    .evaluate((meter) => {
+      const probe = document.createElement("span");
+      probe.style.background = "var(--ink)";
+      document.body.append(probe);
+      const ink = getComputedStyle(probe).backgroundColor;
+      probe.remove();
+
+      const cells = [...meter.children].map((cell) => ({
+        ink: getComputedStyle(cell).backgroundColor === ink,
+        rect: cell.getBoundingClientRect(),
+      }));
+      if (new Set(cells.map((cell) => Math.round(cell.rect.bottom))).size > 1) throw new Error("刻度的格子底部沒有對齊");
+      const base = Math.min(...cells.map((cell) => cell.rect.height));
+      return cells.map(({ ink, rect }) => (!ink ? "□" : rect.height > base + 0.5 ? "█" : "■")).join("");
+    });
+
+/** 刻度應該畫成的樣子：前 `known` 格墨色實心，其中最後 `fresh` 格是這一局新認得的、加高（票 11）。 */
+const meterPicture = (known: number, fresh = 0) =>
+  "■".repeat(known - fresh) + "█".repeat(fresh) + "□".repeat(QUIZZABLE_COUNT - known);
 
 /** 開場的三份清單，以及結算的答錯清單，都以標題命名（`aria-labelledby`）。 */
 const listOf = (page: Page, name: string | RegExp) => page.getByRole("list", { name });
@@ -82,6 +117,9 @@ test.describe("開場", () => {
     // 「錯 N 次」與「還沒遇到」是兩種不熟，分在兩份清單裡。
     expect(await sortedItems(page, "還沒遇到")).toEqual(sortedNames(unseen));
     expect(await sortedItems(page, "已認識")).toEqual(sortedNames(known));
+
+    // 開場的刻度不分新舊，只數已認識（票 11 只畫結算）。
+    await expect.poll(() => meterOf(page)).toBe(meterPicture(known.length));
   });
 
   test("空的紀錄：0 / 13，13 個都在還沒遇到，沒有還不熟與已認識", async ({ page }) => {
@@ -101,8 +139,37 @@ test.describe("開場", () => {
     await expect(knownCountOf(page)).toHaveText(knownCountText(QUIZZABLE_COUNT));
     await expect(listOf(page, "已認識").getByRole("listitem")).toHaveCount(QUIZZABLE_COUNT);
 
-    await page.getByRole("button", { name: "開始" }).click();
+    await startOf(page).click();
     await expect(progressOf(page)).toHaveText(progressText(1));
+  });
+
+  // 票 10：來這裡的人多半是要玩，清單是參考。數字與刻度說完你認得幾個，緊接著就是一局幾題與「開始」，清單排在按鈕下面。
+  test("由上而下：你認得 N / 13 → 「認得」的定義 → 開場那一句 → 「開始」 → 還不熟、還沒遇到、已認識", async ({ page }) => {
+    // 三份清單都有東西：少了一份就少量一個位置。
+    await seedProgress(page, record(allOnce(onPlan.slice(0, 4)), { [onPlan[4]]: 1 }));
+    await page.goto(QUIZ);
+    await expect(knownCountOf(page)).toHaveText(knownCountText(4));
+
+    const parts: [string, Locator][] = [
+      ["你認得", knownCountOf(page)],
+      ["定義", page.getByText(KNOWN_DEFINITION)],
+      ["開場那一句", page.getByText(/^一局 \d+ 題。/)],
+      ["開始", startOf(page)],
+      ["還不熟", listOf(page, "還不熟")],
+      ["還沒遇到", listOf(page, "還沒遇到")],
+      ["已認識", listOf(page, "已認識")],
+    ];
+    const tops = await Promise.all(parts.map(async ([name, part]) => [name, (await part.boundingBox())!.y] as const));
+    expect([...tops].sort((a, b) => a[1] - b[1]).map(([name]) => name)).toEqual(parts.map(([name]) => name));
+  });
+
+  // 還不熟一列一個，是三份清單裡最佔高度的那一份：13 個全都錯過，就是最長的開場。
+  test("13 個都是還不熟：「開始」整顆在第一屏，不必捲動就按得到", async ({ page }) => {
+    await seedProgress(page, record({}, allOnce(onPlan)));
+    await page.goto(QUIZ);
+    await expect(listOf(page, "還不熟").getByRole("listitem")).toHaveCount(QUIZZABLE_COUNT);
+
+    await expect(startOf(page)).toBeInViewport({ ratio: 1 });
   });
 
   // 靜態 HTML 是每個人共用的同一份，而進度在瀏覽器裡。先印一個「0 / 13」再跳成真的數字，那一瞬間的 0 就是進度條在說謊（票面）。
@@ -130,7 +197,7 @@ test.describe("結算", () => {
     await seedProgress(page, record(allOnce(known)));
     await page.goto(QUIZ);
     await expect(knownCountOf(page)).toHaveText(knownCountText(6));
-    await page.getByRole("button", { name: "開始" }).click();
+    await startOf(page).click();
 
     const asked = await playToResults(page, { wrong: [1, 2] });
 
@@ -148,11 +215,61 @@ test.describe("結算", () => {
 
     // 寫進去之後的數字：這一局答對的 5 個已經算進去，答錯的 2 個還不算。
     await expect(knownCountOf(page)).toHaveText(knownCountText(11));
+    // 刻度標出這一局新填的那 5 格（票 11）：他不必記得開場是 6，也看得出這一局帶來了什麼。
+    await expect.poll(() => meterOf(page)).toBe(meterPicture(11, 5));
     // 存得了的時候不說那一句：它只給封鎖儲存的瀏覽器。
     await expect(page.getByText(STORAGE_BLOCKED_NOTE)).toHaveCount(0);
 
     await page.getByRole("link", { name: "回到平面圖" }).click();
     await expect(page).toHaveURL(PLAN);
+  });
+
+  // 票 11 的「新填」：結算時已認識、這一局開始時還不是。答對一個早就認得的，刻度上沒有東西要新填。
+  test("刻度只加高這一局新認得的格子：答對已經認得的不算", async ({ page }) => {
+    // 10 個已認識 + 3 個還沒遇到：這一局是那 3 個加上 4 個已認識的（出題優先序，票 04）。全部答對 → 13 / 13，新填 3 格。
+    await seedProgress(page, record(allOnce(onPlan.slice(0, 10))));
+    await startRound(page);
+    await playToResults(page);
+
+    await expect(knownCountOf(page)).toHaveText(knownCountText(QUIZZABLE_COUNT));
+    await expect.poll(() => meterOf(page)).toBe(meterPicture(QUIZZABLE_COUNT, 3));
+    // 不加字（DESIGN.md「學習進度的刻度」）：新填了幾格只畫在刻度上，數字那一塊仍然只有那一行。
+    await expect(knownCountOf(page).locator("..")).toHaveText(knownCountText(QUIZZABLE_COUNT));
+  });
+
+  test("這一局沒有新認得的（全部答錯）：沒有加高的格子，畫面上也不多任何字", async ({ page }) => {
+    await seedProgress(page, record(allOnce(onPlan.slice(0, 6))));
+    await startRound(page);
+    await playToResults(page, { wrong: [1, 2, 3, 4, 5, 6, 7] });
+
+    await expect(knownCountOf(page)).toHaveText(knownCountText(6));
+    await expect.poll(() => meterOf(page)).toBe(meterPicture(6));
+    // 沒有一句「這一局沒有新認得的」：讀起來像責備（票 08 的 Comments）。
+    await expect(knownCountOf(page).locator("..")).toHaveText(knownCountText(6));
+  });
+
+  test("13 / 13 之後再打一局全對：沒有加高的格子，都已經認得了", async ({ page }) => {
+    await seedProgress(page, record(allOnce(onPlan)));
+    await startRound(page);
+    await playToResults(page);
+
+    await expect(knownCountOf(page)).toHaveText(knownCountText(QUIZZABLE_COUNT));
+    await expect.poll(() => meterOf(page)).toBe(meterPicture(QUIZZABLE_COUNT));
+  });
+
+  // 「再玩一次」同樣從按下去的那一刻讀進度（票 11）：第二局的「開始時」是第一局結束之後，不是開場掛上時的那一份。
+  test("「再玩一次」之後的結算，以第二局開始時的進度為準", async ({ page }) => {
+    await startRound(page);
+    await playToResults(page);
+    await expect(knownCountOf(page)).toHaveText(knownCountText(ROUND_SIZE));
+    await expect.poll(() => meterOf(page)).toBe(meterPicture(ROUND_SIZE, ROUND_SIZE));
+
+    // 第二局：剩下的 6 個還沒遇到，加上第一局答對的其中一個。全部答對 → 13 / 13，新填的是那 6 個。
+    await page.getByRole("button", { name: "再玩一次" }).click();
+    await playToResults(page);
+
+    await expect(knownCountOf(page)).toHaveText(knownCountText(QUIZZABLE_COUNT));
+    await expect.poll(() => meterOf(page)).toBe(meterPicture(QUIZZABLE_COUNT, QUIZZABLE_COUNT - ROUND_SIZE));
   });
 
   test("點答錯清單的一列，到那個符號的符號頁", async ({ page }) => {
@@ -204,13 +321,15 @@ test("瀏覽器封鎖 localStorage：開場與結算照樣顯示、都當成空�
   await expect(page.getByText(STORAGE_BLOCKED_NOTE)).toBeVisible();
   expect(await sortedItems(page, "還沒遇到")).toEqual(sortedNames(onPlan));
 
-  await page.getByRole("button", { name: "開始" }).click();
+  await startOf(page).click();
   await playToResults(page);
   await expect(page.getByText(`答對 ${ROUND_SIZE} / ${ROUND_SIZE} 題`)).toBeVisible();
 
   // 結算印的是讀得到的那一份——空的。這一局答對的 7 個沒有被記住，「再玩一次」出題依據的也是空紀錄；
   // 在這裡印 7 / 13，下一局卻又把它們當成還沒遇到來考，數字就與出題各說各話（票 05 的 Comments）。
   await expect(knownCountOf(page)).toHaveText(knownCountText(0));
+  // 刻度與數字對得上（票 11）：開始時與結算時讀到的都是空紀錄，沒有新填的格子。
+  await expect.poll(() => meterOf(page)).toBe(meterPicture(0));
   // 但只印 0 / 13，剛答對 7 題的人會以為網站壞了（user story 42 要防的正是這件事）：數字旁邊說出為什麼。
   await expect(page.getByText(STORAGE_BLOCKED_NOTE)).toBeVisible();
   expect(errors).toEqual([]);
