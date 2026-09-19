@@ -129,6 +129,20 @@
   height: calc(var(--meter-cell-h) * 2);
 }
 
+/* 只給讀螢幕軟體的字（結算的「這一局新認得 N 個」）：留在無障礙樹裡，畫面上不佔地方。
+   它不會拿到焦點，所以不需要 :focus-within 時現形的那一條例外。 */
+.visuallyHidden {
+  position: absolute;
+  clip-path: inset(50%);
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  white-space: nowrap;
+}
+
 /* 記不住的瀏覽器上，數字底下說出為什麼是 0。與「認得」的定義同一個字級：是說明，不是警告。 */
 .storageNote {
   margin: 8px 0 0;

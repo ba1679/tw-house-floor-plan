@@ -70,6 +70,24 @@ const meterOf = (page: Page) =>
 const meterPicture = (known: number, fresh = 0) =>
   "■".repeat(known - fresh) + "█".repeat(fresh) + "□".repeat(QUIZZABLE_COUNT - known);
 
+/** 結算時只念給讀螢幕軟體聽的那一句（DESIGN.md「學習進度的刻度」，2026-09-19 定）。 */
+const freshNoteOf = (page: Page) => page.getByText(/^這一局新認得/);
+
+/**
+ * 這一局新認得了幾個：讀螢幕軟體從「你認得」那一塊聽到數字，接著聽到這一句——刻度藏起來了，加高的格子只看得到。
+ * 畫面上它不佔地方（不大於 1 × 1）：看得見的人已經從刻度看到了，「不加字」照舊。
+ */
+async function expectFreshNote(page: Page, known: number, fresh: number) {
+  await expect(knownCountOf(page).locator("..")).toMatchAriaSnapshot(
+    [
+      `- paragraph: ${JSON.stringify(knownCountText(known))}`,
+      `- paragraph: ${JSON.stringify(`這一局新認得 ${fresh} 個`)}`,
+    ].join("\n"),
+  );
+  const box = (await freshNoteOf(page).boundingBox())!;
+  expect(box.width <= 1 && box.height <= 1, "「這一局新認得」印在畫面上了").toBe(true);
+}
+
 /** 開場的三份清單，以及結算的答錯清單，都以標題命名（`aria-labelledby`）。 */
 const listOf = (page: Page, name: string | RegExp) => page.getByRole("list", { name });
 
@@ -118,8 +136,9 @@ test.describe("開場", () => {
     expect(await sortedItems(page, "還沒遇到")).toEqual(sortedNames(unseen));
     expect(await sortedItems(page, "已認識")).toEqual(sortedNames(known));
 
-    // 開場的刻度不分新舊，只數已認識（票 11 只畫結算）。
+    // 開場的刻度不分新舊，只數已認識（票 11 只畫結算），讀螢幕軟體也不念「這一局新認得」。
     await expect.poll(() => meterOf(page)).toBe(meterPicture(known.length));
+    await expect(freshNoteOf(page)).toHaveCount(0);
   });
 
   test("空的紀錄：0 / 13，13 個都在還沒遇到，沒有還不熟與已認識", async ({ page }) => {
@@ -217,6 +236,7 @@ test.describe("結算", () => {
     await expect(knownCountOf(page)).toHaveText(knownCountText(11));
     // 刻度標出這一局新填的那 5 格（票 11）：他不必記得開場是 6，也看得出這一局帶來了什麼。
     await expect.poll(() => meterOf(page)).toBe(meterPicture(11, 5));
+    await expectFreshNote(page, 11, 5);
     // 存得了的時候不說那一句：它只給封鎖儲存的瀏覽器。
     await expect(page.getByText(STORAGE_BLOCKED_NOTE)).toHaveCount(0);
 
@@ -233,8 +253,8 @@ test.describe("結算", () => {
 
     await expect(knownCountOf(page)).toHaveText(knownCountText(QUIZZABLE_COUNT));
     await expect.poll(() => meterOf(page)).toBe(meterPicture(QUIZZABLE_COUNT, 3));
-    // 不加字（DESIGN.md「學習進度的刻度」）：新填了幾格只畫在刻度上，數字那一塊仍然只有那一行。
-    await expect(knownCountOf(page).locator("..")).toHaveText(knownCountText(QUIZZABLE_COUNT));
+    // 不加字（DESIGN.md「學習進度的刻度」）：新填了幾格，畫面上只畫在刻度上；讀螢幕軟體聽到的也是 3，不是答對的 7。
+    await expectFreshNote(page, QUIZZABLE_COUNT, 3);
   });
 
   test("這一局沒有新認得的（全部答錯）：沒有加高的格子，畫面上也不多任何字", async ({ page }) => {
@@ -244,7 +264,7 @@ test.describe("結算", () => {
 
     await expect(knownCountOf(page)).toHaveText(knownCountText(6));
     await expect.poll(() => meterOf(page)).toBe(meterPicture(6));
-    // 沒有一句「這一局沒有新認得的」：讀起來像責備（票 08 的 Comments）。
+    // 沒有一句「這一局沒有新認得的」：讀起來像責備（票 08 的 Comments）。讀螢幕軟體念得到的字也算在內。
     await expect(knownCountOf(page).locator("..")).toHaveText(knownCountText(6));
   });
 
@@ -255,6 +275,7 @@ test.describe("結算", () => {
 
     await expect(knownCountOf(page)).toHaveText(knownCountText(QUIZZABLE_COUNT));
     await expect.poll(() => meterOf(page)).toBe(meterPicture(QUIZZABLE_COUNT));
+    await expect(freshNoteOf(page)).toHaveCount(0);
   });
 
   // 「再玩一次」同樣從按下去的那一刻讀進度（票 11）：第二局的「開始時」是第一局結束之後，不是開場掛上時的那一份。
@@ -263,6 +284,7 @@ test.describe("結算", () => {
     await playToResults(page);
     await expect(knownCountOf(page)).toHaveText(knownCountText(ROUND_SIZE));
     await expect.poll(() => meterOf(page)).toBe(meterPicture(ROUND_SIZE, ROUND_SIZE));
+    await expectFreshNote(page, ROUND_SIZE, ROUND_SIZE);
 
     // 第二局：剩下的 6 個還沒遇到，加上第一局答對的其中一個。全部答對 → 13 / 13，新填的是那 6 個。
     await page.getByRole("button", { name: "再玩一次" }).click();
@@ -270,6 +292,7 @@ test.describe("結算", () => {
 
     await expect(knownCountOf(page)).toHaveText(knownCountText(QUIZZABLE_COUNT));
     await expect.poll(() => meterOf(page)).toBe(meterPicture(QUIZZABLE_COUNT, QUIZZABLE_COUNT - ROUND_SIZE));
+    await expectFreshNote(page, QUIZZABLE_COUNT, QUIZZABLE_COUNT - ROUND_SIZE);
   });
 
   test("點答錯清單的一列，到那個符號的符號頁", async ({ page }) => {
@@ -330,6 +353,7 @@ test("瀏覽器封鎖 localStorage：開場與結算照樣顯示、都當成空�
   await expect(knownCountOf(page)).toHaveText(knownCountText(0));
   // 刻度與數字對得上（票 11）：開始時與結算時讀到的都是空紀錄，沒有新填的格子。
   await expect.poll(() => meterOf(page)).toBe(meterPicture(0));
+  await expect(freshNoteOf(page)).toHaveCount(0);
   // 但只印 0 / 13，剛答對 7 題的人會以為網站壞了（user story 42 要防的正是這件事）：數字旁邊說出為什麼。
   await expect(page.getByText(STORAGE_BLOCKED_NOTE)).toBeVisible();
   expect(errors).toEqual([]);

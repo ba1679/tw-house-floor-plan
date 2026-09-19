@@ -1,6 +1,6 @@
 import type { StoredProgress } from "./useLearningProgress";
 import { groupByFamiliarity, type LayoutProgress } from "@/lib/quiz/progress";
-import { STORAGE_BLOCKED_NOTE, knownCountLabel } from "@/lib/ui/copy";
+import { STORAGE_BLOCKED_NOTE, freshKnownNote, knownCountLabel } from "@/lib/ui/copy";
 import styles from "./Quiz.module.css";
 
 // 「這張三房兩廳你認得 N / M」與底下的刻度（PRD §6.6「進度條」）。找找看的開場與結算各印一次（M4 票 05）。
@@ -43,6 +43,8 @@ export function KnownCount({ layoutName, quizzable, stored, progressAtStart }: P
           />
         ))}
       </div>
+      {/* 加高的格子只看得到，所以讀螢幕的人另外聽一句；畫面上不印（`freshKnownNote`）。 */}
+      {freshCount > 0 && <p className={styles.visuallyHidden}>{freshKnownNote(freshCount)}</p>}
       {/* 記不住的瀏覽器上，數字永遠是 0。緊貼著數字說出為什麼：他剛答對幾題，只看到 0 會以為網站壞了。 */}
       {!stored.canRemember && <p className={styles.storageNote}>{STORAGE_BLOCKED_NOTE}</p>}
     </div>
