@@ -24,6 +24,14 @@ test.describe("平面圖頁的入口", () => {
     await expect(page.getByRole("button", { name: "開始" })).toBeVisible();
   });
 
+  // 看得見的膠囊只有 32px（不撐高標題列），點擊範圍靠上下透明的框撐到 44px（PRD §9、DESIGN.md「找找看入口」）。
+  test("入口點得到：點擊範圍至少 44 × 44", async ({ page }) => {
+    await page.goto(PLAN);
+    const box = (await entryOf(page, LAYOUT_ID).boundingBox())!;
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.width).toBeGreaterThanOrEqual(44);
+  });
+
   // 這一頁是 100dvh 的版面，每一列都從平面圖的可視帶挖高度（ADR-0003）：入口要擺在既有的列裡，框一 px 都不能少。
   // 「加之前」用同一頁把入口藏起來量——入口若撐高了它所在的那一列，藏起來之後框就會變高。
   // 三種狀態都量：卡片沒開時框下面本來就有留白，只量那一種的話，撐高了也看不出來。

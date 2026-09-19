@@ -57,6 +57,7 @@ test.describe("答對", () => {
     expect(await idsInState(page, "revealed")).toEqual(
       sorted(hotspotsOf("window").filter((id) => id !== clicked)),
     );
+    expect(await page.locator('[data-mark="check"]').count()).toBe(1);
     // 已經會的東西不強迫再讀一次（spec user story 21）。
     await expect(sheetOf(page)).toBeHidden();
 
@@ -65,6 +66,37 @@ test.describe("答對", () => {
     expect(painted(other.fill), "暫停中的圖上，其餘熱區還亮著可點的底色").toBe(false);
     expect(painted(other.stroke), "暫停中的圖上，其餘熱區還亮著可點的細邊").toBe(false);
   });
+
+  // 答對靠這個勾說話（DESIGN.md「找找看答對的勾」）：它是螢幕上的 20px，不是圖面上的 20cm——
+  // 全圖時 1cm 不到 0.3px，拿公分畫的勾只剩一個 5px 的點。
+  // 勾對著熱區的角、在鍵盤焦點環外面、整個看得到：窗排得密，勾離角落遠了就像在標隔壁那扇。
+  for (const target of ["window", "door_double_swing"]) {
+    test(`答對的勾夠大、對著熱區的角、讓開焦點環、整個在框裡（${target}）`, async ({ page }) => {
+      await startRoundAt(page, target);
+      const [clicked] = cleanHotspotsOf(target);
+      await answerByTwoTaps(page, clicked);
+
+      const check = (await page.locator('[data-mark="check"]').boundingBox())!;
+      const hotspot = (await page.locator(`#${clicked}`).boundingBox())!;
+      const frame = (await page.locator("#floorplan-viewport").boundingBox())!;
+
+      expect(Math.max(check.width, check.height), "勾比 selected 的線粗一級，要一眼看得到").toBeGreaterThanOrEqual(16);
+
+      // 焦點環離熱區邊緣 3px 起、6px 寬：它的外緣在 9px。
+      const ring = 9;
+      const overlapsX = check.x < hotspot.x + hotspot.width + ring && check.x + check.width > hotspot.x - ring;
+      const overlapsY = check.y < hotspot.y + hotspot.height + ring && check.y + check.height > hotspot.y - ring;
+      expect(overlapsX && overlapsY, "勾壓進焦點環的範圍，或壓在熱區上").toBe(false);
+
+      const spans = (edge: number) => check.x <= edge && edge <= check.x + check.width;
+      expect(spans(hotspot.x) || spans(hotspot.x + hotspot.width), "勾沒有對著熱區的角").toBe(true);
+
+      expect(check.x).toBeGreaterThanOrEqual(frame.x);
+      expect(check.y).toBeGreaterThanOrEqual(frame.y);
+      expect(check.x + check.width).toBeLessThanOrEqual(frame.x + frame.width);
+      expect(check.y + check.height).toBeLessThanOrEqual(frame.y + frame.height);
+    });
+  }
 
   test("按「看說明」：打開題目符號的說明卡，沒有「你點的是」；出現次數只有「共 N 處」", async ({ page }) => {
     await startRoundAt(page, "window");
@@ -95,6 +127,7 @@ test.describe("答錯", () => {
     // 他分得出自己是點歪還是認錯：答案的每一處都標出來，點到的那一個也留著。
     expect(await idsInState(page, "revealed")).toEqual(sorted(hotspotsOf("window")));
     expect(await idsInState(page, "selected")).toEqual([column]);
+    expect(await page.locator('[data-mark="check"]').count()).toBe(0);
 
     const sheet = sheetOf(page);
     await expect(sheet.getByRole("heading", { name: "窗" })).toBeVisible();
@@ -237,7 +270,7 @@ test.describe("作答之後、按「下一題」之前", () => {
 });
 
 // 四者形狀可能相同（一個符號的每一處），意思不同：從符號頁帶著高亮進平面圖的人，不該以為自己在答題（spec Further Notes）。
-// 四者不會同時出現在同一張圖上，所以各自在會出現的地方量。
+// revealed 與 highlighted 都是實線框，但前者用四角角標、後者用滿底；這些通道不只靠色相。
 test("revealed、highlighted、candidate、selected 四種 State 畫出來彼此都不同", async ({ page }) => {
   await page.goto(`${PLAN}?symbol=window`);
   await expect(page.locator("#hs-win-living")).toHaveAttribute("data-state", "highlighted");
@@ -262,8 +295,10 @@ test("revealed、highlighted、candidate、selected 四種 State 畫出來彼此
   const all = { revealed, highlighted, candidate, selected };
   expect(new Set(Object.values(all).map((m) => JSON.stringify(m))).size, JSON.stringify(all, null, 2)).toBe(4);
 
-  // 形狀相同的那兩個（一個符號的每一處）不只靠色相分：分不出顏色的人靠線型——revealed 是虛線，高亮是實線。
-  expect(await page.locator(`#${other}`).evaluate((el) => getComputedStyle(el).strokeDasharray)).not.toBe("none");
+  // 形狀相同的那兩個（一個符號的每一處）不只靠色相分：revealed 是四角角標，高亮是滿底實線。
+  expect(await page.locator(`#${other}`).evaluate((el) => getComputedStyle(el).strokeDasharray)).toBe("none");
+  await expect(page.locator('#hotspot-layer [data-mark="revealed"]')).toHaveCount(hotspotsOf("window").length - 1);
+  await expect(page.locator('#hotspot-layer [data-mark="check"]')).toHaveCount(1);
   await page.goto(`${PLAN}?symbol=window`);
   await expect(page.locator("#hs-win-living")).toHaveAttribute("data-state", "highlighted");
   expect(await page.locator("#hs-win-living").evaluate((el) => getComputedStyle(el).strokeDasharray)).toBe("none");

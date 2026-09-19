@@ -20,7 +20,7 @@
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-  background: #fff;
+  background: var(--fp-paper);
   cursor: pointer;
 }
 
@@ -51,6 +51,10 @@
   vector-effect: non-scaling-stroke;
 }
 
+.hotspots rect[data-state] {
+  mix-blend-mode: multiply;
+}
+
 /* 可點擊性提示（票 05）。回訪的人與手機使用者只剩下這一層，所以它要自己站得住
    （PRD §6.1.2「手機無 hover，因此靜態提示必須自身足夠明確」）。
 
@@ -67,9 +71,9 @@
    但圖點不動——不收的話，其餘熱區會在一張點不動的圖上全部亮起來（docs/adr/0007「後果」）。
    `:not([data-paused])` 包在 `:where()` 裡：不包的話這條的特異度多出一截，蓋過最底下鍵盤焦點那條規則。 */
 .hotspots[data-stage="browsing"]:where(:not([data-paused])) rect[data-state="normal"] {
-  fill: oklch(0.55 0.17 232 / 0.1);
-  stroke: oklch(0.55 0.17 232 / 0.5);
-  stroke-width: 1;
+  fill: var(--state-normal-fill);
+  stroke: var(--state-normal-stroke);
+  stroke-width: var(--state-normal-width);
 }
 
 /* 桌機的 hover。手機沒有 hover，上面那層必須自己就夠明確——hover 是加分，不是提示的本體。 */
@@ -81,42 +85,42 @@
   }
 
   .hotspots[data-stage="browsing"]:where(:not([data-paused])) rect[data-state="normal"]:hover {
-    fill: oklch(0.55 0.17 232 / 0.22);
-    stroke: oklch(0.55 0.17 232 / 0.9);
+    fill: var(--state-candidate-fill);
+    stroke: var(--state-candidate-stroke);
   }
 
   /* 第二段最壞情況是在 9 個重疊的候選裡挑一個（spec §Testing Decisions 案例 4）。
      游標停在哪一個上面就讓哪一個更明顯，使用者才不必靠猜。 */
   .hotspots rect[data-state="candidate"]:hover {
-    fill: oklch(0.55 0.17 232 / 0.32);
+    fill: var(--state-selected-fill);
   }
 }
 
 /* 「我剛剛看的是這一圈」。使用者沒點準時，這圈解釋了為什麼是這幾個東西亮起來。 */
 .hotspots circle {
   fill: none;
-  stroke: oklch(0.55 0.17 232 / 0.45);
-  stroke-width: 1.5;
-  stroke-dasharray: 8 6;
+  stroke: var(--mark-circle-stroke);
+  stroke-width: var(--mark-circle-width);
   pointer-events: none;
   vector-effect: non-scaling-stroke;
 }
 
 .hotspots rect[data-state="candidate"] {
-  fill: oklch(0.55 0.17 232 / 0.16);
-  stroke: oklch(0.55 0.17 232);
-  stroke-width: 3;
+  fill: var(--state-candidate-fill);
+  stroke: var(--state-candidate-stroke);
+  stroke-width: var(--state-candidate-width);
 }
 
+/* 線不畫在 rect 上：SVG 的線以邊為中心，會有一半壓進熱區、蓋掉裡面的符號線條。
+   線與白襯邊是另外兩條往外偏移的路徑（`.selectedLine`、`.selectedCasing`，幾何在 lib/viewer/marks.ts）。 */
 .hotspots rect[data-state="selected"] {
-  fill: oklch(0.55 0.17 28 / 0.22);
-  stroke: oklch(0.55 0.17 28);
-  stroke-width: 3.5;
+  fill: var(--state-selected-fill);
+  stroke: none;
 }
 
 /* 從符號頁帶進來的高亮（M3 票 08）：那個符號在圖上的每一處。
 
-   **色相與候選、選中都不同**——螢光筆的黃，不是候選的藍、也不是選中的紅。CONTEXT.md 把三者分開登錄、
+   **色相與候選、選中都不同**——暖色是「別人替你標的」，藍是「你的操作」（DESIGN.md「狀態」）。CONTEXT.md 把三者分開登錄、
    明講不可互相概括：使用者從符號頁進來時沒有點過任何東西，畫成候選的藍，他會以為自己已經點過了。
    三者不會同時出現在圖上（點一下就清掉高亮，docs/adr/0006），要分得開的是「意思」，不是疊在一起時的層次。
 
@@ -124,22 +128,91 @@
    不是在一個放大過的畫面裡挑一個。邊仍是 non-scaling 的實線，細長的熱區靠它。
    不閃、不動（PRD §6.1.2「不得持續閃爍」）。 */
 .hotspots rect[data-state="highlighted"] {
-  fill: oklch(0.9 0.17 95 / 0.5);
-  stroke: oklch(0.68 0.15 75);
-  stroke-width: 3;
+  fill: var(--state-highlighted-fill);
+  stroke: var(--state-highlighted-stroke);
+  stroke-width: var(--state-highlighted-width);
 }
 
 /* 找找看作答之後標出的答案（M4 票 02）：題目符號在圖上的其餘各處（答錯時是每一處）。
 
    與高亮**形狀相同、壽命不同**（CONTEXT.md「State」），畫面上也必須分得出來：從符號頁帶著高亮進平面圖的人，
-   不該以為自己在答題，反過來也一樣。所以色相避開高亮的黃、候選的藍、選中的紅，而且邊是**虛線**——
-   分不出顏色的人靠線型也分得開。不用綠：回饋不用紅綠（spec「文案與畫面」），答對答錯它說的都是「答案在這裡」。
+   不該以為自己在答題，反過來也一樣。兩者同是暖色，所以靠**形狀**分：高亮是滿底，revealed 只有四角角標、不填——
+   分不出顏色的人也分得開。不用綠：回饋不用紅綠（spec「文案與畫面」），答對答錯它說的都是「答案在這裡」。
    不閃、不動（PRD §6.1.2「不得持續閃爍」）。 */
 .hotspots rect[data-state="revealed"] {
-  fill: oklch(0.52 0.17 300 / 0.2);
-  stroke: oklch(0.5 0.17 300);
-  stroke-width: 3;
-  stroke-dasharray: 6 3;
+  fill: transparent;
+  stroke: none;
+}
+
+/* 圖上記號：線寬是螢幕 px（non-scaling），路徑的幾何由 lib/viewer/marks.ts 換成公分。 */
+.selectedCasing,
+.selectedLine,
+.revealedCasing,
+.revealedMark,
+.checkCasing,
+.checkMark,
+.focusLight,
+.focusDark {
+  fill: none;
+  pointer-events: none;
+  vector-effect: non-scaling-stroke;
+}
+
+/* 白襯邊比線寬多一截、畫在線底下：露出來的就是線外側那 1.5px。 */
+.selectedCasing {
+  stroke: var(--state-casing);
+  stroke-width: calc(var(--state-selected-width) + var(--state-selected-mark));
+}
+
+.selectedLine {
+  stroke: var(--state-selected-stroke);
+  stroke-width: var(--state-selected-width);
+}
+
+.revealedCasing {
+  stroke: var(--state-casing);
+  stroke-width: calc(var(--state-revealed-width) + 3px);
+}
+
+.revealedMark {
+  stroke: var(--state-revealed-stroke);
+  stroke-width: var(--state-revealed-width);
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+
+/* 找找看答對的勾：墨色粗勾加兩側白襯邊，比 selected 的線粗一級。要更顯眼就放大加粗，不換顏色（DESIGN.md）。 */
+.checkCasing,
+.checkMark {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.checkCasing {
+  stroke: var(--state-casing);
+  stroke-width: calc(var(--mark-check-width) + 2 * var(--mark-check-casing));
+}
+
+.checkMark {
+  stroke: var(--mark-check-stroke);
+  stroke-width: var(--mark-check-width);
+}
+
+.focusLight,
+.focusDark {
+  display: none;
+}
+
+.hotspots g:has(> rect[data-state]:focus-visible) > .focusLight {
+  display: block;
+  stroke: var(--focus-light);
+  stroke-width: var(--focus-ring-light-width);
+}
+
+.hotspots g:has(> rect[data-state]:focus-visible) > .focusDark {
+  display: block;
+  stroke: var(--focus-dark);
+  stroke-width: var(--focus-ring-dark-width);
 }
 
 /* 鍵盤的焦點（票 06）。焦點框由瀏覽器畫，這裡再加一層熱區自己的強調——
@@ -149,9 +222,9 @@
    放在所有狀態規則的最後：特異度與它們相同，順序決勝。焦點要蓋過 candidate 與 selected——
    使用者正在移動的那一個，永遠是畫面上最該被看到的東西。 */
 .hotspots rect[data-state]:focus-visible {
-  fill: oklch(0.55 0.17 232 / 0.3);
-  stroke: oklch(0.42 0.17 232);
-  stroke-width: 5;
+  outline: none;
+  stroke: var(--focus-dark);
+  stroke-width: var(--focus-ring-dark-width);
 }
 
 .controls {
@@ -163,23 +236,23 @@
 
 /* 手機優先：使用情境是站在接待中心單手操作，控制元件一律點得到。 */
 .control {
-  min-height: 44px;
-  min-width: 44px;
+  min-height: var(--control-h);
+  min-width: var(--touch-min);
   padding: 0 16px;
   font: inherit;
-  font-size: 14px;
-  border: 1px solid oklch(0.865 0.006 260);
-  border-radius: 6px;
-  background: oklch(0.96 0.006 85);
-  color: inherit;
+  font-size: var(--text-button-size);
+  border: none;
+  border-radius: var(--radius-m);
+  background: var(--paper2);
+  color: var(--ink);
   cursor: pointer;
 }
 
 .status {
   flex: 0 0 auto;
   margin: 12px 0 0;
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: var(--text-status-size);
+  line-height: var(--text-status-leading);
   color: var(--ink2);
 }
 
@@ -192,10 +265,10 @@
   gap: 10px;
   margin: 0 0 12px;
   padding: 10px 12px;
-  border-left: 3px solid oklch(0.68 0.15 75);
+  border-left: 3px solid var(--state-warm);
   background: var(--paper2);
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-leading);
 }
 
 .bannerText {

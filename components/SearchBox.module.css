@@ -8,10 +8,11 @@
 
 /* 與符號頁的區塊標題同一個畫法：它是一個標籤，不是這一頁的標題。 */
 .label {
-  font-family: var(--mono);
-  font-size: 10.5px;
+  font-family: var(--sans);
+  font-size: var(--text-label-size);
+  line-height: var(--text-label-leading);
   letter-spacing: 0.16em;
-  color: var(--ink3);
+  color: var(--ink2);
 }
 
 /* 字級 16px 不是品味：iOS Safari 對小於 16px 的輸入框會在聚焦時把整頁放大，而且不會自己縮回來。
@@ -29,11 +30,6 @@
   border: 1px solid var(--rule);
   border-radius: 0;
   appearance: none;
-}
-
-.input:focus-visible {
-  outline: 2px solid var(--accent2);
-  outline-offset: 1px;
 }
 
 /* 還沒打字時是空的。空的 `<p>` 本來就沒有高度，只要不替它留 margin。
@@ -74,8 +70,9 @@
   gap: 12px;
   min-height: 44px;
   padding: 8px 0;
-  color: inherit;
-  text-decoration: none;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 /* `min-width: 0` 與 `overflow-wrap: anywhere` 同分類頁的 `.text`：一段沒有空白的英數別名
@@ -90,15 +87,9 @@
 }
 
 .name {
-  font-size: 15px;
+  font-size: var(--text-row-title-size);
   font-weight: 700;
-  color: var(--accent);
-}
-
-.link:hover .name,
-.link:focus-visible .name {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  color: var(--ink);
 }
 
 /* 「又稱」是對名字的說明，比名字輕一階。 */
@@ -110,7 +101,7 @@
 /* `flex: none`：左邊那段換行時，分類不跟著被擠成直排。 */
 .category {
   flex: none;
-  font-size: 12px;
+  font-size: var(--text-small-size);
   letter-spacing: 0.08em;
-  color: var(--ink3);
+  color: var(--ink2);
 }

@@ -27,6 +27,7 @@ import {
   neutralHotspotLabel,
 } from "@/lib/ui/copy";
 import type { ViewerAction, ViewerConfig, ViewerState } from "@/lib/viewer/interaction";
+import { checkMark, focusRing, revealedCorners, selectedFrame } from "@/lib/viewer/marks";
 import { canvasTransform, isFitView } from "@/lib/viewer/view";
 import styles from "./FloorPlanViewer.module.css";
 
@@ -76,6 +77,8 @@ type Props = {
    * 那時檢視器已經退回閒著，被點中的是哪一個由一局記著（docs/adr/0007「標記住在結束它的那一層」）。
    */
   selectedHotspot: string | null;
+  /** 找找看答對時，位於 selected 熱區右上外側的答對勾；其餘時間為 null。 */
+  correctHotspot?: string | null;
   /** 此刻標成 `revealed` 的符號：找找看作答之後的題目符號，它在圖上的每一處。自由看圖永遠是 null。 */
   revealedSymbol: string | null;
   /**
@@ -114,6 +117,7 @@ export function FloorPlanViewport({
   viewer,
   dispatch,
   selectedHotspot,
+  correctHotspot = null,
   revealedSymbol,
   paused,
   names,
@@ -190,6 +194,11 @@ export function FloorPlanViewport({
   useEscapeKey(viewer.stage === "candidates", reselect);
 
   const candidateIds = new Set(viewer.candidates.map((h) => h.id));
+  // 答對的勾只跟著 selected 出現。
+  const correct =
+    correctHotspot !== null && correctHotspot === selectedHotspot
+      ? floorplan.hotspots.find((h) => h.id === correctHotspot)
+      : undefined;
 
   /**
    * 說明卡開著時，**沒有標記的房間暗下去**（票 07；M4 票 02 放寬成「有標記」）。
@@ -290,29 +299,69 @@ export function FloorPlanViewport({
                     // 兩處各比各的，哪天優先序一改，念出名字的與畫出標記的就對不上。
                     // k 從 1 起，是它在這一間房裡的閱讀順序——讀螢幕的人聽到的「第幾個」就是 Tab 走到它的先後。
                     const named = names === "all" || state === "selected" || state === "revealed";
+                    const frame = state === "selected" ? selectedFrame(h.coords, viewer) : null;
+                    // 記號與焦點環都是 aria-hidden 的 <path>，跟著熱區放在同一個 <g>：
+                    // 焦點環靠 CSS 的 `g:has(> rect:focus-visible)` 找到自己的熱區。
                     return (
-                      <rect
-                        key={h.id}
-                        id={h.id}
-                        role="button"
-                        tabIndex={0}
-                        aria-label={
-                          named
-                            ? symbolName(symbols, h.symbol_id)
-                            : neutralHotspotLabel(room.roomName, index + 1)
-                        }
-                        onFocus={focusHotspot}
-                        onKeyDown={activateHotspot}
-                        data-state={state}
-                        x={h.coords[0]}
-                        y={h.coords[1]}
-                        width={h.coords[2]}
-                        height={h.coords[3]}
-                      />
+                      <g key={h.id}>
+                        <rect
+                          id={h.id}
+                          role="button"
+                          tabIndex={0}
+                          aria-label={
+                            named
+                              ? symbolName(symbols, h.symbol_id)
+                              : neutralHotspotLabel(room.roomName, index + 1)
+                          }
+                          onFocus={focusHotspot}
+                          onKeyDown={activateHotspot}
+                          data-state={state}
+                          x={h.coords[0]}
+                          y={h.coords[1]}
+                          width={h.coords[2]}
+                          height={h.coords[3]}
+                        />
+                        {frame && (
+                          <>
+                            <path className={styles.selectedCasing} d={frame.casing} aria-hidden="true" />
+                            <path
+                              className={styles.selectedLine}
+                              data-mark="selected"
+                              d={frame.line}
+                              aria-hidden="true"
+                            />
+                          </>
+                        )}
+                        {state === "revealed" && (
+                          <>
+                            <path
+                              className={styles.revealedCasing}
+                              d={revealedCorners(h.coords, viewer)}
+                              aria-hidden="true"
+                            />
+                            <path
+                              className={styles.revealedMark}
+                              data-mark="revealed"
+                              d={revealedCorners(h.coords, viewer)}
+                              aria-hidden="true"
+                            />
+                          </>
+                        )}
+                        <path className={styles.focusLight} d={focusRing(h.coords, viewer)} aria-hidden="true" />
+                        <path className={styles.focusDark} d={focusRing(h.coords, viewer)} aria-hidden="true" />
+                      </g>
                     );
                   })}
                 </g>
               ))}
+              {/* 答對的勾畫在所有熱區之後：疊放順序是「State 的線 → 答對的勾 → 鍵盤焦點」，
+                  放進熱區自己的 <g> 的話，DOM 裡排在後面的熱區會把它蓋掉。 */}
+              {correct && (
+                <g aria-hidden="true">
+                  <path className={styles.checkCasing} d={checkMark(correct.coords, viewer)} />
+                  <path className={styles.checkMark} data-mark="check" d={checkMark(correct.coords, viewer)} />
+                </g>
+              )}
             </g>
           </FloorPlanRenderer>
         </div>

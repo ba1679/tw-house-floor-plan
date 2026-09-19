@@ -196,6 +196,18 @@ export function canvasTransform(projection: Projection): string {
   return `translate(${tx}px, ${ty}px) scale(${projection.view.zoom})`;
 }
 
+/**
+ * 圖面座標（cm）→ 畫面上的一點（相對於可視區域左上角的 CSS px）。`screenToPlan` 的反方向。
+ * 圖上記號要知道自己會不會被圖框切掉時用它（`marks.ts` 的答對勾）。
+ */
+export function planToScreen(projection: Projection, x: number, y: number): { x: number; y: number } {
+  const { scale, tx, ty } = originOffset(projection);
+  return {
+    x: tx + (x - projection.viewBox.x) * scale,
+    y: ty + (y - projection.viewBox.y) * scale,
+  };
+}
+
 /** 畫面上的一點（相對於可視區域左上角的 CSS px）→ 圖面座標（cm）。 */
 export function screenToPlan(
   projection: Projection,

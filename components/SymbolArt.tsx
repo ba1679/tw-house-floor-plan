@@ -8,8 +8,8 @@ import styles from "./SymbolArt.module.css";
 // 所以使用者在這裡認得的形狀，回到平面圖上找得到（PRD §12）。也因此**不另外畫一套**——
 // 另外畫的那一套遲早會與圖面分岔，而分岔的那一天畫面上看不出來。
 //
-// 顏色由 sprite 自己的 `var(--fp-*, fallback)` 決定，這裡不覆寫：那組 fallback 就是
-// 圖面用的同一組值（`FloorPlanRenderer.module.css` 的 PALETTE）。
+// 顏色由 sprite 自己的 `var(--fp-*)` 決定，這裡不覆寫：主圖讀的是同一組 `--fp-*`，
+// 值只在 `app/globals.css` 定義一次；sprite 裡的 fallback 與它同值（`tests/design-language.spec.ts` 守著）。
 
 export function SymbolArt({ svgRef, name }: { svgRef: string; name: string }) {
   const art = spriteArt(svgRef);

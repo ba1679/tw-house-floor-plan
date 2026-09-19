@@ -1,22 +1,112 @@
-/* 設計 token 取自 design/_tokens.txt，四份設計稿共用同一組值。
-   字體只給堆疊、不載 webfont：站是 SSG、使用情境是接待中心的行動網路，
-   為了三個標題字去打 fonts.googleapis.com 不划算。設計稿指定的 Noto 系列
-   在台灣的手機上多半已經是系統字，拿不到就落回系統的黑體／明體。 */
+/* 設計 token 取自 DESIGN.md 與 design/_tokens.txt。
+   字體只給堆疊、不載 webfont：站是 SSG，使用情境是接待中心的行動網路。 */
 :root {
-  --paper: oklch(0.985 0.004 85);
-  --paper2: oklch(0.96 0.006 85);
-  --ink: oklch(0.24 0.01 260);
-  --ink2: oklch(0.47 0.012 260);
-  --ink3: oklch(0.645 0.01 260);
-  --rule: oklch(0.865 0.006 260);
-  --rule2: oklch(0.925 0.005 260);
-  --accent: oklch(0.55 0.17 28);
-  --accent2: oklch(0.55 0.17 232);
+  color-scheme: light;
 
-  --sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", -apple-system,
-    BlinkMacSystemFont, sans-serif;
-  --serif: "Noto Serif TC", "Songti TC", serif;
-  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+  --paper: oklch(1 0 0);
+  --paper2: oklch(0.962 0.002 265);
+  --ink: oklch(0.21 0.006 265);
+  --ink2: oklch(0.47 0.008 265);
+  --ink3: oklch(0.62 0.006 265);
+  --rule: oklch(0.89 0.003 265);
+  --rule2: oklch(0.935 0.002 265);
+  --sans: -apple-system, BlinkMacSystemFont, "PingFang TC", "Segoe UI", "Microsoft JhengHei", "Noto Sans CJK TC", sans-serif;
+
+  --text-display-size: 30px;
+  --text-display-leading: 1.35;
+  --text-display-weight: 700;
+  --text-title-size: 24px;
+  --text-title-leading: 32px;
+  --text-title-weight: 700;
+  --text-sheet-name-size: 24px;
+  --text-sheet-name-leading: 1.35;
+  --text-sheet-name-weight: 700;
+  --text-reading-size: 17px;
+  --text-reading-leading: 1.75;
+  --text-prompt-size: 17px;
+  --text-prompt-leading: 1.5;
+  --text-body-size: 16px;
+  --text-body-leading: 1.7;
+  --text-button-size: 16px;
+  --text-secondary-size: 15px;
+  --text-secondary-leading: 1.65;
+  --text-status-size: 15px;
+  --text-status-leading: 24px;
+  --text-row-title-size: 15px;
+  --text-row-title-leading: 1.5;
+  --text-link-chip-size: 14px;
+  --text-link-chip-leading: 20px;
+  --text-label-size: 13px;
+  --text-label-leading: 1.5;
+  --text-eyebrow-size: 13px;
+  --text-eyebrow-leading: 1.5;
+  --text-meta-size: 13px;
+  --text-small-size: 12px;
+  --text-small-leading: 1.7;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  --radius-s: 8px;
+  --radius-m: 12px;
+  --radius-l: 16px;
+  --radius-sheet: 20px;
+  --radius-pill: 999px;
+
+  --touch-min: 44px;
+  --control-h: 48px;
+  --row-h: 56px;
+  --chip-h: 32px;
+  --frame: 0 0 0 1px var(--rule);
+  --shadow-sheet: 0 -1px 0 var(--rule), 0 -12px 32px rgba(0, 0, 0, 0.08);
+  --focus-dark: #000000;
+  --focus-light: #ffffff;
+  --focus-ring-light-width: 6px;
+  --focus-ring-dark-width: 2px;
+
+  --fp-paper: #ffffff;
+  --fp-room: oklch(0.967 0 0);
+  --fp-room-wet: oklch(0.935 0 0);
+  --fp-room-balcony: oklch(0.985 0 0);
+  --fp-wall: #a8a8a8;
+  --fp-column: #585858;
+  --fp-structure: #2b2b2b;
+  --fp-line: #4a4a4a;
+  --fp-text: #2b2b2b;
+  --fp-muted: #767676;
+  --fp-furn: #ffffff;
+  --fp-furn-line: #8a8a8a;
+  --fp-dim-source: #6b6b6b;
+
+  --state-blue: oklch(0.44 0.15 256);
+  --state-warm: oklch(0.45 0.1 65);
+  --state-casing: #ffffff;
+  --state-normal-fill: oklch(0.965 0.018 250);
+  --state-normal-stroke: var(--state-blue);
+  --state-normal-width: 1px;
+  --state-candidate-fill: oklch(0.905 0.045 250);
+  --state-candidate-stroke: var(--state-blue);
+  --state-candidate-width: 2px;
+  --state-selected-fill: oklch(0.82 0.085 252);
+  --state-selected-stroke: var(--state-blue);
+  --state-selected-width: 3px;
+  --state-selected-mark: 1.5px;
+  --state-highlighted-fill: oklch(0.85 0.17 90);
+  --state-highlighted-stroke: var(--state-warm);
+  --state-highlighted-width: 2px;
+  --state-revealed-stroke: var(--state-warm);
+  --state-revealed-width: 3px;
+  --state-revealed-mark: 9px;
+  --mark-circle-stroke: var(--state-blue);
+  --mark-circle-width: 1.5px;
+  --mark-check-stroke: oklch(0.2 0 0);
+  --mark-check-width: 4px;
+  --mark-check-casing: 2.5px;
+  --mark-check-size: 20px;
 }
 
 * {
@@ -32,6 +122,13 @@ body {
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
   text-wrap: pretty;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--focus-light), 0 0 0 4px var(--focus-dark), 0 0 0 6px var(--focus-light);
 }
 
 /* 免責聲明的頁尾是**版面裡的最後一列**，不是接在內容後面的一塊（票 04、PRD §6.4）。

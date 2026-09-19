@@ -269,6 +269,10 @@ test("焦點所在的熱區，畫面上看得出來", async ({ page }) => {
 
   // 焦點狀態要比一般狀態明顯：鍵盤使用者正在移動的那一個，是畫面上最該被看到的東西。
   expect(await strokeOf(focused)).toBeGreaterThan(await strokeOf(page.locator("#hs-win-living")));
+  const focusRings = page.locator("#hotspot-layer g:has(> rect:focus-visible) > path");
+  await expect(focusRings).toHaveCount(2);
+  expect(await focusRings.nth(0).evaluate((el) => getComputedStyle(el).strokeWidth)).toBe("6px");
+  expect(await focusRings.nth(1).evaluate((el) => getComputedStyle(el).strokeWidth)).toBe("2px");
 });
 
 test("鍵盤開過卡片之後改用手指，卡片不再搶走焦點", async ({ page }) => {

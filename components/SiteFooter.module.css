@@ -48,7 +48,7 @@
   padding: 9px 20px calc(10px + env(safe-area-inset-bottom));
   /* 與符號頁的 `.article` 同寬：寬螢幕上這句話不該橫跨整個視窗。 */
   max-width: 560px;
-  font-size: 11px;
-  line-height: 1.7;
-  color: var(--ink3);
+  font-size: var(--text-small-size);
+  line-height: var(--text-small-leading);
+  color: var(--ink2);
 }
