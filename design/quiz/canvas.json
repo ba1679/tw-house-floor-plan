@@ -1,0 +1,174 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Main.dc.html": {
+      "h": 812,
+      "title": "① 開場：有進度",
+      "w": 375,
+      "x": 0,
+      "y": 0
+    },
+    "Q02-start-first.dc.html": {
+      "h": 812,
+      "title": "② 開場：第一次打開",
+      "w": 375,
+      "x": 455,
+      "y": 0
+    },
+    "Q03-question.dc.html": {
+      "h": 812,
+      "title": "③ 第 1 題：全圖鎖定",
+      "w": 375,
+      "x": 910,
+      "y": 0
+    },
+    "Q04-candidates.dc.html": {
+      "h": 812,
+      "title": "④ 第一段：放大、只說數量",
+      "w": 375,
+      "x": 1365,
+      "y": 0
+    },
+    "Q05-correct.dc.html": {
+      "h": 812,
+      "title": "⑤ 答對：勾＋其餘各處",
+      "w": 375,
+      "x": 1820,
+      "y": 0
+    },
+    "Q06-wrong-diff.dc.html": {
+      "h": 812,
+      "title": "⑥ 答錯：有差異句（題目柱、點牆）",
+      "w": 375,
+      "x": 2275,
+      "y": 0
+    },
+    "Q07-wrong-plain.dc.html": {
+      "h": 812,
+      "title": "⑦ 答錯：沒有差異句（題目窗、點柱）",
+      "w": 375,
+      "x": 2730,
+      "y": 0
+    },
+    "Q08-wrong-closed.dc.html": {
+      "h": 812,
+      "title": "⑧ 關掉說明卡：標記留著",
+      "w": 375,
+      "x": 3185,
+      "y": 0
+    },
+    "Q09-results.dc.html": {
+      "h": 812,
+      "title": "⑨ 結算：有答錯",
+      "w": 375,
+      "x": 3640,
+      "y": 0
+    },
+    "Q10-results-all.dc.html": {
+      "h": 812,
+      "title": "⑩ 結算：全部答對",
+      "w": 375,
+      "x": 4095,
+      "y": 0
+    },
+    "Q11-entry-plan.dc.html": {
+      "h": 812,
+      "title": "⑪ 入口：平面圖頁標題列",
+      "w": 375,
+      "x": 0,
+      "y": 1512
+    },
+    "Q12-entry-home.dc.html": {
+      "h": 812,
+      "title": "⑫ 入口：首頁",
+      "w": 375,
+      "x": 455,
+      "y": 1512
+    },
+    "Q13-states.dc.html": {
+      "h": 420,
+      "title": "⑬ 四種 State 並排",
+      "w": 704,
+      "x": 910,
+      "y": 1512
+    },
+    "Q14-meter-options.dc.html": {
+      "h": 520,
+      "title": "⑭ 刻度：新填格子的三種畫法（選 B）",
+      "w": 375,
+      "x": 1694,
+      "y": 1512
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-09-19T03:33:12Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "diff-opening": {
+      "color": "orange",
+      "maxH": 300,
+      "size": 24,
+      "text": "與現況不同：開場的順序（①②）\n\n現況：數字 → 定義 → 三份清單 → 說明句 → 開始。還不熟多了，「開始」會被推出第一屏；說明句是全頁第二大的字，卻夾在清單與按鈕之間。\n改成：數字與刻度 → 定義 → 說明句與開始 → 三份清單。清單是參考，不是開始前的必讀。\n讀到進度之前不印數字的規矩不變：那時只有說明句與按不下去的「開始」，數字出現時把它往下推一段，但按鈕在同一刻才按得下去。",
+      "w": 830,
+      "x": 0,
+      "y": 872
+    },
+    "diff-results": {
+      "color": "orange",
+      "maxH": 300,
+      "size": 24,
+      "text": "與現況不同：結算的刻度（⑨⑩）\n\n這一局新填的格子換一種畫法，不加字（story 34「看得到這一局帶來的變化」）。這局沒有新認得的，就只是沒有不一樣的格子，不會出現一句像在責備的話。\n2026-09-19 選定 B：新填的格子加高，照樣是墨色實心。沒選的 A、C 留在第二排的 ⑭。開場的刻度不分新舊。",
+      "w": 830,
+      "x": 3640,
+      "y": 872
+    },
+    "flow-title": {
+      "kind": "title1",
+      "maxW": 4470,
+      "text": "找找看：一局的流程",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "howto": {
+      "maxH": 675,
+      "size": 24,
+      "text": "怎麼讀這張畫布（票 08）\n\n・圖面是現行 FloorPlanRenderer 對 3b2l_standard 的輸出；熱區座標取自 JSON，勾、角標、候選圈都在真實位置。\n・三種視野（全圖、第一段 3×、說明卡升起）的比例與位移是 375 × 812 實測值。\n・熱區狀態照 DESIGN.md 定案畫：線在熱區外側。normal／candidate／highlighted 的線目前實作還壓在熱區上，已記在設計語言 03，不另開票。\n・一局的劇本：開場已認識 4、還不熟 3、還沒遇到 6，所以這一局是 6 個還沒遇到加錯最多的柱。\n\n標了「與現況不同」的格子，一處對一張實作票；其餘的格子就是現況。",
+      "w": 455,
+      "x": -535,
+      "y": 0
+    },
+    "more-title": {
+      "kind": "title1",
+      "maxW": 2400,
+      "text": "入口、State 對照、待選",
+      "w": 240,
+      "x": 0,
+      "y": 1212
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Q02-start-first.dc.html",
+    "Q03-question.dc.html",
+    "Q04-candidates.dc.html",
+    "Q05-correct.dc.html",
+    "Q06-wrong-diff.dc.html",
+    "Q07-wrong-plain.dc.html",
+    "Q08-wrong-closed.dc.html",
+    "Q09-results.dc.html",
+    "Q10-results-all.dc.html",
+    "Q11-entry-plan.dc.html",
+    "Q12-entry-home.dc.html",
+    "Q13-states.dc.html",
+    "Q14-meter-options.dc.html"
+  ],
+  "pages": [],
+  "title": "找找看設計稿"
+}
