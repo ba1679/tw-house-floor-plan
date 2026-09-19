@@ -95,7 +95,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* 刻度：一格一個可出題符號，不用百分比條——使用者要數得出還差幾個（design/Progress.dc.html 的流程參考）。
+/* 刻度：一格一個可出題符號，不用百分比條——使用者要數得出還差幾個（DESIGN.md「學習進度的刻度」）。
    格子等分寬度，格數由資料來：主圖 13 格在 375px 上每格約 23px，數得清。 */
 .meter {
   display: flex;
