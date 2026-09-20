@@ -2,6 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { DISCLAIMER } from "@/lib/ui/copy";
+import { isSiteVerificationFile } from "./built-html";
 import { selectByTwoTaps } from "./viewer-page";
 
 // PRD §6.4 要的是**每頁固定顯示**，所以這一組刻意不列舉路由。
@@ -21,7 +22,7 @@ function builtPages(dir = "out"): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
     if (entry.isDirectory()) return builtPages(path);
-    return entry.name.endsWith(".html") ? [path] : [];
+    return entry.name.endsWith(".html") && !isSiteVerificationFile(path) ? [path] : [];
   });
 }
 

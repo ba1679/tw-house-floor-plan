@@ -34,6 +34,9 @@ export function rootLayoutFallback() {
   };
 }
 
+/** Search Console 的驗證檔（`googleXXXX.html`）：`public/` 放進來的靜態檔，不是站上的頁面。 */
+export const isSiteVerificationFile = (path: string) => /(^|[\\/])google[0-9a-f]+\.html$/.test(path);
+
 /**
  * `out/` 裡每一張有自己內容的頁，相對 `out/` 的路徑（`index.html`、`symbols/wall.html`⋯）。
  *
@@ -44,4 +47,5 @@ export function rootLayoutFallback() {
 export const contentPages = () =>
   readdirSync("out", { recursive: true, encoding: "utf8" })
     .filter((path) => path.endsWith(".html"))
-    .filter((path) => !["404.html", "_not-found.html"].includes(path));
+    .filter((path) => !["404.html", "_not-found.html"].includes(path))
+    .filter((path) => !isSiteVerificationFile(path));
