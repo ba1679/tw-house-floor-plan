@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { listLayoutIds } from "@/lib/floorplan/data";
+import { SITE_URL } from "@/lib/site-url";
 import { loadCategories, loadSymbolsForPages } from "@/lib/symbols/data";
 
 // 給搜尋引擎的全站頁面清單（spec user story 32、票 10）：它不必靠自己爬連結猜這個網站有哪些頁。
@@ -16,16 +17,6 @@ import { loadCategories, loadSymbolsForPages } from "@/lib/symbols/data";
 //
 // **只給 `url`。**`lastModified` 要準才有用，而資料裡沒有一個說得準「這一頁上次改了什麼」的欄位
 // （`verified_at` 是查證日，不是頁面改動日）；`changeFrequency` 與 `priority` Google 不看。
-
-/**
- * 正式站的網址，build 時由 `SITE_URL` 給。
- *
- * sitemap 協定要 `<loc>` 是帶協定的完整網址，而 Next 對 sitemap 不套 `metadataBase`、給什麼印什麼，
- * 所以這一段一定得有人給。**網域還沒定**（PRD §10 只寫「Vercel 或類似靜態託管」，上線是 M5）。
- * 沒給的時候退回本機預覽的網址——`scripts/serve-static.mjs` 讀的是同一個 `PORT`——本機打開 sitemap 點得到每一頁。
- * 代價是：上線時忘了設，正式站的 sitemap 會列一串 localhost。build 不會因此壞，搜尋引擎則不會收那些網址。
- */
-const SITE_URL = process.env.SITE_URL ?? `http://localhost:${process.env.PORT ?? 3000}`;
 
 // sitemap 在 Next 裡是一個 route handler，`output: "export"` 之下沒有明講是靜態的，build 會直接拒絕它。
 export const dynamic = "force-static";
