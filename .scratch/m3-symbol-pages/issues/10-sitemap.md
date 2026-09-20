@@ -67,9 +67,9 @@ Spec 軸沒有抓到做錯或多做的東西，提的三件事在下面「留給
 
 ### 留給規格的主人決定
 
-1. **正式站的網址沒有主人。**`SITE_URL` 沒設時 sitemap 列的是 localhost——build 不會壞，搜尋引擎則不會收那些網址。今天唯一寫著「上線要設它」的地方是
-   `app/sitemap.ts` 的註解；spec、PRD（§10 只寫「Vercel 或類似靜態託管即可」）、CONTEXT.md 都沒有。要不要寫進 M5 的上線條件，或改成「正式 build 沒設就中斷」，是規格的事。
-2. **沒有 `robots.txt`。**光有 sitemap，搜尋引擎要嘛靠有人到 Search Console 手動提交，要嘛從 `robots.txt` 的 `Sitemap:` 那一行發現它。
-   票面沒要、spec 的路由也沒列，而且它需要同一個 origin，所以沒做——與第 1 條一起放進 M5 比較合理。
+1. **正式站的網址沒有主人。**`SITE_URL` 沒設時 sitemap 列的是 localhost——build 不會壞，搜尋引擎則不會收那些網址。
+   ✅ 已處理（`feat/seo-search-console`）：origin 收進 `lib/site-url.ts`，`SITE_URL` 優先，其次 Vercel 給的 `VERCEL_PROJECT_PRODUCTION_URL`，
+   都沒有才退回 localhost；`app/sitemap.ts` 與 `app/robots.ts` 共用。部署在 Vercel 上時環境變數由平台提供，不必另外設。
+2. **沒有 `robots.txt`。**✅ 已補（`app/robots.ts`，`Sitemap:` 指到同一個 origin 的 `sitemap.xml`；`tests/robots.spec.ts`）。
 3. **測試沒有寫死 19。**Testing Decisions 第 19 條寫的是「列出全部 **19** 個網址」，測試比的是從資料算出來的那一串（今天正好 19），
    與票面「加一個符號，sitemap 自己變長」一致，也與 `category-page.spec.ts` 不寫死 3 同一個理由。代價是：資料裡少了一個符號時，這一組測試不會紅。

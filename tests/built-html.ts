@@ -35,6 +35,14 @@ export function rootLayoutFallback() {
 }
 
 /**
+ * `public/` 原樣複製進 `out/` 的檔案（Search Console 的驗證檔 `googleXXXX.html` 之類），相對 `out/` 的路徑。
+ * 它們是靜態檔，不是站上的頁面——沒有標題、沒有頁尾，也不該列在 sitemap 上。
+ */
+const publicAssets = new Set(readdirSync("public", { recursive: true, encoding: "utf8" }));
+
+export const isPublicAsset = (pathInOut: string) => publicAssets.has(pathInOut);
+
+/**
  * `out/` 裡每一張有自己內容的頁，相對 `out/` 的路徑（`index.html`、`symbols/wall.html`⋯）。
  *
  * 掃 `out/` 而不列舉路由：列舉的清單明天多一頁時不會紅，只會少測一頁（理由同 site-footer.spec.ts）。
@@ -44,4 +52,5 @@ export function rootLayoutFallback() {
 export const contentPages = () =>
   readdirSync("out", { recursive: true, encoding: "utf8" })
     .filter((path) => path.endsWith(".html"))
-    .filter((path) => !["404.html", "_not-found.html"].includes(path));
+    .filter((path) => !["404.html", "_not-found.html"].includes(path))
+    .filter((path) => !isPublicAsset(path));
