@@ -1,2 +1,6 @@
-// 正式站網址由 build 時的 `SITE_URL` 給；上線時沒設，sitemap 與 robots 會列出 localhost。
-export const SITE_URL = process.env.SITE_URL ?? `http://localhost:${process.env.PORT ?? 3000}`;
+const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+
+// 正式站網址：`SITE_URL` 優先，其次 Vercel 的 production 網址；都沒有時退回 localhost，上線前要確認不是這個。
+export const SITE_URL =
+  process.env.SITE_URL ??
+  (vercelUrl ? `https://${vercelUrl}` : `http://localhost:${process.env.PORT ?? 3000}`);
