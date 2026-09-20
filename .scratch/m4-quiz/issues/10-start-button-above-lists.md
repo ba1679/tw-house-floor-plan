@@ -4,7 +4,7 @@
 
 **Blocked by:** None（可以直接開始）
 
-**Status:** ready-for-agent
+**Status:** done —— 2026-09-19 實作：開場改成數字與刻度 → 定義 → 開場那一句 → 「開始」 → 三份清單。
 
 規格：`.scratch/m4-quiz/spec.md` 的「學習進度」；設計稿：`design/quiz/Main.dc.html`（① 開場：有進度）、`design/quiz/Q02-start-first.dc.html`（② 開場：第一次打開）；決議：票 08 的 Comments（2026-09-19）。
 
@@ -25,8 +25,8 @@
 
 ## Acceptance criteria
 
-- [ ] 開場由上而下：「你認得 N / M」與刻度 → 「認得」的定義 → 開場那一句 → 「開始」 → 還不熟、還沒遇到、已認識
-- [ ] 375 × 812 下，預塞 13 個都是還不熟（最長的清單）時，「開始」整顆在第一屏、不必捲動就按得到
-- [ ] 讀到進度之前，建置產出的 HTML 仍然不含任何「你認得」的數字（`quiz-progress-screens.spec.ts` 那一條維持綠）
-- [ ] 三份清單的內容與排法不變（既有的開場測試維持綠）
-- [ ] `npm run typecheck`、`npm test` 通過
+- [x] 開場由上而下：「你認得 N / M」與刻度 → 「認得」的定義 → 開場那一句 → 「開始」 → 還不熟、還沒遇到、已認識
+- [x] 375 × 812 下，預塞 13 個都是還不熟（最長的清單）時，「開始」整顆在第一屏、不必捲動就按得到
+- [x] 讀到進度之前，建置產出的 HTML 仍然不含任何「你認得」的數字（`quiz-progress-screens.spec.ts` 那一條維持綠）
+- [x] 三份清單的內容與排法不變（既有的開場測試維持綠）
+- [x] `npm run typecheck`、`npm test` 通過

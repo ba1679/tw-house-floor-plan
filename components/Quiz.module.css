@@ -35,6 +35,12 @@
   cursor: default;
 }
 
+/* 開場的「開始」：排在清單上面（M4 票 10），與底下的清單隔開一段——清單是參考，不與按鈕擠成一塊。 */
+.start {
+  composes: primary;
+  margin: 0 0 28px;
+}
+
 /* 題目列：題號在左、題目在右，一行放得下就不佔兩行——多一行就從圖框挖一行的高度。 */
 .question {
   flex: 0 0 auto;
@@ -98,19 +104,43 @@
 /* 刻度：一格一個可出題符號，不用百分比條——使用者要數得出還差幾個（DESIGN.md「學習進度的刻度」）。
    格子等分寬度，格數由資料來：主圖 13 格在 375px 上每格約 23px，數得清。 */
 .meter {
+  --meter-cell-h: 8px;
   display: flex;
+  /* 加高的格子從同一條底線往上長。 */
+  align-items: flex-end;
   gap: 3px;
 }
 
 .meter > span {
   flex: 1 1 0;
-  height: 8px;
+  height: var(--meter-cell-h);
   border-radius: 2px;
   background: var(--rule);
 }
 
-.meter > .filled {
+.meter > .filled,
+.meter > .fresh {
   background: var(--ink);
+}
+
+/* 這一局新認得的（M4 票 11，只有結算畫）：加高一倍，照樣墨色實心。
+   不加字、不換色、不用空心格——空心會被讀成「還沒認得」（DESIGN.md「學習進度的刻度」）。 */
+.meter > .fresh {
+  height: calc(var(--meter-cell-h) * 2);
+}
+
+/* 只給讀螢幕軟體的字（結算的「這一局新認得 N 個」）：留在無障礙樹裡，畫面上不佔地方。
+   它不會拿到焦點，所以不需要 :focus-within 時現形的那一條例外。 */
+.visuallyHidden {
+  position: absolute;
+  clip-path: inset(50%);
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  white-space: nowrap;
 }
 
 /* 記不住的瀏覽器上，數字底下說出為什麼是 0。與「認得」的定義同一個字級：是說明，不是警告。 */
@@ -159,7 +189,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* 還沒遇到、已認識：只列名字，排成會折行的一串。13 個各佔一列的話，「開始」會被推出第一個螢幕。不可點，所以不套 44px。 */
+/* 還沒遇到、已認識：只列名字，排成會折行的一串。13 個各佔一列的話，想看清單的人要捲好幾屏。不可點，所以不套 44px。 */
 .names {
   display: flex;
   flex-wrap: wrap;

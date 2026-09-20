@@ -299,6 +299,13 @@ export const QUIZ_PLAY_AGAIN = "再玩一次";
 export const knownCountLabel = (layoutName: string, known: number, total: number) =>
   `這張${layoutName}你認得 ${known} / ${total}`;
 
+/**
+ * 結算時，這一局新認得了幾個——**只念給讀螢幕軟體聽**，接在「你認得 N / M」後面（DESIGN.md「學習進度的刻度」，2026-09-19 定）。
+ * 看得見的人從刻度上加高的格子看得出來；刻度對讀螢幕軟體藏起來了，這一句補上它說的事。畫面上不印：「不加字」照舊。
+ * N 由呼叫端算（`KnownCount`）；**0 個時不說**，理由同不加字：「這一局沒有新認得的」讀起來像責備。
+ */
+export const freshKnownNote = (count: number) => `這一局新認得 ${count} 個`;
+
 /** 「認得」只有一個定義（spec Solution），開場印在數字底下：看過說明卡不算；這份紀錄也不跟著人換裝置走。 */
 export const KNOWN_DEFINITION = "在找找看裡答對過至少一次，就算你認得了。進度只存在這台裝置上。";
 
