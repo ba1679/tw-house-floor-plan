@@ -41,6 +41,9 @@ _Avoid_: 拿「來源」單獨指涉它（會與 source tier 混）、把它讀�
 誠實性由 `via` 承擔，不由 `partial` 承擔——符號頁會把那一行印出來（PRD §7.2.2）。
 `verified` 要求的是**查證紀錄**齊全：`plain_meaning`、`source_refs`、`verified_at`、`verified_by`
 （`scripts/validate_data.py` 的 `REQUIRED_WHEN_VERIFIED`，缺一項就中斷建置）。
+不同 source tier 的流程終點也不同：`cns` 轉載至少要有一筆 `via` 明載未核對原文；
+`convention` 至少要有兩份彼此獨立的可信出處完成交叉核對；`regulation` 至少要有一筆官方法規出處。
+這些條件證明的是「本站查證流程完成」，**不把轉載資料提升成 CNS 原文已驗證**。
 **`caution` 不在其中**——買房時要注意什麼需要的是法規來源（建築技術規則、防火門 A/B 分級、採光通風規定），
 與畫法來源是兩回事，綁進來就是把這兩條軸混成一條，而且 14 筆裡只有雨遮有 `caution`，查證率上限會被壓到 7%。
 _Avoid_: 狀態、進度、拿 `partial` 當「可能畫錯」的意思（畫法對不對是 source tier 那條軸的事）、把 `caution` 算成查證完備性的一部分
@@ -131,6 +134,14 @@ _Avoid_: 點擊、tap（第一段也是 tap，但不是作答）
 **熟悉度（Familiarity）**：
 一個人對一張圖上某個可出題符號認得多少，綁在 layout 上，三態：**已認識**（找找看裡答對過至少一次）、**還不熟**（沒答對過、答錯過）、**還沒遇到**。看過說明卡不算認識——看過不等於記得。答錯只記在題目的那個符號上，不記在被點到的那一個：點歪不等於不認得。
 _Avoid_: 狀態（那是單一 hotspot 的互動狀態 State）、已學會、掌握度、discovered
+
+**符號瀏覽事件（`symbol_view`）**：
+使用者真正看到某個 symbol 的解釋內容時記下的一次 Analytics 事件；自由看圖與找找看以說明卡成功打開為準，符號頁以頁面內容成功載入為準。同一次呈現只記一次，不把單純點擊、焦點移動或看過進度算成符號瀏覽。
+_Avoid_: 點擊事件、曝光（容易把尚未成功呈現的互動誤算進來）、學習進度
+
+**入口來源（`source`）**：
+`symbol_view` 所記錄的使用者從哪一種產品入口開始理解 symbol：`layout`、`search`、`quiz` 或 `category`。它描述入口，不是 source tier，也不是使用者從哪個外部網站來。
+_Avoid_: 來源（單獨使用會與 source tier、source_refs 混淆）、流量來源、referrer
 
 ### 符號層的爭議詞
 
