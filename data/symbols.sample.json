@@ -4,7 +4,7 @@
     "generated_at": "2026-08-31",
     "note": "PRD v0.4 §4.1 的階段一符號清單。Q1 決議砍掉水電與消防類，Q4 決議不購買 CNS 11567，故門窗與結構改以《室內設計裝修製圖規範》為主來源、tier 為 convention，依 §7.1 步驟 5 上線前各需補第 2 個交叉來源。標 cns 的四筆是該規範轉載自 CNS 11567 的表 14，source_refs 以 via 欄位註明未核對標準原文。未查證完成的欄位一律 null，不得臆測填入。",
     "out_of_scope": "撒水頭與插座的查證成果保留在 git 歷史（commit 8905034 之前的版本）——它們是階段一範圍外（消防／水電），但內容已完成，日後開放設備圖層時可直接取回。",
-    "content_state": "plain_meaning：14/14 已寫（依各筆 source_refs 已載明的來源改寫，非轉錄）。ai_description / detection_hints：14/14 已寫，描述的是真實建案平面圖上的樣子（＝標準的畫法），不是本專案 render_svg.py 的簡化版——階段二要分析的是別人的圖。confused_with：9 組、18 筆，雙向登錄，build 時檢查（§7.2.2）。caution：僅 canopy_rain 有，其餘 13 筆仍 null——需要的是建築技術規則、防火門 A/B 分級、採光通風規定這類**法規**來源，與畫法來源是兩回事，不能從製圖規範推導。co_occurs_with：依 §7.2.1 降為選填，M1 結束後一次補齊。verification_status 一律維持 partial：內容寫完不等於查證完成，9 個 convention 仍缺第 2 個交叉來源。"
+    "content_state": "plain_meaning：14/14 已寫（依各筆 source_refs 已載明的來源改寫，非轉錄）。ai_description / detection_hints：14/14 已寫，描述的是真實建案平面圖上的樣子（＝標準的畫法），不是本專案 render_svg.py 的簡化版——階段二要分析的是別人的圖。confused_with：9 組、18 筆，雙向登錄，build 時檢查（§7.2.2）。caution：僅 canopy_rain 有，其餘 13 筆仍 null——需要的是建築技術規則、防火門 A/B 分級、採光通風規定這類**法規**來源，與畫法來源是兩回事，不能從製圖規範推導。co_occurs_with：依 §7.2.1 降為選填，M1 結束後一次補齊。M5 內容查證已補 CNS 轉載 via 與 convention 第二來源；verified 表示本站查證流程完成，不表示已直接核對 CNS 原文。"
   },
   "symbols": [
     {
@@ -24,15 +24,20 @@
         "3b2l_standard"
       ],
       "source_tier": "convention",
-      "verification_status": "partial",
+      "verification_status": "verified",
       "source_refs": [
         {
           "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
           "clause": "p28-29 表 12 材料構造剖面；p47 表 24 筆號 9 牆填淺灰"
+        },
+        {
+          "doc": "國立金門大學建築學系《建築圖學（一）》第六週：影線與線條",
+          "clause": "p2 平面或剖面中被剖到的構造體（牆、柱、梁、樓板等）以最粗線表達",
+          "url": "https://ecampus.nqu.edu.tw/eCampus3P/Learn/common_view_standalone_file.ashx?AttachMediaId=c2405026-f783-40e7-a257-2fcd27a38a47&CourseId=74f2946c-55af-4770-8387-edaaa19256fe"
         }
       ],
-      "verified_at": null,
-      "verified_by": null,
+      "verified_at": "2026-09-21",
+      "verified_by": "Codex",
       "ai_description": "填淺灰的實心帶狀，兩端接到其他牆或柱；外牆的帶寬明顯大於室內隔間牆。與柱同為實心，差別在填色較淺。",
       "detection_hints": [
         "實心填淺灰",
@@ -69,15 +74,20 @@
         "3b2l_standard"
       ],
       "source_tier": "convention",
-      "verification_status": "partial",
+      "verification_status": "verified",
       "source_refs": [
         {
           "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
           "clause": "p47 表 24 筆號 8 柱填深灰；p28 表 12 木構造牆之柱／間柱"
+        },
+        {
+          "doc": "國立金門大學建築學系《建築圖學（一）》第六週：影線與線條",
+          "clause": "p2 平面或剖面中被剖到的構造體（牆、柱、梁、樓板等）以最粗線表達",
+          "url": "https://ecampus.nqu.edu.tw/eCampus3P/Learn/common_view_standalone_file.ashx?AttachMediaId=c2405026-f783-40e7-a257-2fcd27a38a47&CourseId=74f2946c-55af-4770-8387-edaaa19256fe"
         }
       ],
-      "verified_at": null,
-      "verified_by": null,
+      "verified_at": "2026-09-21",
+      "verified_by": "Codex",
       "ai_description": "填深灰的實心方塊，多出現在建物轉角或牆的交會處，寬度大於所在的牆，因此會突出於牆面之外。",
       "detection_hints": [
         "實心填深灰",
@@ -117,15 +127,20 @@
         "3b2l_standard"
       ],
       "source_tier": "convention",
-      "verification_status": "partial",
+      "verification_status": "verified",
       "source_refs": [
         {
           "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
-          "clause": "p18 表 6 長虛線：表示平面圖上部之主結構投影線，如梁線"
+          "clause": "p18 表 6 長虛線：表示平面圖上部之主結構投影線，如梁線；p47 表 24 例示 150cm 平切下視時梁以長虛線表示"
+        },
+        {
+          "doc": "國立金門大學建築學系《建築圖學（一）》第六週：影線與線條",
+          "clause": "p2 被剖到的構造體包含梁；虛線表示圖面中不存在但需要表達、位於頭頂上的內容",
+          "url": "https://ecampus.nqu.edu.tw/eCampus3P/Learn/common_view_standalone_file.ashx?AttachMediaId=c2405026-f783-40e7-a257-2fcd27a38a47&CourseId=74f2946c-55af-4770-8387-edaaa19256fe"
         }
       ],
-      "verified_at": null,
-      "verified_by": null,
+      "verified_at": "2026-09-21",
+      "verified_by": "Codex",
       "ai_description": "兩條平行的長虛線橫跨室內，兩端落在牆或柱上；長虛線代表位於平面切面上方的結構投影，線間不填色。",
       "detection_hints": [
         "長虛線",
@@ -159,15 +174,20 @@
         "3b2l_standard"
       ],
       "source_tier": "convention",
-      "verification_status": "partial",
+      "verification_status": "verified",
       "source_refs": [
         {
           "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
           "clause": "p48 表 25 代號 I.P；p51 表 28 代號 PS（Pipe Shaft）"
+        },
+        {
+          "doc": "建築物給水排水設備設計技術規範（草案）（經濟部水利署）",
+          "clause": "2.1.3 說明：配管應考慮連接器具或機器之位置或管道間，盡量以最短路徑或直線路徑規劃",
+          "url": "https://www.water.gov.tw/ch/ServerFile/Get/ae6cdbf6-ea91-4c66-982e-f635514c3dbd?nodeId=812"
         }
       ],
-      "verified_at": null,
-      "verified_by": null,
+      "verified_at": "2026-09-21",
+      "verified_by": "Codex",
       "ai_description": "四周由牆圍成的小方形空間，內部標註 PS 或 I.P，周圍牆上沒有門開口，面積遠小於一般房間。",
       "detection_hints": [
         "小方框",
@@ -200,15 +220,20 @@
         "3b2l_standard"
       ],
       "source_tier": "convention",
-      "verification_status": "partial",
+      "verification_status": "verified",
       "source_refs": [
         {
           "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
           "clause": "p23 表 8 單開門"
+        },
+        {
+          "doc": "國立金門大學建築學系《建築圖學（一）》第八週：平面基礎：門",
+          "clause": "p1 門的平面符號為 1/100 表現法；表列單開門及旋轉角度／門旋轉幅度",
+          "url": "https://ecampus.nqu.edu.tw/eCampus3P/Learn/common_view_standalone_file.ashx?AttachMediaId=ca466d91-916c-4d3f-ad6b-f86b5ff9fab7&CourseId=74f2946c-55af-4770-8387-edaaa19256fe"
         }
       ],
-      "verified_at": null,
-      "verified_by": null,
+      "verified_at": "2026-09-21",
+      "verified_by": "Codex",
       "ai_description": "牆在開口處斷開，開口一端有一條垂直牆面的門扇線，自門扇端點畫一道四分之一圓弧回到另一端，弧半徑等於開口寬度。",
       "detection_hints": [
         "牆斷開",
@@ -240,15 +265,20 @@
         "3b2l_standard"
       ],
       "source_tier": "convention",
-      "verification_status": "partial",
+      "verification_status": "verified",
       "source_refs": [
         {
           "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
           "clause": "p23 表 8 雙開門"
+        },
+        {
+          "doc": "國立金門大學建築學系《建築圖學（一）》第八週：平面基礎：門",
+          "clause": "p1 門的平面符號為 1/100 表現法；表列雙開門",
+          "url": "https://ecampus.nqu.edu.tw/eCampus3P/Learn/common_view_standalone_file.ashx?AttachMediaId=ca466d91-916c-4d3f-ad6b-f86b5ff9fab7&CourseId=74f2946c-55af-4770-8387-edaaa19256fe"
         }
       ],
-      "verified_at": null,
-      "verified_by": null,
+      "verified_at": "2026-09-21",
+      "verified_by": "Codex",
       "ai_description": "牆在開口處斷開，兩端各有一條垂直牆面的門扇線並各自畫一道四分之一圓弧，兩弧在開口中央相接，弧半徑約為開口半寬。",
       "detection_hints": [
         "牆斷開",
@@ -281,15 +311,20 @@
         "3b2l_standard"
       ],
       "source_tier": "convention",
-      "verification_status": "partial",
+      "verification_status": "verified",
       "source_refs": [
         {
           "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
           "clause": "p23 表 8 單拉門／雙拉門／雙向拉門／拉進門"
+        },
+        {
+          "doc": "國立金門大學建築學系《建築圖學（一）》第八週：平面基礎：門",
+          "clause": "p1 門的平面符號為 1/100 表現法；表列雙拉門、單拉門與拉進門",
+          "url": "https://ecampus.nqu.edu.tw/eCampus3P/Learn/common_view_standalone_file.ashx?AttachMediaId=ca466d91-916c-4d3f-ad6b-f86b5ff9fab7&CourseId=74f2946c-55af-4770-8387-edaaa19256fe"
         }
       ],
-      "verified_at": null,
-      "verified_by": null,
+      "verified_at": "2026-09-21",
+      "verified_by": "Codex",
       "ai_description": "牆在開口處斷開，開口內兩條與牆平行的門扇線分別偏向兩端、在中央錯開，交會處有一個小圓點；沒有開啟弧。",
       "detection_hints": [
         "無開啟弧",
@@ -327,15 +362,20 @@
         "3b2l_standard"
       ],
       "source_tier": "convention",
-      "verification_status": "partial",
+      "verification_status": "verified",
       "source_refs": [
         {
           "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
           "clause": "p23 表 8 第一項 出入口"
+        },
+        {
+          "doc": "國立金門大學建築學系《建築圖學（一）》第八週：平面基礎：門",
+          "clause": "p1 門的平面符號為 1/100 表現法；表列出入口且不畫門扇",
+          "url": "https://ecampus.nqu.edu.tw/eCampus3P/Learn/common_view_standalone_file.ashx?AttachMediaId=ca466d91-916c-4d3f-ad6b-f86b5ff9fab7&CourseId=74f2946c-55af-4770-8387-edaaa19256fe"
         }
       ],
-      "verified_at": null,
-      "verified_by": null,
+      "verified_at": "2026-09-21",
+      "verified_by": "Codex",
       "ai_description": "牆在開口處斷開，開口內不畫任何門扇線，僅在開口中央有一個小三角形記號。",
       "detection_hints": [
         "牆斷開",
@@ -369,15 +409,20 @@
         "3b2l_standard"
       ],
       "source_tier": "convention",
-      "verification_status": "partial",
+      "verification_status": "verified",
       "source_refs": [
         {
           "doc": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
           "clause": "p24 表 9（18 種窗）"
+        },
+        {
+          "doc": "國立金門大學建築學系《建築圖學（一）》第九週：平面基礎：窗",
+          "clause": "p1 平面圖畫法為將窗戶及玻璃水平切開後由上往下望，並表列多種開窗平面畫法",
+          "url": "https://ecampus.nqu.edu.tw/eCampus3P/Learn/common_view_standalone_file.ashx?AttachMediaId=0d8e145b-976c-47ff-839c-78fcca396249&CourseId=74f2946c-55af-4770-8387-edaaa19256fe"
         }
       ],
-      "verified_at": null,
-      "verified_by": null,
+      "verified_at": "2026-09-21",
+      "verified_by": "Codex",
       "ai_description": "牆在開口處斷開，開口以一條與牆等厚的窗框帶橫跨、兩端有窗樘端線；框帶內另有平行細線、中央錯開的線段或開啟弧，視窗型而定。多開在外牆。",
       "detection_hints": [
         "窗框帶橫跨開口",
@@ -414,16 +459,16 @@
         "3b2l_standard"
       ],
       "source_tier": "cns",
-      "verification_status": "partial",
+      "verification_status": "verified",
       "source_refs": [
         {
           "doc": "CNS 11567 建築製圖（類號 A1042）",
-          "clause": "p32 表 14 坐式馬桶（平面＋立面）",
-          "via": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會） p32 表 14 坐式馬桶（平面＋立面）（該表標題註明「引用 CNS11567，A1042 建築製圖」，本專案未核對標準原文）"
+          "clause": "公會規範 p31 表 14 標題明載引用 CNS11567，A1042 建築製圖；p32 表 14 續頁列坐式馬桶（平面＋立面）",
+          "via": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）p31-p32 表 14 轉載；本專案未核對標準原文，也未購買 CNS 11567，無法確認與 CNS 最新版完全一致"
         }
       ],
-      "verified_at": null,
-      "verified_by": null,
+      "verified_at": "2026-09-21",
+      "verified_by": "Codex",
       "ai_description": "上方一個較小的圓角矩形（水箱）與下方一個橢圓（座體）相接組成，水箱側短邊貼牆。",
       "detection_hints": [
         "圓角矩形＋橢圓相接",
@@ -455,16 +500,16 @@
         "3b2l_standard"
       ],
       "source_tier": "cns",
-      "verification_status": "partial",
+      "verification_status": "verified",
       "source_refs": [
         {
           "doc": "CNS 11567 建築製圖（類號 A1042）",
-          "clause": "p32 表 14 洗臉盆（掛牆式／嵌台式／立柱式）",
-          "via": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會） p32 表 14 洗臉盆（掛牆式／嵌台式／立柱式）（該表標題註明「引用 CNS11567，A1042 建築製圖」，本專案未核對標準原文）"
+          "clause": "公會規範 p31 表 14 標題明載引用 CNS11567，A1042 建築製圖；p32 表 14 續頁列洗臉盆（掛牆式／嵌台式／立柱式）",
+          "via": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）p31-p32 表 14 轉載；本專案未核對標準原文，也未購買 CNS 11567，無法確認與 CNS 最新版完全一致"
         }
       ],
-      "verified_at": null,
-      "verified_by": null,
+      "verified_at": "2026-09-21",
+      "verified_by": "Codex",
       "ai_description": "貼著牆線的半圓形或橢圓形盆體，後緣為直線並與牆重合，盆內中央有一個十字記號表示落水頭。",
       "detection_hints": [
         "後緣呈直線貼牆",
@@ -497,16 +542,16 @@
         "3b2l_standard"
       ],
       "source_tier": "cns",
-      "verification_status": "partial",
+      "verification_status": "verified",
       "source_refs": [
         {
           "doc": "CNS 11567 建築製圖（類號 A1042）",
-          "clause": "p32 表 14 流理檯洗槽",
-          "via": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會） p32 表 14 流理檯洗槽（該表標題註明「引用 CNS11567，A1042 建築製圖」，本專案未核對標準原文）"
+          "clause": "公會規範 p31 表 14 標題明載引用 CNS11567，A1042 建築製圖；p32 表 14 續頁列流理檯洗槽",
+          "via": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）p31-p32 表 14 轉載；本專案未核對標準原文，也未購買 CNS 11567，無法確認與 CNS 最新版完全一致"
         }
       ],
-      "verified_at": null,
-      "verified_by": null,
+      "verified_at": "2026-09-21",
+      "verified_by": "Codex",
       "ai_description": "沿牆配置的長矩形檯面，內含一個圓角方形水槽，檯面後緣有一個小圓表示水龍頭；檯面長度遠大於寬度。",
       "detection_hints": [
         "長矩形沿牆",
@@ -537,16 +582,16 @@
         "3b2l_standard"
       ],
       "source_tier": "cns",
-      "verification_status": "partial",
+      "verification_status": "verified",
       "source_refs": [
         {
           "doc": "CNS 11567 建築製圖（類號 A1042）",
-          "clause": "p32 表 14 浴缸（平面＋立面）",
-          "via": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會） p32 表 14 浴缸（平面＋立面）（該表標題註明「引用 CNS11567，A1042 建築製圖」，本專案未核對標準原文）"
+          "clause": "公會規範 p31 表 14 標題明載引用 CNS11567，A1042 建築製圖；p32 表 14 續頁列浴缸（平面＋立面）",
+          "via": "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）p31-p32 表 14 轉載；本專案未核對標準原文，也未購買 CNS 11567，無法確認與 CNS 最新版完全一致"
         }
       ],
-      "verified_at": null,
-      "verified_by": null,
+      "verified_at": "2026-09-21",
+      "verified_by": "Codex",
       "ai_description": "圓角長方形外框內再套一個圓角長方形，內框幾乎填滿外框，一端有一個小圓表示落水；通常一長邊貼牆。",
       "detection_hints": [
         "圓角長方形雙層",
@@ -582,11 +627,13 @@
         {
           "doc": "地籍測量實施規則",
           "clause": "106 年修正刪除屋簷及雨遮之附屬建物測量登記規定",
-          "year": 2017
+          "year": 2017,
+          "url": "https://glrs.moi.gov.tw/LawContent.aspx?id=FL003219"
         },
         {
           "doc": "建築技術規則建築設計施工編",
-          "clause": "雨遮、花台於 1 公尺內免計入容積之規定"
+          "clause": "第 162 條雨遮、花台於 1 公尺內免計入容積之規定",
+          "url": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?flno=162&pcode=D0070115"
         }
       ],
       "verified_at": "2026-08-20",

@@ -121,18 +121,107 @@ test.describe("floorplan 畫得出來", () => {
 // REQUIRED_WHEN_VERIFIED 曾經含 caution，而 14 筆裡只有雨遮有 caution——M1 一把任何
 // 其他符號翻成 verified，prebuild 就失敗、build 斷掉，連帶弄掛所有頁面測試。
 test.describe("verified 的閘門", () => {
-  // 不寫死符號 id：M1 哪天替牆補了 caution，寫死的那條測試會默默變成在測「有 caution 的
-  // 符號能不能 verified」——還是綠的，但守的已經不是原來那件事。找不到就帶訊息失敗。
-  // 只改記憶體裡的那份，寫檔留給呼叫的人，跟這個檔案其餘九條測試同一個手法。
-  function verifiedWithoutCaution(dir: string) {
-    const path = join(dir, SYMBOLS);
-    const data = JSON.parse(readFileSync(path, "utf8"));
-    const symbol = data.symbols.find((s: { caution: string | null }) => s.caution === null);
-    expect(symbol, "資料裡找不到 caution 為 null 的符號，這個測試的前提已經不成立").toBeTruthy();
+  type SourceRef = {
+    doc?: string;
+    clause?: string;
+    url?: string;
+    via?: string;
+  };
+  type MutableSymbol = {
+    id: string;
+    caution: string | null;
+    source_tier: string;
+    verification_status: string;
+    verified_at: string | null;
+    verified_by: string | null;
+    source_refs: SourceRef[];
+    [key: string]: unknown;
+  };
+
+  const SOURCE_REFS = {
+    cnsWithVia: [
+      {
+        doc: "CNS 11567 建築製圖（類號 A1042）",
+        clause: "p32 表 14 坐式馬桶",
+        via: "室內設計裝修製圖規範 p32 表 14（該表註明引用 CNS11567；本專案未核對標準原文）",
+      },
+    ],
+    cnsWithoutVia: [
+      {
+        doc: "CNS 11567 建築製圖（類號 A1042）",
+        clause: "p32 表 14 坐式馬桶",
+      },
+    ],
+    conventionTwoDocs: [
+      {
+        doc: "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
+        clause: "p23 表 8 單開門",
+      },
+      {
+        doc: "住宅設計平面圖繪製手冊",
+        clause: "門窗符號章節",
+      },
+    ],
+    conventionOneDoc: [
+      {
+        doc: "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
+        clause: "p23 表 8 單開門",
+      },
+    ],
+    conventionSameDocTwice: [
+      {
+        doc: "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
+        clause: "p23 表 8 單開門",
+      },
+      {
+        doc: "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）",
+        clause: "p24 表 9 窗",
+      },
+    ],
+    regulationComplete: [
+      {
+        doc: "建築技術規則建築設計施工編",
+        clause: "第 162 條",
+        url: "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=D0070115&flno=162",
+      },
+    ],
+    regulationNoUrl: [
+      {
+        doc: "建築技術規則建築設計施工編",
+        clause: "第 162 條",
+      },
+    ],
+    regulationNoLocator: [
+      {
+        doc: "建築技術規則建築設計施工編",
+        url: "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=D0070115&flno=162",
+      },
+    ],
+  } satisfies Record<string, SourceRef[]>;
+
+  function markVerified(symbol: MutableSymbol, tier: string, sourceRefs: SourceRef[]) {
+    symbol.source_tier = tier;
     symbol.verification_status = "verified";
     symbol.verified_at = "2026-01-01";
     symbol.verified_by = "build-validation-fixture";
-    return { path, data, symbol };
+    symbol.source_refs = sourceRefs.map((ref) => ({ ...ref }));
+  }
+
+  // 不寫死符號 id：M1 哪天替牆補了 caution，寫死的那條測試會默默變成在測「有 caution 的
+  // 符號能不能 verified」——還是綠的，但守的已經不是原來那件事。找不到就帶訊息失敗。
+  // 只改記憶體裡的那份，寫檔留給呼叫的人，跟這個檔案其餘九條測試同一個手法。
+  function verifiedWithoutCaution(
+    dir: string,
+    tier = "convention",
+    sourceRefs: SourceRef[] = SOURCE_REFS.conventionTwoDocs,
+  ) {
+    const path = join(dir, SYMBOLS);
+    const data = JSON.parse(readFileSync(path, "utf8")) as { symbols: MutableSymbol[] };
+    const symbol = data.symbols.find((s) => s.caution === null);
+    expect(symbol, "資料裡找不到 caution 為 null 的符號，這個測試的前提已經不成立").toBeTruthy();
+    const verifiedSymbol = symbol!;
+    markVerified(verifiedSymbol, tier, sourceRefs);
+    return { path, data, symbol: verifiedSymbol };
   }
 
   // caution（買房時要注意什麼）要的是法規來源，與畫法來源是兩條軸。綁在一起等於宣告
@@ -170,6 +259,131 @@ test.describe("verified 的閘門", () => {
       expect(output).toContain(why);
     });
   }
+
+  test("CNS verified 缺 via 時，建置失敗，而且說得出要揭露轉載鏈", () => {
+    const dir = sandbox();
+    const { path, data, symbol } = verifiedWithoutCaution(dir, "cns", SOURCE_REFS.cnsWithoutVia);
+    writeFileSync(path, JSON.stringify(data, null, 2));
+
+    const { code, output } = runValidator(dir);
+    expect(code, output).not.toBe(0);
+    expect(output).toContain(symbol!.id);
+    expect(output).toContain("cns");
+    expect(output).toContain("via");
+    expect(output).toContain("未核對標準原文");
+  });
+
+  test("convention verified 只有一份出處時，建置失敗，而且說得出要兩份不同文件", () => {
+    const dir = sandbox();
+    const { path, data, symbol } = verifiedWithoutCaution(dir, "convention", SOURCE_REFS.conventionOneDoc);
+    writeFileSync(path, JSON.stringify(data, null, 2));
+
+    const { code, output } = runValidator(dir);
+    expect(code, output).not.toBe(0);
+    expect(output).toContain(symbol!.id);
+    expect(output).toContain("convention");
+    expect(output).toContain("兩筆 doc 不同的出處");
+  });
+
+  test("convention verified 兩筆同名文件時，建置失敗，而且說得出同名文件不算交叉來源", () => {
+    const dir = sandbox();
+    const { path, data, symbol } = verifiedWithoutCaution(dir, "convention", SOURCE_REFS.conventionSameDocTwice);
+    writeFileSync(path, JSON.stringify(data, null, 2));
+
+    const { code, output } = runValidator(dir);
+    expect(code, output).not.toBe(0);
+    expect(output).toContain(symbol!.id);
+    expect(output).toContain("convention");
+    expect(output).toContain("同名文件不得冒充交叉來源");
+  });
+
+  test("regulation verified 缺 HTTPS URL 時，建置失敗，而且說得出官方性由查證者負責", () => {
+    const dir = sandbox();
+    const { path, data, symbol } = verifiedWithoutCaution(dir, "regulation", SOURCE_REFS.regulationNoUrl);
+    writeFileSync(path, JSON.stringify(data, null, 2));
+
+    const { code, output } = runValidator(dir);
+    expect(code, output).not.toBe(0);
+    expect(output).toContain(symbol!.id);
+    expect(output).toContain("regulation");
+    expect(output).toContain("HTTPS URL");
+    expect(output).toContain("官方性仍由查證者人工負責");
+  });
+
+  test("regulation verified 缺定位資訊時，建置失敗，而且說得出要能定位條文或頁碼", () => {
+    const dir = sandbox();
+    const { path, data, symbol } = verifiedWithoutCaution(dir, "regulation", SOURCE_REFS.regulationNoLocator);
+    writeFileSync(path, JSON.stringify(data, null, 2));
+
+    const { code, output } = runValidator(dir);
+    expect(code, output).not.toBe(0);
+    expect(output).toContain(symbol!.id);
+    expect(output).toContain("regulation");
+    expect(output).toContain("定位資訊");
+  });
+
+  for (const [tier, sourceRefs] of [
+    ["cns", SOURCE_REFS.cnsWithVia],
+    ["convention", SOURCE_REFS.conventionTwoDocs],
+    ["regulation", SOURCE_REFS.regulationComplete],
+  ] as const) {
+    test(`${tier} verified 的 tier-specific 查證條件齊全時，建置通過`, () => {
+      const dir = sandbox();
+      const { path, data } = verifiedWithoutCaution(dir, tier, sourceRefs);
+      writeFileSync(path, JSON.stringify(data, null, 2));
+
+      const { code, output } = runValidator(dir);
+      expect(code, output).toBe(0);
+    });
+  }
+});
+
+test.describe("verification rate 發布 gate", () => {
+  function writeSymbols(dir: string, mutate: (symbols: { verification_status: string }[]) => void) {
+    const path = join(dir, SYMBOLS);
+    const data = JSON.parse(readFileSync(path, "utf8")) as {
+      symbols: { verification_status: string }[];
+    };
+    mutate(data.symbols);
+    writeFileSync(path, JSON.stringify(data, null, 2));
+  }
+
+  test("11/14 verified 時建置失敗，而且說出實際比例與至少需要 12 筆", () => {
+    const dir = sandbox();
+    writeSymbols(dir, (symbols) => {
+      for (const symbol of symbols.slice(0, 3)) symbol.verification_status = "partial";
+    });
+
+    const { code, output } = runValidator(dir);
+    expect(code, output).not.toBe(0);
+    expect(output).toContain("查證率 11/14 = 78.6% 未達 80% 上線門檻");
+    expect(output).toContain("至少需要 12 筆 verified");
+  });
+
+  test("12/14 verified 時通過 80% gate，不用四捨五入偷渡", () => {
+    const dir = sandbox();
+    writeSymbols(dir, (symbols) => {
+      for (const symbol of symbols.slice(0, 2)) symbol.verification_status = "partial";
+    });
+
+    const { code, output } = runValidator(dir);
+    expect(code, output).toBe(0);
+    expect(output).toContain("查證率 12/14 = 85.7%");
+    expect(output).toContain("✓");
+  });
+
+  test("空 symbol 清單不能以 0/0 通過發布 gate", () => {
+    const dir = sandbox();
+    const path = join(dir, SYMBOLS);
+    const data = JSON.parse(readFileSync(path, "utf8"));
+    data.symbols = [];
+    writeFileSync(path, JSON.stringify(data, null, 2));
+
+    const { code, output } = runValidator(dir);
+    expect(code, output).not.toBe(0);
+    expect(output).toContain("沒有任何 symbol");
+    expect(output).toContain("分母不可為 0");
+  });
 });
 
 // 符號頁是搜尋落地頁（M3 票 02）：缺一個內容欄位的後果不是報錯，而是頁面上**靜默少一塊**

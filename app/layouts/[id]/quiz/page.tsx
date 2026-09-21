@@ -4,8 +4,9 @@ import { QuizGame } from "@/components/QuizGame";
 import { listLayoutIds, loadFloorPlan } from "@/lib/floorplan/data";
 import { readingOrder } from "@/lib/floorplan/reading-order";
 import { hasQuiz, quizzableSymbols } from "@/lib/quiz/questions";
+import { quizMetadata } from "@/lib/site-metadata";
 import { loadSymbolsForViewer } from "@/lib/symbols/data";
-import { quizHeading, quizPageDescription, quizPageTitle } from "@/lib/ui/copy";
+import { quizHeading } from "@/lib/ui/copy";
 // 與平面圖頁同一套「一個螢幕就是一頁」的版面：理由寫在那一份 CSS 上，不抄第二份。
 import styles from "../page.module.css";
 
@@ -33,14 +34,9 @@ export async function generateMetadata({
   const { id } = await params;
   if (!quizLayoutIds().includes(id)) return {};
 
-  const { name } = loadFloorPlan(id);
-  return {
-    title: quizPageTitle(name),
-    description: quizPageDescription(name),
-    // **noindex、不進 sitemap**（spec「路由與頁面」）：一局的題目是隨機的，搜尋結果上沒有東西可以給人看。
-    // sitemap 那一側「有哪幾種頁」是手列的（`app/sitemap.ts`），這一種刻意不加。
-    robots: { index: false },
-  };
+  // **noindex、不進 sitemap**（spec「路由與頁面」）：一局的題目是隨機的，搜尋結果上沒有東西可以給人看。
+  // sitemap 那一側「有哪幾種頁」是手列的（`app/sitemap.ts`），這一種刻意不加。
+  return quizMetadata(loadFloorPlan(id));
 }
 
 export default async function QuizPage({ params }: { params: Promise<{ id: string }> }) {

@@ -1,11 +1,12 @@
 "use client";
 
-import { Suspense, useCallback, useReducer, useState } from "react";
+import { Suspense, useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { FloorPlanViewport, initialViewerConfig } from "./FloorPlanViewport";
 import { HighlightFromQuery } from "./HighlightFromQuery";
 import { InfoSheet } from "./InfoSheet";
 import { useEscapeKey } from "./useEscapeKey";
 import { useFirstVisitHint } from "./useFirstVisitHint";
+import { recordSymbolView } from "@/lib/analytics/gtag";
 import { isSymbolAbsent } from "@/lib/floorplan/hotspots";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
@@ -112,6 +113,22 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
   const occurrence = selectedOccurrence(state);
   /** 說明卡此刻升起來了沒。掛上 `<InfoSheet>`、樑的橫幅讓位、房間變暗，問的是同一件事，所以只寫一次。 */
   const sheetOpen = selectedSymbol !== null && occurrence !== null;
+  const previousSheetOpen = useRef(false);
+
+  useEffect(() => {
+    if (!sheetOpen || !state.selected?.symbol_id) {
+      previousSheetOpen.current = false;
+      return;
+    }
+    if (previousSheetOpen.current) return;
+    previousSheetOpen.current = true;
+    recordSymbolView({
+      symbol_id: state.selected.symbol_id,
+      source: "layout",
+      layout_id: floorplan.id,
+      hotspot_id: state.selected.id,
+    });
+  }, [floorplan.id, sheetOpen, state.selected?.id, state.selected?.symbol_id]);
 
   // Esc 關掉說明卡——與關閉鍵同一個 action。第二段進行中的 Esc 由圖框自己處理。
   useEscapeKey(sheetOpen, close);

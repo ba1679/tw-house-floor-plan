@@ -66,7 +66,7 @@ test.describe("/ 首頁", () => {
     const search = page.getByRole("search");
     await search.getByRole("searchbox").pressSequentially("暗樑");
 
-    await expect(search.locator('a[href="/symbols/beam"]')).toBeVisible();
+    await expect(search.locator('a[href="/symbols/beam?from=search"]')).toBeVisible();
     await expect(search.getByRole("status")).toContainText("找到");
     await expect(page).toHaveURL("/");
     expect(requests, "打字的時候不該有任何網路請求").toEqual([]);

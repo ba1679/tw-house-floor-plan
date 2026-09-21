@@ -18,6 +18,7 @@ import {
   quizIntro,
   wrongTimesLabel,
 } from "@/lib/ui/copy";
+import { sentenceLines } from "@/lib/ui/text-lines";
 import styles from "./Quiz.module.css";
 
 // 找找看頁的 client 那一半：開場 → 一局 → （結算在一局裡）。
@@ -65,6 +66,16 @@ export function QuizGame({ floorplan, symbols, readingOrder, quizzable }: Props)
    * 也因此數字與刻度出現在上面、把按鈕往下推的那一刻，按鈕才剛變得按得下去：不會有人按到一半被推走（清單排在按鈕下面，推不動它，M4 票 10）。
    */
   const stored = useLayoutProgress(floorplan.id);
+  const intro = quizIntro(roundSize(quizzable.length));
+  const firstSentenceEnd = intro.indexOf("。") + 1;
+  const introLead = intro.slice(0, firstSentenceEnd);
+  const introDetail = intro.slice(firstSentenceEnd);
+  const detailBreak = introDetail.indexOf("——");
+  const introTask = detailBreak >= 0 ? introDetail.slice(0, detailBreak) : introDetail;
+  const introMethod = detailBreak >= 0 ? introDetail.slice(detailBreak) : "";
+  const methodBreak = introMethod.indexOf("，");
+  const introMethodLead = methodBreak >= 0 ? introMethod.slice(0, methodBreak + 1) : introMethod;
+  const introMethodAnswer = methodBreak >= 0 ? introMethod.slice(methodBreak + 1) : "";
 
   if (round) {
     return (
@@ -88,14 +99,25 @@ export function QuizGame({ floorplan, symbols, readingOrder, quizzable }: Props)
 
   return (
     <section className={styles.screen}>
-      {stored && (
-        <>
+      <div className={styles.progressIntro} aria-hidden={stored ? undefined : "true"}>
+        {stored && (
           <KnownCount layoutName={floorplan.name} quizzable={quizzable} stored={stored} />
-          <p className={styles.definition}>{KNOWN_DEFINITION}</p>
-        </>
-      )}
+        )}
+        <p className={styles.definition}>
+          {sentenceLines(KNOWN_DEFINITION).map((line) => (
+            <span key={line} className={styles.definitionLine}>
+              {line}
+            </span>
+          ))}
+        </p>
+      </div>
 
-      <p className={styles.lead}>{quizIntro(roundSize(quizzable.length))}</p>
+      <div className={styles.lead}>
+        <p className={styles.leadLine}>{introLead}</p>
+        <p className={styles.leadLine}>{introTask}</p>
+        {introMethodLead && <p className={styles.leadLine}>{introMethodLead}</p>}
+        {introMethodAnswer && <p className={styles.leadLine}>{introMethodAnswer}</p>}
+      </div>
       {/* 全部認得之後照樣按得下去（PRD §6.6）：出題就在已認識的那一組裡隨機。 */}
       <button type="button" className={styles.start} onClick={start} disabled={!stored}>
         {QUIZ_START}

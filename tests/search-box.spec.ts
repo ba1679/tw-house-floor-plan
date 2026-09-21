@@ -42,7 +42,7 @@ test.describe("搜尋框", () => {
     await search.getByRole("searchbox").pressSequentially("暗樑");
 
     // 結果只在搜尋區裡找：結構那一頁本來就列著樑，整頁找的話這條什麼都證明不了。
-    await expect(search.locator(`a[href="/symbols/${beam.id}"]`)).toBeVisible();
+    await expect(search.locator(`a[href="/symbols/${beam.id}?from=search"]`)).toBeVisible();
     await expect(page).toHaveURL(`/categories/${category}`);
     expect(requests, "打字的時候不該有任何網路請求").toEqual([]);
   });
@@ -88,7 +88,7 @@ test.describe("搜尋框", () => {
     await page.goto(`/categories/${categoriesInData[0]}`);
     const search = page.getByRole("search");
     const box = search.getByRole("searchbox");
-    const row = search.locator(`a[href="/symbols/${symbol.id}"]`);
+    const row = search.locator(`a[href="/symbols/${symbol.id}?from=search"]`);
 
     await box.pressSequentially(alias.toLowerCase());
     await expect(row).toContainText(symbol.name);
@@ -126,7 +126,7 @@ test.describe("搜尋框", () => {
 
     await cdp.send("Input.insertText", { text: "暗樑" });
     await expect(box).toHaveValue("暗樑");
-    await expect(search.locator(`a[href="/symbols/${beam.id}"]`)).toBeVisible();
+    await expect(search.locator(`a[href="/symbols/${beam.id}?from=search"]`)).toBeVisible();
     await expect(status).not.toContainText("找不到");
   });
 
@@ -137,9 +137,9 @@ test.describe("搜尋框", () => {
 
     const search = page.getByRole("search");
     await search.getByRole("searchbox").pressSequentially("暗樑");
-    await search.locator(`a[href="/symbols/${beam.id}"]`).click();
+    await search.locator(`a[href="/symbols/${beam.id}?from=search"]`).click();
 
-    await expect(page).toHaveURL(`/symbols/${beam.id}`);
+    await expect(page).toHaveURL(`/symbols/${beam.id}?from=search`);
     await expect(page.getByRole("heading", { level: 1 })).toContainText(beam.name);
   });
 

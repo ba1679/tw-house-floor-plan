@@ -49,13 +49,13 @@ function textOf(html: string) {
 
 /** 這一頁列出了哪些符號——照出現的先後，一個連結一個。 */
 const listedSymbols = (id: string) =>
-  [...built(id).matchAll(/href="\/symbols\/([^"]+)"/g)].map((m) => m[1]);
+  [...built(id).matchAll(/href="\/symbols\/([^"?]+)\?from=category"/g)].map((m) => m[1]);
 
 const normalize = (text: string) => text.replace(/\s+/g, " ").trim();
 
 /** 一列在畫面上讀得到的字：連到那個符號的連結裡面、圖形以外（圖形裡的 `<title>` 不算）。 */
 function rowText(html: string, id: string) {
-  const row = new RegExp(`<a[^>]*href="/symbols/${id}"[^>]*>([\\s\\S]*?)</a>`).exec(html);
+  const row = new RegExp(`<a[^>]*href="/symbols/${id}\\?from=category"[^>]*>([\\s\\S]*?)</a>`).exec(html);
   expect(row, `找不到連到 /symbols/${id} 的那一列`).toBeTruthy();
   return normalize(textOf(row![1].replace(/<svg[\s\S]*?<\/svg>/g, " ")));
 }
@@ -173,10 +173,10 @@ test.describe("/categories/[id] 分類頁", () => {
     await page.goto(`/categories/${category}`);
 
     for (const symbol of symbolsIn(category)) {
-      await expect(page.locator(`a[href="/symbols/${symbol.id}"]`)).toBeVisible();
+      await expect(page.locator(`a[href="/symbols/${symbol.id}?from=category"]`)).toBeVisible();
     }
 
-    await page.locator(`a[href="/symbols/${first.id}"]`).click();
+    await page.locator(`a[href="/symbols/${first.id}?from=category"]`).click();
     await expect(page.getByRole("heading", { level: 1 })).toContainText(first.name);
   });
 
@@ -186,7 +186,7 @@ test.describe("/categories/[id] 分類頁", () => {
     for (const category of categoriesInData) {
       await page.goto(`/categories/${category}`);
       // 先確認站在分類頁上：404 頁也不會溢出，那樣這條就成了一個永遠是綠的斷言。
-      await expect(page.locator(`a[href="/symbols/${symbolsIn(category)[0].id}"]`)).toBeVisible();
+      await expect(page.locator(`a[href="/symbols/${symbolsIn(category)[0].id}?from=category"]`)).toBeVisible();
 
       const overflows = await page.evaluate(
         () => document.documentElement.scrollWidth > document.documentElement.clientWidth,

@@ -7,9 +7,10 @@
 
 用法: python3 scripts/validate_data.py
 """
-import json, io, sys, glob, os
+import json, io, sys, glob, os, math
 import xml.etree.ElementTree as ET
 from collections import Counter
+from urllib.parse import urlparse
 
 # verification_status 描述的是「**來源查證**做到哪」，所以這裡只擋查證這件事本身的紀錄。
 # caution（買房時要注意什麼）刻意不在清單裡：它要的是建築技術規則、防火門 A/B 分級、
@@ -74,6 +75,7 @@ VALID_STATUS = {"verified", "partial", "pending_purchase", "blocked"}
 # （資料是 JSON.parse 之後 `as` 進去的），建置會死在分類頁取中文名的那一行，而那個 TypeError
 # 不會說是兩份清單分岔了。tests/build-validation.spec.ts 比對這兩份，分岔時說得出是哪兩份。
 VALID_CATEGORIES = {"structure", "door_window", "furniture"}
+MIN_VERIFICATION_RATE = 0.8
 SPRITE_PATH = "data/symbols.sprite.svg"
 SPRITE_VIEWBOX = "0 0 140 140"
 VALID_HOTSPOT_SOURCES = set(['auto_door', 'auto_window', 'auto_column', 'auto_canopy', 'auto_furniture', 'auto_room', 'manual'])
@@ -87,7 +89,26 @@ def check(cond, msg, bucket=errors):
     return cond
 
 
+def filled(value):
+    return isinstance(value, str) and value.strip()
+
+
+def verified_source_refs(symbol):
+    refs = symbol.get("source_refs")
+    if isinstance(refs, list):
+        return [ref for ref in refs if isinstance(ref, dict)]
+    return []
+
+
+def has_https_url(value):
+    if not filled(value):
+        return False
+    parsed = urlparse(value.strip())
+    return parsed.scheme == "https" and bool(parsed.netloc)
+
+
 symbols = json.load(io.open("data/symbols.sample.json", encoding="utf-8"))["symbols"]
+check(bool(symbols), "data/symbols.sample.json 裡沒有任何 symbol——查證率分母不可為 0，空清單不能通過發布 gate")
 # Q3(b)：floorplan 是 commit 進 repo 的產物，由 layout spec 經 expand_layout.py 生成。
 # 這裡讀的就是網站要吃的那份檔案，不是另一份樣本——樣本與正式檔分家正是內容雙份維護的開端。
 floorplan_paths = sorted(glob.glob("data/layouts/*.floorplan.json"))
@@ -138,6 +159,27 @@ for s in symbols:
               "%s: 標記 verified 但無 source_tier——查證完成卻不說答案出自哪一級文件，"
               "讀者就無法判斷這個答案硬到什麼程度；這兩個欄位是兩條不同的軸，"
               "不可互相取代（CONTEXT.md）" % s["id"])
+        refs = verified_source_refs(s)
+        tier = s.get("source_tier")
+        if tier == "cns":
+            check(any(filled(ref.get("via")) for ref in refs),
+                  "%s: source_tier=cns 且 verified，但 source_refs 沒有任何非空 via——"
+                  "CNS 轉載必須揭露經由哪份文件讀到標準，並寫明本專案未核對標準原文；"
+                  "請在至少一筆 source_refs.via 補上轉載來源與未核對標準原文的說明"
+                  % s["id"])
+        elif tier == "convention":
+            docs = {ref.get("doc").strip() for ref in refs if filled(ref.get("doc"))}
+            check(len(docs) >= 2,
+                  "%s: source_tier=convention 且 verified，但沒有兩筆 doc 不同的出處——"
+                  "業界慣例至少要兩份不同文件完成交叉核對，同名文件不得冒充交叉來源；"
+                  "請補上第二份實際讀過且 doc 名稱不同的 source_ref"
+                  % s["id"])
+        elif tier == "regulation":
+            check(any(has_https_url(ref.get("url")) and filled(ref.get("clause")) for ref in refs),
+                  "%s: source_tier=regulation 且 verified，但沒有同一筆出處同時具備可解析的 HTTPS URL 與定位資訊——"
+                  "validator 只能檢查結構，官方性仍由查證者人工負責；"
+                  "請補上一筆含 https:// 全文網址與 clause 條次／頁碼的官方法規出處"
+                  % s["id"])
 
 # --- svg_ref exists in sprite（PRD §10.1）---
 # sprite 是「符號畫成什麼樣」的唯一來源。svg_ref 斷掉的後果不是報錯而是靜默留白：
@@ -316,10 +358,16 @@ for s in symbols:
                         "但那條橫幅的說明是為樑寫的（lib/ui/copy.ts 裡橫幅的那一句），不是樑的話要回頭改。"
                         "若不是刻意的，代表圖或清單少了東西" % (s["id"], lid))
 
-# --- 報告 ---
+# --- verification rate gate ---
 verified = sum(1 for s in symbols if s["verification_status"] == "verified")
 rate = verified / len(symbols) if symbols else 0
+required_verified = math.ceil(len(symbols) * MIN_VERIFICATION_RATE) if symbols else 1
+check(verified >= required_verified,
+      "查證率 %d/%d = %.1f%% 未達 80%% 上線門檻——至少需要 %d 筆 verified；"
+      "不得用顯示用四捨五入把未達標資料送進 production"
+      % (verified, len(symbols), rate * 100, required_verified))
 
+# --- 報告 ---
 print("\n資料驗證報告 (PRD v0.3.1)")
 print("=" * 46)
 for w in warnings:
@@ -345,8 +393,8 @@ print("  %d sprite symbols" % len(sprite_ids))
 print("  %d floorplans validated" % len(floorplans))
 print("  %d hotspots validated" % len(hotspot_ids))
 print("  %d broken references" % broken_refs)
-print("  查證率 %d/%d = %.0f%%  (上線門檻 80%%) %s"
-      % (verified, len(symbols), rate * 100, "✓" if rate >= 0.8 else "← 未達標"))
+print("  查證率 %d/%d = %.1f%%  (上線門檻 80%%，至少 %d 筆 verified) %s"
+      % (verified, len(symbols), rate * 100, required_verified, "✓" if verified >= required_verified else "← 未達標"))
 print("=" * 46)
 print("  %d errors, %d warnings\n" % (len(errors), len(warnings)))
 sys.exit(1 if errors else 0)

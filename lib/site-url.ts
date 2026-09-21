@@ -4,3 +4,8 @@ const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL;
 export const SITE_URL =
   process.env.SITE_URL ??
   (vercelUrl ? `https://${vercelUrl}` : `http://localhost:${process.env.PORT ?? 3000}`);
+
+export function absoluteSiteUrl(path: string): string {
+  const href = new URL(path, SITE_URL).href;
+  return path === "/" ? href.replace(/\/$/, "") : href;
+}

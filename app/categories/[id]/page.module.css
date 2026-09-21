@@ -23,6 +23,10 @@
   margin: 0;
 }
 
+.titleLine {
+  display: block;
+}
+
 /* 搜尋框夾在標題與「共 N 個符號」之間，上下多留一點：它是一個工具，不是標題的副標、也不是清單的第一列。 */
 .search {
   margin: 10px 0;

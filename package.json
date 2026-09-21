@@ -11,7 +11,8 @@
     "validate:floorplan": "python3 .claude/skills/floorplan-generator/scripts/validate_floorplan.py data/layouts/3b2l_standard.floorplan.json --symbols data/symbols.sample.json && python3 .claude/skills/residential-floorplan-domain/scripts/validate_domain_rules.py --plan data/layouts/3b2l_standard.floorplan.json --rules .claude/skills/residential-floorplan-domain/knowledge/adjacency-rules.json --fixtures .claude/skills/residential-floorplan-domain/knowledge/fixture-dimensions.json --context data/layouts/3b2l_standard.domain-context.json --summary",
     "test:domain": "python3 -m unittest discover -s .claude/skills/residential-floorplan-domain/tests -v",
     "typecheck": "tsc --noEmit",
-    "test": "playwright test"
+    "test": "playwright test",
+    "audit": "node scripts/lighthouse-audit.mjs"
   },
   "dependencies": {
     "next": "16.3.4",
@@ -23,6 +24,8 @@
     "@types/node": "24.10.1",
     "@types/react": "19.2.9",
     "@types/react-dom": "19.2.4",
+    "chrome-launcher": "^1.2.1",
+    "lighthouse": "^12.8.2",
     "typescript": "5.9.3"
   }
 }
