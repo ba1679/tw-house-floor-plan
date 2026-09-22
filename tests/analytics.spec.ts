@@ -58,6 +58,7 @@ test.describe("Analytics：GA4 bootstrap 與 symbol_view", () => {
     });
 
     await page.goto("/symbols/window");
+    await expectSymbolViews(page, 1);
     const commands = await commandsOf(page);
     const firstConfig = commands.findIndex((command) => command.command === "config");
     const firstEvent = commands.findIndex((command) => command.command === "event");
