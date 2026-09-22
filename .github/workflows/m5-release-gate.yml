@@ -31,7 +31,8 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Expose Chromium for Lighthouse
-        run: echo "CHROME_PATH=$(node -e \"console.log(require('playwright').chromium.executablePath())\")" >> "$GITHUB_ENV"
+        run: |
+          echo "CHROME_PATH=$(node -e "console.log(require('playwright').chromium.executablePath())")" >> "$GITHUB_ENV"
 
       - name: Typecheck
         run: npm run typecheck
