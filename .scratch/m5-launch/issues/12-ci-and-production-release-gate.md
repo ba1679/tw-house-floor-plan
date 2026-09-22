@@ -21,4 +21,5 @@
 
 - 2026-09-22：repo 內實作與本機 gate 已完成於 `5181c38`；`npm run typecheck`、`npm test`（266 passed）、`npm run audit` 與 14/14 內容查證皆通過。
 - 已確認既有 production host 為 `https://tw-house-floor-plan.vercel.app`；目前仍是 M5 前的 production commit，尚不能作為 M5 smoke 證據。
+- 2026-09-22：已在 Vercel Production 設定 `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-V30D2J505B`；Vercel 顯示需下一次 deployment 才會生效。
 - 待完成：把 branch 推到遠端取得 PR／main workflow 綠燈；部署後確認 production metadata 並執行公開站 smoke；在 GA4 Realtime／DebugView 與管理介面確認事件、Measurement ID、Google Ads 未連結及 retention 2 個月。

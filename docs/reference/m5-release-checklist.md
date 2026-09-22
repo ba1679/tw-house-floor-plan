@@ -11,7 +11,7 @@ This checklist covers the manual release checks that cannot be proven from the r
 
 ## GA4 settings
 
-- [ ] Production has a valid `NEXT_PUBLIC_GA_MEASUREMENT_ID` in `G-...` format.
+- [x] Production has a valid `NEXT_PUBLIC_GA_MEASUREMENT_ID` in `G-...` format (`G-V30D2J505B`; configured in Vercel Production on 2026-09-22, pending the next deployment to take effect).
 - [ ] Consent Mode default is queued before GA config and before any `symbol_view` event.
 - [ ] Taiwan traffic has `analytics_storage` granted by default for phase one.
 - [ ] Advertising consent remains denied: `ad_storage`, `ad_user_data`, and `ad_personalization`.
