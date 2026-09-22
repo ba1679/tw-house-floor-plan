@@ -5,9 +5,9 @@ This checklist covers the manual release checks that cannot be proven from the r
 ## CI gates
 
 - [ ] The latest pull request or `main` run of `M5 release gate` is green.
-- [ ] `npm run validate` reports at least 12 / 14 verified symbols. M5 currently expects 14 / 14.
-- [ ] `npm test` is green.
-- [ ] `npm run audit` is green for home, floorplan, symbol, category, and quiz representative pages.
+- [x] `npm run validate` reports at least 12 / 14 verified symbols. M5 currently expects 14 / 14.
+- [x] `npm test` is green.
+- [x] `npm run audit` is green for home, floorplan, symbol, category, and quiz representative pages.
 
 ## GA4 settings
 
@@ -47,4 +47,4 @@ Use the existing public Vercel production URL as the canonical host for phase on
 
 - [ ] Metadata canonical URLs use the existing Vercel production host.
 - [ ] No metadata URL points at localhost or a preview deployment.
-- [ ] Adding a custom domain is tracked as a future canonical migration, not part of M5.
+- [x] Adding a custom domain is tracked as a future canonical migration, not part of M5.

@@ -1,6 +1,6 @@
 # M5 上線品質、Analytics 與搜尋呈現
 
-Status: ready-for-agent
+Status: release-verification-pending
 
 來源：PRD `平面圖教學網站-PRD-Phase1.md` §5、§7.1、§9、§9.1、§10.1、§13（M1、M5）
 決議依據：2026-09-20～2026-09-21 的 grill-with-docs；`CONTEXT.md` 的 Verification Status、符號瀏覽事件與入口來源；ADR-0001（不購買 CNS 11567）、ADR-0008（GA4 adapter）
