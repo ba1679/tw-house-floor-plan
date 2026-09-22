@@ -23,4 +23,3 @@ export function SymbolPageAnalytics({ symbolId }: { symbolId: string }) {
 
   return null;
 }
-

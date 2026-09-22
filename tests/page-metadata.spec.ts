@@ -160,7 +160,7 @@ test.describe("page metadata and JSON-LD", () => {
     }
   });
 
-  test("每張 FloorPlan 頁的 LearningResource JSON-LD 只描述實際頁面內容", () => {
+  test("每張 Layout 頁的 LearningResource JSON-LD 只描述實際頁面內容", () => {
     for (const floorplan of floorplans) {
       const html = layoutHtml(floorplan.id);
       const url = `${BASE_URL}/layouts/${floorplan.id}`;
@@ -221,4 +221,3 @@ test.describe("page metadata and JSON-LD", () => {
     }
   });
 });
-
