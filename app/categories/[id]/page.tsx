@@ -3,13 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SearchBox } from "@/components/SearchBox";
 import { SymbolArt } from "@/components/SymbolArt";
+import { categoryCollectionJsonLd, categoryMetadata, jsonLd } from "@/lib/site-metadata";
 import { loadCategories, loadSearchIndex } from "@/lib/symbols/data";
-import {
-  CATEGORY_LABELS,
-  categoryCountLabel,
-  categoryPageDescription,
-  categoryPageTitle,
-} from "@/lib/ui/copy";
+import { CATEGORY_LABELS, categoryCountLabel } from "@/lib/ui/copy";
 import styles from "./page.module.css";
 
 // 分類頁是給「想一類一類看完」的人走的那條路（spec user story 24）。它不是入站點——
@@ -45,16 +41,8 @@ export async function generateMetadata({
   const category = findCategory((await params).id);
   if (!category) return {};
 
-  // 每頁自己的標題與描述。三頁共用根版面那一句「平面圖教學」的話，
-  // 搜尋引擎會把它們當成同一頁。
-  const { zh } = CATEGORY_LABELS[category.id];
-  return {
-    title: categoryPageTitle(zh),
-    description: categoryPageDescription(
-      zh,
-      category.symbols.map((symbol) => symbol.name),
-    ),
-  };
+  // 每頁自己的標題、描述、canonical 與 Open Graph。清單與 JSON-LD 都從同一份 category 資料來。
+  return categoryMetadata(category);
 }
 
 export default async function CategoryPage({ params }: { params: Promise<{ id: string }> }) {
@@ -65,12 +53,19 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
 
   return (
     <main className={styles.page}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(categoryCollectionJsonLd(category)) }}
+      />
       <div className={styles.column}>
         <p className={styles.category}>
           {label.zh} / {label.en}
         </p>
         {/* `<title>` 與 `<h1>` 同一句：搜尋結果上那一行與落地後看到的第一行不該是兩句話。 */}
-        <h1 className={styles.title}>{categoryPageTitle(label.zh)}</h1>
+        <h1 className={styles.title}>
+          <span className={styles.titleLine}>平面圖上的</span>
+          <span className={styles.titleLine}>{label.zh}符號有哪些？</span>
+        </h1>
 
         {/* 搜尋框排在標題**之後**（落地後看到的第一行仍是標題），但在「共 N 個符號」與清單**之前**：
             數目是清單的前言，兩者不拆開；而想查特定符號的人不必先捲過這一類的清單才找得到它。
@@ -84,7 +79,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
         <ul className={styles.list}>
           {category.symbols.map((symbol) => (
             <li key={symbol.id} className={styles.item}>
-              <Link className={styles.link} href={`/symbols/${symbol.id}`}>
+              <Link className={styles.link} href={`/symbols/${symbol.id}?from=category`}>
                 {/* 圖形在這裡**對讀螢幕的人藏起來**，與符號頁相反。那一頁的圖是內容——它在教
                     這個形狀——所以有替代文字；這裡整列是一個連結，替代文字會被併進連結的名字，
                     唸出來是「牆在平面圖上的畫法 牆 牆是⋯」，名字唸兩次，反而更難聽出這個連結

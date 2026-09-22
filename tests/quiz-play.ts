@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { readFileSync, readdirSync } from "node:fs";
 
 // 在瀏覽器裡玩找找看的測試共用的東西（M4）：資料、畫面上的定位、怎麼作答、怎麼決定這一局出哪幾題。
@@ -89,6 +89,15 @@ export function cleanHotspotsOf(symbolId: string): string[] {
 /** 題目以外的另一個可出題符號——拿來答錯。 */
 export const otherThan = (symbolId: string) => onPlan.find((id) => id !== symbolId)!;
 
+async function settledBox(page: Page, target: Locator) {
+  // 下一題會先換題目，再由 ResizeObserver 把收起說明卡後的圖框尺寸送回 reducer。
+  // 等兩個繪製週期，避免拿舊框的熱區座標去點已經長回來的新框。
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
+  );
+  return (await target.boundingBox())!;
+}
+
 /**
  * 用手指作答：點熱區正中央圈出候選並放大，再點一次放大後的正中央確認——那一下就是答案。
  * 放大之後同一個熱區換了螢幕座標，所以第二下之前重新量，不自己推算（同 `viewer-page.ts` 的 `selectByTwoTaps`）。
@@ -96,10 +105,10 @@ export const otherThan = (symbolId: string) => onPlan.find((id) => id !== symbol
  */
 export async function answerByTwoTaps(page: Page, hotspotId: string) {
   const target = page.locator(`#${hotspotId}`);
-  const before = (await target.boundingBox())!;
+  const before = await settledBox(page, target);
   await page.mouse.click(before.x + before.width / 2, before.y + before.height / 2);
   await expect(target, `${hotspotId} 沒有被圈成候選`).toHaveAttribute("data-state", "candidate");
-  const zoomed = (await target.boundingBox())!;
+  const zoomed = await settledBox(page, target);
   await page.mouse.click(zoomed.x + zoomed.width / 2, zoomed.y + zoomed.height / 2);
   await expect(nextOf(page), "作答之後沒有出現「下一題」").toBeVisible();
 }

@@ -9,6 +9,7 @@ import { LabelledList } from "./LabelledList";
 import { useEscapeKey } from "./useEscapeKey";
 import { useFirstVisitHint } from "./useFirstVisitHint";
 import { useSaveAnswers } from "./useLearningProgress";
+import { recordSymbolView } from "@/lib/analytics/gtag";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
 import type { LayoutProgress } from "@/lib/quiz/progress";
@@ -140,6 +141,17 @@ export function QuizRound({
 
   // 首次引導與平面圖頁共用同一句、同一個記錄（spec「首次引導」）：在哪一頁先看到都算看過。
   const hint = useFirstVisitHint();
+  const answer = pendingAnswer(round);
+
+  useEffect(() => {
+    if (!answer || !round.sheetOpen) return;
+    recordSymbolView({
+      symbol_id: answer.target,
+      source: "quiz",
+      layout_id: floorplan.id,
+      hotspot_id: answer.hotspotId,
+    });
+  }, [answer, floorplan.id, round.sheetOpen]);
 
   if (round.phase === "finished") {
     // 答錯清單只從這一局的作答來：「你答成了 X」只在記憶體裡，不進 localStorage（M4 票 05；票 04 的紀錄格式不變）。
@@ -191,7 +203,6 @@ export function QuizRound({
 
   const index = questionIndex(round);
   const target = questions[index];
-  const answer = pendingAnswer(round);
   // 說明卡講的是**題目符號**，不是被點中的那一個（spec）：答錯時兩者不同。
   const sheetSymbol = answer && round.sheetOpen ? symbols[answer.target] : undefined;
 

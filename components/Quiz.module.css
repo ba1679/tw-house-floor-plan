@@ -11,8 +11,19 @@
 
 .lead {
   margin: 0 0 16px;
+}
+
+.leadLine {
+  margin: 0;
   font-size: var(--text-body-size);
   line-height: var(--text-body-leading);
+}
+
+/* 開場進度要等 client 讀完 localStorage 才能印真數字；靜態 HTML 不能先印 0 / 13。
+   但若整塊晚插入，下面的 lead 會重排並成為晚到的 LCP。空槽保留真進度區的高度：
+   不說假資料，只讓第一屏位置穩定。 */
+.progressIntro {
+  min-height: 96px;
 }
 
 /* 手機優先：站著單手操作，按鈕一律點得到（44px，與檢視器的控制列同一條規矩）。 */
@@ -157,6 +168,10 @@
   font-size: 13px;
   line-height: 1.7;
   color: var(--ink2);
+}
+
+.definitionLine {
+  display: inline;
 }
 
 /* 開場三份清單與結算答錯清單的標題。 */

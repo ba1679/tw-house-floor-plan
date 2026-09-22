@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { SourceTierPanel } from "@/components/SourceTierPanel";
 import { SymbolArt } from "@/components/SymbolArt";
+import { SymbolPageAnalytics } from "@/components/SymbolPageAnalytics";
 import { loadFloorPlan } from "@/lib/floorplan/data";
 import { isSymbolAbsent } from "@/lib/floorplan/hotspots";
+import { jsonLd, symbolDefinedTermJsonLd, symbolMetadata } from "@/lib/site-metadata";
 import { loadSymbolsForPages } from "@/lib/symbols/data";
 import { printedSourceRefs } from "@/lib/symbols/source-refs";
 import { highlightHref } from "@/lib/viewer/highlight";
@@ -42,12 +45,8 @@ export async function generateMetadata({
   const symbol = loadSymbolsForPages()[(await params).id];
   if (!symbol) return {};
 
-  // 每頁自己的標題與描述。14 頁共用根版面那一句「平面圖教學」的話，
-  // 搜尋引擎會把它們當成同一頁。
-  return {
-    title: symbolPageTitle(symbol.name),
-    description: symbolPageDescription(symbol.plain_meaning),
-  };
+  // 每頁自己的標題、描述、canonical 與 Open Graph。query 只影響 Analytics，不進 canonical。
+  return symbolMetadata(symbol);
 }
 
 export default async function SymbolPage({ params }: { params: Promise<{ id: string }> }) {
@@ -61,6 +60,13 @@ export default async function SymbolPage({ params }: { params: Promise<{ id: str
 
   return (
     <main className={styles.page}>
+      <Suspense fallback={null}>
+        <SymbolPageAnalytics symbolId={symbol.id} />
+      </Suspense>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(symbolDefinedTermJsonLd(symbol)) }}
+      />
       <article className={styles.article}>
         <p className={styles.category}>
           {category.zh} / {category.en}

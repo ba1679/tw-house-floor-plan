@@ -5,8 +5,9 @@ import { FloorPlanViewer } from "@/components/FloorPlanViewer";
 import { listLayoutIds, loadFloorPlan } from "@/lib/floorplan/data";
 import { readingOrder } from "@/lib/floorplan/reading-order";
 import { hasQuiz } from "@/lib/quiz/questions";
+import { jsonLd, layoutLearningResourceJsonLd, layoutMetadata } from "@/lib/site-metadata";
 import { loadSymbolsForViewer } from "@/lib/symbols/data";
-import { LAYOUT_QUIZ_LINK, layoutPageDescription, layoutPageTitle } from "@/lib/ui/copy";
+import { LAYOUT_QUIZ_LINK } from "@/lib/ui/copy";
 import styles from "./page.module.css";
 
 // 網址以 layout（格局）id 定址，頁面渲染的是該 layout 展開出的 floorplan（PRD §8）。
@@ -24,17 +25,7 @@ export async function generateMetadata({
   const { id } = await params;
   if (!listLayoutIds().includes(id)) return {};
 
-  // 每一張圖自己的標題與描述，由它自己的 `floorplan.name` 生成。沿用根版面那一句「平面圖教學」的話，
-  // 這一頁在搜尋結果上與首頁同名；寫死三房兩廳的話，M6 加第 2 張圖時兩頁又同名（spec「路由」）。
-  //
-  // **只改 `<title>` 與 meta，不動 `<h1>`**——與符號頁、分類頁「兩者同一句」的規矩刻意不同。
-  // 這一頁的 `<h1>` 是 100dvh 版面裡的一列（ADR-0003）：換成這一句，它在 375px 上會折成兩行，
-  // 檢視器的框就跟著變矮——說明卡升起時與矮螢幕上，正是票 04 的頁尾驗過的那一類風險。
-  const { name } = loadFloorPlan(id);
-  return {
-    title: layoutPageTitle(name),
-    description: layoutPageDescription(name),
-  };
+  return layoutMetadata(loadFloorPlan(id));
 }
 
 export default async function LayoutPage({ params }: { params: Promise<{ id: string }> }) {
@@ -46,6 +37,10 @@ export default async function LayoutPage({ params }: { params: Promise<{ id: str
 
   return (
     <main className={styles.page}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(layoutLearningResourceJsonLd(floorplan, symbols)) }}
+      />
       {/* 找找看的入口與 `<h1>` 同一列（M4 票 06），**不另起一列**：同一個 ADR-0003 的理由，每多一列就從圖框挖一列。
           入口只替有找找看頁的圖放——與找找看頁產不產生問的是同一句 `hasQuiz`。 */}
       <div className={styles.titleRow}>

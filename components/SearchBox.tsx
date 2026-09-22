@@ -71,7 +71,7 @@ export function SearchBox({ index }: { index: SearchIndexEntry[] }) {
             <li key={symbol.id} className={styles.result}>
               {/* `prefetch={false}`：結果隨每一個字換一批，預設的「進入視野就預抓」會讓打字這件事
                   一路打網路——在接待中心的行動網路上，替讀者沒打算點的那幾個付流量。 */}
-              <Link className={styles.link} href={`/symbols/${symbol.id}`} prefetch={false}>
+              <Link className={styles.link} href={`/symbols/${symbol.id}?from=search`} prefetch={false}>
                 <span className={styles.text}>
                   <span className={styles.name}>{symbol.name}</span>
                   {matchedAlias && (

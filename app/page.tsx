@@ -4,13 +4,12 @@ import { Fragment } from "react";
 import { SearchBox } from "@/components/SearchBox";
 import { listLayoutIds, loadFloorPlan } from "@/lib/floorplan/data";
 import { hasQuiz } from "@/lib/quiz/questions";
+import { homeMetadata, homeWebsiteJsonLd, jsonLd } from "@/lib/site-metadata";
 import { loadCategories, loadSearchIndex } from "@/lib/symbols/data";
 import {
   CATEGORY_LABELS,
   HOME_BROWSE_LABEL,
   HOME_CLAIM,
-  HOME_PAGE_DESCRIPTION,
-  HOME_PAGE_TITLE,
   SITE_NAME,
   SITE_TAGLINE,
   homeLayoutButton,
@@ -24,11 +23,8 @@ import styles from "./page.module.css";
 //
 // 先後照票面那一句話的先後：先知道這裡在幹嘛，然後直接進圖；想查特定符號的往下一格，想瀏覽的再往下。
 
-// 自己的標題與描述。沿用根版面那一句「平面圖教學」的話，首頁與 404 頁在搜尋結果上同名。
-export const metadata: Metadata = {
-  title: HOME_PAGE_TITLE,
-  description: HOME_PAGE_DESCRIPTION,
-};
+// 自己的標題、描述、canonical 與 Open Graph 都走同一個 metadata 邊界；下一批頁面可沿用同一個入口。
+export const metadata: Metadata = homeMetadata();
 
 export default function HomePage() {
   // **有幾個 layout 就有幾個按鈕，由 `data/layouts/` 決定。** 今天只有三房兩廳，所以就是一個。
@@ -41,6 +37,10 @@ export default function HomePage() {
 
   return (
     <main className={styles.page}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(homeWebsiteJsonLd()) }}
+      />
       <div className={styles.column}>
         <p className={styles.site}>{SITE_NAME}</p>
         <h1 className={styles.title}>{HOME_CLAIM}</h1>

@@ -121,7 +121,6 @@ body {
   color: var(--ink);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
-  text-wrap: pretty;
 }
 
 a:focus-visible,

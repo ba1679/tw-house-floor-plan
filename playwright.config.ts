@@ -8,6 +8,7 @@ import { defineConfig, devices } from "@playwright/test";
 // 本來就讀 PORT，這裡只是讓測試端跟著它走。
 const port = Number(process.env.PORT ?? 3000);
 const baseURL = `http://localhost:${port}`;
+const testSiteURL = process.env.SITE_URL ?? "https://floorplan.example.test";
 
 export default defineConfig({
   testDir: "tests",
@@ -33,7 +34,7 @@ export default defineConfig({
   ],
   webServer: {
     // 測的是 build 產物本身：prebuild 的資料驗證、SSG 的靜態輸出，都要在這條路徑上被走過。
-    command: "npm run build && npm run start",
+    command: `SITE_URL=${testSiteURL} NEXT_PUBLIC_GA_MEASUREMENT_ID=G-TEST12345 npm run build && npm run start`,
     url: `${baseURL}/layouts/3b2l_standard`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

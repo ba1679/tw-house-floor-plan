@@ -6,8 +6,10 @@
 .footer {
   flex: 0 0 auto;
   margin-top: auto;
+  padding: 9px 20px calc(10px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--rule2);
   background: var(--paper);
+  text-align: center;
 }
 
 /* 說明卡升起來時，頁尾這一份讓位。
@@ -43,9 +45,6 @@
 
 .disclaimer {
   margin: 0 auto;
-  /* 上下留白比說明卡那份再收一點：那一份是卡片的收尾，這一份是整頁的收尾，
-     而平面圖頁的每一個 px 都是從圖上那條可視帶挖走的。 */
-  padding: 9px 20px calc(10px + env(safe-area-inset-bottom));
   /* 與符號頁的 `.article` 同寬：寬螢幕上這句話不該橫跨整個視窗。 */
   max-width: 560px;
   font-size: var(--text-small-size);
