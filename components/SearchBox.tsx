@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { ANALYTICS_EVENTS, analyticsSearchKey, analyticsSearchTerm, track } from "@/lib/analytics";
 import { isEmptyQuery, searchSymbols } from "@/lib/symbols/search";
 import type { SearchIndexEntry } from "@/lib/symbols/types";
 import {
@@ -22,7 +23,7 @@ import styles from "./SearchBox.module.css";
 // **索引是 props，在 build 時就內嵌進頁面**：不 fetch、不打 API。也因此沒有 `/search` 路由——
 // 全站是靜態輸出，產不出搜尋結果頁的 HTML，那一頁對搜尋引擎是空殼，卻仍然會被收錄。
 
-export function SearchBox({ index }: { index: SearchIndexEntry[] }) {
+export function SearchBox({ index, surface }: { index: SearchIndexEntry[]; surface: "home" | "category" }) {
   const inputId = useId();
   // 框裡的字與拿去比對的字是**兩份**：注音組字的時候，框裡暫時是「ㄢˋ」這種還沒選字的注音，
   // 它得照樣顯示，但不能拿去比對——否則狀態列會說「找不到符合『ㄢˋ』的符號」，受眾（PRD §3）
@@ -30,6 +31,27 @@ export function SearchBox({ index }: { index: SearchIndexEntry[] }) {
   const [inputValue, setInputValue] = useState("");
   const [committedQuery, setCommittedQuery] = useState("");
   const hits = searchSymbols(index, committedQuery);
+  const sentQueries = useRef(new Set<string>());
+
+  // The searchable UI is instantaneous, so an intentional search is the
+  // settled query rather than a submit. Composition never updates
+  // `committedQuery`, and the sanitizer never lets unknown text escape.
+  useEffect(() => {
+    const term = analyticsSearchTerm(index, committedQuery);
+    if (!term) return;
+    const key = `${surface}|${analyticsSearchKey(committedQuery)}`;
+    if (sentQueries.current.has(key)) return;
+    const timer = window.setTimeout(() => {
+      sentQueries.current.add(key);
+      track({
+        name: ANALYTICS_EVENTS.search,
+        search_term: term,
+        result_count: hits.length,
+        search_surface: surface,
+      });
+    }, 750);
+    return () => window.clearTimeout(timer);
+  }, [committedQuery, hits.length, index, surface]);
 
   const status = isEmptyQuery(committedQuery)
     ? ""
@@ -71,7 +93,19 @@ export function SearchBox({ index }: { index: SearchIndexEntry[] }) {
             <li key={symbol.id} className={styles.result}>
               {/* `prefetch={false}`：結果隨每一個字換一批，預設的「進入視野就預抓」會讓打字這件事
                   一路打網路——在接待中心的行動網路上，替讀者沒打算點的那幾個付流量。 */}
-              <Link className={styles.link} href={`/symbols/${symbol.id}?from=search`} prefetch={false}>
+              <Link
+                className={styles.link}
+                href={`/symbols/${symbol.id}?from=search`}
+                prefetch={false}
+                onClick={() =>
+                  track({
+                    name: ANALYTICS_EVENTS.selectContent,
+                    content_type: "search_result",
+                    item_id: symbol.id,
+                    origin_page_type: surface,
+                  })
+                }
+              >
                 <span className={styles.text}>
                   <span className={styles.name}>{symbol.name}</span>
                   {matchedAlias && (

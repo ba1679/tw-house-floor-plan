@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AnalyticsLink } from "@/components/AnalyticsLink";
 import { FloorPlanViewer } from "@/components/FloorPlanViewer";
+import { ANALYTICS_EVENTS } from "@/lib/analytics";
 import { listLayoutIds, loadFloorPlan } from "@/lib/floorplan/data";
 import { readingOrder } from "@/lib/floorplan/reading-order";
 import { hasQuiz } from "@/lib/quiz/questions";
@@ -46,9 +47,18 @@ export default async function LayoutPage({ params }: { params: Promise<{ id: str
       <div className={styles.titleRow}>
         <h1 className={styles.title}>{floorplan.name}</h1>
         {hasQuiz(floorplan.hotspots) && (
-          <Link className={styles.quizLink} href={`/layouts/${id}/quiz`}>
+          <AnalyticsLink
+            className={styles.quizLink}
+            href={`/layouts/${id}/quiz`}
+            event={{
+              name: ANALYTICS_EVENTS.selectContent,
+              content_type: "layout_quiz",
+              item_id: id,
+              origin_page_type: "layout",
+            }}
+          >
             {LAYOUT_QUIZ_LINK}
-          </Link>
+          </AnalyticsLink>
         )}
       </div>
       {/* 鍵盤的閱讀順序在這裡算完（票 06）：頁面是 SSG，這一行只在 build 時跑一次，

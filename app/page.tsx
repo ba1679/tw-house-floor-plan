@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Fragment } from "react";
+import { AnalyticsLink } from "@/components/AnalyticsLink";
 import { SearchBox } from "@/components/SearchBox";
+import { ANALYTICS_EVENTS } from "@/lib/analytics";
 import { listLayoutIds, loadFloorPlan } from "@/lib/floorplan/data";
 import { hasQuiz } from "@/lib/quiz/questions";
 import { homeMetadata, homeWebsiteJsonLd, jsonLd } from "@/lib/site-metadata";
@@ -10,7 +12,6 @@ import {
   CATEGORY_LABELS,
   HOME_BROWSE_LABEL,
   HOME_CLAIM,
-  SITE_NAME,
   SITE_TAGLINE,
   homeLayoutButton,
   homeQuizButton,
@@ -42,32 +43,49 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: jsonLd(homeWebsiteJsonLd()) }}
       />
       <div className={styles.column}>
-        <p className={styles.site}>{SITE_NAME}</p>
         <h1 className={styles.title}>{HOME_CLAIM}</h1>
         <p className={styles.lede}>{SITE_TAGLINE}</p>
 
         <div className={styles.layouts}>
           {layouts.map((layout) => (
             <Fragment key={layout.id}>
-              <Link className={styles.layoutButton} href={`/layouts/${layout.id}`}>
+              <AnalyticsLink
+                className={styles.layoutButton}
+                href={`/layouts/${layout.id}`}
+                event={{
+                  name: ANALYTICS_EVENTS.selectContent,
+                  content_type: "home_layout",
+                  item_id: layout.id,
+                  origin_page_type: "home",
+                }}
+              >
                 {homeLayoutButton(layout.name)}
                 {/* 箭頭是給看得見的人的方向感；讀螢幕的人聽到「開始探索三房兩廳」就夠了。 */}
                 <span aria-hidden="true">→</span>
-              </Link>
+              </AnalyticsLink>
               {/* 找找看的入口（M4 票 06）：想從玩開始的人從這裡走。與進圖的按鈕同樣由資料產生，
                   只替有找找看頁的圖產生——與找找看頁產不產生問的是同一句 `hasQuiz`。 */}
               {layout.hasQuiz && (
-                <Link className={styles.quizButton} href={`/layouts/${layout.id}/quiz`}>
+                <AnalyticsLink
+                  className={styles.quizButton}
+                  href={`/layouts/${layout.id}/quiz`}
+                  event={{
+                    name: ANALYTICS_EVENTS.selectContent,
+                    content_type: "home_quiz",
+                    item_id: layout.id,
+                    origin_page_type: "home",
+                  }}
+                >
                   {homeQuizButton(layout.name)}
                   <span aria-hidden="true">→</span>
-                </Link>
+                </AnalyticsLink>
               )}
             </Fragment>
           ))}
         </div>
 
         {/* 想查特定符號的人從這裡走。與分類頁上的是同一個元件、同一份索引（`loadSearchIndex()`）。 */}
-        <SearchBox index={loadSearchIndex()} />
+        <SearchBox index={loadSearchIndex()} surface="home" />
 
         {/* 想一類一類看完的人從這裡走。有哪幾類由 `loadCategories()` 從資料算出，中文名從 `CATEGORY_LABELS` 來——
             與分類頁自己用的是同一份，這裡不另外手寫一份「就這 3 類」（PRD §9「不得各自維護副本」）。
