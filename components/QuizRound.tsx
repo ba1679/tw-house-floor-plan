@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { AnalyticsLink } from "./AnalyticsLink";
 import { FloorPlanViewport, initialViewerConfig } from "./FloorPlanViewport";
 import { InfoSheet, type SheetNote } from "./InfoSheet";
 import { KnownCount } from "./KnownCount";
@@ -9,7 +10,7 @@ import { LabelledList } from "./LabelledList";
 import { useEscapeKey } from "./useEscapeKey";
 import { useFirstVisitHint } from "./useFirstVisitHint";
 import { useSaveAnswers } from "./useLearningProgress";
-import { recordSymbolView } from "@/lib/analytics/gtag";
+import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
 import type { LayoutProgress } from "@/lib/quiz/progress";
@@ -93,15 +94,52 @@ export function QuizRound({
     { viewer: initialViewerConfig(floorplan), questions },
     createRound,
   );
+  const answersTracked = useRef(0);
+  const completedTracked = useRef(false);
+  const answerInput = useRef<"pointer" | "keyboard">("pointer");
 
   // 圖框送出來的每一個 action 都先交給一局。同一個函式物件：手勢層的回呼靠它不變才不必每輪重建。
   const dispatchViewer = useCallback(
-    (action: ViewerAction) => dispatch({ type: "VIEWER", action }),
+    (action: ViewerAction) => {
+      if (action.type === "SELECT_HOTSPOT") answerInput.current = "keyboard";
+      if (action.type === "TAP") answerInput.current = "pointer";
+      dispatch({ type: "VIEWER", action });
+    },
     [],
   );
 
   // 每作答一題立刻寫進學習進度（spec「學習進度」）。回傳的是寫完之後讀回來的那一份：結算的「你認得」要算進這一局。
   const stored = useSaveAnswers(floorplan.id, round.answers);
+
+  // A quiz answer exists only when the round reducer appended it. This keeps
+  // first taps, missed confirmations, reselects, and rerenders out of GA.
+  useEffect(() => {
+    while (answersTracked.current < round.answers.length) {
+      const answer = round.answers[answersTracked.current];
+      track({
+        name: ANALYTICS_EVENTS.quizAnswer,
+        layout_id: floorplan.id,
+        symbol_id: answer.target,
+        picked_symbol_id: answer.picked,
+        hotspot_id: answer.hotspotId,
+        correct: isCorrect(answer),
+        question_index: answersTracked.current + 1,
+        input_method: answerInput.current,
+      });
+      answersTracked.current += 1;
+    }
+  }, [floorplan.id, round.answers]);
+
+  useEffect(() => {
+    if (round.phase !== "finished" || completedTracked.current) return;
+    completedTracked.current = true;
+    track({
+      name: ANALYTICS_EVENTS.quizComplete,
+      layout_id: floorplan.id,
+      question_count: questions.length,
+      correct_count: scoreOf(round),
+    });
+  }, [floorplan.id, questions.length, round]);
 
   /**
    * 鍵盤焦點要不要跟著一局走（票 01 留下的：作答後「下一題」排在所有熱區之後，要 Tab 很多下才到）。
@@ -113,19 +151,63 @@ export function QuizRound({
    * 「看說明」算在內，是因為那顆按鈕按下去就消失了：不把焦點收進卡片，焦點就掉回頁面的最開頭。
    */
   const [focusFollows, setFocusFollows] = useState(false);
-  const onTouch = useCallback(() => setFocusFollows(false), []);
-  const onKeyboardSelect = useCallback(() => setFocusFollows(true), []);
+  const [closingSheet, setClosingSheet] = useState(false);
+  const onTouch = useCallback(() => {
+    answerInput.current = "pointer";
+    setFocusFollows(false);
+  }, []);
+  const onKeyboardSelect = useCallback(() => {
+    answerInput.current = "keyboard";
+    setFocusFollows(true);
+  }, []);
 
   const next = useCallback(() => dispatch({ type: "NEXT" }), []);
   const openSheet = useCallback(() => {
     setFocusFollows(true);
     dispatch({ type: "OPEN_SHEET" });
-  }, []);
+    const answer = pendingAnswer(round);
+    if (answer) {
+      track({
+        name: ANALYTICS_EVENTS.symbolView,
+        symbol_id: answer.target,
+        surface: "quiz_sheet",
+        layout_id: floorplan.id,
+      });
+    }
+  }, [floorplan.id, round]);
   // 關卡片**不派 RESELECT**——那是自由看圖的關法。找找看關了卡片，標記留著、圖照樣暫停（spec）。
-  const closeSheet = useCallback(() => dispatch({ type: "CLOSE_SHEET" }), []);
+  const closeSheet = useCallback(() => {
+    if (closingSheet) return;
+    setClosingSheet(true);
+    const finish = () => {
+      dispatch({ type: "CLOSE_SHEET" });
+      setClosingSheet(false);
+    };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) finish();
+    else window.setTimeout(finish, 180);
+  }, [closingSheet]);
+
+  const sheetAction = useCallback(
+    (action: "expand" | "collapse" | "close" | "next_occurrence") => {
+      const answer = pendingAnswer(round);
+      if (!answer) return;
+      track({
+        name: ANALYTICS_EVENTS.infoSheetAction,
+        layout_id: floorplan.id,
+        symbol_id: answer.target,
+        context: "quiz",
+        action,
+      });
+    },
+    [floorplan.id, round],
+  );
+  const closeSheetFromEscape = useCallback(() => {
+    sheetAction("close");
+    closeSheet();
+  }, [closeSheet, sheetAction]);
 
   // Esc 關掉說明卡，與關閉鍵同一個 action。卡片沒開時 Esc 什麼都不做。
-  useEscapeKey(round.sheetOpen, closeSheet);
+  useEscapeKey(round.sheetOpen, closeSheetFromEscape);
 
   const questionRef = useRef<HTMLDivElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
@@ -143,16 +225,6 @@ export function QuizRound({
   const hint = useFirstVisitHint();
   const answer = pendingAnswer(round);
 
-  useEffect(() => {
-    if (!answer || !round.sheetOpen) return;
-    recordSymbolView({
-      symbol_id: answer.target,
-      source: "quiz",
-      layout_id: floorplan.id,
-      hotspot_id: answer.hotspotId,
-    });
-  }, [answer, floorplan.id, round.sheetOpen]);
-
   if (round.phase === "finished") {
     // 答錯清單只從這一局的作答來：「你答成了 X」只在記憶體裡，不進 localStorage（M4 票 05；票 04 的紀錄格式不變）。
     // 一局裡題目不重複，所以一個題目符號最多一列。全部答對時整份不印——不誇獎，也就不需要一句「沒有答錯」。
@@ -169,9 +241,18 @@ export function QuizRound({
         <LabelledList id="quiz-review" heading={QUIZ_REVIEW_HEADING} className={styles.review}>
           {missed.map((a) => (
             <li key={a.target}>
-              <Link href={`/symbols/${a.target}`} className={styles.reviewLink}>
+              <AnalyticsLink
+                href={`/symbols/${a.target}`}
+                className={styles.reviewLink}
+                event={{
+                  name: ANALYTICS_EVENTS.selectContent,
+                  content_type: "quiz_review_symbol",
+                  item_id: a.target,
+                  origin_page_type: "quiz",
+                }}
+              >
                 {quizReviewRow(symbolName(symbols, a.target), symbolName(symbols, a.picked))}
-              </Link>
+              </AnalyticsLink>
             </li>
           ))}
         </LabelledList>
@@ -273,7 +354,9 @@ export function QuizRound({
           occurrence={{ total: occurrencesOf(round.viewer, answer.target).length }}
           note={isCorrect(answer) ? undefined : pickedNote(answer, symbols)}
           takeFocus={focusFollows}
+          closing={closingSheet}
           onClose={closeSheet}
+          onAction={sheetAction}
         />
       )}
     </>
