@@ -292,10 +292,10 @@ test("展開說明卡後直接點圖上另一個符號，收合後仍然選得�
   await page.goto(PLAN);
   const plan = planOf(page);
 
-  // 雨遮是唯一有注意事項的符號，內容塞不下——「上拉看完整內容」只在它身上出現。
+  // 雨遮是唯一有注意事項的符號，內容塞不下——「展開完整內容」只在它身上出現。
   await selectByTwoTaps(page, "hs-canopy-master");
   const withSheet = (await plan.boundingBox())!;
-  await page.getByRole("button", { name: /上拉看完整內容/ }).click();
+  await page.getByRole("button", { name: /展開完整內容/ }).click();
   // 卡片長高，圖被擠得更扁：等這一輪 RESIZE 走完，才是使用者看到的那個畫面。
   await expect
     .poll(async () => (await plan.boundingBox())!.height)

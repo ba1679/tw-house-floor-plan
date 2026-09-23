@@ -68,7 +68,8 @@ export const SECTION_LABELS = {
 
 export const SHEET_CONTROLS = {
   close: "關閉說明",
-  expand: "上拉看完整內容",
+  expand: "展開完整內容",
+  collapse: "收合看平面圖",
   otherOccurrences: "看它在圖上的其他位置",
 } as const;
 
