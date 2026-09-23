@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { HIGHLIGHT_PARAM } from "@/lib/viewer/highlight";
 
@@ -20,9 +20,16 @@ import { HIGHLIGHT_PARAM } from "@/lib/viewer/highlight";
  */
 export function HighlightFromQuery({ onSymbol }: { onSymbol: (symbolId: string) => void }) {
   const symbolId = useSearchParams().get(HIGHLIGHT_PARAM);
+  const applied = useRef<string | null>(null);
 
   useEffect(() => {
-    if (symbolId) onSymbol(symbolId);
+    // The callback belongs to a stateful viewer and may legitimately be
+    // recreated after an interaction. URL landing is one instruction, not an
+    // instruction to re-highlight after every state update.
+    if (symbolId && applied.current !== symbolId) {
+      applied.current = symbolId;
+      onSymbol(symbolId);
+    }
   }, [symbolId, onSymbol]);
 
   return null;
