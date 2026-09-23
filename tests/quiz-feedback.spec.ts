@@ -217,12 +217,12 @@ test.describe("作答之後、按「下一題」之前", () => {
   });
 
   test("「下一題」：說明卡展開著也一起收起，標記清掉、題號前進、視野回到全圖、不再暫停", async ({ page }) => {
-    // 雨遮是唯一有注意事項的符號，卡片塞不下，「上拉看完整內容」才會出現。
+    // 雨遮是唯一有注意事項的符號，卡片塞不下，「展開完整內容」才會出現。
     const index = await startRoundAt(page, "canopy_rain", { notLast: true });
     const fit = (await planOf(page).boundingBox())!;
 
     await answerByTwoTaps(page, cleanHotspotsOf("window")[0]);
-    const expand = page.getByRole("button", { name: /上拉看完整內容/ });
+    const expand = page.getByRole("button", { name: /展開完整內容/ });
     await expand.click();
     await expect(expand).toBeHidden();
 

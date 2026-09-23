@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { KnownCount } from "./KnownCount";
 import { LabelledList } from "./LabelledList";
 import { QuizRound } from "./QuizRound";
+import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 import { loadLayoutProgress, useLayoutProgress } from "./useLearningProgress";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
@@ -54,8 +55,19 @@ export function QuizGame({ floorplan, symbols, readingOrder, quizzable }: Props)
   const start = useCallback(() => {
     const progressAtStart = loadLayoutProgress(floorplan.id);
     const questions = pickQuestions(quizzable, progressAtStart, Math.random);
-    setRound((current) => ({ key: (current?.key ?? 0) + 1, questions, progressAtStart }));
-  }, [quizzable, floorplan.id]);
+    // Keep analytics outside React's state updater. React may intentionally
+    // replay updater functions in development, but a user started only one
+    // quiz round.
+    track({
+      name: ANALYTICS_EVENTS.quizStart,
+      layout_id: floorplan.id,
+      question_count: questions.length,
+      start_type: round ? "replay" : "first",
+    });
+    setRound((current) => {
+      return { key: (current?.key ?? 0) + 1, questions, progressAtStart };
+    });
+  }, [quizzable, floorplan.id, round]);
 
   /**
    * 開場印的進度（M4 票 05）：client 接手、讀到 localStorage 之後才有。在那之前分子與清單都不印——

@@ -129,6 +129,7 @@ test("密集情況：客浴周邊一次圈出 8 個候選，8 個都選得到", 
     // 圖上同一個位置因此換了螢幕座標。關掉卡片讓視野還原，再重新量一次那個位置，
     // 回到第一段做下一個。（照抄迴圈外量到的 worstTap 會點到別的地方去。）
     await page.locator("#info-sheet").getByRole("button", { name: "關閉說明" }).click();
+    await expect(page.locator("#info-sheet")).toBeHidden();
     // 等圖真的長回全圖再量：卡片收起到圖回到原尺寸中間隔著一次版面回流，
     // 量在回流當中就會拿到一個下一刻已經不成立的座標。
     await expect

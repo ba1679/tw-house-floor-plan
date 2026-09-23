@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
+import { AnalyticsLink } from "@/components/AnalyticsLink";
 import { SourceTierPanel } from "@/components/SourceTierPanel";
 import { SymbolArt } from "@/components/SymbolArt";
-import { SymbolPageAnalytics } from "@/components/SymbolPageAnalytics";
+import { TrackSymbolView } from "@/components/TrackSymbolView";
+import { ANALYTICS_EVENTS } from "@/lib/analytics";
 import { loadFloorPlan } from "@/lib/floorplan/data";
 import { isSymbolAbsent } from "@/lib/floorplan/hotspots";
 import { jsonLd, symbolDefinedTermJsonLd, symbolMetadata } from "@/lib/site-metadata";
@@ -60,14 +61,14 @@ export default async function SymbolPage({ params }: { params: Promise<{ id: str
 
   return (
     <main className={styles.page}>
-      <Suspense fallback={null}>
-        <SymbolPageAnalytics symbolId={symbol.id} />
-      </Suspense>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd(symbolDefinedTermJsonLd(symbol)) }}
       />
       <article className={styles.article}>
+        <TrackSymbolView
+          event={{ name: ANALYTICS_EVENTS.symbolView, symbol_id: symbol.id, surface: "symbol_page" }}
+        />
         <p className={styles.category}>
           {category.zh} / {category.en}
         </p>
@@ -158,11 +159,21 @@ export default async function SymbolPage({ params }: { params: Promise<{ id: str
             const floorplan = loadFloorPlan(layoutId);
             const absent = isSymbolAbsent(floorplan.hotspots, symbol.id);
             return (
-              <Link key={layoutId} className={styles.layoutLink} href={highlightHref(layoutId, symbol.id)}>
+              <AnalyticsLink
+                key={layoutId}
+                className={styles.layoutLink}
+                href={highlightHref(layoutId, symbol.id)}
+                event={{
+                  name: ANALYTICS_EVENTS.selectContent,
+                  content_type: "symbol_layout",
+                  item_id: layoutId,
+                  origin_page_type: "symbol",
+                }}
+              >
                 {absent ? absentSymbolButton(floorplan.name, symbol.name) : SYMBOL_LAYOUT_BUTTON}
                 {/* 箭頭是給看得見的人的方向感；讀螢幕的人聽到那一句就夠了（同首頁那顆）。 */}
                 <span aria-hidden="true">→</span>
-              </Link>
+              </AnalyticsLink>
             );
           })}
         </div>

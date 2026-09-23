@@ -65,9 +65,12 @@ test.describe("平面圖頁的入口", () => {
     await expect(sheet).toBeHidden();
     await page.locator("#hs-canopy-master").focus();
     await page.keyboard.press("Enter");
-    const expand = page.getByRole("button", { name: /上拉看完整內容/ });
+    const expand = page.getByRole("button", { name: /展開完整內容/ });
     await expand.click();
     await expect(expand).toBeHidden();
+    // M6 lets the sheet and viewport finish their shared structural transition
+    // before comparing the two otherwise identical title-row layouts.
+    await page.waitForTimeout(200);
     const expanded = await withAndWithout();
     expect(expanded.shown, "展開時框被壓到 0，這一格什麼都量不出來").toBeGreaterThan(0);
     expect(expanded.shown, "卡片展開").toBeCloseTo(expanded.hidden, 1);

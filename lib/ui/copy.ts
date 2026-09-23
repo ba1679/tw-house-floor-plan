@@ -68,7 +68,8 @@ export const SECTION_LABELS = {
 
 export const SHEET_CONTROLS = {
   close: "關閉說明",
-  expand: "上拉看完整內容",
+  expand: "展開完整內容",
+  collapse: "收合看平面圖",
   otherOccurrences: "看它在圖上的其他位置",
 } as const;
 
@@ -204,7 +205,7 @@ export const HOME_PAGE_DESCRIPTION = `教買房的人看懂建案平面圖：${S
 
 /**
  * 首頁那個進平面圖的按鈕（PRD §8「開始探索三房兩廳」），一個 layout 一個。**格局名由呼叫端從 floorplan 資料取來**，
- * 不寫在這裡：寫死「三房兩廳」，M6 加第 2 張圖時這一行就是第二份會跟資料分岔的名字。
+ * 不寫在這裡：寫死「三房兩廳」，M7 加第 2 張圖時這一行就是第二份會跟資料分岔的名字。
  */
 export const homeLayoutButton = (layoutName: string) => `開始探索${layoutName}`;
 

@@ -80,19 +80,23 @@ test("沒有注意事項的符號，卡片上不留空的區塊", async ({ page 
   await expect(page.locator(SHEET)).toContainText("這是買房最容易被灌水的坪數項目");
 });
 
-test("塞得下就不出現「上拉看完整內容」；塞不下才出現，點一下展開", async ({ page }) => {
+test("塞得下就不出現「展開完整內容」；塞不下才出現，點一下展開", async ({ page }) => {
   await page.goto(PLAN);
-  const hint = page.getByRole("button", { name: /上拉看完整內容/ });
+  const hint = page.getByRole("button", { name: /展開完整內容/ });
 
   // 雙開門：一則容易搞混、沒有注意事項，內容整個塞得進上限。
   // 高度隨內容走——這正是「392 是上限不是初始」要防的那片空白（決議 1）。
   await selectByTwoTaps(page, "hs-door-entry");
+  // M6 makes the sheet enter as a structural transition. Measure its final
+  // layout rather than the intentional zero-height starting frame.
+  await page.waitForTimeout(200);
   const fitted = (await page.locator(SHEET).boundingBox())!;
   await expect(hint).toBeHidden();
 
   // 雨遮：唯一有 caution 的符號，內容超出上限。
   await page.reload();
   await selectByTwoTaps(page, "hs-canopy-master");
+  await page.waitForTimeout(200);
   const initial = (await page.locator(SHEET).boundingBox())!;
   expect(initial.height, "塞不下的卡片應該頂到上限，比塞得下的那張高").toBeGreaterThan(
     fitted.height,
@@ -101,14 +105,37 @@ test("塞得下就不出現「上拉看完整內容」；塞不下才出現，�
 
   // 展開的觸發是點一下那句提示，不是拖曳（拖曳會跟票 04 的 pan/zoom 打架）。
   await hint.click();
+  await expect
+    .poll(async () => (await page.locator(SHEET).boundingBox())!.height)
+    .toBeGreaterThan(initial.height);
   const expanded = (await page.locator(SHEET).boundingBox())!;
-  expect(expanded.height).toBeGreaterThan(initial.height);
-  await expect(hint).toBeHidden();
+  await expect(page.getByRole("button", { name: "收合看平面圖" })).toHaveAttribute(
+    "aria-expanded",
+    "true",
+  );
 
   // 展開之後卡片仍然不佔滿螢幕：上緣留給平面圖，位置感才不會斷。
   const plan = (await page.getByRole("group", { name: /三房兩廳/ }).boundingBox())!;
   expect(plan.height).toBeGreaterThan(0);
   expect(plan.y + plan.height).toBeLessThanOrEqual(expanded.y + 1);
+
+  const collapse = page.getByRole("button", { name: "收合看平面圖" });
+  const control = page.locator('button[aria-controls="info-sheet-body"]');
+  await collapse.focus();
+  await collapse.click();
+  await expect(control).toBeFocused();
+  await expect(control).toHaveAttribute("aria-expanded", "false");
+  await expect
+    .poll(async () => (await page.locator(SHEET).boundingBox())!.height)
+    .toBeCloseTo(initial.height, 0);
+  await expect(page.locator(SHEET)).toBeVisible();
+});
+
+test("減少動態時說明卡高度切換不播放過渡", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(PLAN);
+  await selectByTwoTaps(page, "hs-canopy-master");
+  await expect(page.locator(SHEET)).toHaveCSS("transition-duration", "0s");
 });
 
 test("按「其他位置」換看下一處：M 遞增、標示換到同一個符號的另一處、卡片不關", async ({
@@ -118,6 +145,7 @@ test("按「其他位置」換看下一處：M 遞增、標示換到同一個符
   await selectByTwoTaps(page, "hs-win-living");
 
   const sheet = page.locator(SHEET);
+  await page.waitForTimeout(200);
   await expect(sheet).toContainText("目前第 1 處");
   const before = (await sheet.boundingBox())!;
 

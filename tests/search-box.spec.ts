@@ -150,6 +150,10 @@ test.describe("搜尋框", () => {
     const search = page.getByRole("search");
     const box = search.getByRole("searchbox");
 
+    // M6 的全站 header 是頁面的第一個鍵盤入口；下一格才是內容區的搜尋框。
+    await page.keyboard.press("Tab");
+    await expect(page.getByRole("link", { name: /回首頁/ })).toBeFocused();
+
     await page.keyboard.press("Tab");
     await expect(box).toBeFocused();
 

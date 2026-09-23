@@ -3,13 +3,14 @@
 
 | 項目 | 內容 |
 |---|---|
-| 版本 | v0.7（M4 找找看規格收斂） |
+| 版本 | v0.8（新增 M6 公開前可觀測性與 UX 打磨） |
 | 狀態 | 範圍已定案，可進入 M1 |
 | 適用範圍 | 僅涵蓋三階段規劃中的「階段一」，AI 平面圖分析與地點歷史分析**不在此文件範圍內** |
 | v0.2 變更 | 內容來源定為 CNS 正式規範核對、找找看小遊戲納入階段一、格局範例圖首發 1 張、資料結構預留階段二擴充 |
 | v0.2.1 變更 | 依 M1 試查結果修正 §7.1 的 CNS 取得方式與權威來源地圖 |
 | v0.3 變更 | 符號數砍至 15–25 個、pan/zoom 升為核心功能、刪除 `risk_flags`、UI 狀態改掛 Hotspot、補上 SEO→核心體驗的轉換設計 |
 | v0.3.1 變更 | `layout` 收斂為「格局」單一語意、圖面座標層改稱 `floorplan`、`hotspot.source` 補進 schema、格局名稱一律用「N 房 M 廳」（見 §7.3、[`CONTEXT.md`](CONTEXT.md)） |
+| v0.8 變更 | M5 改為 GA4 基礎量測與小流量上線；新增 M6「公開前可觀測性與 UX 打磨」，補齊導覽／平面圖／說明卡／找找看事件，以及全站回首頁、header 品牌入口、說明卡動效與展開後收合；原 M6 數據檢視順延為 M7（§9.1、§13） |
 | v0.7 變更 | 找找看一局題數改由可出題符號數算出（主圖 7 題，修正「6 題兩局覆蓋 13 個」的算術錯誤）、定義「作答」與答後的 `revealed` 標記、作答前不露出符號名字、路由改為 `/layouts/[id]/quiz`、學習進度併入找找看的開場與結算畫面、刪除 `quiz_enabled` 與 `quiz-target`／`discovered`（§6.3、§11 #22–29） |
 | v0.5.1 變更 | 14 個符號 sprite 完成（`data/symbols.sprite.svg`）；`validate_data.py` 補上 `svg_ref` 對 sprite 的存在性檢查；記錄衛浴廚具 4 個符號的圖例／renderer 畫法落差（§12） |
 | v0.5 變更 | **兩段式點擊由找找看專用升級為全站基礎操作**（§6.1.1）、熱區命中優先序、找找看一局 6 題、「已認識」定義與 localStorage schema 定案（§6.6.1） |
@@ -635,19 +636,45 @@ floorplan {                   // 由 layout 展開而來，**不得手改**
 > **v0.6：已決——依房間，房間內依符號類別（結構 → 門窗 → 家具家配）。** 房間的先後對上看屋的動線，房間歸屬由 `rooms` 的幾何在 build 時算出、不進 floorplan schema。決議與代價見 [`.scratch/m2-viewer/spec.md`](.scratch/m2-viewer/spec.md) 的「鍵盤與無障礙」，實作在 `lib/floorplan/reading-order.ts`。
 - **內容可維護性**：符號資料為單一真實來源，分類頁、符號頁、格局圖、小遊戲四處皆由同一份資料驅動，不得各自維護副本
 
-### 9.1 Analytics（v0.3 新增）
+### 9.1 Analytics（v0.8 擴充）
 
-除 §5 的指標外，需埋一個極簡事件，用來回答「**使用者是從哪裡開始理解這個網站的**」：
+量測不是把每一次 click 都送出去，而是要回答四個產品問題：
 
-```jsonc
-symbol_view {
-  symbol_id: string
-  hotspot_id?: string                          // 若來自平面圖
-  source: "layout" | "search" | "quiz" | "category"
-}
-```
+1. **從哪裡開始懂**：先讀符號頁、先在平面圖選到符號，還是先玩找找看？
+2. **哪裡真的有停留**：哪一類頁面的前景閱讀時間長；說明卡是否需要展開才看得完？
+3. **兩段式點擊有沒有卡住**：第一段之後有多少成功確認、多少次第二段沒點中或重選？
+4. **找找看怎麼被使用**：開始率、完成率、每個符號的正確率，以及常被誤認成哪一個符號？
 
-若數據顯示 `layout` 遠多於 `search`，就證實互動平面圖才是真正的核心產品；反之則說明這其實是一個工具型查詢網站，階段二方向要跟著調整。**這種以數據推翻或確認產品假設的過程，本身就是很好的面試素材。**
+#### GA4 自動量測負責的事
+
+- 頁面瀏覽、來源媒介與每頁停留，使用 GA4 的 `page_view`、`user_engagement` 與 Average engagement time。
+- 「停留」指頁面在焦點中、App／瀏覽器在前景的時間；**不另送自製秒數、不用 `setInterval` 每秒打事件**。
+- `scroll` 等 Enhanced Measurement 若在 GA 後台開啟就直接使用，程式不重複送同名事件。
+
+#### 產品事件契約
+
+| 事件 | 觸發時機 | 主要參數 | 回答的問題 |
+|---|---|---|---|
+| `symbol_view` | 完整符號說明第一次可讀：符號頁載入、自由看圖開啟說明卡、找找看主動開啟說明卡 | `symbol_id`、`surface: symbol_page \| layout_sheet \| quiz_sheet`、選填 `layout_id`／`hotspot_id` | 使用者從哪一種介面開始理解符號 |
+| `select_content` | 具產品意義的站內入口被選擇；不攔截每一個普通連結 | `content_type`、`item_id`、`origin_page_type` | 首頁、header、分類、搜尋、符號頁轉換點與找找看入口各帶來多少後續使用 |
+| `search` | 站內搜尋輸入完成並停頓後，一個正規化 query 只送一次 | `search_term`、`result_count`、`search_surface` | 搜尋是否有用、多少搜尋找不到內容 |
+| `layout_interaction` | 兩段式的有意義狀態轉移，或本次檢視器第一次手動 pan／zoom | `layout_id`、`action`、選填 `symbol_id`／`hotspot_id`／`candidate_count`／`input_method` | 第一段到確認的漏斗與操作摩擦 |
+| `info_sheet_action` | 展開、收合回平面圖、關閉、切換其他位置 | `layout_id`、`symbol_id`、`context`、`action` | 說明是否太長、使用者何時想回圖 |
+| `quiz_start` | 開始一局；再玩一次仍是一個新 start | `layout_id`、`question_count`、`start_type: first \| replay` | 有多少人開始、多少人重玩 |
+| `quiz_answer` | 一題完成一次作答 | `layout_id`、`symbol_id`、`picked_symbol_id`、`hotspot_id`、`correct`、`question_index`、`input_method` | 單一符號正確率與常見混淆 |
+| `quiz_complete` | 一局進入結算 | `layout_id`、`question_count`、`correct_count` | 完成率與一局結果分布 |
+
+`symbol_view.source` 在 v0.8 改為 `surface`。外部自然搜尋、直接輸入網址與站內來源由 GA 的 acquisition／referrer 與 `select_content` 路徑回答；把它們硬塞進一個 `source` 會把「在哪裡讀到符號」和「怎麼進站」混成同一軸。
+
+#### 資料邊界
+
+- 事件與參數用固定 enum 或既有資料 id；不送使用者 id、session id、email、電話、精細位置、自訂 timestamp。
+- 不送點擊座標、每一幀 pan／zoom、完整 localStorage 學習紀錄，也不為停留時間自訂計時事件。
+- 站內搜尋只有在 query **完整等於既有 `name` 或 `aliases`** 時，才把該白名單詞送為 `search_term`；其餘一律送固定值 `other`，另帶 `result_count`。不得把未知自由文字原樣交給 GA。
+- 同一個手勢產生的多個 browser event 只算一次產品事件；React Strict Mode 重掛也不得重複送。
+- 自訂參數必須在 GA4 後台登錄成必要的 custom dimensions／metrics，並以 Realtime 與 DebugView 驗證。沒有被報表使用的參數不收。
+
+若 `symbol_view.surface = layout_sheet` 遠多於 `symbol_page`，就支持「互動平面圖是核心產品」；反之則說明它更接近工具型查詢網站。若 `quiz_start` 高但 `quiz_complete` 低，先看逐題掉點與版面摩擦，不直接解讀成內容太難。**這種用數據確認或推翻產品假設的過程，本身就是作品集的一部分。**
 
 ## 10. 技術方案與作品集亮點
 
@@ -745,6 +772,10 @@ Symbol Dataset ──┼── Symbol Page (SEO)
 | 27 | 找找看住哪？ | **`/layouts/[id]/quiz`**，noindex、不進 sitemap；刪除 `quiz_enabled`（§8） | v0.7 |
 | 28 | 學習進度顯示在哪？ | **找找看的開場與結算畫面**，不另開頁；入口在平面圖頁與首頁（§6.6、§8） | v0.7 |
 | 29 | `design/Quiz.dc.html`、`Progress.dc.html` 還算數嗎？ | **只當流程參考**（早於 v0.4：8 題、撒水頭、「46 SVG 單位」）；另開票重畫，不擋 M4。**2026-09-19 已重畫**：新稿在 `design/quiz/`，兩份舊稿刪除（M4 票 08） | v0.7 |
+| 30 | GA 要不要自己計算「停留秒數」？ | **不要**。頁面停留使用 GA4 的前景 engagement time；只替產品內的有意義狀態轉移送事件，不做每秒 timer（§9.1） | v0.8 |
+| 31 | 站內搜尋字要不要原樣送 GA？ | **只有完整命中既有名稱／俗稱的白名單詞可以送；其他固定為 `other`**。避免自由輸入夾帶個資與高基數（§9.1） | v0.8 |
+| 32 | 公開分享前還缺什麼 UX？ | **全站 header 的品牌／回首頁入口、說明卡進出與高度切換動效、展開後「收合看平面圖」**；動效必須尊重 `prefers-reduced-motion` | v0.8 |
+| 33 | 新里程碑放在哪？ | **M5 小流量上線，M6 公開前可觀測性與 UX 打磨，原 M6 順延為 M7** | v0.8 |
 
 ## 12. 待辦與風險
 
@@ -784,8 +815,9 @@ Symbol Dataset ──┼── Symbol Page (SEO)
 | M2 | 檢視器：說明卡片 + **pan/zoom** + 可點擊性提示 | 手機實機上，圖上任一符號都能在兩段式內選到；說明卡的**控制元件**（關閉鍵、「其他位置」列）達 44px |
 | M3 | 符號頁（SEO）+ 分類瀏覽 + 搜尋 + 來源徽章 + **符號頁→平面圖轉換點** | 每個符號有獨立可索引 URL 且能高亮跳轉 |
 | M4 | 找找看小遊戲（含 §6.3.1 的縮放與名字規則、§6.3.3 的作答規則）+ 學習進度 | 由符號資料自動出題，無獨立題庫 |
-| M5 | Analytics 埋點、RWD／效能／SEO／無障礙檢查，上線 | Lighthouse 各項達標 |
-| M6 | 上線後依 §9.1 數據檢視，決定第 2、3 張格局範例圖 | — |
+| M5 | GA4 基礎量測（`page_view`／`user_engagement`＋`symbol_view`）、RWD／效能／SEO／無障礙檢查，小流量上線 | Lighthouse 各項達標；Realtime／DebugView 看得到基礎事件 |
+| M6 | **公開前可觀測性與 UX 打磨**：補齊 §9.1 事件；全站 header 品牌／回首頁入口；說明卡進出與展開／收合動效；展開後可一鍵「收合看平面圖」 | 事件 payload 經 DebugView 驗證且無自由輸入／個資；所有頁可回首頁；375×812 與 320×568 上說明卡可展開也可回圖；reduced motion 下無非必要動效 |
+| M7 | 公開分享後依 §9.1 數據檢視，決定第 2、3 張格局範例圖與下一輪 UX 優先序 | 以至少一個完整觀察窗的資料寫出決策紀錄，不因小樣本直接下結論 |
 
 > **v0.6：M2 的完成定義改寫過。** 原文是「觸控目標達 44px」，但 §6.1.1 已經證明
 > 主圖 37 個熱區**全部**達不到 44px，而且放大命中區在數學上走不通——兩段式點擊就是為此而生的替代方案。
@@ -812,3 +844,6 @@ Symbol Dataset ──┼── Symbol Page (SEO)
 
 *v0.7：M4 grilling 收斂找找看——題數改由可出題符號數算出（修正 6 × 2 ≠ 13）、作答一次、答後 `revealed` 標出每一處、
 作答前不露名字、路由改掛格局底下、學習進度併入找找看畫面、刪除 `quiz_enabled` / `quiz-target` / `discovered`。*
+
+*v0.8：新增 M6 公開前可觀測性與 UX 打磨；Analytics 從單一 `symbol_view` 擴為可回答內容、檢視器與找找看漏斗的事件契約，
+停留時間沿用 GA4 engagement；補上全站回首頁、header 品牌入口、說明卡動效與展開後收合，原 M6 順延為 M7。*

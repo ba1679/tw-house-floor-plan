@@ -54,7 +54,11 @@ type Props = {
    * 焦點留在圖上的話，Tab 的下一站是圖上的下一個熱區，卡片裡的內容永遠走不到。
    */
   takeFocus: boolean;
+  /** Parent keeps the card mounted long enough for its structural exit transition. */
+  closing?: boolean;
   onClose: () => void;
+  /** The caller owns context-specific analytics; this component owns the UI seam. */
+  onAction?: (action: "expand" | "collapse" | "close" | "next_occurrence") => void;
 };
 
 /** 圖上那個十字準星，兩種呈現共用。 */
@@ -67,7 +71,16 @@ function OccurrenceMark() {
   );
 }
 
-export function InfoSheet({ symbol, symbols, occurrence, note, takeFocus, onClose }: Props) {
+export function InfoSheet({
+  symbol,
+  symbols,
+  occurrence,
+  note,
+  takeFocus,
+  closing = false,
+  onClose,
+  onAction,
+}: Props) {
   const sheetRef = useRef<HTMLElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState(false);
@@ -95,7 +108,29 @@ export function InfoSheet({ symbol, symbols, occurrence, note, takeFocus, onClos
   }, [symbol.id, expanded]);
 
   const category = CATEGORY_LABELS[symbol.category];
-  const expand = useCallback(() => setExpanded(true), []);
+  const toggleExpanded = useCallback(() => {
+    if (expanded) {
+      // Returning to the summary must show the reader the beginning again.
+      if (bodyRef.current) bodyRef.current.scrollTop = 0;
+      setExpanded(false);
+      onAction?.("collapse");
+      return;
+    }
+    setExpanded(true);
+    onAction?.("expand");
+  }, [expanded, onAction]);
+
+  const close = useCallback(() => {
+    onAction?.("close");
+    onClose();
+  }, [onAction, onClose]);
+
+  const next = useCallback(() => {
+    if ("onNext" in occurrence) {
+      onAction?.("next_occurrence");
+      occurrence.onNext();
+    }
+  }, [occurrence, onAction]);
 
   return (
     <aside
@@ -106,6 +141,7 @@ export function InfoSheet({ symbol, symbols, occurrence, note, takeFocus, onClos
       tabIndex={-1}
       className={styles.sheet}
       data-expanded={expanded ? "true" : "false"}
+      data-closing={closing ? "true" : "false"}
       aria-labelledby="info-sheet-name"
     >
       {/* 標題列不捲動：關閉鍵必須隨時按得到。 */}
@@ -123,7 +159,8 @@ export function InfoSheet({ symbol, symbols, occurrence, note, takeFocus, onClos
         <button
           type="button"
           className={styles.close}
-          onClick={onClose}
+          onClick={close}
+          disabled={closing}
           aria-label={SHEET_CONTROLS.close}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
@@ -133,7 +170,7 @@ export function InfoSheet({ symbol, symbols, occurrence, note, takeFocus, onClos
       </header>
 
       <div className={styles.bodyWrap}>
-        <div className={styles.body} ref={bodyRef}>
+        <div id="info-sheet-body" className={styles.body} ref={bodyRef}>
           {/* 排在最前面、跟著內容捲：它是這張卡此刻為什麼打開的理由，但不該佔住不捲的標題列——
               差異句可能有三行，而卡片的高度上限是 46dvh。 */}
           {note && (
@@ -181,12 +218,19 @@ export function InfoSheet({ symbol, symbols, occurrence, note, takeFocus, onClos
         </div>
 
         {/* 展開的觸發是**點一下**，不是拖曳——拖曳手勢會跟票 04 的 pan/zoom 打架。 */}
-        {overflowing && !expanded && (
-          <button type="button" className={styles.expand} onClick={expand}>
+        {(overflowing || expanded) && (
+          <button
+            type="button"
+            className={styles.expand}
+            onClick={toggleExpanded}
+            disabled={closing}
+            aria-expanded={expanded}
+            aria-controls="info-sheet-body"
+          >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M6 15l6-6 6 6" />
+              <path d={expanded ? "M6 9l6 6 6-6" : "M6 15l6-6 6 6"} />
             </svg>
-            {SHEET_CONTROLS.expand}
+            {expanded ? SHEET_CONTROLS.collapse : SHEET_CONTROLS.expand}
           </button>
         )}
       </div>
@@ -199,7 +243,7 @@ export function InfoSheet({ symbol, symbols, occurrence, note, takeFocus, onClos
           找找看那一列（只有「共 N 處」）同一條規矩：2026-09-14 規格主人裁定照決議 2（M4 票 02 的 Comments）。 */}
       {occurrence.total > 1 &&
         ("onNext" in occurrence ? (
-          <button type="button" className={styles.occurrences} onClick={occurrence.onNext}>
+          <button type="button" className={styles.occurrences} onClick={next} disabled={closing}>
             <OccurrenceMark />
             <span className={styles.occurrenceText}>
               <span className={styles.occurrenceTitle}>{SHEET_CONTROLS.otherOccurrences}</span>

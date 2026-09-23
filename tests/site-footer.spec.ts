@@ -116,7 +116,7 @@ test.describe("免責聲明的全站頁尾", () => {
     await expect(visibleCopies).toHaveCount(1);
     expect(await pageScrolls(page), "說明卡升起來之後頁面變成可捲的").toBe(false);
 
-    await page.getByRole("button", { name: /上拉看完整內容/ }).click();
+    await page.getByRole("button", { name: /展開完整內容/ }).click();
     await expect(sheet).toHaveAttribute("data-expanded", "true");
     await expect(footerOf(page)).toBeHidden();
     await expect(sheetCopy).toBeVisible();

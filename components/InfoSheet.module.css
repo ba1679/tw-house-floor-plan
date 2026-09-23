@@ -18,6 +18,19 @@
   border-top: 1px solid var(--ink);
   border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
   box-shadow: var(--shadow-sheet);
+  transition: max-height 180ms ease, margin 180ms ease, opacity 180ms ease;
+}
+
+/* Mounting starts collapsed, so the card and the viewport resize together as
+   it enters. `@starting-style` only supplies the first frame; the final state
+   remains the normal layout-row sheet above. */
+@starting-style {
+  .sheet {
+    max-height: 0;
+    margin-top: 0;
+    overflow: hidden;
+    opacity: 0;
+  }
 }
 
 /* 卡片是鍵盤焦點的**落點**，不是一個控制元件（票 06）：它升起來這件事本身就是給眼睛看的
@@ -29,6 +42,16 @@
 
 .sheet[data-expanded="true"] {
   --sheet-max: 78dvh;
+}
+
+/* The parent keeps a closing sheet in the layout just long enough for this
+   transition. The viewport therefore regains space in the same motion rather
+   than snapping before the card disappears. */
+.sheet[data-closing="true"] {
+  max-height: 0;
+  margin-top: 0;
+  overflow: hidden;
+  opacity: 0;
 }
 
 /* 桌機：卡片不跟著螢幕一起變寬。說明是拿來讀的，一行 1200px 讀不下去。 */
@@ -89,6 +112,12 @@
   cursor: pointer;
 }
 
+.close:disabled,
+.expand:disabled,
+.occurrences:disabled {
+  cursor: default;
+}
+
 .bodyWrap {
   position: relative;
   flex: 1 1 auto;
@@ -102,6 +131,7 @@
   overflow-y: auto;
   padding: 0 20px 4px;
   -webkit-overflow-scrolling: touch;
+  scroll-behavior: auto;
 }
 
 .badgeRow {
@@ -184,6 +214,7 @@
   left: 0;
   right: 0;
   bottom: 0;
+  min-height: var(--touch-min);
   height: 76px;
   display: flex;
   align-items: flex-end;
@@ -259,6 +290,12 @@
   font-size: var(--text-small-size);
   letter-spacing: 0.08em;
   color: var(--ink2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    transition: none;
+  }
 }
 
 /* 桌機才有 hover——手機沒有，所以靜態呈現本身必須夠明確，

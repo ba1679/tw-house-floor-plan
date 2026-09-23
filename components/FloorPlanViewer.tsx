@@ -1,12 +1,12 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { Suspense, useCallback, useReducer, useRef, useState } from "react";
 import { FloorPlanViewport, initialViewerConfig } from "./FloorPlanViewport";
 import { HighlightFromQuery } from "./HighlightFromQuery";
 import { InfoSheet } from "./InfoSheet";
 import { useEscapeKey } from "./useEscapeKey";
 import { useFirstVisitHint } from "./useFirstVisitHint";
-import { recordSymbolView } from "@/lib/analytics/gtag";
+import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 import { isSymbolAbsent } from "@/lib/floorplan/hotspots";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
@@ -37,6 +37,79 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
   const [state, dispatch] = useReducer(reduceViewer, floorplan, (fp: FloorPlan) =>
     createViewerState(initialViewerConfig(fp)),
   );
+  const sentManualPan = useRef(false);
+  const sentManualZoom = useRef(false);
+  const trackedSelection = useRef<string | null>(null);
+
+  /**
+   * Events are derived from the reducer's before/after values, not pointer
+   * handlers. That preserves the distinction between a blank first tap, a
+   * missed confirmation, and a real selection.
+   */
+  const dispatchViewer = useCallback(
+    (action: Parameters<typeof dispatch>[0]) => {
+      const next = reduceViewer(state, action);
+      if (next !== state) {
+        if (state.stage !== "candidates" && next.stage === "candidates") {
+          trackedSelection.current = null;
+          track({
+            name: ANALYTICS_EVENTS.layoutInteraction,
+            layout_id: floorplan.id,
+            action: "candidates_shown",
+            candidate_count: next.candidates.length,
+            input_method: "pointer",
+          });
+        }
+        if (state.stage !== "confirmed" && next.stage === "confirmed" && next.selected?.symbol_id) {
+          // Browser compatibility events may replay the final pointer contact.
+          // A selection is still one semantic confirmation and one readable card.
+          if (trackedSelection.current !== next.selected.id) {
+            trackedSelection.current = next.selected.id;
+            const inputMethod = action.type === "SELECT_HOTSPOT" ? "keyboard" : "pointer";
+            track({
+              name: ANALYTICS_EVENTS.layoutInteraction,
+              layout_id: floorplan.id,
+              action: "symbol_confirmed",
+              symbol_id: next.selected.symbol_id,
+              hotspot_id: next.selected.id,
+              input_method: inputMethod,
+            });
+            track({
+              name: ANALYTICS_EVENTS.symbolView,
+              symbol_id: next.selected.symbol_id,
+              surface: "layout_sheet",
+              layout_id: floorplan.id,
+              hotspot_id: next.selected.id,
+            });
+          }
+        }
+        if (state.stage === "candidates" && next.stage === "candidates" && next.confirmMissed) {
+          track({
+            name: ANALYTICS_EVENTS.layoutInteraction,
+            layout_id: floorplan.id,
+            action: "confirm_missed",
+          });
+        }
+        if (action.type === "RESELECT") {
+          trackedSelection.current = null;
+          track({ name: ANALYTICS_EVENTS.layoutInteraction, layout_id: floorplan.id, action: "reselect" });
+        }
+        if (action.type === "RESET_VIEW") {
+          track({ name: ANALYTICS_EVENTS.layoutInteraction, layout_id: floorplan.id, action: "reset_view" });
+        }
+        if (action.type === "PAN" && !sentManualPan.current) {
+          sentManualPan.current = true;
+          track({ name: ANALYTICS_EVENTS.layoutInteraction, layout_id: floorplan.id, action: "manual_pan" });
+        }
+        if ((action.type === "ZOOM" || action.type === "DOUBLE_TAP") && !sentManualZoom.current) {
+          sentManualZoom.current = true;
+          track({ name: ANALYTICS_EVENTS.layoutInteraction, layout_id: floorplan.id, action: "manual_zoom" });
+        }
+      }
+      dispatch(action);
+    },
+    [floorplan.id, state],
+  );
 
   // 從符號頁按轉換點進來的人（`?symbol=`，M3 票 08）：那個符號在圖上的每一處一起亮。
   // 網址由 `HighlightFromQuery` 讀，它自己待在一個 Suspense 邊界裡——理由寫在那個元件上。
@@ -65,6 +138,9 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
         setSymbolNotFound(true);
         return;
       }
+      // URL landing is not a user interaction, so it bypasses the product
+      // event wrapper. Keeping this callback stable also prevents the query
+      // effect from reapplying highlight after a user starts selecting.
       dispatch({ type: "HIGHLIGHT_SYMBOL", symbolId });
       if (isSymbolAbsent(floorplan.hotspots, symbolId)) setAbsentSymbol(symbolId);
     },
@@ -85,6 +161,7 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
    * 而 render 期間讀 ref 讀到的是「上一次改到哪」，不是這一輪該畫的東西。
    */
   const [keyboardOrigin, setKeyboardOrigin] = useState<string | null>(null);
+  const [closingSheet, setClosingSheet] = useState(false);
 
   const onTouch = useCallback(() => {
     // 「找不到網址指定的符號」與引導同一個時機退場：那一句的話也說完了。
@@ -101,11 +178,37 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
   }, []);
 
   const close = useCallback(() => {
-    dispatch({ type: "RESELECT" });
-    if (keyboardOrigin) document.getElementById(keyboardOrigin)?.focus();
-    setKeyboardOrigin(null);
-  }, [keyboardOrigin]);
-  const nextOccurrence = useCallback(() => dispatch({ type: "NEXT_OCCURRENCE" }), []);
+    if (closingSheet) return;
+    setClosingSheet(true);
+    const finish = () => {
+      dispatchViewer({ type: "RESELECT" });
+      if (keyboardOrigin) document.getElementById(keyboardOrigin)?.focus();
+      setKeyboardOrigin(null);
+      setClosingSheet(false);
+    };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) finish();
+    else window.setTimeout(finish, 180);
+  }, [closingSheet, dispatchViewer, keyboardOrigin]);
+  const nextOccurrence = useCallback(() => dispatchViewer({ type: "NEXT_OCCURRENCE" }), [dispatchViewer]);
+
+  const sheetAction = useCallback(
+    (action: "expand" | "collapse" | "close" | "next_occurrence") => {
+      const symbolId = state.selected?.symbol_id;
+      if (!symbolId) return;
+      track({
+        name: ANALYTICS_EVENTS.infoSheetAction,
+        layout_id: floorplan.id,
+        symbol_id: symbolId,
+        context: "layout",
+        action,
+      });
+    },
+    [floorplan.id, state.selected?.symbol_id],
+  );
+  const closeFromEscape = useCallback(() => {
+    sheetAction("close");
+    close();
+  }, [close, sheetAction]);
 
   const selectedSymbol = state.selected?.symbol_id
     ? (symbols[state.selected.symbol_id] ?? null)
@@ -113,25 +216,9 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
   const occurrence = selectedOccurrence(state);
   /** 說明卡此刻升起來了沒。掛上 `<InfoSheet>`、樑的橫幅讓位、房間變暗，問的是同一件事，所以只寫一次。 */
   const sheetOpen = selectedSymbol !== null && occurrence !== null;
-  const previousSheetOpen = useRef(false);
-
-  useEffect(() => {
-    if (!sheetOpen || !state.selected?.symbol_id) {
-      previousSheetOpen.current = false;
-      return;
-    }
-    if (previousSheetOpen.current) return;
-    previousSheetOpen.current = true;
-    recordSymbolView({
-      symbol_id: state.selected.symbol_id,
-      source: "layout",
-      layout_id: floorplan.id,
-      hotspot_id: state.selected.id,
-    });
-  }, [floorplan.id, sheetOpen, state.selected?.id, state.selected?.symbol_id]);
 
   // Esc 關掉說明卡——與關閉鍵同一個 action。第二段進行中的 Esc 由圖框自己處理。
-  useEscapeKey(sheetOpen, close);
+  useEscapeKey(sheetOpen, closeFromEscape);
 
   /**
    * 落地時狀態列說的那一句（M3 票 08；規格主人 2026-09-13 的決定 D2、D4）。
@@ -192,7 +279,7 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
         symbols={symbols}
         readingOrder={readingOrder}
         viewer={state}
-        dispatch={dispatch}
+        dispatch={dispatchViewer}
         // 自由看圖的標記就是檢視器自己的選取；`revealed` 與暫停是找找看的事（docs/adr/0007）。
         selectedHotspot={state.selected?.id ?? null}
         revealedSymbol={null}
@@ -213,7 +300,9 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
           symbols={symbols}
           occurrence={{ ...occurrence, onNext: nextOccurrence }}
           takeFocus={keyboardOrigin !== null}
+          closing={closingSheet}
           onClose={close}
+          onAction={sheetAction}
         />
       )}
     </>

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AnalyticsLink } from "@/components/AnalyticsLink";
 import { SearchBox } from "@/components/SearchBox";
+import { ANALYTICS_EVENTS } from "@/lib/analytics";
 import { SymbolArt } from "@/components/SymbolArt";
 import { categoryCollectionJsonLd, categoryMetadata, jsonLd } from "@/lib/site-metadata";
 import { loadCategories, loadSearchIndex } from "@/lib/symbols/data";
@@ -71,7 +72,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
             數目是清單的前言，兩者不拆開；而想查特定符號的人不必先捲過這一類的清單才找得到它。
             它搜的是全部，不是這一類——標籤自己說（`searchLabel`）。索引見 `loadSearchIndex()`。 */}
         <div className={styles.search}>
-          <SearchBox index={loadSearchIndex()} />
+          <SearchBox index={loadSearchIndex()} surface="category" />
         </div>
 
         <p className={styles.count}>{categoryCountLabel(category.symbols.length)}</p>
@@ -79,7 +80,16 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
         <ul className={styles.list}>
           {category.symbols.map((symbol) => (
             <li key={symbol.id} className={styles.item}>
-              <Link className={styles.link} href={`/symbols/${symbol.id}?from=category`}>
+              <AnalyticsLink
+                className={styles.link}
+                href={`/symbols/${symbol.id}?from=category`}
+                event={{
+                  name: ANALYTICS_EVENTS.selectContent,
+                  content_type: "category_symbol",
+                  item_id: symbol.id,
+                  origin_page_type: "category",
+                }}
+              >
                 {/* 圖形在這裡**對讀螢幕的人藏起來**，與符號頁相反。那一頁的圖是內容——它在教
                     這個形狀——所以有替代文字；這裡整列是一個連結，替代文字會被併進連結的名字，
                     唸出來是「牆在平面圖上的畫法 牆 牆是⋯」，名字唸兩次，反而更難聽出這個連結
@@ -91,7 +101,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
                   <span className={styles.name}>{symbol.name}</span>
                   <span className={styles.meaning}>{symbol.plain_meaning}</span>
                 </span>
-              </Link>
+              </AnalyticsLink>
             </li>
           ))}
         </ul>
