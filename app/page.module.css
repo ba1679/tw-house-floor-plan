@@ -25,7 +25,7 @@
   color: var(--ink2);
 }
 
-/* 今天只有一個 layout，所以是進圖與找找看各一個按鈕；M6 多一張圖就多一組，排成一欄。 */
+/* 今天只有一個 layout，所以是進圖與找找看各一個按鈕；M7 多一張圖就多一組，排成一欄。 */
 .layouts {
   display: flex;
   flex-direction: column;

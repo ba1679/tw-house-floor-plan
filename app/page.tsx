@@ -30,7 +30,7 @@ export const metadata: Metadata = homeMetadata();
 export default function HomePage() {
   // **有幾個 layout 就有幾個按鈕，由 `data/layouts/` 決定。** 今天只有三房兩廳，所以就是一個。
   // 不挑「第一張」當主打：哪一張該被主打是一個編輯決定，而那個決定不該藏在排序裡；
-  // 也不寫死 `3b2l_standard`（spec「路由」）——M6 加第 2 張圖時，它自己長出第二個按鈕。
+  // 也不寫死 `3b2l_standard`（spec「路由」）——M7 加第 2 張圖時，它自己長出第二個按鈕。
   const layouts = listLayoutIds().map((id) => {
     const floorplan = loadFloorPlan(id);
     return { id, name: floorplan.name, hasQuiz: hasQuiz(floorplan.hotspots) };
