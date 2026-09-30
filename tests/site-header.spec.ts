@@ -12,8 +12,11 @@ test.describe("全站品牌 header", () => {
   test("每一種內容頁都有同一個可回首頁的品牌入口", async ({ page }) => {
     for (const path of pages) {
       await page.goto(path);
-      const home = page.getByRole("link", { name: "回首頁：平面圖教學" });
+      const home = page.getByRole("link", { name: "回首頁：拼厝" });
       await expect(home).toBeVisible();
+      await expect(home.getByText("拼厝", { exact: true })).toBeVisible();
+      await expect(home.getByText("Phin-Chhù", { exact: true })).toBeVisible();
+      await expect(home.getByRole("img", { name: "拼厝", exact: true })).toBeVisible();
       const box = (await home.boundingBox())!;
       expect(box.width).toBeGreaterThanOrEqual(44);
       expect(box.height).toBeGreaterThanOrEqual(44);
@@ -23,7 +26,7 @@ test.describe("全站品牌 header", () => {
 
   test("首頁沒有第二個不可點的同名 wordmark", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByText("平面圖教學", { exact: true })).toHaveCount(1);
+    await expect(page.getByText("拼厝", { exact: true })).toHaveCount(1);
   });
 
   test("窄而矮的平面圖與找找看頁仍沒有文件捲動", async ({ page }) => {

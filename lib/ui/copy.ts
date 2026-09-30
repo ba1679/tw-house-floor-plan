@@ -174,8 +174,13 @@ export const neutralHotspotLabel = (roomName: string, k: number) =>
 /** 「跟○○的差別」——容易搞混區塊裡每一則的標題。 */
 export const confusedWithLabel = (otherName: string) => `跟${otherName}的差別`;
 
-/** 站名。根版面的預設標題、首頁標題上方那一行小字，都是它。 */
-export const SITE_NAME = "平面圖教學";
+/** 第一方識別共用文字；標記圖形由 BrandMark 擁有（ADR-0009）。 */
+export const SITE_NAME = "拼厝";
+export const SITE_ROMANIZATION = "Phin-Chhù";
+export const SITE_IDENTITY = `${SITE_NAME}（${SITE_ROMANIZATION}）`;
+export const BRAND_PROMISE = "看懂格局，慢慢拼成家。";
+export const SITE_PURPOSE = "教你看懂建案平面圖與格局";
+export const BRAND_IMAGE_ALT = `${SITE_NAME}：由平面圖方格拼成的台灣意象`;
 
 /**
  * 首頁那一句主張，照 PRD §8 資訊架構圖上的原句。
@@ -198,10 +203,10 @@ export const SITE_TAGLINE = "點圖上的符號，就知道它是什麼、該注
  * 與 `HOME_CLAIM` 刻意不同句，與符號頁、分類頁「`<title>` 與 `<h1>` 同一句」的規矩不同：那兩種頁是
  * 搜尋落地頁，標題要長得像使用者打的那句話；首頁的主張是一個問句，放進搜尋結果裡看不出這是哪個網站。
  */
-export const HOME_PAGE_TITLE = `${SITE_NAME}：看懂建案平面圖上的符號`;
+export const HOME_PAGE_TITLE = `${SITE_IDENTITY}：看懂建案平面圖上的符號`;
 
 /** 首頁的 meta description：這個網站替誰做什麼，以及站上有哪幾條路（進圖、搜尋、依分類）。 */
-export const HOME_PAGE_DESCRIPTION = `教買房的人看懂建案平面圖：${SITE_TAGLINE}也可以直接搜尋，或依分類瀏覽。`;
+export const HOME_PAGE_DESCRIPTION = `${SITE_IDENTITY}${SITE_PURPOSE}：${SITE_TAGLINE}也可以直接搜尋，或依分類瀏覽。`;
 
 /**
  * 首頁那個進平面圖的按鈕（PRD §8「開始探索三房兩廳」），一個 layout 一個。**格局名由呼叫端從 floorplan 資料取來**，

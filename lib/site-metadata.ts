@@ -5,9 +5,12 @@ import type { SymbolCategoryPage } from "@/lib/symbols/data";
 import type { SymbolPageRecord, SymbolRecord } from "@/lib/symbols/types";
 import {
   CATEGORY_LABELS,
+  BRAND_IMAGE_ALT,
   HOME_PAGE_DESCRIPTION,
   HOME_PAGE_TITLE,
   SITE_NAME,
+  SITE_IDENTITY,
+  SITE_PURPOSE,
   SITE_TAGLINE,
   categoryPageDescription,
   categoryPageTitle,
@@ -54,7 +57,7 @@ export function pageMetadata({ title, description, path }: PageMetadataInput): M
           url: absoluteSiteUrl(OG_IMAGE_PATH),
           width: 1200,
           height: 630,
-          alt: `${SITE_NAME}的簡化平面圖線稿識別`,
+          alt: BRAND_IMAGE_ALT,
         },
       ],
     },
@@ -187,7 +190,7 @@ export function jsonLd(value: unknown): string {
 
 export const fallbackMetadata: Metadata = {
   metadataBase: siteMetadataBase,
-  title: SITE_NAME,
-  description: SITE_TAGLINE,
+  title: SITE_IDENTITY,
+  description: `${SITE_IDENTITY}${SITE_PURPOSE}。${SITE_TAGLINE}`,
   icons: siteIcons,
 };

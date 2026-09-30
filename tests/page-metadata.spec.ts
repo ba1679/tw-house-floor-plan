@@ -90,7 +90,7 @@ function expectSharedOpenGraph(html: string, title: string, description: string,
   expect(metaContent(html, "og:description"), url).toBe(description);
   expect(metaContent(html, "og:type"), url).toBe("website");
   expect(metaContent(html, "og:url"), url).toBe(url);
-  expect(metaContent(html, "og:site_name"), url).toBe("平面圖教學");
+  expect(metaContent(html, "og:site_name"), url).toBe("拼厝");
   expect(metaContent(html, "og:locale"), url).toBe("zh_TW");
   expect(metaContent(html, "og:image"), url).toBe(OG_IMAGE);
   expect(metaContent(html, "og:image:width"), url).toBe("1200");
@@ -115,7 +115,7 @@ test.describe("page metadata and JSON-LD", () => {
         url,
         inDefinedTermSet: {
           "@type": "DefinedTermSet",
-          name: "平面圖教學",
+          name: "拼厝",
           url: BASE_URL,
         },
       });

@@ -1,3 +1,5 @@
+@import "./brand-tokens.css";
+
 /* 設計 token 取自 DESIGN.md 與 design/_tokens.txt。
    字體只給堆疊、不載 webfont：站是 SSG，使用情境是接待中心的行動網路。 */
 :root {

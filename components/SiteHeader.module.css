@@ -24,12 +24,21 @@
   width: 28px;
   height: 28px;
   flex: none;
-  stroke: currentColor;
-  stroke-width: 1.6;
-  stroke-linecap: square;
-  stroke-linejoin: miter;
+}
+
+.wordmark {
+  display: grid;
+  gap: 2px;
+  line-height: 1;
 }
 
 .name {
   white-space: nowrap;
+}
+
+.romanization {
+  font-size: var(--text-small-size);
+  font-weight: 400;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
 }

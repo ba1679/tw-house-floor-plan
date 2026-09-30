@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npm run validate && npm run validate:floorplan",
+    "prebuild": "npm run generate:brand && npm run validate && npm run validate:floorplan",
+    "generate:brand": "tsx scripts/generate-brand-assets.tsx",
     "build": "next build",
     "start": "node scripts/serve-static.mjs out",
     "validate": "python3 scripts/validate_data.py",
@@ -26,6 +27,8 @@
     "@types/react-dom": "19.2.4",
     "chrome-launcher": "^1.2.1",
     "lighthouse": "^12.8.2",
+    "sharp": "0.35.4",
+    "tsx": "4.23.15",
     "typescript": "5.9.3"
   }
 }

@@ -151,7 +151,7 @@ test.describe("/categories/[id] 分類頁", () => {
     const descriptions = categoriesInData.map((c) => descriptionOf(built(c)));
 
     expect(new Set(titles).size).toBe(categoriesInData.length);
-    expect(titles).not.toContain("平面圖教學");
+    expect(titles).not.toContain("拼厝（Phin-Chhù）");
     expect(new Set(descriptions).size).toBe(categoriesInData.length);
 
     for (const [i, category] of categoriesInData.entries()) {

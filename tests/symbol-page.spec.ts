@@ -87,7 +87,7 @@ test.describe("/symbols/[id] 符號頁", () => {
       expect(titles[i]).toBe(`平面圖上的${s.name}是什麼？`);
     }
     expect(new Set(titles).size).toBe(symbols.length);
-    expect(titles).not.toContain("平面圖教學");
+    expect(titles).not.toContain("拼厝（Phin-Chhù）");
   });
 
   // 14 頁共用一句描述，搜尋引擎會把它們當成同一頁（spec user story 31）。

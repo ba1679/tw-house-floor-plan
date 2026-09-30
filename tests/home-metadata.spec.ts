@@ -38,13 +38,13 @@ test.describe("home metadata", () => {
 
     expect(linkHref(html, "canonical")).toBe(canonical);
 
-    expect(metaContent(html, "og:title")).toBe("平面圖教學：看懂建案平面圖上的符號");
+    expect(metaContent(html, "og:title")).toBe("拼厝（Phin-Chhù）：看懂建案平面圖上的符號");
     expect(metaContent(html, "og:description")).toBe(
-      "教買房的人看懂建案平面圖：點圖上的符號，就知道它是什麼、該注意什麼，以及這個說法出自哪一級文件。也可以直接搜尋，或依分類瀏覽。",
+      "拼厝（Phin-Chhù）教你看懂建案平面圖與格局：點圖上的符號，就知道它是什麼、該注意什麼，以及這個說法出自哪一級文件。也可以直接搜尋，或依分類瀏覽。",
     );
     expect(metaContent(html, "og:type")).toBe("website");
     expect(metaContent(html, "og:url")).toBe(canonical);
-    expect(metaContent(html, "og:site_name")).toBe("平面圖教學");
+    expect(metaContent(html, "og:site_name")).toBe("拼厝");
     expect(metaContent(html, "og:locale")).toBe("zh_TW");
     expect(metaContent(html, "og:image")).toBe(image);
     expect(metaContent(html, "og:image:width")).toBe("1200");
@@ -61,9 +61,9 @@ test.describe("home metadata", () => {
     expect(jsonLd).toEqual({
       "@context": "https://schema.org",
       "@type": "WebSite",
-      name: "平面圖教學",
+      name: "拼厝",
       description:
-        "教買房的人看懂建案平面圖：點圖上的符號，就知道它是什麼、該注意什麼，以及這個說法出自哪一級文件。也可以直接搜尋，或依分類瀏覽。",
+        "拼厝（Phin-Chhù）教你看懂建案平面圖與格局：點圖上的符號，就知道它是什麼、該注意什麼，以及這個說法出自哪一級文件。也可以直接搜尋，或依分類瀏覽。",
       url: canonical,
       inLanguage: "zh-Hant",
     });
@@ -75,5 +75,20 @@ test.describe("home metadata", () => {
     expect(html).not.toContain("localhost");
     expect(linkHref(html, "canonical")).toMatch(/^https:\/\/floorplan\.example\.test\/?$/);
     expect(metaContent(html, "og:image")).toMatch(/^https:\/\/floorplan\.example\.test\//);
+  });
+
+  test("品牌資產可獨立閱讀：favicon 有名稱，分享圖保留真文字，app icon 為 180px", async ({ page }) => {
+    await page.goto("/brand/favicon.svg");
+    await expect(page.getByRole("img", { name: "拼厝", exact: true })).toBeVisible();
+
+    await page.goto("/brand/og-home.svg");
+    await expect(page.getByText("拼厝", { exact: true })).toBeVisible();
+    await expect(page.getByText("Phin-Chhù", { exact: true })).toBeVisible();
+    await expect(page.getByText("看懂格局，慢慢拼成家。", { exact: true })).toBeVisible();
+    await expect(page.getByText("教你看懂建案平面圖與格局", { exact: true })).toBeVisible();
+
+    const icon = readFileSync("out/brand/apple-touch-icon.png");
+    expect(icon.subarray(1, 4).toString()).toBe("PNG");
+    expect([icon.readUInt32BE(16), icon.readUInt32BE(20)]).toEqual([180, 180]);
   });
 });

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { track, ANALYTICS_EVENTS } from "@/lib/analytics";
-import { SITE_NAME } from "@/lib/ui/copy";
+import { SITE_NAME, SITE_ROMANIZATION } from "@/lib/ui/copy";
+import { BrandMark } from "./BrandMark";
 import styles from "./SiteHeader.module.css";
 
 function originPageType(): "home" | "category" | "symbol" | "layout" | "quiz" {
@@ -12,15 +13,6 @@ function originPageType(): "home" | "category" | "symbol" | "layout" | "quiz" {
   if (path.startsWith("/symbols/")) return "symbol";
   if (path.startsWith("/categories/")) return "category";
   return "home";
-}
-
-/** A small plan-line mark: a floor-plan cue, intentionally not a house icon. */
-function PlanMark() {
-  return (
-    <svg className={styles.mark} viewBox="0 0 32 32" fill="none" aria-hidden="true">
-      <path d="M4 5h24v22H4zM4 15h12M16 5v10M16 15h12M11 15v12M16 20h5" />
-    </svg>
-  );
 }
 
 export function SiteHeader() {
@@ -39,8 +31,11 @@ export function SiteHeader() {
           })
         }
       >
-        <PlanMark />
-        <span className={styles.name}>{SITE_NAME}</span>
+        <BrandMark variant="compact" className={styles.mark} />
+        <span className={styles.wordmark}>
+          <span className={styles.name}>{SITE_NAME}</span>
+          <span className={styles.romanization}>{SITE_ROMANIZATION}</span>
+        </span>
       </Link>
     </header>
   );
