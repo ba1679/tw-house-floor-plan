@@ -11,6 +11,31 @@ import { selectByTwoTaps } from "./viewer-page";
 const PLAN = "/layouts/3b2l_standard";
 const SHEET = "#info-sheet";
 
+for (const size of [{ width: 375, height: 812 }, { width: 320, height: 568 }]) {
+  test(`${size.width} × ${size.height}：展開說明仍保留圖面可視帶，卡片底部與控制不被裁切`, async ({ page }) => {
+    await page.setViewportSize(size);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(PLAN);
+    const canopy = page.locator("#hs-canopy-master");
+    await canopy.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator(SHEET)).toBeFocused();
+    await page.getByRole("button", { name: "展開完整內容" }).click();
+    await expect(page.locator(SHEET)).toHaveAttribute("data-expanded", "true");
+
+    const frame = (await page.locator("#floorplan-viewport").boundingBox())!;
+    // ADR-0003 的展開態仍需留出辨認位置的圖面帶，不能只剩非零的幾個 px。
+    expect(frame.height).toBeGreaterThanOrEqual(84);
+    const sheet = (await page.locator(SHEET).boundingBox())!;
+    expect(frame.y + frame.height).toBeLessThanOrEqual(sheet.y);
+    expect(sheet.y + sheet.height).toBeLessThanOrEqual(size.height + 1);
+    for (const name of ["關閉說明", "收合看平面圖", /其他位置/]) {
+      await expect(page.getByRole("button", { name })).toBeInViewport({ ratio: 1 });
+    }
+    await expect(page.locator(SHEET).getByText(/實際請以個案圖說或現場人員說明為準/)).toBeInViewport({ ratio: 1 });
+  });
+}
+
 test("選到符號之後，說明卡帶著這個符號的白話意思升起來", async ({ page }) => {
   await page.goto(PLAN);
   await expect(page.locator(SHEET)).toBeHidden();
@@ -136,6 +161,26 @@ test("減少動態時說明卡高度切換不播放過渡", async ({ page }) => 
   await page.goto(PLAN);
   await selectByTwoTaps(page, "hs-canopy-master");
   await expect(page.locator(SHEET)).toHaveCSS("transition-duration", "0s");
+});
+
+test("說明末段可捲到控制列上方，展開與收合按鈕不蓋住文字", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(PLAN);
+  await selectByTwoTaps(page, "hs-canopy-master");
+  const body = page.locator("#info-sheet-body");
+  const control = page.locator('button[aria-controls="info-sheet-body"]');
+  for (const expanded of [false, true]) {
+    if (expanded) await control.click();
+    await body.evaluate((element) => { element.scrollTop = element.scrollHeight; });
+    const last = (await body.locator("dd").last().boundingBox())!;
+    const button = (await control.boundingBox())!;
+    expect(last.y + last.height).toBeLessThanOrEqual(button.y);
+    expect(button.height).toBeGreaterThanOrEqual(44);
+  }
+  await control.click();
+  await expect.poll(() => body.evaluate((element) => element.scrollTop)).toBe(0);
+  await expect(control).toBeFocused();
 });
 
 test("按「其他位置」換看下一處：M 遞增、標示換到同一個符號的另一處、卡片不關", async ({

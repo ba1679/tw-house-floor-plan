@@ -32,18 +32,29 @@ test.describe("/layouts/[id] 靜態平面圖", () => {
     await expect(page.locator("#wall-001")).toBeAttached();
   });
 
-  test("在 375px 手機寬度下不溢出、不橫向捲動", async ({ page }) => {
-    await page.goto("/layouts/3b2l_standard");
+  for (const size of [{ width: 375, height: 812 }, { width: 320, height: 568 }]) {
+    test(`在 ${size.width} × ${size.height} 下 header、標題與圖框都留在一個螢幕`, async ({ page }) => {
+      await page.setViewportSize(size);
+      await page.goto("/layouts/3b2l_standard");
 
-    const plan = page.getByRole("group", { name: /三房兩廳/ });
-    const box = await plan.boundingBox();
-    expect(box!.width).toBeLessThanOrEqual(375);
+      const plan = page.getByRole("group", { name: /三房兩廳/ });
+      const box = await plan.boundingBox();
+      expect(box!.width).toBeLessThanOrEqual(size.width);
+      await expect(page.getByRole("banner")).toBeInViewport({ ratio: 1 });
+      await expect(page.getByRole("heading", { level: 1 })).toBeInViewport({ ratio: 1 });
+      await expect(page.locator("#floorplan-viewport")).toBeInViewport({ ratio: 1 });
+      const quiz = page.getByRole("link", { name: /找找看/ });
+      await expect(quiz).toBeInViewport({ ratio: 1 });
+      const linkBox = (await quiz.boundingBox())!;
+      expect(linkBox.height).toBeGreaterThanOrEqual(44);
 
-    const overflows = await page.evaluate(
-      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
-    );
-    expect(overflows).toBe(false);
-  });
+      const overflows = await page.evaluate(
+        () => document.documentElement.scrollWidth > document.documentElement.clientWidth
+          || document.documentElement.scrollHeight > document.documentElement.clientHeight,
+      );
+      expect(overflows).toBe(false);
+    });
+  }
 
   test("網址以 layout id 定址：資料裡沒有的 id 沒有頁面", async ({ page }) => {
     const response = await page.goto("/layouts/nonexistent_layout");

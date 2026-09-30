@@ -1,9 +1,8 @@
-/* 高度以 vh 定義。設計稿的 392 / 660px 是 846px 高的手機上量出來的基準值
-   （392/846 ≈ 46%、660/846 ≈ 78%），**不寫死成 px**——換一支手機就不對了。
-   660 那一段的依據是「平面圖僅餘 84px」：足夠維持位置感，不足以繼續操作。
+/* 高度隨內容走，vh 只定閱讀上限。自由看圖另由 main 依剩餘高度給上限，
+   讓 header、標題、狀態列與至少一條能辨認位置的圖面帶各自留在螢幕內。
 
    `height: auto` + `max-height` 就是票 03 決議 1 要的「內容高度與上限的較小者」：
-   392 是上限不是初始。13/14 個符號沒有 caution，照設計稿固定 392 會開出一大片空白。 */
+   不把上限當初始高度：短說明不該開出一大片空白。 */
 .sheet {
   --sheet-max: 46dvh;
 
@@ -11,12 +10,12 @@
   display: flex;
   flex-direction: column;
   height: auto;
-  max-height: var(--sheet-max);
+  /* vh 是閱讀上限；呼叫端的版面預算保障圖面與固定控制列仍留在螢幕內。 */
+  max-height: min(var(--sheet-max), var(--sheet-height-limit, 100dvh));
   /* 卡片滿版出血：它是從螢幕底部升起來的一張卡，不是內文裡的一個方塊。 */
   margin: 12px -16px -16px;
   background: var(--paper);
-  border-top: 1px solid var(--ink);
-  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  border-top: 1px solid var(--rule-strong);
   box-shadow: var(--shadow-sheet);
   transition: max-height 180ms ease, margin 180ms ease, opacity 180ms ease;
 }
@@ -71,7 +70,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: var(--space-1) 8px 0 20px;
+  padding: var(--space-1) var(--space-3) 0 var(--space-5);
+  border-bottom: 1px solid var(--rule-subtle);
 }
 
 .identity {
@@ -92,7 +92,7 @@
   font-family: var(--sans);
   font-size: var(--text-eyebrow-size);
   line-height: var(--text-eyebrow-leading);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   color: var(--ink2);
 }
 
@@ -105,10 +105,10 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: none;
-  border-radius: var(--radius-pill);
-  background: var(--paper2);
-  color: var(--ink);
+  border: 1px solid var(--rule-soft);
+  border-radius: var(--radius-s);
+  background: var(--surface-reading);
+  color: var(--text-primary);
   cursor: pointer;
 }
 
@@ -119,17 +119,17 @@
 }
 
 .bodyWrap {
-  position: relative;
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
+  flex-direction: column;
 }
 
 .body {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: 0 20px 4px;
+  padding: 0 var(--space-5) var(--space-1);
   -webkit-overflow-scrolling: touch;
   scroll-behavior: auto;
 }
@@ -167,12 +167,12 @@
 }
 
 .sectionLabel {
-  margin: 0 0 6px;
+  margin: 0 0 var(--space-1);
   font-family: var(--sans);
   font-size: var(--text-label-size);
   line-height: var(--text-label-leading);
-  font-weight: 400;
-  letter-spacing: 0.16em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   color: var(--ink2);
 }
 
@@ -195,7 +195,7 @@
 }
 
 .confusedName {
-  font-size: 13px;
+  font-size: var(--text-secondary-size);
   font-weight: 600;
   line-height: 1.6;
 }
@@ -207,28 +207,24 @@
   color: var(--ink2);
 }
 
-/* 內容超出上限時才出現。漸層讓「下面還有東西」看得出來，
-   提示本身就是展開的按鈕——點一下，不是拖曳。 */
+/* 內容超出上限時才出現，獨立的一列讓文字能捲到按鈕上方。
+   展開後仍留在原處，鍵盤焦點與收合入口不隨正文捲走。 */
 .expand {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  flex: 0 0 auto;
   min-height: var(--touch-min);
-  height: 76px;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   gap: 6px;
-  padding-bottom: 10px;
+  margin: 0 20px;
+  padding: var(--space-2) 0;
   border: none;
-  background: linear-gradient(
-    to bottom,
-    color-mix(in oklch, var(--paper) 0%, transparent),
-    var(--paper) 72%
-  );
+  border-top: 1px solid var(--rule2);
+  border-radius: 0;
+  background: var(--paper);
   font-family: var(--sans);
-  font-size: var(--text-small-size);
+  font-size: var(--text-meta-size);
+  font-weight: 600;
   line-height: var(--text-small-leading);
   letter-spacing: 0.1em;
   color: var(--ink2);
@@ -245,9 +241,9 @@
   margin: 0 20px;
   padding: 6px 0;
   border: none;
-  border-top: 1px solid var(--rule2);
-  background: var(--paper2);
-  border-radius: var(--radius-m);
+  border-top: 1px solid var(--rule-strong);
+  background: var(--surface-reading);
+  border-radius: 0;
   font: inherit;
   color: var(--ink);
   text-align: left;

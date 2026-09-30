@@ -83,6 +83,7 @@ export function InfoSheet({
 }: Props) {
   const sheetRef = useRef<HTMLElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const expandRef = useRef<HTMLButtonElement>(null);
   const [expanded, setExpanded] = useState(false);
   const [overflowing, setOverflowing] = useState(false);
 
@@ -100,7 +101,11 @@ export function InfoSheet({
   useEffect(() => {
     const el = bodyRef.current;
     if (!el) return;
-    const measure = () => setOverflowing(el.scrollHeight > el.clientHeight + 1);
+    const measure = () => {
+      // 判斷「不放展開控制時」是否仍放不下，避免控制列自己的高度讓它永遠無法退場。
+      const controlHeight = expanded ? 0 : (expandRef.current?.offsetHeight ?? 0);
+      setOverflowing(el.scrollHeight > el.clientHeight + controlHeight + 1);
+    };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(el);
@@ -220,6 +225,7 @@ export function InfoSheet({
         {/* 展開的觸發是**點一下**，不是拖曳——拖曳手勢會跟票 04 的 pan/zoom 打架。 */}
         {(overflowing || expanded) && (
           <button
+            ref={expandRef}
             type="button"
             className={styles.expand}
             onClick={toggleExpanded}

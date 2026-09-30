@@ -37,7 +37,7 @@ export default async function LayoutPage({ params }: { params: Promise<{ id: str
   const symbols = loadSymbolsForViewer();
 
   return (
-    <main className={styles.page}>
+    <main className={styles.exploration}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd(layoutLearningResourceJsonLd(floorplan, symbols)) }}

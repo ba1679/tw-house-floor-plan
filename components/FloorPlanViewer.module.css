@@ -21,6 +21,8 @@
   user-select: none;
   -webkit-user-select: none;
   background: var(--fp-paper);
+  /* 外框不參與 content box 尺寸，ResizeObserver 與手勢座標仍使用同一個圖框。 */
+  outline: 1px solid var(--rule-strong);
   cursor: pointer;
 }
 
@@ -230,8 +232,8 @@
 .controls {
   flex: 0 0 auto;
   display: flex;
-  gap: 8px;
-  margin-top: 12px;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
 }
 
 /* 手機優先：使用情境是站在接待中心單手操作，控制元件一律點得到。 */
@@ -241,19 +243,21 @@
   padding: 0 16px;
   font: inherit;
   font-size: var(--text-button-size);
-  border: none;
-  border-radius: var(--radius-m);
-  background: var(--paper2);
-  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-s);
+  background: var(--surface-reading);
+  color: var(--text-primary);
   cursor: pointer;
 }
 
 .status {
   flex: 0 0 auto;
-  margin: 12px 0 0;
+  margin: var(--space-3) 0 0;
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--rule-strong);
   font-size: var(--text-status-size);
   line-height: var(--text-status-leading);
-  color: var(--ink2);
+  color: var(--text-secondary);
 }
 
 /* 圖上看不到的符號（樑）落地時的那條橫幅（M3 票 09）。

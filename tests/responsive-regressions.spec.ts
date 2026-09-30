@@ -22,6 +22,39 @@ async function gotoRepresentative(page: Page, path: string) {
 }
 
 test.describe("M5 RWD representatives", () => {
+  test("自由看圖在手機與桌機完整開合說明卡，動畫後仍是一個螢幕的版面列", async ({ page }) => {
+    for (const size of [
+      { width: 375, height: 812 },
+      { width: 320, height: 568 },
+      { width: 1280, height: 900 },
+    ]) {
+      await page.setViewportSize(size);
+      await page.goto("/layouts/3b2l_standard");
+      await selectByTwoTaps(page, "hs-canopy-master");
+      const sheet = page.locator("#info-sheet");
+      for (const stage of ["open", "expanded", "collapsed"]) {
+        if (stage === "expanded") await page.getByRole("button", { name: "展開完整內容" }).click();
+        if (stage === "collapsed") await page.getByRole("button", { name: "收合看平面圖" }).click();
+        await sheet.evaluate(async (element) => {
+          element.getBoundingClientRect();
+          await Promise.all(element.getAnimations().map((animation) => animation.finished));
+        });
+        await expect(sheet.getByRole("heading", { name: "雨遮" })).toBeInViewport({ ratio: 1 });
+        const frame = (await page.locator("#floorplan-viewport").boundingBox())!;
+        const card = (await sheet.boundingBox())!;
+        expect(frame.height, `${size.width} / ${stage}`).toBeGreaterThanOrEqual(84);
+        expect(frame.y + frame.height).toBeLessThanOrEqual(card.y);
+        expect(card.y + card.height).toBeLessThanOrEqual(size.height + 1);
+        await expectNoHorizontalOverflow(page, `${size.width} / ${stage}`);
+        expect(await page.evaluate(() => document.documentElement.scrollHeight > innerHeight)).toBe(false);
+      }
+      await page.getByRole("button", { name: "關閉說明" }).click();
+      await expect(sheet).toBeHidden();
+      await expect(page.getByRole("contentinfo")).toBeInViewport({ ratio: 1 });
+      expect(await page.evaluate(() => document.documentElement.scrollHeight > innerHeight)).toBe(false);
+    }
+  });
+
   test("五種代表頁在 375 × 812 下主要內容與入口可見", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
 
