@@ -32,6 +32,32 @@ const highlightedIds = (page: Page) =>
 
 const CONVERSION_BUTTON = /這個符號在真實格局裡長怎樣/;
 
+test("窄螢幕與 desktop 的格局入口可用鍵盤開啟，包含圖上沒有的樑", async ({ page }) => {
+  for (const width of [320, 1280]) {
+    await page.setViewportSize({ width, height: 812 });
+    for (const id of ["window", "beam"]) {
+      const symbol = symbols.find((s) => s.id === id)!;
+      const [layoutId] = symbol.related_layouts;
+      await page.goto(`/symbols/${id}`);
+      const link = page.getByRole("link", {
+        name: id === "beam" ? "這張三房兩廳上看不到樑——這正是重點" : CONVERSION_BUTTON,
+      });
+      await link.focus();
+      await expect(link).toBeInViewport();
+      const box = (await link.boundingBox())!;
+      expect(box.width).toBeGreaterThanOrEqual(44);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      await page.keyboard.press("Enter");
+      await expect(page).toHaveURL(`/layouts/${layoutId}?symbol=${id}`);
+      if (id === "beam") {
+        await expect(page.locator("#absent-symbol-banner")).toContainText("看不到樑");
+      } else {
+        await expect.poll(() => highlightedIds(page)).toEqual(hotspotIdsOf(id, layoutId));
+      }
+    }
+  }
+});
+
 test.describe("符號頁 → 平面圖：該符號的每一處同時亮起來", () => {
   // 票面點名的三個：窗 9 處、單扇門 5 處、柱 5 處。一處的符號亮起來跟點選沒兩樣，看不出「全部」。
   for (const symbolId of ["window", "door_single_swing", "column"]) {

@@ -2,7 +2,7 @@
    首頁讀圖桌有自己的寬版編排，只共用 eyebrow 與主要動作的樣式。
 
    **只放各頁共用的屬性。** 區塊之間的 `gap` 與標題的 `margin` 依頁面而異
-   （符號頁的區塊間距大，標題要往上吃掉一段 gap），留在各頁自己的檔案裡。
+   留在各頁自己的檔案裡。
    同一個屬性不得在這裡與各頁同時寫：
    composes 進來的 class 與頁面自己的 class 誰蓋過誰，取決於兩份 CSS 在打包後的先後，
    那不是這個檔案控制得了的事。
@@ -13,11 +13,11 @@
   padding: var(--space-6) var(--space-5) 40px;
 }
 
-/* 手機優先，但寬螢幕上一行字不該橫跨整個視窗——長行讀起來會掉行。 */
+/* 寬版容納目錄與圖文分欄；各頁的正文另限行寬，不把整個版心當一行字。 */
 .column {
   display: flex;
   flex-direction: column;
-  max-width: 560px;
+  max-width: 1040px;
   margin: 0 auto;
 }
 
@@ -34,10 +34,17 @@
 /* 讀物頁以字級與留白建立標題層次，仍使用系統 sans。 */
 .title {
   font-family: var(--sans);
-  font-size: var(--text-display-size);
+  font-size: clamp(var(--text-display-size), 4.5vw, 48px);
   font-weight: var(--text-display-weight);
   line-height: var(--text-display-leading);
-  letter-spacing: 0.01em;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+@media (min-width: 760px) {
+  .page {
+    padding: 48px 32px 64px;
+  }
 }
 
 /* 這幾頁**唯一**填滿底色的東西：首頁那顆進平面圖的按鈕（PRD §8）、符號頁底部的轉換點（PRD §6.2.1）。

@@ -180,18 +180,47 @@ test.describe("/categories/[id] 分類頁", () => {
     await expect(page.getByRole("heading", { level: 1 })).toContainText(first.name);
   });
 
-  // 三頁都量：符號數最多的那一類最容易撐破版面，而每一列是「圖形 + 名字 + 白話意思」
-  // 這種橫排，375px 上它是這一頁唯一會溢出的東西。
-  test("在 375px 手機寬度下不溢出、不橫向捲動", async ({ page }) => {
+  test("目錄能依符號 heading 掃讀，Tab 依資料順序走過每一列", async ({ page }) => {
     for (const category of categoriesInData) {
       await page.goto(`/categories/${category}`);
-      // 先確認站在分類頁上：404 頁也不會溢出，那樣這條就成了一個永遠是綠的斷言。
-      await expect(page.locator(`a[href="/symbols/${symbolsIn(category)[0].id}?from=category"]`)).toBeVisible();
+      const entries = symbolsIn(category);
+      await expect(page.getByRole("heading", { level: 2 })).toHaveText(entries.map((s) => s.name));
 
-      const overflows = await page.evaluate(
-        () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
-      );
-      expect(overflows, category).toBe(false);
+      await page.getByRole("searchbox").focus();
+      for (const symbol of entries) {
+        await page.keyboard.press("Tab");
+        const link = page.getByRole("link", { name: `${symbol.name} ${symbol.plain_meaning}`, exact: true });
+        await expect(link).toBeFocused();
+        const box = (await link.boundingBox())!;
+        expect(box.width).toBeGreaterThanOrEqual(44);
+        expect(box.height).toBeGreaterThanOrEqual(44);
+      }
     }
   });
+
+  // 三頁都量：符號數最多的那一類最容易撐破版面，而每一列是「圖形 + 名字 + 白話意思」
+  // 這種橫排，375px 上它是這一頁唯一會溢出的東西。
+  for (const width of [320, 375, 1280]) {
+    test(`在 ${width}px 寬度下目錄依序排列、不橫向捲動`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 812 });
+      for (const category of categoriesInData) {
+        await page.goto(`/categories/${category}`);
+        // 先確認站在分類頁上：404 頁也不會溢出，那樣這條就成了一個永遠是綠的斷言。
+        await expect(page.locator(`a[href="/symbols/${symbolsIn(category)[0].id}?from=category"]`)).toBeVisible();
+
+        const overflows = await page.evaluate(
+          () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        );
+        expect(overflows, category).toBe(false);
+
+        const rows = await page.locator('main a[href$="?from=category"]').all();
+        let previousBottom = 0;
+        for (const row of rows) {
+          const box = (await row.boundingBox())!;
+          expect(box.y).toBeGreaterThanOrEqual(previousBottom);
+          previousBottom = box.y + box.height;
+        }
+      }
+    });
+  }
 });

@@ -1,100 +1,139 @@
-/* 與符號頁是同一類讀物：可以捲動、一欄、手機優先。`.page` 的留白、`.category` 與 `.title`
-   的字型字級、版心寬 560px，與符號頁、首頁同一套（`app/reading.module.css`）——從這裡點進去，
-   版心與標題不會跳。這裡只寫這一頁自己的間距。
-
-   符號頁那邊「排版不抽成共用」的註解講的是它與說明卡**值刻意不同**，不適用於這裡：
-   這幾頁的值是刻意相同的。 */
+/* 目錄每列維持資料順序；桌機只展開列內的欄位，不把名單切成多欄。 */
 .page {
   composes: page from "../../reading.module.css";
 }
 
 .column {
   composes: column from "../../reading.module.css";
-  gap: var(--space-2);
+}
+
+.intro {
+  display: grid;
+  gap: var(--space-6);
+  padding-bottom: var(--space-6);
 }
 
 .category {
   composes: eyebrow from "../../reading.module.css";
 }
 
-/* 標題是一個問句。 */
 .title {
   composes: title from "../../reading.module.css";
-  margin: 0;
+  margin: var(--space-3) 0 0;
 }
 
 .titleLine {
   display: block;
 }
 
-/* 搜尋框夾在標題與「共 N 個符號」之間，上下多留一點：它是一個工具，不是標題的副標、也不是清單的第一列。 */
 .search {
-  margin: 10px 0;
+  min-width: 0;
 }
 
 .count {
-  margin: 0 0 14px;
+  margin: 0;
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--rule-strong);
   font-size: var(--text-meta-size);
-  color: var(--ink2);
+  color: var(--text-secondary);
 }
 
-/* 一列一格，格與格之間一條細線——與符號頁的出處清單同一個畫法，讀者一眼數得出有幾個。
-   `list-style: none` 但保留 `<ul>` 的語意：這一串沒有先後之分，只有「有哪些」。 */
 .list {
   margin: 0;
   padding: 0;
   list-style: none;
-  border-bottom: 1px solid var(--rule2);
+  border-bottom: 1px solid var(--rule-strong);
 }
 
 .item {
-  border-top: 1px solid var(--rule2);
+  border-top: 1px solid var(--rule-subtle);
 }
 
-/* 整列是一個連結，高度遠超過 44px（PRD §9）：手機上這幾列就是這一頁的出口。 */
 .link {
-  display: flex;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 20px;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-3);
   min-height: var(--touch-min);
-  padding: 8px 0;
-  color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  padding: var(--space-5) 0;
+  color: var(--text-primary);
+  text-decoration: none;
 }
 
-/* sprite 每一格都是正方形（驗證器擋著），寬度給定，`SymbolArt` 自己保持等比。
-   底色與框線照符號頁的 figure：同一個形狀在兩頁上裝在同一種框裡。
-   `flex: none`：375px 上右邊那段白話意思很長，不鎖住的話圖形會先被擠扁。 */
+.link:hover {
+  background: var(--surface-subtle);
+}
+
+/* 白紙與製圖線維持原樣，不在符號裡加入分類色或格線。 */
 .art {
-  flex: none;
-  width: 64px;
-  padding: 6px;
+  padding: var(--space-2);
   background: var(--fp-paper);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-l);
+  border: 1px solid var(--rule-soft);
 }
 
-/* `min-width: 0` 與 `overflow-wrap: anywhere` 是同一件事的兩半：中文字之間都能斷行，
-   但一段沒有空白的英數字（型號、法規代碼）不行，而 flex 子項預設不肯縮到那一段以下——
-   整列會把 375px 的頁面往右撐出去。 */
 .text {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+  display: grid;
+  gap: var(--space-2);
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
 .name {
-  align-self: flex-start;
-  font-size: var(--text-row-title-size);
+  margin: 0;
+  font-size: var(--text-reading-size);
+  line-height: var(--text-row-title-leading);
   font-weight: 700;
-  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .meaning {
+  margin: 0;
   font-size: var(--text-secondary-size);
   line-height: var(--text-secondary-leading);
-  color: var(--ink2);
+  color: var(--text-secondary);
+}
+
+.arrow {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+@media (min-width: 760px) {
+  .intro {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    align-items: end;
+    gap: 40px;
+    padding-bottom: 32px;
+  }
+
+  .search {
+    padding-left: var(--space-6);
+    border-left: 1px solid var(--rule-soft);
+  }
+
+  .link {
+    grid-template-columns: 88px minmax(0, 1fr) 20px;
+    gap: var(--space-6);
+    padding-block: var(--space-6);
+  }
+
+  .text {
+    grid-template-columns: minmax(120px, 1fr) minmax(0, 2.5fr);
+    align-items: baseline;
+    gap: var(--space-6);
+  }
+
+  .name {
+    font-size: 20px;
+  }
+
+  .meaning {
+    max-width: 560px;
+    font-size: var(--text-body-size);
+    line-height: var(--text-body-leading);
+  }
 }

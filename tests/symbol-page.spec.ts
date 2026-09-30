@@ -17,6 +17,7 @@ type RawSymbol = {
   plain_meaning: string;
   caution: string | null;
   source_tier: string;
+  related_layouts: string[];
   confused_with: { symbol_id: string; difference: string }[];
   source_refs: { doc: string; clause?: string; year?: number; url?: string; via?: string }[];
 };
@@ -295,17 +296,61 @@ test.describe("/symbols/[id] 符號頁", () => {
     expect(visited).toEqual(expected);
   });
 
-  // 兩張各代表一種：牆沒有 caution、雨遮有——而有 caution 的那一頁是唯一多一個區塊的。
-  test("在 375px 手機寬度下不溢出、不橫向捲動", async ({ page }) => {
-    for (const id of ["wall", "canopy_rain"]) {
-      await page.goto(`/symbols/${id}`);
-      // 先確認站在符號頁上：404 頁也不會溢出，那樣這條就成了一個永遠是綠的斷言。
-      await expect(page.getByRole("img", { name: `${nameOf(id)}在平面圖上的畫法` })).toBeVisible();
+  test("desktop 可並排對照符號圖形與白話意思，正文維持可讀行寬", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto("/symbols/canopy_rain");
+    const figure = (await page.locator("figure").boundingBox())!;
+    const meaning = page.locator("section").filter({ has: page.getByRole("heading", { name: "白話意思" }) });
+    const box = (await meaning.boundingBox())!;
+    expect(figure.x + figure.width).toBeLessThan(box.x);
+    expect(figure.y).toBeCloseTo(box.y, 0);
+    expect(box.width).toBeLessThanOrEqual(560);
 
-      const overflows = await page.evaluate(
-        () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
-      );
-      expect(overflows, id).toBe(false);
+    const prose = meaning.locator("p");
+    const selected = await prose.evaluate((element) => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      const selection = window.getSelection()!;
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return selection.toString();
+    });
+    expect(selected).toBe(symbols.find((s) => s.id === "canopy_rain")!.plain_meaning);
+  });
+
+  test("編輯分欄維持徽章、圖形、解釋、出處到格局入口的閱讀順序", async ({ page }) => {
+    for (const symbol of symbols) {
+      await page.goto(`/symbols/${symbol.id}`);
+      const order = await page.locator('article [data-tier], article figure, article h2, article a[href^="/layouts/"]')
+        .evaluateAll((elements) => elements.map((element) => {
+          if (element.hasAttribute("data-tier")) return "來源層級";
+          if (element.tagName === "FIGURE") return "符號圖形";
+          if (element.tagName === "A") return "前往格局";
+          return element.textContent;
+        }));
+      expect(order, symbol.id).toEqual([
+        "來源層級", "符號圖形", "白話意思",
+        ...(symbol.confused_with.length ? ["容易搞混"] : []),
+        ...(symbol.caution ? ["注意事項"] : []),
+        "出處", ...symbol.related_layouts.map(() => "前往格局"),
+      ]);
     }
   });
+
+  // 兩張各代表一種：牆沒有 caution、雨遮有——而有 caution 的那一頁是唯一多一個區塊的。
+  for (const width of [320, 375, 1280]) {
+    test(`在 ${width}px 寬度下不溢出、不橫向捲動`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 812 });
+      for (const id of ["wall", "canopy_rain", "door_single_swing"]) {
+        await page.goto(`/symbols/${id}`);
+        // 先確認站在符號頁上：404 頁也不會溢出，那樣這條就成了一個永遠是綠的斷言。
+        await expect(page.getByRole("img", { name: `${nameOf(id)}在平面圖上的畫法` })).toBeVisible();
+
+        const overflows = await page.evaluate(
+          () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        );
+        expect(overflows, id).toBe(false);
+      }
+    });
+  }
 });

@@ -59,25 +59,29 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
         dangerouslySetInnerHTML={{ __html: jsonLd(categoryCollectionJsonLd(category)) }}
       />
       <div className={styles.column}>
-        <p className={styles.category}>
-          {label.zh} / {label.en}
-        </p>
-        {/* `<title>` 與 `<h1>` 同一句：搜尋結果上那一行與落地後看到的第一行不該是兩句話。 */}
-        <h1 className={styles.title}>
-          <span className={styles.titleLine}>平面圖上的</span>
-          <span className={styles.titleLine}>{label.zh}符號有哪些？</span>
-        </h1>
+        <header className={styles.intro}>
+          <div>
+            <p className={styles.category}>
+              {label.zh} / {label.en}
+            </p>
+            {/* `<title>` 與 `<h1>` 同一句：搜尋結果上那一行與落地後看到的第一行不該是兩句話。 */}
+            <h1 className={styles.title}>
+              <span className={styles.titleLine}>平面圖上的</span>
+              <span className={styles.titleLine}>{label.zh}符號有哪些？</span>
+            </h1>
+          </div>
 
-        {/* 搜尋框排在標題**之後**（落地後看到的第一行仍是標題），但在「共 N 個符號」與清單**之前**：
-            數目是清單的前言，兩者不拆開；而想查特定符號的人不必先捲過這一類的清單才找得到它。
-            它搜的是全部，不是這一類——標籤自己說（`searchLabel`）。索引見 `loadSearchIndex()`。 */}
-        <div className={styles.search}>
-          <SearchBox index={loadSearchIndex()} surface="category" />
-        </div>
+          {/* 搜尋框排在標題**之後**（落地後看到的第一行仍是標題），但在「共 N 個符號」與清單**之前**：
+              數目是清單的前言，兩者不拆開；而想查特定符號的人不必先捲過這一類的清單才找得到它。
+              它搜的是全部，不是這一類——標籤自己說（`searchLabel`）。索引見 `loadSearchIndex()`。 */}
+          <div className={styles.search}>
+            <SearchBox index={loadSearchIndex()} surface="category" />
+          </div>
+        </header>
 
         <p className={styles.count}>{categoryCountLabel(category.symbols.length)}</p>
 
-        <ul className={styles.list}>
+        <ul className={styles.list} role="list">
           {category.symbols.map((symbol) => (
             <li key={symbol.id} className={styles.item}>
               <AnalyticsLink
@@ -97,10 +101,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
                 <span className={styles.art} aria-hidden="true">
                   <SymbolArt svgRef={symbol.svg_ref} name={symbol.name} />
                 </span>
-                <span className={styles.text}>
-                  <span className={styles.name}>{symbol.name}</span>
-                  <span className={styles.meaning}>{symbol.plain_meaning}</span>
-                </span>
+                <div className={styles.text}>
+                  <h2 className={styles.name}>{symbol.name}</h2>
+                  <p className={styles.meaning}>{symbol.plain_meaning}</p>
+                </div>
+                <svg className={styles.arrow} viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 12h15m-6-6 6 6-6 6" />
+                </svg>
               </AnalyticsLink>
             </li>
           ))}

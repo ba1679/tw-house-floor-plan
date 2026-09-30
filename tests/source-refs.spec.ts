@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { readFileSync } from "node:fs";
 import { printedSourceRefs } from "@/lib/symbols/source-refs";
 
 // 出處印成什麼樣，這裡用 **fixture** 問——票 03 兩次明講「用 fixture 驗」。
@@ -14,10 +15,32 @@ import { printedSourceRefs } from "@/lib/symbols/source-refs";
 // 但破例的理由是票 03 自己的：一條在真資料上不存在、卻會在 M1 補完當天直接上線的路徑。
 // spec 那一句因此已經不準，記在票 03 的 Comments 裡。
 //
-// **只放真資料到不了的案例。** 轉載那一行、每一筆都印得出來這些，14 頁的真資料上就驗得到，
-// 由 `tests/symbol-page.spec.ts` 顧著——同一件事驗兩次，改的時候要改兩個地方。
+// 純函式只放真資料到不了的案例。下方的頁面測試守住重新編排後的出處順序與清單語意；
+// 各欄文字是否齊全仍由 `tests/symbol-page.spec.ts` 的建置產物測試顧著。
 
 const guild = "室內設計裝修製圖規範（中華民國室內設計裝修商業同業公會全國聯合會）";
+
+test("符號頁出處保留清單語意與資料順序，沒有連結的來源也佔一列", async ({ page }) => {
+  const { symbols } = JSON.parse(readFileSync("data/symbols.sample.json", "utf8")) as {
+    symbols: { id: string; source_refs: { doc: string; url?: string }[] }[];
+  };
+  expect(symbols.length).toBeGreaterThan(0);
+  for (const symbol of symbols) {
+    await page.goto(`/symbols/${symbol.id}`);
+    const sources = page.locator('section[data-section="sources"]');
+    const items = sources.getByRole("list").getByRole("listitem");
+    await expect(items).toHaveCount(symbol.source_refs.length);
+    for (const [index, ref] of symbol.source_refs.entries()) {
+      const item = items.nth(index);
+      await expect(item.locator("p").first()).toHaveText(ref.doc);
+      if (ref.url) {
+        await expect(item.getByRole("link")).toHaveAttribute("href", ref.url);
+      } else {
+        await expect(item.getByRole("link")).toHaveCount(0);
+      }
+    }
+  }
+});
 
 test.describe("一筆 source_ref 印成什麼", () => {
   // 缺 url 就少印一筆，等於讓「沒附連結的來源」在頁面上消失——
