@@ -9,8 +9,8 @@ type BrandMarkProps = {
   height?: number;
 };
 
-// 完整輪廓採定案原型 A（prototype/pin-chhu @ 843bf77）。
-const island = "M56 4h20l8 9v13l8 8-3 17-9 13-1 21-10 18-4 20v32H45v-31l-12-13-14-15-5-16 3-19 10-18 11-17 3-20 8-16V8h7z";
+// 完整輪廓依使用者提供的 design/reference/pin-chhu-logo.png 重畫，僅採圖形。
+const island = "M550 50h26l20 20h17v68l-13 18-21 107-43 69v55h-35v-35l-44-26-37-46v-59l79-151h51z";
 
 /** 唯一品牌幾何來源：頁面直接呈現，favicon／app icon／OG 由同一元件產生。 */
 export function BrandMark({ variant, surface = "light", className, width, height }: BrandMarkProps) {
@@ -30,7 +30,7 @@ export function BrandMark({ variant, surface = "light", className, width, height
       className={className}
       width={width}
       height={height}
-      viewBox={compact ? "0 0 32 32" : "10 -10 86 170"}
+      viewBox={compact ? "0 0 32 32" : "410 40 213 357"}
       role="img"
       aria-label={SITE_NAME}
     >
@@ -45,25 +45,23 @@ export function BrandMark({ variant, surface = "light", className, width, height
       ) : (
         <>
           <defs><clipPath id={clipId}><path d={island} /></clipPath></defs>
-          <g clipPath={`url(#${clipId})`} stroke={outline} strokeWidth="2.6" strokeLinejoin="round">
-            <rect x="6" y="3" width="33" height="30" fill={wood} />
-            <rect x="39" y="3" width="28" height="30" fill={cream} />
-            <rect x="67" y="3" width="33" height="30" fill={wood} />
-            <rect x="6" y="33" width="31" height="31" fill={concrete} />
-            <rect x="37" y="33" width="34" height="31" fill={brick} />
-            <rect x="71" y="33" width="29" height="31" fill={cream} />
-            <rect x="6" y="64" width="28" height="34" fill={cream} />
-            <rect x="34" y="64" width="34" height="34" fill={wood} />
-            <rect x="68" y="64" width="32" height="34" fill={brick} />
-            <rect x="7" y="98" width="34" height="31" fill={brick} />
-            <rect x="41" y="98" width="27" height="31" fill={concrete} />
-            <rect x="68" y="98" width="32" height="31" fill={cream} />
-            <rect x="7" y="129" width="35" height="40" fill={cream} />
-            <rect x="42" y="129" width="28" height="40" fill={brick} />
-            <rect x="70" y="129" width="30" height="40" fill={wood} />
-            <path d="M70 67h17v27H70zM74 70h9v7h-9zM74 80h9v10h-9z" fill="none" />
+          <g clipPath={`url(#${clipId})`}>
+            <path d={island} fill={wood} />
+            <path d="M420 102h130v54H420z" fill={cream} />
+            <path d="M550 114h63v42h-63zM455 156h80v65h-80zM501 221h34v65h-34zM455 286h46v67l-46-27z" fill={brick} />
+            <path d="M535 156h80v91h-80zM419 221h82v65h-82z" fill={concrete} />
+            <path d="M535 247h50v39h-50zM420 286h35v40z" fill={cream} />
+            <g fill="none" stroke={outline} strokeWidth="3.4" strokeLinejoin="miter">
+              <path d="M550 50v106M481 102h69M502 102v11m0 19v24M535 103v26h15M550 114h37m20 0h6" />
+              <path d="M455 156h146M455 156v22m0 19v24M535 156v65H420M429 221v51h45v-51M501 221v131" />
+              <path d="M423 286h142M455 286v38M535 286v-39h47M565 247v-58h29" />
+            </g>
+            <path
+              d="M569 190l19 15-20 15 14 12-14 15M590 190l-22 15 18 15-18 14 12 13M565 204h26M565 219h23M565 234h20"
+              fill="none" stroke={outline} strokeWidth="1.7"
+            />
           </g>
-          <path d={island} fill="none" stroke={outline} strokeWidth="3.5" strokeLinejoin="round" />
+          <path d={island} fill="none" stroke={outline} strokeWidth="4.4" strokeLinejoin="miter" />
         </>
       )}
     </svg>

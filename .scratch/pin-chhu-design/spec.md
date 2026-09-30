@@ -5,7 +5,8 @@ Status: ready-for-agent
 ## Source of truth
 
 - 視覺規則：[`DESIGN.md`](../../DESIGN.md)
-- 品牌與版面定案：`prototype/pin-chhu` 的 `843bf77`（方向 A 完整 logo、方向 C 讀圖工具骨架；方向 B 僅取低密度格線節奏）
+- 完整標記幾何：使用者 2026-09-30 提供的[參考圖](../../design/reference/pin-chhu-logo.png)，僅採輪廓與內部分隔；下方文字與棋盤背景不採用，品牌色票不變。
+- 版面定案：`prototype/pin-chhu` 的 `843bf77`（方向 C 讀圖工具骨架；方向 B 僅取低密度格線節奏；方向 A 的完整 logo 後依使用者參考圖重畫）
 - 產品行為：[`平面圖教學網站-PRD-Phase1.md`](../../平面圖教學網站-PRD-Phase1.md)
 - 既有互動決策：ADR-0003（InfoSheet 是版面列）、ADR-0005（viewer 自畫 FloorPlan）、ADR-0006（highlight 是 layer）、ADR-0007（找找看暫停屬於 Round）
 - 品牌決策：ADR-0009（雙尺度拼圖標記與讀圖桌）
@@ -23,7 +24,7 @@ Status: ready-for-agent
 - 品牌意義：把平面圖的格、線與空間慢慢拼成對一個家的理解；名稱取「起厝」與「拼湊」的語感。
 - 一句品牌承諾：**看懂格局，慢慢拼成家。**
 - 首次說明／SEO 文案必須明示產品是「建案平面圖／格局」的教學與閱讀工具，不能只說品牌故事。
-- Logo：完整品牌標記採原型 A 的台灣意象拼圖；header、favicon、app icon 用同一個 Module 的 compact mark，不能縮小完整版湊用。
+- Logo：完整品牌標記依使用者指定的台灣拼圖參考重畫；header、favicon、app icon 用同一個 Module 的 compact mark，不能縮小完整版湊用。
 - 色彩：木質棕、磚紅、清水灰、米白與深褐外框構成品牌層。日光花磚高彩度探索不採用。
 - 網站骨架：首頁採原型 C 的讀圖桌，格局入口優先；只借原型 B 的低密度格線、對齊與不對稱分欄，不採其深色首頁、旋轉圖或直排品牌欄。
 - 平面圖與 State：`--fp-*` 與 `--state-*` contract 不更動。品牌色不得表示房間功能、分類、答題正誤、學習進度或 Hotspot State。
