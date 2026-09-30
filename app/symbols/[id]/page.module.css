@@ -31,7 +31,8 @@
   justify-content: center;
   margin: 0;
   padding: 24px 20px;
-  background: var(--paper2);
+  /* Symbol Art 與主圖共用白紙，不能透出品牌表面的色相。 */
+  background: var(--fp-paper);
   border: 1px solid var(--rule);
   border-radius: var(--radius-l);
 }

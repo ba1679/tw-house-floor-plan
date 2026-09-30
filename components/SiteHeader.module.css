@@ -3,9 +3,9 @@
   min-height: var(--site-header-h);
   display: flex;
   align-items: center;
-  padding: 0 var(--space-4);
-  border-bottom: 1px solid var(--rule2);
-  background: var(--paper);
+  padding: 0 var(--space-5);
+  border-bottom: 1px solid var(--rule-strong);
+  background: var(--surface-reading);
 }
 
 .home {
@@ -13,16 +13,17 @@
   min-height: var(--touch-min);
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  color: var(--ink);
-  font-size: var(--text-label-size);
+  gap: var(--space-3);
+  color: var(--text-primary);
   font-weight: 700;
   letter-spacing: 0.08em;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
 }
 
 .mark {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   flex: none;
 }
 
@@ -33,11 +34,14 @@
 }
 
 .name {
+  font-size: 20px;
+  line-height: 22px;
   white-space: nowrap;
 }
 
 .romanization {
   font-size: var(--text-small-size);
+  line-height: 14px;
   font-weight: 400;
   white-space: nowrap;
   letter-spacing: 0.02em;

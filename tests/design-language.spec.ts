@@ -72,14 +72,17 @@ function contrast(foreground: string, background: string) {
 }
 
 test.describe("介面設計語言", () => {
-  test("介面 token 與定案值一致，且移除舊的彩色／字體 token", () => {
-    expect(token(globals, "--paper")).toBe("oklch(1 0 0)");
-    expect(token(globals, "--paper2")).toBe("oklch(0.962 0.002 265)");
-    expect(token(globals, "--ink")).toBe("oklch(0.21 0.006 265)");
-    expect(token(globals, "--ink2")).toBe("oklch(0.47 0.008 265)");
-    expect(token(globals, "--ink3")).toBe("oklch(0.62 0.006 265)");
-    expect(token(globals, "--rule")).toBe("oklch(0.89 0.003 265)");
-    expect(token(globals, "--rule2")).toBe("oklch(0.935 0.002 265)");
+  test("閱讀外殼呈現米白與深褐，主要入口延續同一組品牌色", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(250, 248, 240)");
+    await expect(page.locator("body")).toHaveCSS("color", "rgb(66, 44, 29)");
+    const primary = page.getByRole("link", { name: "開始探索三房兩廳" });
+    await expect(primary).toHaveCSS("background-color", "rgb(66, 44, 29)");
+    await expect(primary).toHaveCSS("color", "rgb(250, 248, 240)");
+    await expect(page.getByRole("link", { name: "結構", exact: true })).toHaveCSS("text-decoration-line", "underline");
+  });
+
+  test("介面尺寸與焦點 token 保留，沒有舊的彩色／字體 token", () => {
     expect(token(globals, "--control-h")).toBe("48px");
     expect(token(globals, "--touch-min")).toBe("44px");
     expect(token(globals, "--focus-ring-light-width")).toBe("6px");
@@ -94,7 +97,7 @@ test.describe("介面設計語言", () => {
     expect(css).not.toMatch(/color:\s*var\(--ink3\b/);
   });
 
-  test("介面文字至少 12px，墨色文字與紙色表面達到 AA", () => {
+  test("介面文字至少 12px，墨色文字與紙色表面達到 AA", async ({ page }) => {
     const files = [...cssModuleFiles("app"), ...cssModuleFiles("components")].filter(
       (path) => !path.endsWith("FloorPlanRenderer.module.css") && !path.endsWith("FloorPlanViewer.module.css"),
     );
@@ -105,10 +108,24 @@ test.describe("介面設計語言", () => {
       }
     }
 
-    const paper = token(globals, "--paper");
-    const paper2 = token(globals, "--paper2");
-    const ink = token(globals, "--ink");
-    const ink2 = token(globals, "--ink2");
+    // 由瀏覽器解析 alias 與 color-mix，再以 sRGB 計算對比；不在測試複製 CSS 求值器。
+    await page.goto("/");
+    const [paper, paper2, ink, ink2] = await page.evaluate(() => {
+      const probe = document.createElement("span");
+      document.body.append(probe);
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 1;
+      const ctx = canvas.getContext("2d")!;
+      const colors = ["--paper", "--paper2", "--ink", "--ink2"].map((name) => {
+        probe.style.color = `var(${name})`;
+        ctx.fillStyle = getComputedStyle(probe).color;
+        ctx.fillRect(0, 0, 1, 1);
+        return "#" + [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3)
+          .map((channel) => channel.toString(16).padStart(2, "0")).join("");
+      });
+      probe.remove();
+      return colors;
+    });
     for (const foreground of [ink, ink2]) {
       for (const background of [paper, paper2]) {
         expect(contrast(foreground, background), `${foreground} / ${background}`).toBeGreaterThanOrEqual(4.5);
@@ -135,6 +152,22 @@ test.describe("介面設計語言", () => {
 });
 
 test.describe("圖面與熱區設計語言", () => {
+  test("符號頁與分類縮圖的圖紙維持純白，不繼承品牌表面", async ({ page }) => {
+    for (const path of ["/symbols/window", "/categories/door_window"]) {
+      await page.goto(path);
+      // 分類縮圖刻意不進 accessibility tree；這裡檢查看得見的 SVG 紙色。
+      const paper = await page.locator('svg[aria-label="窗在平面圖上的畫法"]').evaluate((art) => {
+        // SVG 留白是透明的；檢查真正透出來的第一層不透明背景。
+        for (let node: Element | null = art; node; node = node.parentElement) {
+          const background = getComputedStyle(node).backgroundColor;
+          if (background !== "rgba(0, 0, 0, 0)") return background;
+        }
+        return null;
+      });
+      expect(paper, path).toBe("rgb(255, 255, 255)");
+    }
+  });
+
   test("圖面 token 與 sprite 共用同一組定案值", () => {
     const values: Record<string, string> = {
       "--fp-paper": "#ffffff",

@@ -70,7 +70,7 @@
   flex: none;
   width: 64px;
   padding: 6px;
-  background: var(--paper2);
+  background: var(--fp-paper);
   border: 1px solid var(--rule);
   border-radius: var(--radius-l);
 }

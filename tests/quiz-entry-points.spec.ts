@@ -68,9 +68,10 @@ test.describe("平面圖頁的入口", () => {
     const expand = page.getByRole("button", { name: /展開完整內容/ });
     await expand.click();
     await expect(expand).toBeHidden();
-    // M6 lets the sheet and viewport finish their shared structural transition
-    // before comparing the two otherwise identical title-row layouts.
-    await page.waitForTimeout(200);
+    // 等說明卡的結構性過渡真正結束再比高度；固定延遲可能量到最後一幀。
+    await sheet.evaluate(async (element) => {
+      await Promise.all(element.getAnimations().map((animation) => animation.finished));
+    });
     const expanded = await withAndWithout();
     expect(expanded.shown, "展開時框被壓到 0，這一格什麼都量不出來").toBeGreaterThan(0);
     expect(expanded.shown, "卡片展開").toBeCloseTo(expanded.hidden, 1);

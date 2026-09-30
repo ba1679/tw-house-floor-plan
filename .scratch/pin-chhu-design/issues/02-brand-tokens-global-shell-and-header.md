@@ -1,6 +1,6 @@
 # 02 — 品牌 tokens、global shell 與 Header
 
-Status: ready
+Status: resolved
 Blocked by: 01
 
 ## Goal
@@ -23,12 +23,24 @@ Blocked by: 01
 
 ## Acceptance criteria
 
-- [ ] 全站 shell 使用命名 token，沒有跨頁硬寫的 brand 色值。
-- [ ] header 顯示 compact mark、拼厝與 Phin-Chhù，整組是單一回首頁連結，沒有 toolbar 化導覽。
-- [ ] 品牌背景／線條清楚但不壓過內容；圖面與 State 截圖和 token tests 證實不被色彩覆寫。
-- [ ] 375 × 812 與 320 × 568 上不出現 header 引起的水平捲動或不可用控制。
+- [x] 全站 shell 使用命名 token，沒有跨頁硬寫的 brand 色值。
+- [x] header 顯示 compact mark、拼厝與 Phin-Chhù，整組是單一回首頁連結，沒有 toolbar 化導覽。
+- [x] 品牌背景／線條清楚但不壓過內容；圖面與 State 截圖和 token tests 證實不被色彩覆寫。
+- [x] 375 × 812 與 320 × 568 上不出現 header 引起的水平捲動或不可用控制。
 
 ## Validation
 
 擴充 `tests/design-language.spec.ts`、`tests/site-header.spec.ts` 與既有 focus／responsive test seam；跑完整 build。
 
+## Comments
+
+### 2026-09-30 — 實作與驗證
+
+- `app/globals.css` 以票 01 的品牌原色定義 surface、text、rule tokens，既有 paper／ink 名稱轉接到閱讀外殼；全站米白底、深褐字與主要動作共用這組值。連結保留底線，按鈕預設提供最小觸控尺寸；黑白焦點環不變。
+- Header 延用 compact mark 與單一首頁連結，調整字級、間距與深褐分隔線；維持原本高度預算與正常文件流。框線使用 shell token，首頁品牌欄與格線編排依交付順序留給票 03。
+- 符號頁與分類縮圖容器改接 `--fp-paper`，避免透明 SVG 透出品牌底色。未改動圖面、State、資料、路由、footer 結構或 Analytics。
+- TDD：閱讀底色／主要入口、Header 分隔線、Symbol Art 白紙檢查依序確認失敗後實作；補上 375 × 812／320 × 568 的跨頁 Header 與鍵盤焦點檢查，文字對比由瀏覽器解析 token 後驗證 AA。
+- 首次完整回歸發現既有高度測試以固定延遲量到動畫末幀；改為等待說明卡 transition 的 `finished`，連續 5 次高度檢查通過。最終 `npm run typecheck` 與完整 `PORT=3107 npm test -- --workers=4` 通過，共 276 tests，包含 production build、資料／FloorPlan validation、互動、SEO 與 Analytics 回歸。
+- Chromium 目視檢查手機首頁、桌機符號頁。以票 01 結束的 `efffa61` 比較 normal、candidate、selected、highlighted、revealed 五種 State：圖框尺寸相同、圖面內部像素完全一致。selected／revealed 截圖因小數座標裁切帶入外側最多 1 CSS px 的新米白背景，差異僅在上下邊緣；比對報告及截圖存於本機 `test-results/ticket-2-qa/`。
+- 品牌產物與圖面資料 `git diff --exit-code -- public/brand data` 通過；CodeGraph 已同步。無新增詞彙或推翻既有決策，不需修改 CONTEXT／ADR。
+- Standards review：0 項；Spec review：0 項（比較基準 `efffa61`）。

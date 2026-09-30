@@ -1,17 +1,26 @@
 @import "./brand-tokens.css";
 
-/* 設計 token 取自 DESIGN.md 與 design/_tokens.txt。
-   字體只給堆疊、不載 webfont：站是 SSG，使用情境是接待中心的行動網路。 */
+/* DESIGN.md 定義閱讀規則；品牌原色集中在 brand-tokens.css。
+   字體只給系統堆疊、不載 webfont。 */
 :root {
   color-scheme: light;
 
-  --paper: oklch(1 0 0);
-  --paper2: oklch(0.962 0.002 265);
-  --ink: oklch(0.21 0.006 265);
-  --ink2: oklch(0.47 0.008 265);
-  --ink3: oklch(0.62 0.006 265);
-  --rule: oklch(0.89 0.003 265);
-  --rule2: oklch(0.935 0.002 265);
+  --surface-reading: var(--brand-cream);
+  --surface-subtle: color-mix(in srgb, var(--brand-cream) 88%, var(--brand-concrete));
+  --text-primary: var(--brand-ink);
+  --text-secondary: var(--brand-outline);
+  --rule-strong: var(--brand-outline);
+  --rule-soft: color-mix(in srgb, var(--brand-outline) 36%, var(--brand-cream));
+  --rule-subtle: color-mix(in srgb, var(--brand-outline) 18%, var(--brand-cream));
+
+  /* 既有頁面共用的介面名稱接到品牌語意；圖面與 State 保持獨立。 */
+  --paper: var(--surface-reading);
+  --paper2: var(--surface-subtle);
+  --ink: var(--text-primary);
+  --ink2: var(--text-secondary);
+  --ink3: var(--rule-soft);
+  --rule: var(--rule-soft);
+  --rule2: var(--rule-subtle);
   --sans: -apple-system, BlinkMacSystemFont, "PingFang TC", "Segoe UI", "Microsoft JhengHei", "Noto Sans CJK TC", sans-serif;
 
   --text-display-size: 30px;
@@ -120,10 +129,30 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--surface-reading);
+  color: var(--text-primary);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
+}
+
+:where(a) {
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+}
+
+:where(button, input) {
+  font: inherit;
+}
+
+:where(button) {
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-s);
+  background: var(--text-primary);
+  color: var(--surface-reading);
+  cursor: pointer;
 }
 
 a:focus-visible,
