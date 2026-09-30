@@ -186,12 +186,12 @@ export const BRAND_IMAGE_ALT = `${SITE_NAME}：由平面圖方格拼成的台灣
  * 首頁那一句主張，照 PRD §8 資訊架構圖上的原句。
  *
  * 一個問句而不是介紹：讀者多半以為自己看得懂平面圖，這一句先讓他懷疑一下，底下那個按鈕才有人按。
- * 「這裡在幹嘛」由緊接著的 `SITE_TAGLINE` 說。
+ * 「這裡在幹嘛」由緊接著的 `SITE_PURPOSE` 說。
  */
 export const HOME_CLAIM = "一張平面圖，你真的看得懂嗎？";
 
 /**
- * 這個網站替你做什麼的那一句。首頁的主張底下印它；首頁、平面圖頁、根版面的 meta description 都由它組出來——
+ * 這個網站替你做什麼的那一句。首頁、平面圖頁、根版面的 meta description 都由它組出來——
  * 同一個承諾在四個地方各寫一版，改一處就漏三處。一句，不展開成產品敘事（票 07「要小」）。
  */
 export const SITE_TAGLINE = "點圖上的符號，就知道它是什麼、該注意什麼，以及這個說法出自哪一級文件。";
@@ -209,10 +209,10 @@ export const HOME_PAGE_TITLE = `${SITE_IDENTITY}：看懂建案平面圖上的�
 export const HOME_PAGE_DESCRIPTION = `${SITE_IDENTITY}${SITE_PURPOSE}：${SITE_TAGLINE}也可以直接搜尋，或依分類瀏覽。`;
 
 /**
- * 首頁那個進平面圖的按鈕（PRD §8「開始探索三房兩廳」），一個 layout 一個。**格局名由呼叫端從 floorplan 資料取來**，
+ * 首頁讀圖桌的主 CTA（拼厝票 03），一個 layout 一個。**格局名由呼叫端從 floorplan 資料取來**，
  * 不寫在這裡：寫死「三房兩廳」，M7 加第 2 張圖時這一行就是第二份會跟資料分岔的名字。
  */
-export const homeLayoutButton = (layoutName: string) => `開始探索${layoutName}`;
+export const homeLayoutButton = (layoutName: string) => `讀這張圖：${layoutName}`;
 
 /**
  * 平面圖頁標題列上那個進找找看的入口（M4 票 06）。**不帶格局名**：它就排在寫著格局名的 `<h1>` 旁邊。

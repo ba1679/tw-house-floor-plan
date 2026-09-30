@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Fragment } from "react";
 import { AnalyticsLink } from "@/components/AnalyticsLink";
+import { BrandMark } from "@/components/BrandMark";
+import { FloorPlanRenderer } from "@/components/FloorPlanRenderer";
 import { SearchBox } from "@/components/SearchBox";
 import { ANALYTICS_EVENTS } from "@/lib/analytics";
 import { listLayoutIds, loadFloorPlan } from "@/lib/floorplan/data";
@@ -10,31 +11,22 @@ import { homeMetadata, homeWebsiteJsonLd, jsonLd } from "@/lib/site-metadata";
 import { loadCategories, loadSearchIndex } from "@/lib/symbols/data";
 import {
   CATEGORY_LABELS,
+  BRAND_PROMISE,
   HOME_BROWSE_LABEL,
   HOME_CLAIM,
-  SITE_TAGLINE,
+  SITE_NAME,
+  SITE_PURPOSE,
   homeLayoutButton,
   homeQuizButton,
 } from "@/lib/ui/copy";
 import styles from "./page.module.css";
 
-// 首頁是「首頁 → 平面圖」那條入站路徑的起點（PRD §8）。它**不是**主要入口——大多數人從 Google
-// 直接落在符號頁（§6.2.1）——所以這一頁要小：一句主張、進平面圖與找找看的按鈕、搜尋框、分類入口。
-// 不做長篇產品敘事、示意圖、統計數字、動畫（票 07）。
-//
-// 先後照票面那一句話的先後：先知道這裡在幹嘛，然後直接進圖；想查特定符號的往下一格，想瀏覽的再往下。
-
-// 自己的標題、描述、canonical 與 Open Graph 都走同一個 metadata 邊界；下一批頁面可沿用同一個入口。
 export const metadata: Metadata = homeMetadata();
 
 export default function HomePage() {
-  // **有幾個 layout 就有幾個按鈕，由 `data/layouts/` 決定。** 今天只有三房兩廳，所以就是一個。
-  // 不挑「第一張」當主打：哪一張該被主打是一個編輯決定，而那個決定不該藏在排序裡；
-  // 也不寫死 `3b2l_standard`（spec「路由」）——M7 加第 2 張圖時，它自己長出第二個按鈕。
-  const layouts = listLayoutIds().map((id) => {
-    const floorplan = loadFloorPlan(id);
-    return { id, name: floorplan.name, hasQuiz: hasQuiz(floorplan.hotspots) };
-  });
+  // 格局與入口仍由同一份資料列出，不另選主打、不維護縮圖資料。
+  const layouts = listLayoutIds().map(loadFloorPlan);
+  const quizLayouts = layouts.filter((layout) => hasQuiz(layout.hotspots));
 
   return (
     <main className={styles.page}>
@@ -43,74 +35,103 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: jsonLd(homeWebsiteJsonLd()) }}
       />
       <div className={styles.column}>
-        <h1 className={styles.title}>{HOME_CLAIM}</h1>
-        <p className={styles.lede}>{SITE_TAGLINE}</p>
+        <header className={styles.intro}>
+          <div>
+            <p className={styles.eyebrow}>{SITE_NAME}的讀圖桌</p>
+            <h1 className={styles.title}>{HOME_CLAIM}</h1>
+          </div>
+          <p className={styles.lede}>
+            {SITE_NAME}{SITE_PURPOSE}。<br />
+            從牆、門與窗開始，慢慢讀懂每一格。
+          </p>
+        </header>
 
-        <div className={styles.layouts}>
-          {layouts.map((layout) => (
-            <Fragment key={layout.id}>
-              <AnalyticsLink
-                className={styles.layoutButton}
-                href={`/layouts/${layout.id}`}
-                event={{
-                  name: ANALYTICS_EVENTS.selectContent,
-                  content_type: "home_layout",
-                  item_id: layout.id,
-                  origin_page_type: "home",
-                }}
-              >
-                {homeLayoutButton(layout.name)}
-                {/* 箭頭是給看得見的人的方向感；讀螢幕的人聽到「開始探索三房兩廳」就夠了。 */}
-                <span aria-hidden="true">→</span>
-              </AnalyticsLink>
-              {/* 找找看的入口（M4 票 06）：想從玩開始的人從這裡走。與進圖的按鈕同樣由資料產生，
-                  只替有找找看頁的圖產生——與找找看頁產不產生問的是同一句 `hasQuiz`。 */}
-              {layout.hasQuiz && (
+        <div className={styles.desk}>
+          <section className={styles.layouts} aria-label="可讀的格局">
+            {layouts.map((layout) => (
+              <article key={layout.id} className={styles.layout} aria-labelledby={`layout-title-${layout.id}`}>
+                <div className={styles.layoutHeading}>
+                  <p className={styles.eyebrow}>從格局開始</p>
+                  <h2 id={`layout-title-${layout.id}`} className={styles.layoutTitle}>{layout.name}</h2>
+                </div>
+                {/* 與讀圖頁共用同一個 renderer；首頁只畫圖面，不掛熱區或互動狀態。 */}
+                <div className={styles.preview} role="img" aria-label={`${layout.name}平面圖縮圖`}>
+                  <FloorPlanRenderer floorplan={layout} />
+                </div>
                 <AnalyticsLink
-                  className={styles.quizButton}
-                  href={`/layouts/${layout.id}/quiz`}
+                  className={styles.layoutButton}
+                  href={`/layouts/${layout.id}`}
                   event={{
                     name: ANALYTICS_EVENTS.selectContent,
-                    content_type: "home_quiz",
+                    content_type: "home_layout",
                     item_id: layout.id,
                     origin_page_type: "home",
                   }}
                 >
-                  {homeQuizButton(layout.name)}
+                  {homeLayoutButton(layout.name)}
                   <span aria-hidden="true">→</span>
                 </AnalyticsLink>
-              )}
-            </Fragment>
-          ))}
+              </article>
+            ))}
+          </section>
+
+          <div className={styles.tools}>
+            <section className={styles.lookup} aria-labelledby="home-lookup">
+              <h2 id="home-lookup" className={styles.sectionTitle}>有個符號看不懂？</h2>
+              <p className={styles.sectionNote}>查名字，或從分類慢慢找。</p>
+              <SearchBox index={loadSearchIndex()} surface="home" />
+              <nav className={styles.browse} aria-labelledby="home-browse">
+                <h3 id="home-browse" className={styles.browseLabel}>{HOME_BROWSE_LABEL}</h3>
+                <ul className={styles.categories}>
+                  {loadCategories().map((category) => {
+                    const label = CATEGORY_LABELS[category.id];
+                    return (
+                      <li key={category.id} className={styles.categoryItem}>
+                        <Link className={styles.categoryLink} href={`/categories/${category.id}`}>
+                          <span className={styles.categoryName}>{label.zh}</span>
+                          <span className={styles.categoryEn} aria-hidden="true">{label.en}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
+            </section>
+
+            {quizLayouts.length > 0 && (
+              <section className={styles.practice} aria-labelledby="home-practice">
+                <h2 id="home-practice" className={styles.sectionTitle}>想試著自己找？</h2>
+                <p className={styles.sectionNote}>回到同一張圖，練習認出剛看過的符號。</p>
+                {quizLayouts.map((layout) => (
+                  <AnalyticsLink
+                    key={layout.id}
+                    className={styles.quizButton}
+                    href={`/layouts/${layout.id}/quiz`}
+                    event={{
+                      name: ANALYTICS_EVENTS.selectContent,
+                      content_type: "home_quiz",
+                      item_id: layout.id,
+                      origin_page_type: "home",
+                    }}
+                  >
+                    <span>{homeQuizButton(layout.name)}</span>
+                    <span aria-hidden="true">→</span>
+                  </AnalyticsLink>
+                ))}
+              </section>
+            )}
+          </div>
+
+          <aside className={styles.brand} aria-label="關於拼厝">
+            <div className={styles.brandArt}>
+              <BrandMark variant="full" className={styles.brandMark} width={136} height={228} />
+            </div>
+            <div className={styles.brandCopy}>
+              <p className={styles.brandPromise}>{BRAND_PROMISE}</p>
+              <p className={styles.brandNote}>看屋前，或回家以後。<br />把不確定的地方，一格一格拼起來。</p>
+            </div>
+          </aside>
         </div>
-
-        {/* 想查特定符號的人從這裡走。與分類頁上的是同一個元件、同一份索引（`loadSearchIndex()`）。 */}
-        <SearchBox index={loadSearchIndex()} surface="home" />
-
-        {/* 想一類一類看完的人從這裡走。有哪幾類由 `loadCategories()` 從資料算出，中文名從 `CATEGORY_LABELS` 來——
-            與分類頁自己用的是同一份，這裡不另外手寫一份「就這 3 類」（PRD §9「不得各自維護副本」）。
-            每一類不附「共 N 個符號」：那一行是分類頁清單的前言，離開清單就只剩一個數字，而這一頁要小。 */}
-        <nav className={styles.browse} aria-labelledby="home-browse">
-          <h2 id="home-browse" className={styles.browseLabel}>
-            {HOME_BROWSE_LABEL}
-          </h2>
-          <ul className={styles.categories}>
-            {loadCategories().map((category) => {
-              const label = CATEGORY_LABELS[category.id];
-              return (
-                <li key={category.id} className={styles.categoryItem}>
-                  <Link className={styles.categoryLink} href={`/categories/${category.id}`}>
-                    <span className={styles.categoryName}>{label.zh}</span>
-                    {/* 英文小字對讀螢幕的人是重唸一次同一個名字。 */}
-                    <span className={styles.categoryEn} aria-hidden="true">
-                      {label.en}
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
       </div>
     </main>
   );

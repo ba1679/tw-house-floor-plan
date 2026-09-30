@@ -1,106 +1,239 @@
-/* 首頁一頁捲得完：一句主張、一個按鈕、搜尋框、分類入口（票 07「要小」）。
-   版心與標題與符號頁、分類頁同一套（`reading.module.css`）。 */
+/* 讀圖桌：圖面與主要入口在前；編輯分欄只負責閱讀節奏。 */
 .page {
-  composes: page from "./reading.module.css";
+  padding: var(--space-6) var(--space-5) 48px;
 }
 
 .column {
-  composes: column from "./reading.module.css";
-  gap: var(--space-2);
+  max-width: 1120px;
+  margin: 0 auto;
 }
 
-.site {
+.intro {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.eyebrow {
   composes: eyebrow from "./reading.module.css";
 }
 
 .title {
-  composes: title from "./reading.module.css";
-  margin: 0;
+  margin: var(--space-2) 0 0;
+  font-size: clamp(30px, 4.5vw, 52px);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
 }
 
 .lede {
   margin: 0;
   font-size: var(--text-body-size);
   line-height: var(--text-body-leading);
-  color: var(--ink2);
+  color: var(--text-secondary);
 }
 
-/* 今天只有一個 layout，所以是進圖與找找看各一個按鈕；M7 多一張圖就多一組，排成一欄。 */
+.desk,
 .layouts {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  margin: 14px 0 18px;
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
 }
 
-/* 這一頁**唯一**填滿底色的東西：從首頁進平面圖是這一頁存在的理由（PRD §8）。
-   畫法與符號頁底部的轉換點同一套（`reading.module.css` 的 `primaryAction`），墨色底的理由寫在那裡。 */
+.layout {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--rule-strong);
+  background: var(--surface-reading);
+}
+
+.layoutHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.layoutTitle {
+  margin: 0;
+  font-size: var(--text-title-size);
+  line-height: 1.3;
+}
+
+.preview {
+  height: 220px;
+  min-width: 0;
+  background: var(--fp-paper);
+}
+
+.preview > svg {
+  width: 100%;
+  height: 100%;
+}
+
 .layoutButton {
   composes: primaryAction from "./reading.module.css";
 }
 
-/* 找找看的入口（M4 票 06）：與進平面圖的按鈕同一個形狀（`reading.module.css` 的 `actionShape`，含焦點框），
-   但**不填底色**——填滿底色的仍然只有進平面圖那一顆。 */
+.tools {
+  display: grid;
+  min-width: 0;
+}
+
+.lookup,
+.practice {
+  min-width: 0;
+  padding: var(--space-6) 0;
+  border-top: 1px solid var(--rule-strong);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.4;
+}
+
+.sectionNote {
+  margin: var(--space-2) 0 var(--space-5);
+  font-size: var(--text-secondary-size);
+  line-height: var(--text-secondary-leading);
+  color: var(--text-secondary);
+}
+
 .quizButton {
-  composes: actionShape from "./reading.module.css";
-  color: var(--ink);
-  background: var(--paper2);
-  border: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--touch-min);
+  padding: var(--space-3) 0;
+  border-block: 1px solid var(--rule-soft);
+  font-size: var(--text-body-size);
+  line-height: 1.5;
+  font-weight: 600;
 }
 
 .browse {
-  display: flex;
-  flex-direction: column;
-  margin-top: 18px;
+  margin-top: var(--space-6);
 }
 
-/* 與搜尋框的標籤同一個畫法：兩區在這一頁上是並列的兩條路，標題長得一樣。 */
 .browseLabel {
   margin: 0;
-  font-family: var(--sans);
   font-size: var(--text-label-size);
   line-height: var(--text-label-leading);
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  color: var(--ink2);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
 }
 
-/* 一列一格、格與格之間一條細線——與分類頁的清單、搜尋結果同一個畫法。
-   畫法相同但**不 composes 搜尋框的 class**：那是 `SearchBox` 自己的內部名字，首頁拿去用，
-   搜尋框改一次結果列，首頁的分類入口就跟著變。 */
 .categories {
-  margin: 8px 0 0;
+  margin: var(--space-2) 0 0;
   padding: 0;
   list-style: none;
-  border-bottom: 1px solid var(--rule2);
+  border-bottom: 1px solid var(--rule-subtle);
 }
 
 .categoryItem {
-  border-top: 1px solid var(--rule2);
+  border-top: 1px solid var(--rule-subtle);
 }
 
-/* 整列是一個連結，高度超過 44px（PRD §9）。 */
 .categoryLink {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
   min-height: var(--touch-min);
-  padding: 8px 0;
-  color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  padding: var(--space-2) 0;
 }
 
 .categoryName {
   font-size: var(--text-row-title-size);
   font-weight: 700;
-  color: inherit;
 }
 
 .categoryEn {
-  flex: none;
   font-size: var(--text-small-size);
-  letter-spacing: 0.1em;
-  color: var(--ink2);
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.brand {
+  min-width: 0;
+  border-top: 1px solid var(--rule-soft);
+}
+
+/* 格線只留在獨立圖形面；文字、表單、圖面與連結都不在格線上。 */
+.brandArt {
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+  background-image:
+    linear-gradient(90deg, var(--rule-subtle) 1px, transparent 1px),
+    linear-gradient(var(--rule-subtle) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.brandMark {
+  display: block;
+  width: 136px;
+  height: 228px;
+}
+
+.brandCopy {
+  padding: var(--space-5) 0 0;
+}
+
+.brandPromise {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.brandNote {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-small-size);
+  line-height: var(--text-small-leading);
+  color: var(--text-secondary);
+}
+
+@media (min-width: 760px) {
+  .page {
+    padding: 48px 32px 64px;
+  }
+
+  .intro {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    align-items: end;
+    gap: 40px;
+    margin-bottom: 32px;
+  }
+
+  .tools {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 32px;
+  }
+
+  .desk {
+    grid-template-columns: minmax(0, 1fr) 240px;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .brand {
+    grid-column: 2;
+    grid-row: 1;
+    border-top: none;
+  }
+
+  .brandCopy {
+    border-top: 1px solid var(--rule-soft);
+  }
+
+  .preview {
+    height: 340px;
+  }
 }

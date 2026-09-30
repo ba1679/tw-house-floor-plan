@@ -40,11 +40,12 @@ test.describe("/ 首頁", () => {
     expect(specNamedFloorplan, "spec 點名的 3b2l_standard 不在 data/layouts 裡").toBeTruthy();
     const target = specNamedFloorplan!;
 
-    // 按鈕的字帶著格局的名字：讀者按下去之前就知道會到哪張圖（PRD §8「開始探索三房兩廳」）。
+    // 票 03 的「讀這張圖」仍帶著格局名，畫面文字與可存取名稱一致。
     for (const floorplan of floorplans) {
       const button = page.locator(`main a[href="/layouts/${floorplan.id}"]`);
       await expect(button, `沒有進 ${floorplan.id} 的按鈕`).toBeVisible();
       await expect(button).toContainText(floorplan.name);
+      await expect(button).toHaveAccessibleName(`讀這張圖：${floorplan.name}`);
     }
 
     await page.locator(`main a[href="/layouts/${target.id}"]`).click();
@@ -95,6 +96,29 @@ test.describe("/ 首頁", () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
+  test("鍵盤依序走過讀圖、搜尋、分類與找找看，搜尋結果仍能用 Enter 進入", async ({ page }) => {
+    await page.goto("/");
+    const firstLayout = floorplans[0];
+    const stops = [
+      page.getByRole("link", { name: "回首頁：拼厝" }),
+      ...floorplans.map((floorplan) => page.getByRole("link", { name: `讀這張圖：${floorplan.name}`, exact: true })),
+      page.getByRole("searchbox"),
+      ...categoriesInData.map((category) => page.getByRole("link", { name: CATEGORY_LABELS[category as SymbolCategory].zh, exact: true })),
+      page.locator(`main a[href="/layouts/${firstLayout.id}/quiz"]`),
+    ];
+    for (const stop of stops) {
+      await page.keyboard.press("Tab");
+      await expect(stop).toBeFocused();
+    }
+    const search = page.getByRole("searchbox");
+    await search.focus();
+    await search.fill("暗樑");
+    await page.keyboard.press("Tab");
+    await expect(page.getByRole("link", { name: /樑.*暗樑/ })).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL("/symbols/beam?from=search");
+  });
+
   // 首頁與平面圖頁的標題是對照著取的（票 07）。但「與平面圖頁不同」只是最低要求：
   // 與站上**任何一頁**同名，搜尋結果上都是兩條分不開的連結。所以掃過 `out/` 裡每一張有自己內容的頁，
   // 不列舉路由——理由同 site-footer.spec.ts：列舉的清單明天多一頁時不會紅，只會少測一頁。
@@ -132,13 +156,53 @@ test.describe("/ 首頁", () => {
     expect(overflows).toBe(false);
   });
 
-  // 票面「要小」：不做示意圖、統計數字、動畫。示意圖是其中唯一量得出來的一樣——
-  // 首頁的內容區裡沒有任何一張圖。符號圖形與平面圖各有自己的頁，首頁是往那裡走的入口，不是它們的縮圖。
-  test("沒有示意圖：首頁的內容區裡沒有任何一張圖", async ({ page }) => {
+  // 拼厝票 03 以真實圖面取代舊版「首頁不放圖」：首屏就能知道用途與從哪張圖開始。
+  test("375 × 812 首屏看得到用途、真實格局縮圖與讀圖入口", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/");
-    // 先確認站在首頁上，而且用首頁才有的東西確認：404 頁也有 `<h1>`、也沒有圖。
-    await expect(page.locator(`main a[href="/layouts/${floorplans[0].id}"]`)).toBeVisible();
+    const purpose = page.getByText(/拼厝教你看懂建案平面圖與格局/);
+    const preview = page.getByRole("img", { name: "三房兩廳平面圖縮圖", exact: true });
+    const entry = page.locator('main a[href="/layouts/3b2l_standard"]');
+    await expect(purpose).toBeVisible();
+    await expect(preview).toBeVisible();
+    // 看得到實際房間的名稱，不能用幾個品牌色塊冒充格局。
+    await expect(preview).toContainText("客廳");
+    await expect(preview).toContainText("主臥");
+    for (const element of [purpose, preview, entry]) {
+      const box = (await element.boundingBox())!;
+      expect(box.y).toBeGreaterThanOrEqual(0);
+      expect(box.y + box.height).toBeLessThanOrEqual(812);
+    }
+    const previewBox = (await preview.boundingBox())!;
+    expect(previewBox.width).toBeGreaterThanOrEqual(240);
+    expect(previewBox.height).toBeGreaterThanOrEqual(180);
+    expect((await entry.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  });
 
-    await expect(page.locator("main").locator("img, svg, picture, video, canvas, figure")).toHaveCount(0);
+  test("品牌面獨立於圖面與搜尋，桌機分欄、手機單欄且圖面比標記突出", async ({ page }) => {
+    for (const size of [{ width: 1280, height: 900 }, { width: 320, height: 568 }]) {
+      await page.setViewportSize(size);
+      await page.goto("/");
+      const brand = page.getByRole("complementary", { name: "關於拼厝" });
+      const mark = brand.getByRole("img", { name: "拼厝", exact: true });
+      const preview = page.getByRole("img", { name: "三房兩廳平面圖縮圖", exact: true });
+      await expect(mark).toBeVisible();
+      await expect(brand.getByRole("searchbox")).toHaveCount(0);
+      await expect(brand.getByRole("link")).toHaveCount(0);
+
+      const brandBox = (await brand.boundingBox())!;
+      const markBox = (await mark.boundingBox())!;
+      const previewBox = (await preview.boundingBox())!;
+      expect(previewBox.width * previewBox.height).toBeGreaterThan(markBox.width * markBox.height);
+      // 完整標記必須有足夠尺寸辨認島嶼拼塊，不是另一個 compact icon。
+      expect(markBox.width).toBeGreaterThanOrEqual(96);
+      expect(markBox.height).toBeGreaterThanOrEqual(144);
+      if (size.width >= 760) {
+        expect(brandBox.x).toBeGreaterThan(previewBox.x + previewBox.width);
+      } else {
+        expect(brandBox.y).toBeGreaterThan(previewBox.y + previewBox.height);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+    }
   });
 });

@@ -34,6 +34,21 @@ test("搜尋只送白名單字，未知自由輸入一律是 other", () => {
   expect(analyticsSearchTerm(index, "0912-345-678")).toBe("other");
 });
 
+test("首頁讀圖與找找看入口保留原本的單次 select_content 事件", async ({ page }) => {
+  for (const [href, contentType] of [
+    [PLAN, "home_layout"],
+    [`${PLAN}/quiz`, "home_quiz"],
+  ]) {
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    await page.locator(`main a[href="${href}"]`).click();
+    await expect(page).toHaveURL(href);
+    await expect.poll(async () => (await events(page)).filter((event) => event.name === "select_content")).toEqual([
+      { name: "select_content", content_type: contentType, item_id: "3b2l_standard", origin_page_type: "home" },
+    ]);
+  }
+});
+
 test("符號頁、搜尋與入口都寫入記憶體 sink，不連 Google", async ({ page }) => {
   const requests: string[] = [];
   await page.goto("/symbols/window");

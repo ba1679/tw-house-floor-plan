@@ -76,7 +76,7 @@ test.describe("介面設計語言", () => {
     await page.goto("/");
     await expect(page.locator("body")).toHaveCSS("background-color", "rgb(250, 248, 240)");
     await expect(page.locator("body")).toHaveCSS("color", "rgb(66, 44, 29)");
-    const primary = page.getByRole("link", { name: "開始探索三房兩廳" });
+    const primary = page.getByRole("link", { name: "讀這張圖：三房兩廳" });
     await expect(primary).toHaveCSS("background-color", "rgb(66, 44, 29)");
     await expect(primary).toHaveCSS("color", "rgb(250, 248, 240)");
     await expect(page.getByRole("link", { name: "結構", exact: true })).toHaveCSS("text-decoration-line", "underline");
