@@ -21,6 +21,21 @@
   overflow: hidden;
 }
 
+.quiz {
+  composes: page;
+}
+
+@media (max-height: 640px) {
+  .quiz {
+    padding-block: var(--space-2);
+    --sheet-bottom-inset: var(--space-2);
+  }
+
+  .quiz > .title {
+    margin-bottom: var(--space-2);
+  }
+}
+
 /* 自由看圖的高度預算：百分比以 main 的實際內容高度為準，header 已在外面扣除。
    保留圖面帶、標題與狀態行、三段列距；sheet 的底部出血還回一段頁邊距。
    找找看有自己的題目與作答控制列，仍使用 .page，不套這份自由看圖的預算。 */

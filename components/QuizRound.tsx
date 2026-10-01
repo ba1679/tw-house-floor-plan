@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState } from "react";
 import { AnalyticsLink } from "./AnalyticsLink";
 import { FloorPlanViewport, initialViewerConfig } from "./FloorPlanViewport";
 import { InfoSheet, type SheetNote } from "./InfoSheet";
@@ -32,10 +32,16 @@ import {
   QUIZ_PLAY_AGAIN,
   QUIZ_PROMPT_LEAD,
   QUIZ_REVIEW_HEADING,
+  QUIZ_RESULT_LABEL,
+  QUIZ_RESULT_CORRECT,
+  QUIZ_RESULT_WRONG,
   QUIZ_SHOW_SHEET,
   QUIZ_WRONG,
   TAP_HINT,
   quizPicked,
+  quizFound,
+  quizExpected,
+  quizResultPicked,
   quizProgress,
   quizReviewRow,
   quizScore,
@@ -210,8 +216,36 @@ export function QuizRound({
   useEscapeKey(round.sheetOpen, closeSheetFromEscape);
 
   const questionRef = useRef<HTMLDivElement>(null);
+  const roundRef = useRef<HTMLDivElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
   const scoreRef = useRef<HTMLParagraphElement>(null);
+  // Quiz 多出的題目、結果與動作列依真實換行高度扣除，不能借自由看圖的固定預算。
+  // 只觀察外框與固定列，不觀察 Sheet／viewport，避免自己的 max-height 引發量測迴圈。
+  useLayoutEffect(() => {
+    const root = roundRef.current;
+    if (!root || !round.sheetOpen) return;
+    const rows = Array.from(root.children).filter(
+      (row) => row.id !== "floorplan-viewport" && row.id !== "info-sheet",
+    );
+    const measure = () => {
+      const outerHeight = (row: Element) => {
+        const css = getComputedStyle(row);
+        if (css.position === "absolute") return 0;
+        return row.getBoundingClientRect().height + parseFloat(css.marginTop) + parseFloat(css.marginBottom);
+      };
+      const sheet = root.querySelector("#info-sheet")!;
+      const css = getComputedStyle(sheet);
+      const minimumPlanHeight = parseFloat(getComputedStyle(root.querySelector("#floorplan-viewport")!).minHeight);
+      const available = root.clientHeight - rows.reduce((sum, row) => sum + outerHeight(row), 0)
+        - minimumPlanHeight - parseFloat(css.marginTop) - parseFloat(css.marginBottom);
+      root.style.setProperty("--sheet-height-limit", `${Math.max(0, available)}px`);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(root);
+    rows.forEach((row) => observer.observe(row));
+    return () => observer.disconnect();
+  }, [round.phase, round.sheetOpen]);
   // 說明卡開著時焦點由卡片自己收（`takeFocus`），其餘的去處在這裡。
   // 最後一題的「下一題」按下去就不在了（M4 票 05）：焦點接在成績上，不然掉回頁面最開頭，讀螢幕的人聽不到這一局的結果。
   useEffect(() => {
@@ -286,18 +320,23 @@ export function QuizRound({
   const target = questions[index];
   // 說明卡講的是**題目符號**，不是被點中的那一個（spec）：答錯時兩者不同。
   const sheetSymbol = answer && round.sheetOpen ? symbols[answer.target] : undefined;
+  const correct = answer ? isCorrect(answer) : false;
+  const targetName = symbolName(symbols, target);
+  const resultLines = answer
+    ? correct
+      ? [quizFound(targetName)]
+      : [quizResultPicked(symbolName(symbols, answer.picked)), quizExpected(targetName)]
+    : [];
 
   // 作答之後說對或錯；出題中只有第一題說引導——那句話教的是怎麼點，第二題的時候他已經點過一次了。
   const restingStatus = answer
-    ? isCorrect(answer)
-      ? QUIZ_CORRECT
-      : QUIZ_WRONG
+    ? `${correct ? QUIZ_CORRECT : QUIZ_WRONG}${resultLines.join("。")}。`
     : index === 0 && hint.visible
       ? TAP_HINT
       : "";
 
   return (
-    <>
+    <div ref={roundRef} className={styles.round} data-answered={answer ? "true" : "false"}>
       {/* tabIndex -1：按下「下一題」之後鍵盤焦點的落點，讀螢幕的人接著聽到的就是新的題目。不進 Tab 序列。 */}
       <div id="quiz-question" ref={questionRef} tabIndex={-1} className={styles.question}>
         <p id="quiz-progress" className={styles.progress}>
@@ -332,6 +371,22 @@ export function QuizRound({
         onKeyboardSelect={onKeyboardSelect}
       />
 
+      {answer && (
+        <section id="quiz-result" className={styles.result} data-correct={correct ? "true" : "false"} aria-label={QUIZ_RESULT_LABEL}>
+          <strong className={styles.resultVerdict}>
+            {correct && (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M4 12l5 5L20 6" />
+              </svg>
+            )}
+            {correct ? QUIZ_RESULT_CORRECT : QUIZ_RESULT_WRONG}
+          </strong>
+          <div className={styles.resultNames}>
+            {resultLines.map((line) => <p key={line}>{line}</p>)}
+          </div>
+        </section>
+      )}
+
       {/* 「下一題」排在前面、位置固定：「看說明」在卡片開著時不出現，排在前面的話「下一題」會跟著左右跳。 */}
       {answer && (
         <div className={styles.next}>
@@ -359,6 +414,6 @@ export function QuizRound({
           onAction={sheetAction}
         />
       )}
-    </>
+    </div>
   );
 }

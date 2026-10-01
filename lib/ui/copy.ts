@@ -274,11 +274,17 @@ export const quizProgress = (index: number, total: number) => `第 ${index} / ${
 export const QUIZ_PROMPT_LEAD = "找出這張圖上的";
 
 /**
- * 作答之後狀態列那一句。**只說對或錯**，不誇獎、不責備（spec「一局的流程」）：這是工具，不是遊戲化產品。
- * 放在狀態列（role="status"）而不是另外一行：用鍵盤作答的人聽得到結果。
+ * 作答判定；狀態列接上結果區的完整名字，用鍵盤作答的人也聽得到答案。
  */
 export const QUIZ_CORRECT = "答對了。";
 export const QUIZ_WRONG = "答錯了。";
+
+export const QUIZ_RESULT_LABEL = "作答結果";
+export const QUIZ_RESULT_CORRECT = "答對";
+export const QUIZ_RESULT_WRONG = "答錯";
+export const quizFound = (name: string) => `你找到了「${name}」`;
+export const quizResultPicked = (name: string) => `你點的是「${name}」`;
+export const quizExpected = (name: string) => `正確答案是「${name}」`;
 
 /** 作答之後前進的那一顆。最後一題按下去是結算，字照樣是「下一題」（spec「作答之後」的原文）。 */
 export const QUIZ_NEXT = "下一題";

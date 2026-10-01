@@ -152,9 +152,14 @@ export function InfoSheet({
       {/* 標題列不捲動：關閉鍵必須隨時按得到。 */}
       <header className={styles.header}>
         <div className={styles.identity}>
-          <h2 id="info-sheet-name" className={styles.name}>
-            {symbol.name}
-          </h2>
+          <div className={styles.nameRow}>
+            <h2 id="info-sheet-name" className={styles.name}>
+              {symbol.name}
+            </h2>
+            {occurrence.total > 1 && !("onNext" in occurrence) && (
+              <span className={styles.occurrenceSummary}>{occurrenceTotalLabel(occurrence.total)}</span>
+            )}
+          </div>
           <p className={styles.category}>
             {category.zh} / {category.en}
           </p>
@@ -246,9 +251,8 @@ export function InfoSheet({
           2026-09-07 裁定維持現狀：這一列量起來約 43px，而卡片離 46vh 的上限只剩 14px，
           補回去就 14/14 全部頂到上限，決議 1 的「高度隨內容走」在這張圖上再也沒有例子。
           不必再回頭翻這個問題，來龍去脈在票 03 的 comments。
-          找找看那一列（只有「共 N 處」）同一條規矩：2026-09-14 規格主人裁定照決議 2（M4 票 02 的 Comments）。 */}
-      {occurrence.total > 1 &&
-        ("onNext" in occurrence ? (
+          找找看同一條規矩：只有總數時放在標題旁，讓正文保留閱讀空間（拼厝票 06）。 */}
+      {occurrence.total > 1 && "onNext" in occurrence && (
           <button type="button" className={styles.occurrences} onClick={next} disabled={closing}>
             <OccurrenceMark />
             <span className={styles.occurrenceText}>
@@ -261,12 +265,7 @@ export function InfoSheet({
               <path d="M9 5l7 7-7 7" />
             </svg>
           </button>
-        ) : (
-          <p className={styles.occurrenceTotal}>
-            <OccurrenceMark />
-            <span className={styles.occurrenceCount}>{occurrenceTotalLabel(occurrence.total)}</span>
-          </p>
-        ))}
+        )}
 
       {/* 免責固定在最底，不隨捲動消失（PRD §6.4）。 */}
       <p className={styles.disclaimer}>{DISCLAIMER}</p>

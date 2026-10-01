@@ -83,7 +83,7 @@ test.describe("找找看頁", () => {
       asked.push(target);
 
       await answerByTwoTaps(page, cleanHotspotsOf(target)[0]);
-      await expect(statusOf(page)).toHaveText("答對了。");
+      await expect(statusOf(page)).toContainText("答對了。");
       await nextOf(page).click();
     }
 
@@ -97,14 +97,14 @@ test.describe("找找看頁", () => {
     await startRound(page);
 
     await answerByTwoTaps(page, cleanHotspotsOf(otherThan(await currentTarget(page)))[0]);
-    await expect(statusOf(page)).toHaveText("答錯了。");
+    await expect(statusOf(page)).toContainText("答錯了。");
     await nextOf(page).click();
 
     // 第 2 題起點題目符號的**最後一處**：上一條測試點的是第一處。窗有 9 處，點中哪一扇都是窗（PRD §6.3.2）。
     for (let i = 2; i <= ROUND_SIZE; i++) {
       await expect(progressOf(page)).toHaveText(progressText(i));
       await answerByTwoTaps(page, cleanHotspotsOf(await currentTarget(page)).at(-1)!);
-      await expect(statusOf(page)).toHaveText("答對了。");
+      await expect(statusOf(page)).toContainText("答對了。");
       await nextOf(page).click();
     }
 
@@ -162,7 +162,7 @@ test.describe("找找看頁", () => {
 
     // 第二段照樣確認得了：那一下就是作答。
     await page.mouse.click(dragged.x + dragged.width / 2, dragged.y + dragged.height / 2);
-    await expect(statusOf(page)).toHaveText(/^答(對|錯)了。$/);
+    await expect(statusOf(page)).toHaveText(/^答(對|錯)了。.+。$/);
   });
 
   // 鍵盤不走兩段式（票 06）：Enter 與 role="button" 一併要求的空白鍵直接選定熱區，那一下就是作答。
@@ -171,13 +171,13 @@ test.describe("找找看頁", () => {
 
     await page.locator(`#${cleanHotspotsOf(await currentTarget(page))[0]}`).focus();
     await page.keyboard.press("Enter");
-    await expect(statusOf(page)).toHaveText("答對了。");
+    await expect(statusOf(page)).toContainText("答對了。");
     await nextOf(page).click();
 
     await expect(progressOf(page)).toHaveText(progressText(2));
     await page.locator(`#${cleanHotspotsOf(otherThan(await currentTarget(page)))[0]}`).focus();
     await page.keyboard.press(" ");
-    await expect(statusOf(page)).toHaveText("答錯了。");
+    await expect(statusOf(page)).toContainText("答錯了。");
   });
 
   // 一局的進行狀態只在記憶體裡（spec「一局的流程」）：沒有續玩，也不跳離開確認。

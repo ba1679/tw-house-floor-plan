@@ -25,6 +25,31 @@ const sheetOf = (page: Page) => page.locator("#info-sheet");
 const pickedNoteOf = (page: Page) => page.locator('#info-sheet [data-section="note"]');
 const showSheetOf = (page: Page) => page.getByRole("button", { name: "看說明" });
 
+test("作答結果固定顯示真實名字，並由既有 live status 完整宣告", async ({ page }) => {
+  await startRoundAt(page, "window", { notLast: true });
+  const result = page.getByRole("region", { name: "作答結果" });
+  await expect(result).toBeHidden();
+  await answerByTwoTaps(page, cleanHotspotsOf("window")[0]);
+  await expect(result).toBeInViewport({ ratio: 1 });
+  await expect(result.getByText("答對", { exact: true })).toBeVisible();
+  await expect(result).toContainText("你找到了「窗」");
+  await expect(statusOf(page)).toHaveText("答對了。你找到了「窗」。");
+  await expect(sheetOf(page)).toBeHidden();
+
+  await nextOf(page).click();
+  await expect(result).toBeHidden();
+  const target = await currentTarget(page);
+  const picked = target === "column" ? "wall" : "column";
+  await answerByTwoTaps(page, cleanHotspotsOf(picked)[0]);
+  await expect(result.getByText("答錯", { exact: true })).toBeVisible();
+  await expect(result).toContainText(`你點的是「${symbolOf(picked).name}」`);
+  await expect(result).toContainText(`正確答案是「${symbolOf(target).name}」`);
+  await expect(statusOf(page)).toHaveText(
+    `答錯了。你點的是「${symbolOf(picked).name}」。正確答案是「${symbolOf(target).name}」。`,
+  );
+  await expect(sheetOf(page).getByRole("heading", { name: symbolOf(target).name })).toBeVisible();
+});
+
 /** 圖上每一個熱區此刻的 State，依 DOM 順序。 */
 const statesOf = (page: Page) =>
   page
@@ -51,7 +76,7 @@ test.describe("答對", () => {
 
     await answerByTwoTaps(page, clicked);
 
-    await expect(statusOf(page)).toHaveText("答對了。");
+    await expect(statusOf(page)).toContainText("答對了。");
     expect(await idsInState(page, "selected")).toEqual([clicked]);
     // 主圖的窗 9 處畫了三種：他剛剛認得的只是其中一種，另外 8 扇也標出來。
     expect(await idsInState(page, "revealed")).toEqual(
@@ -123,7 +148,7 @@ test.describe("答錯", () => {
 
     await answerByTwoTaps(page, column);
 
-    await expect(statusOf(page)).toHaveText("答錯了。");
+    await expect(statusOf(page)).toContainText("答錯了。");
     // 他分得出自己是點歪還是認錯：答案的每一處都標出來，點到的那一個也留著。
     expect(await idsInState(page, "revealed")).toEqual(sorted(hotspotsOf("window")));
     expect(await idsInState(page, "selected")).toEqual([column]);
@@ -264,7 +289,7 @@ test.describe("作答之後、按「下一題」之前", () => {
 
     await page.locator(`#${cleanHotspotsOf(await currentTarget(page))[0]}`).focus();
     await page.keyboard.press("Enter");
-    await expect(statusOf(page)).toHaveText("答對了。");
+    await expect(statusOf(page)).toContainText("答對了。");
     await expect(nextOf(page)).toBeFocused();
   });
 });

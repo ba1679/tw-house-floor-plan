@@ -47,7 +47,7 @@ export default async function QuizPage({ params }: { params: Promise<{ id: strin
   const symbols = loadSymbolsForViewer();
 
   return (
-    <main className={styles.page}>
+    <main className={styles.quiz}>
       <h1 className={styles.title}>{quizHeading(floorplan.name)}</h1>
       {/* 閱讀順序與可出題符號都在 build 時算完：頁面是 SSG，瀏覽器拿到的是結果。 */}
       <QuizGame
