@@ -152,6 +152,57 @@ test.describe("介面設計語言", () => {
 });
 
 test.describe("圖面與熱區設計語言", () => {
+  test("房型底色保留圖面文字與 State 對比，暗化面仍有黑白焦點訊號", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/layouts/3b2l_standard");
+    const sample = () => page.evaluate(() => {
+      const ctx = document.createElement("canvas").getContext("2d")!;
+      const hex = (color: string) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, 1, 1);
+        return "#" + [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3)
+          .map((channel) => channel.toString(16).padStart(2, "0")).join("");
+      };
+      const probe = document.createElement("span");
+      document.body.append(probe);
+      const tokens = Object.fromEntries(["--fp-text", "--fp-line", "--state-blue", "--state-warm", "--state-casing", "--focus-light", "--focus-dark"].map((name) => {
+        probe.style.color = `var(${name})`;
+        return [name, hex(getComputedStyle(probe).color)];
+      }));
+      probe.remove();
+      return {
+        tokens,
+        rooms: [...document.querySelectorAll("#rooms > rect")].map((room) => ({ id: room.id, fill: hex(getComputedStyle(room).fill) })),
+      };
+    });
+    const normal = await sample();
+    for (const room of normal.rooms) {
+      for (const state of ["--state-blue", "--state-warm"]) {
+        expect(contrast(normal.tokens[state], room.fill), `${state} / ${room.id}`).toBeGreaterThanOrEqual(3);
+      }
+    }
+    await page.locator("#hs-f-bathtub-m").focus();
+    await page.keyboard.press("Enter");
+    const dimmed = await sample();
+    for (const room of [...normal.rooms, ...dimmed.rooms]) {
+      expect(contrast(normal.tokens["--fp-text"], room.fill), `文字 / ${room.id}`).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(normal.tokens["--fp-line"], room.fill), `符號線 / ${room.id}`).toBeGreaterThanOrEqual(3);
+      expect(Math.max(...["--focus-light", "--focus-dark"].map((name) => contrast(normal.tokens[name], room.fill))), `焦點 / ${room.id}`).toBeGreaterThanOrEqual(3);
+    }
+    // Selected／revealed 的線以白襯邊隔開背景，保護房間暗化時仍在圖上的記號。
+    for (const state of ["--state-blue", "--state-warm"]) {
+      expect(contrast(normal.tokens[state], normal.tokens["--state-casing"])).toBeGreaterThanOrEqual(3);
+    }
+    await page.locator("#hs-f-counter").focus();
+    const focus = await page.locator("#hs-f-counter").evaluate((hotspot) =>
+      [...hotspot.parentElement!.querySelectorAll("path")].map((path) => {
+        const css = getComputedStyle(path);
+        return { visible: css.display !== "none", stroke: css.stroke };
+      }),
+    );
+    expect(focus.filter((mark) => mark.visible).map((mark) => mark.stroke)).toEqual(["rgb(255, 255, 255)", "rgb(0, 0, 0)"]);
+  });
+
   test("符號頁與分類縮圖的圖紙維持純白，不繼承品牌表面", async ({ page }) => {
     for (const path of ["/symbols/window", "/categories/door_window"]) {
       await page.goto(path);

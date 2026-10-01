@@ -32,6 +32,8 @@
   }
 
   .quiz > .title {
+    font-size: 20px;
+    line-height: 28px;
     margin-bottom: var(--space-2);
   }
 }

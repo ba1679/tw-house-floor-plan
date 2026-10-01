@@ -147,6 +147,7 @@ export function InfoSheet({
       className={styles.sheet}
       data-expanded={expanded ? "true" : "false"}
       data-closing={closing ? "true" : "false"}
+      data-total-only={!("onNext" in occurrence) ? "true" : undefined}
       aria-labelledby="info-sheet-name"
     >
       {/* 標題列不捲動：關閉鍵必須隨時按得到。 */}

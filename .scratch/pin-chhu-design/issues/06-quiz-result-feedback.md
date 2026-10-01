@@ -45,3 +45,7 @@ Blocked by: 02, 05
 - `QuizRound` 在圖面與動作列之間顯示深碳灰結果區；答對有勾及題目名字，答錯同時顯示被點與正確符號。既有已掛載的 live status 宣告完整文字，結果區不另建重複的 live region。
 - Quiz 自己量題目、結果與固定列的實際換行高度，限制 Sheet 的剩餘空間；CSS 保留 84px 圖面。320 × 568 使用較緊的垂直間距，只有總數的 Sheet 將出現次數放在標題旁，保留正文捲動空間。自由看圖的其他位置控制不變。
 - 已走過 quiz feedback／page 與 responsive 回歸：判定、標記、暫停、下一題、完整名字宣告、鍵盤焦點和兩個手機尺寸的 Sheet 開合。Typecheck 通過；全套 progress／analytics、build 與跨頁視覺檢查併入票 07 的最後 gate。
+
+### 2026-10-01 — Review 後補齊最長名稱
+
+- Standards 軸無 actionable finding；Spec 軸指出最長名稱在 320 × 568 時正文不足兩行。票 07 的 regression gate 已補上該案例，並修正窄螢幕結果排列、標頭 metadata 與列距。完整 production suite 303 項通過，含 quiz progress／analytics；詳細量測與視覺紀錄見票 07。

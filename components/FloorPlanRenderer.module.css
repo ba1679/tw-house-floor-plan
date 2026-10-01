@@ -21,7 +21,7 @@
 /* --- 房間（圖層 06 地板）--- */
 .room {
   fill: var(--fp-room);
-  --fp-room-dim: color-mix(in oklab, var(--fp-room) 74%, var(--fp-dim-source));
+  --fp-room-dim: color-mix(in oklab, var(--fp-room) var(--fp-room-dim-weight), var(--fp-dim-source));
   /* 地板換色要看得出是「暗下去」而不是「閃一下」：兩段式本來就在動，
      再加一個瞬間的跳色只會變成雜訊。 */
   transition: fill 160ms ease-out;
@@ -29,22 +29,22 @@
 
 .room[data-room-kind="master"] {
   fill: var(--fp-room-master);
-  --fp-room-dim: color-mix(in oklab, var(--fp-room-master) 74%, var(--fp-dim-source));
+  --fp-room-dim: color-mix(in oklab, var(--fp-room-master) var(--fp-room-dim-weight), var(--fp-dim-source));
 }
 
 .room[data-room-kind="living"] {
   fill: var(--fp-room-living);
-  --fp-room-dim: color-mix(in oklab, var(--fp-room-living) 74%, var(--fp-dim-source));
+  --fp-room-dim: color-mix(in oklab, var(--fp-room-living) var(--fp-room-dim-weight), var(--fp-dim-source));
 }
 
 .room[data-room-kind="dining-kitchen"] {
   fill: var(--fp-room-dining-kitchen);
-  --fp-room-dim: color-mix(in oklab, var(--fp-room-dining-kitchen) 74%, var(--fp-dim-source));
+  --fp-room-dim: color-mix(in oklab, var(--fp-room-dining-kitchen) var(--fp-room-dim-weight), var(--fp-dim-source));
 }
 
 .room[data-room-kind="wet-balcony"] {
   fill: var(--fp-room-wet-balcony);
-  --fp-room-dim: color-mix(in oklab, var(--fp-room-wet-balcony) 74%, var(--fp-dim-source));
+  --fp-room-dim: color-mix(in oklab, var(--fp-room-wet-balcony) var(--fp-room-dim-weight), var(--fp-dim-source));
 }
 
 /* 圖面依互動狀態改變畫法（票 07）。目前只有一種狀態：說明卡開著時，
