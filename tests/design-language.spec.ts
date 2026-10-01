@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { MARK_PX } from "../lib/viewer/marks";
+import { browserColors } from "./browser-colors";
 
 const root = process.cwd();
 const read = (path: string) => readFileSync(join(root, path), "utf8");
@@ -110,22 +111,9 @@ test.describe("介面設計語言", () => {
 
     // 由瀏覽器解析 alias 與 color-mix，再以 sRGB 計算對比；不在測試複製 CSS 求值器。
     await page.goto("/");
-    const [paper, paper2, ink, ink2] = await page.evaluate(() => {
-      const probe = document.createElement("span");
-      document.body.append(probe);
-      const canvas = document.createElement("canvas");
-      canvas.width = canvas.height = 1;
-      const ctx = canvas.getContext("2d")!;
-      const colors = ["--paper", "--paper2", "--ink", "--ink2"].map((name) => {
-        probe.style.color = `var(${name})`;
-        ctx.fillStyle = getComputedStyle(probe).color;
-        ctx.fillRect(0, 0, 1, 1);
-        return "#" + [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3)
-          .map((channel) => channel.toString(16).padStart(2, "0")).join("");
-      });
-      probe.remove();
-      return colors;
-    });
+    const [paper, paper2, ink, ink2] = await browserColors(page,
+      ["--paper", "--paper2", "--ink", "--ink2"].map((name) => `var(${name})`),
+    );
     for (const foreground of [ink, ink2]) {
       for (const background of [paper, paper2]) {
         expect(contrast(foreground, background), `${foreground} / ${background}`).toBeGreaterThanOrEqual(4.5);
@@ -155,26 +143,17 @@ test.describe("圖面與熱區設計語言", () => {
   test("房型底色保留圖面文字與 State 對比，暗化面仍有黑白焦點訊號", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/layouts/3b2l_standard");
-    const sample = () => page.evaluate(() => {
-      const ctx = document.createElement("canvas").getContext("2d")!;
-      const hex = (color: string) => {
-        ctx.fillStyle = color;
-        ctx.fillRect(0, 0, 1, 1);
-        return "#" + [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3)
-          .map((channel) => channel.toString(16).padStart(2, "0")).join("");
-      };
-      const probe = document.createElement("span");
-      document.body.append(probe);
-      const tokens = Object.fromEntries(["--fp-text", "--fp-line", "--state-blue", "--state-warm", "--state-casing", "--focus-light", "--focus-dark"].map((name) => {
-        probe.style.color = `var(${name})`;
-        return [name, hex(getComputedStyle(probe).color)];
-      }));
-      probe.remove();
+    const sample = async () => {
+      const names = ["--fp-text", "--fp-line", "--state-blue", "--state-warm", "--state-casing", "--focus-light", "--focus-dark"];
+      const rooms = await page.locator("#rooms > rect").evaluateAll((rooms) =>
+        rooms.map((room) => ({ id: room.id, fill: getComputedStyle(room).fill })),
+      );
+      const colors = await browserColors(page, [...names.map((name) => `var(${name})`), ...rooms.map((room) => room.fill)]);
       return {
-        tokens,
-        rooms: [...document.querySelectorAll("#rooms > rect")].map((room) => ({ id: room.id, fill: hex(getComputedStyle(room).fill) })),
+        tokens: Object.fromEntries(names.map((name, index) => [name, colors[index]])),
+        rooms: rooms.map((room, index) => ({ ...room, fill: colors[names.length + index] })),
       };
-    });
+    };
     const normal = await sample();
     for (const room of normal.rooms) {
       for (const state of ["--state-blue", "--state-warm"]) {

@@ -51,3 +51,9 @@ Blocked by: 03, 04, 05, 06
 - `PORT=3100 npx playwright test --workers=4`：**303 passed**（production SSG build 產物，含 analytics、progress、metadata、canonical、JSON-LD、robots／sitemap 與 quiz noindex）。該路徑完成 `generate:brand`、`validate`、`validate:floorplan` 與 `npm run build`。`npm run typecheck` 通過；`npm run test:domain`：**13 passed**。
 - 重新執行 `npm run generate:brand`，favicon SVG、Apple icon PNG、OG SVG 的前後 SHA-256 全部一致。`data/` 的 FloorPlan JSON 與符號圖形未修改。
 - 目視：Chromium 的 375 × 812（首頁／分類／符號／答錯）、320 × 568（最長名稱的答對／答錯）、1280 × 900（首頁／自由看圖 Sheet／答對），另並排檢查 normal／candidate／selected／highlighted／revealed 的彩色與灰階畫面。截圖位於 `/tmp/pin-chhu-qa/`；使用現有 dev preview，其 Next.js 開發指示器不是 production 介面。Apple icon 亦已目視核對。硬體 Safari／iPhone／Android 與實際螢幕閱讀器發聲未測，本次證據為 Chromium viewport、既有 CDP touch 測試、鍵盤與 accessibility tree。
+
+### 2026-10-01 — 最終 review 與 knowledge update
+
+- Standards：0 hard breaches、0 未解決 smell；原先重複的瀏覽器色彩轉換已收進 `tests/browser-colors.ts`，三處共用，複查通過。整理後重新跑 design-language／pin-chhu-regressions 的 production gate：**14 passed**。
+- Spec：0 findings。另獨立重測最長名稱的 320 × 568 答錯／展開／收合，圖面 84px、正文約 50.6px、document 568px；關卡焦點與下一題焦點正確。
+- ADR-0003 追加找找看可視帶歸零限制已解決的紀錄，保留 InfoSheet 作為版面列，以及高度預算由 QuizRound 管理的既有邊界。

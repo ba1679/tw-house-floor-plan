@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { PLAN, cleanHotspotsOf, nextOf, startRoundAt, statusOf } from "./quiz-play";
+import { browserColors } from "./browser-colors";
 
 // 拼厝票 07：沿用既有 header／SEO／analytics tests，只補跨房型、資產 variants 與 quiz 可及性缺口。
 const palette: Record<string, string> = {
@@ -15,16 +16,12 @@ const palette: Record<string, string> = {
 type RoomPaint = { id: string; type: string; fill: string; muted: boolean };
 
 async function roomPaint(page: Page): Promise<RoomPaint[]> {
-  return page.locator("#rooms > rect").evaluateAll((rooms) => {
-    const ctx = document.createElement("canvas").getContext("2d")!;
-    return rooms.map((room) => {
-      ctx.fillStyle = getComputedStyle(room).fill;
-      ctx.fillRect(0, 0, 1, 1);
-      const fill = "#" + [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3)
-        .map((channel) => channel.toString(16).padStart(2, "0")).join("");
-      return { id: room.id, type: room.getAttribute("data-room-type")!, fill, muted: room.getAttribute("data-state") === "muted" };
-    });
-  });
+  const rooms = await page.locator("#rooms > rect").evaluateAll((rooms) => rooms.map((room) => ({
+    id: room.id, type: room.getAttribute("data-room-type")!, fill: getComputedStyle(room).fill,
+    muted: room.getAttribute("data-state") === "muted",
+  })));
+  const colors = await browserColors(page, rooms.map((room) => room.fill));
+  return rooms.map((room, index) => ({ ...room, fill: colors[index] }));
 }
 
 test("首頁縮圖、自由看圖、找找看的房型色一致，離線 SVG 也遵守核准配對", async ({ page }) => {
