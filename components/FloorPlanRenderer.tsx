@@ -4,7 +4,6 @@ import {
   LAYER,
   TALL_FURNITURE,
   WALL_MOUNTED_FURNITURE,
-  WET_ROOMS,
   arcSweep,
   baseFontSize,
   fixtureFrame,
@@ -182,8 +181,17 @@ function Canopies({ floorplan }: { floorplan: FloorPlan }) {
 
 /* --- 房間（圖層 06 地板）------------------------------------------------ */
 
-const roomKind = (room: Room) =>
-  WET_ROOMS.has(room.type) ? "wet" : room.type === "balcony" ? "balcony" : "dry";
+const roomKind = (room: Room) => {
+  switch (room.type) {
+    case "master_bedroom": return "master";
+    case "living_room": return "living";
+    case "dining_room":
+    case "kitchen": return "dining-kitchen";
+    case "bathroom":
+    case "balcony": return "wet-balcony";
+    default: return "neutral";
+  }
+};
 
 function Rooms({
   floorplan,

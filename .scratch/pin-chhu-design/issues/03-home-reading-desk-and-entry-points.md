@@ -17,7 +17,7 @@ Blocked by: 01, 02
 ## Constraints
 
 - 不使用原型 B 的整片深色 hero、旋轉平面圖、直排品牌欄；不複製 prototype-only switcher 或任何 prototype CSS。
-- 不在縮圖上換房間色、不把 brand 色當 State、不改任何 href、Analytics link tracking 或可存取名稱。
+- 縮圖沿用共享 FloorPlanRenderer 的現行房型色，不在首頁另外覆寫配色；不把 brand 色當 State，不改任何 href、Analytics link tracking 或可存取名稱。
 - 文字選取、語意 heading、鍵盤順序和搜尋 landing 的清楚度不可退步。
 
 ## Acceptance criteria
@@ -47,3 +47,7 @@ Scope 指定主 CTA「讀這張圖」，Constraints 又要求不改可存取名�
 - Playwright／Chromium 目視 375 × 812、320 × 568、1280 × 900；均無水平溢出。375px 主要入口位於 y=566–614px，尺寸 301 × 48px；縮圖與用途同在首屏。完整截圖、首屏截圖與尺寸紀錄存於本機 `test-results/ticket-3-qa/`。
 - 對票 02 結束的 `ee2a2d1` 驗證 metadata、圖面 renderer、品牌／圖面／State tokens、品牌產物及資料皆無 diff。CodeGraph 已同步；未新增領域詞彙或推翻 ADR。
 - Standards review：0 項。Spec review：無功能／版面缺陷，1 項上述 CTA 名稱的規格衝突；兩軸均核對 C 的工具優先骨架與品牌／圖面分離。
+
+### 2026-10-01 — 房型色同步
+
+- 使用者核准指定房型底色後，首頁縮圖由同一個 FloorPlanRenderer 自動呈現新配色，與自由看圖／找找看一致；首頁不另外持有一套填色規則。

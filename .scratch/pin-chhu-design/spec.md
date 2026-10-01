@@ -5,7 +5,7 @@ Status: ready-for-agent
 ## Source of truth
 
 - 視覺規則：[`DESIGN.md`](../../DESIGN.md)
-- 完整標記幾何：使用者 2026-09-30 提供的[參考圖](../../design/reference/pin-chhu-logo.png)，僅採輪廓與內部分隔；下方文字與棋盤背景不採用，品牌色票不變。
+- 完整標記幾何：使用者 2026-09-30 提供的[參考圖](../../design/reference/pin-chhu-logo.png)，僅採輪廓與內部分隔；下方文字與棋盤背景不採用。品牌色票依 2026-10-01 使用者提供的新版標記與指定色碼更新。
 - 版面定案：`prototype/pin-chhu` 的 `843bf77`（方向 C 讀圖工具骨架；方向 B 僅取低密度格線節奏；方向 A 的完整 logo 後依使用者參考圖重畫）
 - 產品行為：[`平面圖教學網站-PRD-Phase1.md`](../../平面圖教學網站-PRD-Phase1.md)
 - 既有互動決策：ADR-0003（InfoSheet 是版面列）、ADR-0005（viewer 自畫 FloorPlan）、ADR-0006（highlight 是 layer）、ADR-0007（找找看暫停屬於 Round）
@@ -25,9 +25,9 @@ Status: ready-for-agent
 - 一句品牌承諾：**看懂格局，慢慢拼成家。**
 - 首次說明／SEO 文案必須明示產品是「建案平面圖／格局」的教學與閱讀工具，不能只說品牌故事。
 - Logo：完整品牌標記依使用者指定的台灣拼圖參考重畫；header、favicon、app icon 用同一個 Module 的 compact mark，不能縮小完整版湊用。
-- 色彩：木質棕、磚紅、清水灰、米白與深褐外框構成品牌層。日光花磚高彩度探索不採用。
+- 色彩：橡木棕、暖陶土、燕麥奶白、鼠尾草綠與深碳灰外框構成品牌層。日光花磚高彩度探索不採用。
 - 網站骨架：首頁採原型 C 的讀圖桌，格局入口優先；只借原型 B 的低密度格線、對齊與不對稱分欄，不採其深色首頁、旋轉圖或直排品牌欄。
-- 平面圖與 State：`--fp-*` 與 `--state-*` contract 不更動。品牌色不得表示房間功能、分類、答題正誤、學習進度或 Hotspot State。
+- 平面圖與 State：`--state-*` contract 不更動。依使用者 2026-10-01 明確核准，主臥、客廳、餐廳／廚房、衛浴／陽台的地板分別使用指定品牌色；其他房型保留中性底色。顏色不表示分類、答題正誤、學習進度或 Hotspot State，亦不推論平面圖方位。
 - 字體：維持系統 sans；雜誌閱讀感由字級、行距、留白、框線與編輯式分欄產生。
 - 找找看：保留既定的正確／錯誤結果區，讓作答後一眼可判讀；結果是 `QuizRound`／Round 的責任，InfoSheet 保持後續理解的責任。
 
@@ -35,7 +35,7 @@ Status: ready-for-agent
 
 1. 讓站名、品牌承諾、metadata、Structured Data、header、favicon、app icon 與 OG image 一致改為拼厝。
 2. 建立同一個品牌標記 Module，提供 `full`、`compact` 與淺／深表面 variant，集中 SVG、可及性文字與小尺寸 fallback。
-3. 建立品牌／閱讀 tokens，更新全站 shell 與 header，且不更動圖面與 State token 的語意。
+3. 建立品牌／閱讀 tokens，更新全站 shell 與 header；指定房型地板依核准配對呈現，牆柱、符號、文字與 State token 的語意不變。
 4. 將首頁改為讀圖桌：清楚引言、真實格局入口、符號／分類的次要入口，以及克制的品牌區與格線節奏。
 5. 將分類頁、符號頁、平面圖與 InfoSheet 重新排成可慢讀的編輯版面，保留所有資料順序、行為、路由與無障礙 contract。
 6. 在找找看加上強、固定、非紅綠的答對／答錯結果區；答錯依然自動開題目 Symbol 的 InfoSheet。
@@ -45,7 +45,7 @@ Status: ready-for-agent
 
 - 新增或改動 Symbol、FloorPlan、Hotspot、來源、`confused_with`、熟悉度、題目挑選、Analytics event contract 或任一既有 route。
 - 新增帳號、收藏、看屋 checklist、房屋評分、AI 問答、照片、插畫、網路字型或深色模式。
-- 以品牌色標注客廳、主臥、衛浴、正誤、分類或學習進度。
+- 以品牌色標注正誤、分類或學習進度；指定房型地板色依使用者核准的配對呈現。
 - 改寫兩段式點擊、pan／zoom、答題判定、InfoSheet 作為 layout row 的結構，或改動 ADR-0003～0008 的結論。
 - 將原型 route、原型 CSS 或 prototype-only controls 帶進 production。
 
@@ -67,7 +67,7 @@ Status: ready-for-agent
 
 每頁 header 都有 compact 拼圖標記、可選取的「拼厝」與「Phin-Chhù」，整組連回首頁。完整標記只在首頁 hero／品牌內容與 share asset 出現。header 不做懸浮 toolbar，也不做全站深色帶。
 
-圖面、State 與 source tier 的色彩／語意不變；米白閱讀面與深褐框線屬於 shell。品牌色塊的數量必須少於圖面上的資訊密度。
+燕麥奶白閱讀面與深碳灰框線屬於 shell。指定房型地板依核准配對著色，首頁縮圖、自由看圖與找找看使用同一個 renderer；牆柱、符號、文字、State 與 source tier 的語意不變。品牌裝飾維持低密度。
 
 ### 2. Home: reading desk
 
@@ -81,16 +81,18 @@ Status: ready-for-agent
 
 ### 4. Floorplan and InfoSheet
 
-平面圖依然是最大的內容圖，一個螢幕頁面不能捲。InfoSheet 仍壓縮圖面高度、保留唯一陰影與焦點規則。視覺更新只能更清楚地區分「圖面」「說明」與「下一個動作」，不能把 Sheet 做成 modal，或在圖面上加入品牌方格／色塊。
+平面圖依然是最大的內容圖，一個螢幕頁面不能捲。InfoSheet 仍壓縮圖面高度、保留唯一陰影與焦點規則。指定房型地板可使用核准底色並保留房名；不得另外加入品牌裝飾方格或改寫圖面資料。視覺更新需更清楚地區分「圖面」「說明」與「下一個動作」，不能把 Sheet 做成 modal。
 
 ### 5. Quiz feedback
 
 作答後，圖框和「看說明／下一題」控制之間必定顯示結果區：
 
-- 答對：深褐實心、形狀清楚的勾、`答對`、`你找到了「X」`。
-- 答錯：深褐強框、`答錯`、`你點的是「Y」`、`正確答案是「X」`。
+- 答對：深碳灰實心、形狀清楚的勾、`答對`、`你找到了「X」`。
+- 答錯：深碳灰強框、`答錯`、`你點的是「Y」`、`正確答案是「X」`。
 
 正誤由 `isCorrect(answer)` 與 Round state 供應。答錯同時自動開題目 Symbol 的 InfoSheet，讓 `confused_with` 差異解釋被保留；結果區不得把它吞掉。結果訊息用可被讀螢幕即時宣布的文字，而不是色彩或動畫。
+
+結果區使用閱讀介面的語意 tokens，不借用房型底色。Quiz 自行計算包含 header、題目、結果、動作列、InfoSheet 與 footer 的高度預算；窄螢幕上結果文字能換行，答錯與 Sheet 展開時仍可見圖面和下一題控制。
 
 ## Delivery order
 
@@ -111,4 +113,5 @@ Status: ready-for-agent
 - 目視檢查 375 × 812；平面圖與找找看另檢查 320 × 568，無水平捲動、無 document scroll，InfoSheet 開啟時仍看得到圖。
 - 測試完整／compact logo 的可見與可及性：header、首頁、深／淺品牌表面、favicon／app icon、OG image。中文與羅馬字必須是可選取文字；SVG 不把中文轉 path。
 - 找找看結果要以文字即時宣布；鍵盤焦點、`prefers-reduced-motion`、既有 State 3:1 對比、灰階可辨性與 Analytics event contract 不得退步。
+- 房型底色的配對、預設中性底色與 InfoSheet 開關後的暗化／還原需有瀏覽器回歸檢查；State 的形狀、白襯邊、標記與文字在各房型底色及暗化面上仍可辨認。
 - metadata、canonical、JSON-LD、sitemap 與 noindex quiz contract 保持正確；改品牌不得降低「平面圖／格局」相關的搜尋意圖說明。

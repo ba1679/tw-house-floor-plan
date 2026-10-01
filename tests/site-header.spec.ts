@@ -55,11 +55,11 @@ test.describe("全站品牌 header", () => {
     await expect(page.getByText("拼厝", { exact: true })).toHaveCount(1);
   });
 
-  test("header 是米白閱讀面的一列，以深褐細框分隔內容", async ({ page }) => {
+  test("header 是燕麥奶白閱讀面的一列，以深碳灰細框分隔內容", async ({ page }) => {
     await page.goto("/symbols/window");
     const header = page.getByRole("banner");
-    await expect(header).toHaveCSS("background-color", "rgb(250, 248, 240)");
-    await expect(header).toHaveCSS("border-bottom-color", "rgb(90, 62, 41)");
+    await expect(header).toHaveCSS("background-color", "rgb(250, 237, 205)");
+    await expect(header).toHaveCSS("border-bottom-color", "rgb(61, 64, 91)");
     await expect(header).toHaveCSS("box-shadow", "none");
     expect(await header.evaluate((el) => getComputedStyle(el).position)).not.toMatch(/fixed|sticky|absolute/);
     await expect(header.getByRole("link")).toHaveCount(1);

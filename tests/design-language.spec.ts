@@ -72,13 +72,13 @@ function contrast(foreground: string, background: string) {
 }
 
 test.describe("介面設計語言", () => {
-  test("閱讀外殼呈現米白與深褐，主要入口延續同一組品牌色", async ({ page }) => {
+  test("閱讀外殼呈現燕麥奶白與深碳灰，主要入口延續同一組品牌色", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(250, 248, 240)");
-    await expect(page.locator("body")).toHaveCSS("color", "rgb(66, 44, 29)");
+    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(250, 237, 205)");
+    await expect(page.locator("body")).toHaveCSS("color", "rgb(61, 64, 91)");
     const primary = page.getByRole("link", { name: "讀這張圖：三房兩廳" });
-    await expect(primary).toHaveCSS("background-color", "rgb(66, 44, 29)");
-    await expect(primary).toHaveCSS("color", "rgb(250, 248, 240)");
+    await expect(primary).toHaveCSS("background-color", "rgb(61, 64, 91)");
+    await expect(primary).toHaveCSS("color", "rgb(250, 237, 205)");
     await expect(page.getByRole("link", { name: "結構", exact: true })).toHaveCSS("text-decoration-line", "underline");
   });
 
@@ -172,8 +172,10 @@ test.describe("圖面與熱區設計語言", () => {
     const values: Record<string, string> = {
       "--fp-paper": "#ffffff",
       "--fp-room": "oklch(0.967 0 0)",
-      "--fp-room-wet": "oklch(0.935 0 0)",
-      "--fp-room-balcony": "oklch(0.985 0 0)",
+      "--fp-room-master": "var(--brand-wood)",
+      "--fp-room-living": "var(--brand-brick)",
+      "--fp-room-dining-kitchen": "var(--brand-cream)",
+      "--fp-room-wet-balcony": "var(--brand-sage)",
       "--fp-wall": "#a8a8a8",
       "--fp-column": "#585858",
       "--fp-structure": "#2b2b2b",

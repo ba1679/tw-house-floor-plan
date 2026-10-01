@@ -16,7 +16,7 @@ Status: resolved
 ## Constraints
 
 - 完整 mark 不得縮小冒充 favicon／header icon；compact mark 不是任意裁切的完整台灣輪廓。
-- 所有品牌色只來自命名 brand token；不得動 `--fp-*`／`--state-*` token 或把品牌色帶進圖面。
+- 所有品牌色只來自命名 brand token；品牌資產不改寫 `--state-*`、牆柱、家具、符號或文字的圖面語意。2026-10-01 核准的房型地板色以 DESIGN.md 與票 05 為準。
 - metadata、canonical、JSON-LD、sitemap、quiz noindex 與 Analytics event name／payload contract 不變。
 - 不加入房子屋頂、聊天泡泡或任何 AI iconography。
 
@@ -47,3 +47,7 @@ Status: resolved
 - 重新產生品牌資產後 `git diff --exit-code -- public/brand` 通過，確認產生流程可重現。
 - 使用者追加指定完整台灣標記：已保留參考圖並先更新 `DESIGN.md`／spec，再重畫 SVG；忽略下方 TW FloorPlan 文案與棋盤背景，沿用既定品牌色票。更新後 build、typecheck 及 18 個品牌／SEO 測試通過。
 - 最終版本再次通過完整 272 tests（含 build 與 validation）；Standards review：0 項，Spec review：0 項。使用者指定幾何的追加變更也經兩軸複查，均無發現。
+
+### 2026-10-01 — 新色票與品牌產物
+
+- 依使用者提供的新版品牌素材與色票更新 full／compact mark，並由共享 BrandMark 重新產生 favicon、Apple icon 與 OG 圖。色值集中在品牌 tokens；參考圖的棋盤背景與影像中的文字不作為產品規格。

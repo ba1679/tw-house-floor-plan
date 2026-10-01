@@ -20,7 +20,7 @@ export function BrandMark({ variant, surface = "light", className, width, height
   const cream = "var(--brand-cream)";
   const wood = dark ? "var(--brand-wood-on-dark)" : "var(--brand-wood)";
   const brick = dark ? "var(--brand-brick-on-dark)" : "var(--brand-brick)";
-  const concrete = dark ? "var(--brand-concrete-on-dark)" : "var(--brand-concrete)";
+  const sage = dark ? "var(--brand-sage-on-dark)" : "var(--brand-sage)";
   // 小尺寸不硬縮島嶼細節；已知輸出尺寸不足時也退回 compact。
   const compact = variant === "compact" || (width !== undefined && width < 96) || (height !== undefined && height < 144);
 
@@ -40,17 +40,17 @@ export function BrandMark({ variant, surface = "light", className, width, height
           <path d="M3 3h14v12H3z" fill={wood} />
           <path d="M17 3h12v22H17z" fill={cream} />
           <path d="M3 15h14v14H3z" fill={brick} />
-          <path d="M17 25h12M17 25v4" fill="none" />
+          <path d="M17 25h12v4H17z" fill={sage} />
         </g>
       ) : (
         <>
           <defs><clipPath id={clipId}><path d={island} /></clipPath></defs>
           <g clipPath={`url(#${clipId})`}>
-            <path d={island} fill={wood} />
-            <path d="M420 102h130v54H420z" fill={cream} />
-            <path d="M550 114h63v42h-63zM455 156h80v65h-80zM501 221h34v65h-34zM455 286h46v67l-46-27z" fill={brick} />
-            <path d="M535 156h80v91h-80zM419 221h82v65h-82z" fill={concrete} />
-            <path d="M535 247h50v39h-50zM420 286h35v40z" fill={cream} />
+            <path d={island} fill={cream} />
+            <path d="M420 102h130v54H420zM550 50h63v106h-63z" fill={wood} />
+            <path d="M455 156h80v65h-80zM419 221h82v65h-82zM455 286h46v67l-46-27z" fill={brick} />
+            <path d="M535 156h80v91h-80zM501 221h34v65h-34z" fill={cream} />
+            <path d="M535 247h50v39h-50zM420 286h35v40zM501 286h64l-30 67h-34z" fill={sage} />
             <g fill="none" stroke={outline} strokeWidth="3.4" strokeLinejoin="miter">
               <path d="M550 50v106M481 102h69M502 102v11m0 19v24M535 103v26h15M550 114h37m20 0h6" />
               <path d="M455 156h146M455 156v22m0 19v24M535 156v65H420M429 221v51h45v-51M501 221v131" />

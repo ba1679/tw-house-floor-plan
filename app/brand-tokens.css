@@ -1,12 +1,12 @@
 /* 拼厝品牌色的唯一手寫值；靜態資產由 generate:brand 從這裡解析。 */
 :root {
-  --brand-ink: #422c1d;
-  --brand-outline: #5a3e29;
-  --brand-cream: #faf8f0;
-  --brand-wood: #c19a6b;
-  --brand-brick: #e07a5f;
-  --brand-concrete: #c0c0c0;
-  --brand-wood-on-dark: #ddbd8b;
-  --brand-brick-on-dark: #efa07b;
-  --brand-concrete-on-dark: #d9d8d4;
+  --brand-ink: #3d405b;
+  --brand-outline: #3d405b;
+  --brand-cream: #faedcd;
+  --brand-wood: #d4a373;
+  --brand-brick: #dd8b67;
+  --brand-sage: #a3b18a;
+  --brand-wood-on-dark: #e3bd97;
+  --brand-brick-on-dark: #e8a789;
+  --brand-sage-on-dark: #b8c59f;
 }

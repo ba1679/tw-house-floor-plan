@@ -5,7 +5,7 @@ Blocked by: 01
 
 ## Goal
 
-將米白、深褐外框、木質棕、磚紅、清水灰的品牌層落成 token，並用 compact 拼厝 header 建立全站閱讀外殼，而不改寫圖面與 State contract。
+將燕麥奶白、深碳灰外框、橡木棕、暖陶土與鼠尾草綠的品牌層落成 token，並用 compact 拼厝 header 建立全站閱讀外殼，而不改寫 State contract。
 
 ## Scope
 
@@ -16,7 +16,7 @@ Blocked by: 01
 
 ## Constraints
 
-- `--fp-*` 和 `--state-*` 的意義、對比、灰階辨識與使用位置不變；不得以 brand token override 它們。
+- `--state-*`、牆柱、家具、符號與文字的意義、對比及灰階辨識不變；指定房型地板可依 2026-10-01 核准的 DESIGN.md 配對引用品牌 token。
 - 格線是背景節奏，不能落在圖面、Symbol Art、表單、表格或可點元素的 hit target 上。
 - 文字對背景達 4.5:1；keyboard focus 保持黑白雙環；控制項保持至少 44 × 44 px hit target。
 - 不加 webfont、dark mode、玻璃擬態、重陰影或全站大圓角卡片。
@@ -44,3 +44,7 @@ Blocked by: 01
 - Chromium 目視檢查手機首頁、桌機符號頁。以票 01 結束的 `efffa61` 比較 normal、candidate、selected、highlighted、revealed 五種 State：圖框尺寸相同、圖面內部像素完全一致。selected／revealed 截圖因小數座標裁切帶入外側最多 1 CSS px 的新米白背景，差異僅在上下邊緣；比對報告及截圖存於本機 `test-results/ticket-2-qa/`。
 - 品牌產物與圖面資料 `git diff --exit-code -- public/brand data` 通過；CodeGraph 已同步。無新增詞彙或推翻既有決策，不需修改 CONTEXT／ADR。
 - Standards review：0 項；Spec review：0 項（比較基準 `efffa61`）。
+
+### 2026-10-01 — 現行色票
+
+- 閱讀外殼改用燕麥奶白與深碳灰，品牌拼塊使用橡木棕、暖陶土與鼠尾草綠；新的值仍由 `app/brand-tokens.css` 集中供應。原先圖面禁色限制以 DESIGN.md 所列房型地板例外為準。

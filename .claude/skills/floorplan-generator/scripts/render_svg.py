@@ -52,15 +52,15 @@ LAYER = {
 }
 
 PALETTE = {
-    "paper": "#ffffff", "room": "#f4f2ed", "room_wet": "#eaf0f2",
-    "room_balcony": "#eef1e9",
+    "paper": "#ffffff", "room": "#f4f4f4", "room_master": "#d4a373",
+    "room_living": "#dd8b67", "room_dining_kitchen": "#faedcd",
+    "room_wet_balcony": "#a3b18a",
     # 表 24 筆號 8／9：柱填深灰、牆填淺灰。牆與柱的差別在填色深淺，不在形狀。
     "wall": "#a8a8a8", "column": "#585858",
     "structure": "#2b2b2b", "line": "#4a4a4a",
     "furn": "#ffffff", "furn_line": "#8a8a8a", "text": "#2b2b2b",
     "muted": "#7a7a7a", "hotspot": "#c8622b",
 }
-WET = {"bathroom", "kitchen"}
 
 # 高度語意（p25 表 10 備考）。平面圖是離地 120~150cm 平切下視，所以：
 #   高櫃被切到 → 矩形內畫 X；吊櫃／壁掛在切面以上 → 虛線。
@@ -95,11 +95,15 @@ def esc(s):
 
 
 def room_fill(t):
-    if t in WET:
-        return PALETTE["room_wet"]
-    if t == "balcony":
-        return PALETTE["room_balcony"]
-    return PALETTE["room"]
+    palette_key = {
+        "master_bedroom": "room_master",
+        "living_room": "room_living",
+        "dining_room": "room_dining_kitchen",
+        "kitchen": "room_dining_kitchen",
+        "bathroom": "room_wet_balcony",
+        "balcony": "room_wet_balcony",
+    }.get(t, "room")
+    return PALETTE[palette_key]
 
 
 def wall_rect(w):

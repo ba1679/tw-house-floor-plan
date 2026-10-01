@@ -15,7 +15,7 @@ Blocked by: 02
 
 ## Constraints
 
-- 不改 `FloorPlanViewport`／`FloorPlanRenderer` 對 FloorPlan、State、hit-test、pan／zoom 的 Interface；不把品牌色畫進 `--fp-*`／`--state-*`。
+- 不改 `FloorPlanViewport`／`FloorPlanRenderer` 對 FloorPlan、State、hit-test、pan／zoom 的 Interface；不改 `--state-*` 或牆柱、家具、符號、文字等 `--fp-*` 語意。指定房型地板色依 DESIGN.md 的使用者核准配對呈現。
 - InfoSheet 仍是 layout row、唯一可有結構性陰影的表面，不可改為 modal、drawer 或蓋住圖面的 floating card。
 - 無 document scroll；圖面仍可看見、控制可用；不改 existing analytics、highlight query 或 keyboard ownership。
 
@@ -42,3 +42,10 @@ Blocked by: 02
 - `npm run typecheck`、`SITE_URL=https://floorplan.example.test NEXT_PUBLIC_GA_MEASUREMENT_ID=G-TEST12345 npm run build` 及完整 `PORT=3108 npm test -- --workers=4` 通過，共 293 tests。Build 包含資料、FloorPlan 與 domain validation；樑無熱區的既有提示維持預期，domain validation 為 0 blockers。
 - Chromium 目視 320／375／1280px 的初始、開啟、展開、捲到底與收合畫面，以及 normal／candidate／selected／highlighted 的彩色與灰階；圖面牆、柱、文字及 State 規則未修改。額外逐一檢查 320 × 568／reduced motion 下全部 37 個 Hotspot 的鍵盤開卡與展開，皆保留圖面、可捲正文與完整卡片，無 document scroll。截圖、尺寸與測試紀錄存於本機 `test-results/ticket-5-qa/`。
 - Code review 以 `e0b6f7e` 為基準：Standards 指出的次要控制配色文件落差，已在 `DESIGN.md` 補上限於圖面工具與 InfoSheet 的例外及閱讀優先理由；複查後 Standards 0 未解 findings、Spec 0 findings。CodeGraph 已同步，未新增領域詞彙或推翻 ADR。
+
+### 2026-10-01 — 使用者核准的房型色彩例外
+
+- 使用者提供新版 Logo／OG／favicon 方向及指定色票，並確認橡木棕用於主臥、暖陶土用於客廳、燕麥奶白用於餐廳與廚房、鼠尾草綠用於衛浴與陽台。
+- 此為地板填色的限定視覺索引，不推論方位，不更動 State、牆柱、家具、符號、房名、互動或資料 schema；未列房型保留中性底色。
+- React renderer 與離線 SVG renderer 使用相同房型配對；InfoSheet 開啟時仍依各房底色暗化，關閉時還原。首頁縮圖與找找看共用 React renderer，無另建資料或改寫產生出的 FloorPlan JSON。
+- 提交前回歸發現未指定房型的底色與 Symbol Art fallback 不一致，已還原既有中性灰 token；四組核准房型色不變。`PORT=3109 npm test -- tests/design-language.spec.ts tests/site-header.spec.ts tests/floorplan-renderer.spec.ts tests/home-metadata.spec.ts tests/home-page.spec.ts tests/quiz-feedback.spec.ts tests/layout-page.spec.ts --workers=4 --reporter=dot` 最終 48 tests 通過，含 production build 與資料／FloorPlan validation；typecheck、設計偵測及 diff whitespace 檢查通過。品牌產物重生後雜湊一致；這次未跑全套 tests，票 07 仍保留完整跨頁驗收。

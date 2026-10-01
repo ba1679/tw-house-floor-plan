@@ -6,7 +6,7 @@
   color-scheme: light;
 
   --surface-reading: var(--brand-cream);
-  --surface-subtle: color-mix(in srgb, var(--brand-cream) 88%, var(--brand-concrete));
+  --surface-subtle: color-mix(in srgb, var(--brand-cream) 88%, var(--brand-sage));
   --text-primary: var(--brand-ink);
   --text-secondary: var(--brand-outline);
   --rule-strong: var(--brand-outline);
@@ -82,8 +82,10 @@
 
   --fp-paper: #ffffff;
   --fp-room: oklch(0.967 0 0);
-  --fp-room-wet: oklch(0.935 0 0);
-  --fp-room-balcony: oklch(0.985 0 0);
+  --fp-room-master: var(--brand-wood);
+  --fp-room-living: var(--brand-brick);
+  --fp-room-dining-kitchen: var(--brand-cream);
+  --fp-room-wet-balcony: var(--brand-sage);
   --fp-wall: #a8a8a8;
   --fp-column: #585858;
   --fp-structure: #2b2b2b;

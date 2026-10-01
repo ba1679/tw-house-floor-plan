@@ -27,14 +27,24 @@
   transition: fill 160ms ease-out;
 }
 
-.room[data-room-kind="wet"] {
-  fill: var(--fp-room-wet);
-  --fp-room-dim: color-mix(in oklab, var(--fp-room-wet) 74%, var(--fp-dim-source));
+.room[data-room-kind="master"] {
+  fill: var(--fp-room-master);
+  --fp-room-dim: color-mix(in oklab, var(--fp-room-master) 74%, var(--fp-dim-source));
 }
 
-.room[data-room-kind="balcony"] {
-  fill: var(--fp-room-balcony);
-  --fp-room-dim: color-mix(in oklab, var(--fp-room-balcony) 74%, var(--fp-dim-source));
+.room[data-room-kind="living"] {
+  fill: var(--fp-room-living);
+  --fp-room-dim: color-mix(in oklab, var(--fp-room-living) 74%, var(--fp-dim-source));
+}
+
+.room[data-room-kind="dining-kitchen"] {
+  fill: var(--fp-room-dining-kitchen);
+  --fp-room-dim: color-mix(in oklab, var(--fp-room-dining-kitchen) 74%, var(--fp-dim-source));
+}
+
+.room[data-room-kind="wet-balcony"] {
+  fill: var(--fp-room-wet-balcony);
+  --fp-room-dim: color-mix(in oklab, var(--fp-room-wet-balcony) 74%, var(--fp-dim-source));
 }
 
 /* 圖面依互動狀態改變畫法（票 07）。目前只有一種狀態：說明卡開著時，
