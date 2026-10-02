@@ -36,14 +36,18 @@ export default function HomePage() {
       />
       <div className={styles.column}>
         <header className={styles.intro}>
-          <div>
-            <p className={styles.eyebrow}>{SITE_NAME}的讀圖桌</p>
+          <div className={styles.introHeading}>
             <h1 className={styles.title}>{HOME_CLAIM}</h1>
           </div>
           <p className={styles.lede}>
             {SITE_NAME}{SITE_PURPOSE}。<br />
             從牆、門與窗開始，慢慢讀懂每一格。
           </p>
+          <aside className={styles.brand} aria-label="關於拼厝">
+            <div className={styles.brandArt}>
+              <BrandMark variant="full" className={styles.brandMark} width={136} height={228} />
+            </div>
+          </aside>
         </header>
 
         <div className={styles.desk}>
@@ -51,8 +55,8 @@ export default function HomePage() {
             {layouts.map((layout) => (
               <article key={layout.id} className={styles.layout} aria-labelledby={`layout-title-${layout.id}`}>
                 <div className={styles.layoutHeading}>
-                  <p className={styles.eyebrow}>從格局開始</p>
                   <h2 id={`layout-title-${layout.id}`} className={styles.layoutTitle}>{layout.name}</h2>
+                  <p className={styles.layoutPrompt}>從格局開始</p>
                 </div>
                 {/* 與讀圖頁共用同一個 renderer；首頁只畫圖面，不掛熱區或互動狀態。 */}
                 <div className={styles.preview} role="img" aria-label={`${layout.name}平面圖縮圖`}>
@@ -87,7 +91,8 @@ export default function HomePage() {
                     const label = CATEGORY_LABELS[category.id];
                     return (
                       <li key={category.id} className={styles.categoryItem}>
-                        <Link className={styles.categoryLink} href={`/categories/${category.id}`}>
+                        {/* 聚焦搜尋而捲動時，不預抓剛進入視野的其他入口。 */}
+                        <Link className={styles.categoryLink} href={`/categories/${category.id}`} prefetch={false}>
                           <span className={styles.categoryName}>{label.zh}</span>
                           <span className={styles.categoryEn} aria-hidden="true">{label.en}</span>
                         </Link>
@@ -107,6 +112,7 @@ export default function HomePage() {
                     key={layout.id}
                     className={styles.quizButton}
                     href={`/layouts/${layout.id}/quiz`}
+                    prefetch={false}
                     event={{
                       name: ANALYTICS_EVENTS.selectContent,
                       content_type: "home_quiz",
@@ -121,16 +127,10 @@ export default function HomePage() {
               </section>
             )}
           </div>
-
-          <aside className={styles.brand} aria-label="關於拼厝">
-            <div className={styles.brandArt}>
-              <BrandMark variant="full" className={styles.brandMark} width={136} height={228} />
-            </div>
-            <div className={styles.brandCopy}>
-              <p className={styles.brandPromise}>{BRAND_PROMISE}</p>
-              <p className={styles.brandNote}>看屋前，或回家以後。<br />把不確定的地方，一格一格拼起來。</p>
-            </div>
-          </aside>
+        </div>
+        <div className={styles.brandCopy}>
+          <p className={styles.brandPromise}>{BRAND_PROMISE}</p>
+          <p className={styles.brandNote}>看屋前，或回家以後。<br />把不確定的地方，一格一格拼起來。</p>
         </div>
       </div>
     </main>

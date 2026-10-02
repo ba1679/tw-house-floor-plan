@@ -186,9 +186,9 @@ export const BRAND_IMAGE_ALT = `${SITE_NAME}：由平面圖方格拼成的台灣
  * 首頁那一句主張，照 PRD §8 資訊架構圖上的原句。
  *
  * 一個問句而不是介紹：讀者多半以為自己看得懂平面圖，這一句先讓他懷疑一下，底下那個按鈕才有人按。
- * 「這裡在幹嘛」由緊接著的 `SITE_PURPOSE` 說。
+ * 「這裡在幹嘛」由緊接著的 `SITE_PURPOSE` 說。換行直接由文案指定，CSS pre-line 呈現。
  */
-export const HOME_CLAIM = "一張平面圖，你真的看得懂嗎？";
+export const HOME_CLAIM = "一張平面圖，\n你真的\n看得懂嗎？";
 
 /**
  * 這個網站替你做什麼的那一句。首頁、平面圖頁、根版面的 meta description 都由它組出來——
@@ -274,11 +274,17 @@ export const quizProgress = (index: number, total: number) => `第 ${index} / ${
 export const QUIZ_PROMPT_LEAD = "找出這張圖上的";
 
 /**
- * 作答之後狀態列那一句。**只說對或錯**，不誇獎、不責備（spec「一局的流程」）：這是工具，不是遊戲化產品。
- * 放在狀態列（role="status"）而不是另外一行：用鍵盤作答的人聽得到結果。
+ * 作答判定；狀態列接上結果區的完整名字，用鍵盤作答的人也聽得到答案。
  */
 export const QUIZ_CORRECT = "答對了。";
 export const QUIZ_WRONG = "答錯了。";
+
+export const QUIZ_RESULT_LABEL = "作答結果";
+export const QUIZ_RESULT_CORRECT = "答對";
+export const QUIZ_RESULT_WRONG = "答錯";
+export const quizFound = (name: string) => `你找到了「${name}」`;
+export const quizResultPicked = (name: string) => `你點的是「${name}」`;
+export const quizExpected = (name: string) => `正確答案是「${name}」`;
 
 /** 作答之後前進的那一顆。最後一題按下去是結算，字照樣是「下一題」（spec「作答之後」的原文）。 */
 export const QUIZ_NEXT = "下一題";

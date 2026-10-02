@@ -95,9 +95,10 @@
   --fp-furn: #ffffff;
   --fp-furn-line: #8a8a8a;
   --fp-dim-source: #6b6b6b;
+  --fp-room-dim-weight: 84%;
 
-  --state-blue: oklch(0.44 0.15 256);
-  --state-warm: oklch(0.45 0.1 65);
+  --state-blue: oklch(0.435 0.15 256);
+  --state-warm: oklch(0.44 0.1 65);
   --state-casing: #ffffff;
   --state-normal-fill: oklch(0.965 0.018 250);
   --state-normal-stroke: var(--state-blue);

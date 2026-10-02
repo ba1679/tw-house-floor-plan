@@ -34,7 +34,7 @@ test.describe("/ 首頁", () => {
     // 主張**再打一次** PRD §8 的原句、不從常數拿：從常數 import 的斷言證不出常數本身被改壞
     // （同 site-footer.spec.ts 的免責、category-page.spec.ts 的中文分類名）。只問「有一個 h1」的話，
     // 換成任何一句標題都會過。
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("一張平面圖，你真的看得懂嗎？");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("一張平面圖，\n你真的\n看得懂嗎？");
 
     // 前提：spec 點名的那張圖還在資料裡。哪天它被改名，這條要帶著訊息紅，而不是安靜地少測一張。
     expect(specNamedFloorplan, "spec 點名的 3b2l_standard 不在 data/layouts 裡").toBeTruthy();
@@ -179,8 +179,8 @@ test.describe("/ 首頁", () => {
     expect((await entry.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   });
 
-  test("品牌面獨立於圖面與搜尋，桌機分欄、手機單欄且圖面比標記突出", async ({ page }) => {
-    for (const size of [{ width: 1280, height: 900 }, { width: 320, height: 568 }]) {
+  test("完整台灣標記在開場，手機首屏保留讀圖入口，圖面仍比標記突出", async ({ page }) => {
+    for (const size of [{ width: 1280, height: 900 }, { width: 375, height: 812 }, { width: 320, height: 568 }]) {
       await page.setViewportSize(size);
       await page.goto("/");
       const brand = page.getByRole("complementary", { name: "關於拼厝" });
@@ -190,18 +190,19 @@ test.describe("/ 首頁", () => {
       await expect(brand.getByRole("searchbox")).toHaveCount(0);
       await expect(brand.getByRole("link")).toHaveCount(0);
 
-      const brandBox = (await brand.boundingBox())!;
       const markBox = (await mark.boundingBox())!;
       const previewBox = (await preview.boundingBox())!;
       expect(previewBox.width * previewBox.height).toBeGreaterThan(markBox.width * markBox.height);
       // 完整標記必須有足夠尺寸辨認島嶼拼塊，不是另一個 compact icon。
       expect(markBox.width).toBeGreaterThanOrEqual(96);
       expect(markBox.height).toBeGreaterThanOrEqual(144);
-      if (size.width >= 760) {
-        expect(brandBox.x).toBeGreaterThan(previewBox.x + previewBox.width);
-      } else {
-        expect(brandBox.y).toBeGreaterThan(previewBox.y + previewBox.height);
-      }
+      // 品牌在 intro 的真實 DOM 位置，不只靠桌機 grid 把頁尾裝飾搬上來。
+      expect(await brand.evaluate((element) => element.closest("header") !== null)).toBe(true);
+      expect(markBox.y).toBeGreaterThanOrEqual(0);
+      expect(markBox.y + markBox.height).toBeLessThan(previewBox.y);
+      expect(markBox.y + markBox.height).toBeLessThanOrEqual(size.height);
+      const entryBox = (await page.locator('main a[href="/layouts/3b2l_standard"]').boundingBox())!;
+      expect(entryBox.y + entryBox.height).toBeLessThanOrEqual(size.height);
       expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
     }
   });

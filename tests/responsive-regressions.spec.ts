@@ -1,8 +1,9 @@
 import { test, expect, type Page } from "@playwright/test";
 import { selectByTwoTaps } from "./viewer-page";
+import { answerByTwoTaps, cleanHotspotsOf, nextOf, startRoundAt, symbolOf } from "./quiz-play";
 
 const REPRESENTATIVE_PAGES = [
-  { label: "home", path: "/", heading: "一張平面圖，你真的看得懂嗎？" },
+  { label: "home", path: "/", heading: /^一張平面圖，\s*你真的\s*看得懂嗎？$/ },
   { label: "floorplan", path: "/layouts/3b2l_standard", heading: "三房兩廳" },
   { label: "symbol", path: "/symbols/window", heading: /窗/ },
   { label: "category", path: "/categories/door_window", heading: /門窗/ },
@@ -22,6 +23,61 @@ async function gotoRepresentative(page: Page, path: string) {
 }
 
 test.describe("M5 RWD representatives", () => {
+  for (const size of [{ width: 375, height: 812 }, { width: 320, height: 568 }]) {
+    for (const correct of [true, false]) {
+      test(`找找看結果與說明卡完整開合仍保留圖面與下一題（${size.width} × ${size.height}，${correct ? "答對" : "答錯"}）`, async ({ page }) => {
+        await page.setViewportSize(size);
+        const target = "door_single_swing";
+        await startRoundAt(page, target, { notLast: true });
+        await answerByTwoTaps(page, cleanHotspotsOf(correct ? target : "door_double_swing")[0]);
+        const result = page.getByRole("region", { name: "作答結果" });
+        const sheet = page.locator("#info-sheet");
+        if (correct) await page.getByRole("button", { name: "看說明" }).click();
+        await sheet.evaluate(async (element) => {
+          element.getBoundingClientRect();
+          await Promise.all(element.getAnimations().map((animation) => animation.finished));
+        });
+        // 完整內容已放得下時本來就沒有展開控制；有溢出的卡才走展開與收合。
+        const stages = await page.getByRole("button", { name: "展開完整內容" }).isVisible()
+          ? ["open", "expanded", "collapsed"] : ["open"];
+        for (const stage of stages) {
+          if (stage === "expanded") await page.getByRole("button", { name: "展開完整內容" }).click();
+          if (stage === "collapsed") await page.getByRole("button", { name: "收合看平面圖" }).click();
+          await sheet.evaluate(async (element) => {
+            element.getBoundingClientRect();
+            await Promise.all(element.getAnimations().map((animation) => animation.finished));
+          });
+          await expect(result).toBeInViewport({ ratio: 1 });
+          await expect(nextOf(page)).toBeInViewport({ ratio: 1 });
+          await expect(sheet.getByRole("heading", { name: symbolOf(target).name })).toBeInViewport({ ratio: 1 });
+          const frame = (await page.locator("#floorplan-viewport").boundingBox())!;
+          const card = (await sheet.boundingBox())!;
+          const feedback = (await result.boundingBox())!;
+          expect(frame.height, stage).toBeGreaterThanOrEqual(84);
+          expect(frame.y + frame.height).toBeLessThanOrEqual(feedback.y);
+          expect(feedback.y + feedback.height).toBeLessThanOrEqual(card.y);
+          await expectNoHorizontalOverflow(page, stage);
+          expect(await page.evaluate(() => document.documentElement.scrollHeight > innerHeight)).toBe(false);
+        }
+        if (!correct) {
+          const difference = symbolOf(target).confused_with.find((other) => other.symbol_id === "door_double_swing")!.difference;
+          const note = sheet.locator('[data-section="note"]');
+          await expect(note).toContainText(difference);
+          const body = sheet.locator("#info-sheet-body");
+          expect((await body.boundingBox())!.height, "正文至少能讀兩行，不能只剩裁切縫隙").toBeGreaterThanOrEqual(48);
+          await body.evaluate((element) => { element.scrollTop = element.scrollHeight; });
+          expect(await body.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+        }
+        await page.getByRole("button", { name: "關閉說明" }).click();
+        await expect(sheet).toBeHidden();
+        await expect(result).toBeInViewport({ ratio: 1 });
+        await expect(nextOf(page)).toBeInViewport({ ratio: 1 });
+        await nextOf(page).click();
+        await expect(result).toBeHidden();
+        expect(await page.evaluate(() => document.documentElement.scrollHeight > innerHeight)).toBe(false);
+      });
+    }
+  }
   test("自由看圖在手機與桌機完整開合說明卡，動畫後仍是一個螢幕的版面列", async ({ page }) => {
     for (const size of [
       { width: 375, height: 812 },
