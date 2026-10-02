@@ -49,3 +49,11 @@ Blocked by: 02, 05
 ### 2026-10-01 — Review 後補齊最長名稱
 
 - Standards 軸無 actionable finding；Spec 軸指出最長名稱在 320 × 568 時正文不足兩行。票 07 的 regression gate 已補上該案例，並修正窄螢幕結果排列、標頭 metadata 與列距。完整 production suite 303 項通過，含 quiz progress／analytics；詳細量測與視覺紀錄見票 07。
+
+### 2026-10-02 — 與首頁改版整合驗收
+
+- 既有實作與完成紀錄隨 `e1f3807`、`914030e`、`690d9f4`、`810b2e1` 一起整合至 `codex/pin-chhu-design-completion`；本票保持 `resolved`，不是作廢或重新實作。
+- 整合基底為首頁 PR #11 的 `23a2cef`，保留完整台灣標記的開場位置與文案換行／CSS `pre-line`。跨頁首頁 h1 的比對已容許 accessible name 正規化產生的空白。
+- `PORT=3112 npx playwright test --workers=4` 對本工作目錄重新 production build 後：**303 passed**，涵蓋答對／答錯、最長符號名、Sheet 開合、375 × 812／320 × 568 高度、鍵盤、Analytics 與 progress。`npm run typecheck` 通過；`npm run test:domain`：**13 passed**。
+- Chromium 目視本次 build 的 375 × 812 答錯及 320 × 568 最長名稱答錯／展開；結果、下一題與 Sheet 保持可讀可操作。截圖在 `/tmp/pin-chhu-integrated-qa/`，實際硬體及螢幕閱讀器發聲仍未測。
+- 整合後兩軸 review：Standards 0、Spec 0。

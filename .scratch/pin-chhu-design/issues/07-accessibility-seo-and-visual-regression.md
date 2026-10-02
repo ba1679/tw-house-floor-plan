@@ -57,3 +57,12 @@ Blocked by: 03, 04, 05, 06
 - Standards：0 hard breaches、0 未解決 smell；原先重複的瀏覽器色彩轉換已收進 `tests/browser-colors.ts`，三處共用，複查通過。整理後重新跑 design-language／pin-chhu-regressions 的 production gate：**14 passed**。
 - Spec：0 findings。另獨立重測最長名稱的 320 × 568 答錯／展開／收合，圖面 84px、正文約 50.6px、document 568px；關卡焦點與下一題焦點正確。
 - ADR-0003 追加找找看可視帶歸零限制已解決的紀錄，保留 InfoSheet 作為版面列，以及高度預算由 QuizRound 管理的既有邊界。
+
+### 2026-10-02 — 與最新首頁整合後重新完成 gate
+
+- 隨四筆既有實作提交整合至 `codex/pin-chhu-design-completion`，以首頁 PR #11 的 `23a2cef` 為基底；完成紀錄與程式一起保留，本票保持 `resolved`。
+- 首頁三個代表頁測試改用完整且容許句間空白的 h1 regex，修正文案換行經 accessible name 正規化後無法匹配舊字串的問題；修正已提交在 PR #11。
+- 本次實際執行 `PORT=3112 npx playwright test --workers=4`：**303 passed**。Playwright 使用獨立埠號，先在本工作目錄完成 production build（含 `generate:brand`、`validate`、`validate:floorplan`）再啟動靜態 server；沒有重用其他 checkout 的 preview。既有 SEO、sitemap、quiz noindex、Analytics、房型色、對比、品牌與 responsive gates 全部通過。
+- `npm run typecheck` 通過；`npm run test:domain`：**13 passed**。另重跑 `npm run generate:brand`，favicon／Apple icon／OG 三個產物的前後 SHA-256 全部一致；`data/` 與符號圖形未修改。
+- Chromium 批次目視 production 的首頁 375 × 812、320 × 568、1280 × 900，以及最長名稱的手機答錯／小螢幕展開 Sheet；首頁標記與讀圖入口、結果與下一題均完整。截圖在 `/tmp/pin-chhu-integrated-qa/`。實體 Safari／iPhone／Android 與螢幕閱讀器發聲仍未測，沿用原先已記錄的限制。
+- 整合後兩軸 review：Standards 0、Spec 0；`git diff --check` 通過。
