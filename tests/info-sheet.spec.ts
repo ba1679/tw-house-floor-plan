@@ -106,6 +106,8 @@ test("沒有注意事項的符號，卡片上不留空的區塊", async ({ page 
 });
 
 test("塞得下就不出現「展開完整內容」；塞不下才出現，點一下展開", async ({ page }) => {
+  // 給短說明足夠的閱讀高度，驗證展開提示取決於內容是否真的溢出。
+  await page.setViewportSize({ width: 375, height: 900 });
   await page.goto(PLAN);
   const hint = page.getByRole("button", { name: /展開完整內容/ });
 

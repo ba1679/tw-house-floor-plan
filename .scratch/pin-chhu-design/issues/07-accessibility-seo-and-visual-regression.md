@@ -66,3 +66,11 @@ Blocked by: 03, 04, 05, 06
 - `npm run typecheck` 通過；`npm run test:domain`：**13 passed**。另重跑 `npm run generate:brand`，favicon／Apple icon／OG 三個產物的前後 SHA-256 全部一致；`data/` 與符號圖形未修改。
 - Chromium 批次目視 production 的首頁 375 × 812、320 × 568、1280 × 900，以及最長名稱的手機答錯／小螢幕展開 Sheet；首頁標記與讀圖入口、結果與下一題均完整。截圖在 `/tmp/pin-chhu-integrated-qa/`。實體 Safari／iPhone／Android 與螢幕閱讀器發聲仍未測，沿用原先已記錄的限制。
 - 整合後兩軸 review：Standards 0、Spec 0；`git diff --check` 通過。
+
+### 2026-10-02 — 來源徽章與分隔線 spacing
+
+- 依使用者截圖修正 InfoSheet：來源徽章作為正文首項時，使用既有 `--space-3` 加上方間距，讓外框與 header 分隔線由 0px 分開至 12px。有錯答 note 先行時，保留原本 note 到徽章的間距。
+- 375 × 812、320 × 568、1280 × 900 的自由看圖開啟／展開／收合，實際間距均為 12px，沒有 document scroll 或水平溢出；亦目視核對找找看答對後的「窗」說明卡。截圖在 `/tmp/pin-chhu-sheet-spacing-qa/`。
+- 新留白使雙開門在 375 × 812 超過原有閱讀上限，正確顯示展開提示。既有「塞得下／塞不下」測試改用 375 × 900 的足夠閱讀高度比較短說明與雨遮，讓測試仍驗證實際溢出而非依賴舊 spacing 的邊界；375 × 812 與 320 × 568 的高度預算仍由原尺寸回歸守住。
+- 本工作目錄以 `PORT=3113 npx playwright test --workers=4` 完成含此 CSS 的 production build，再以同一份 `out/` 在 `PORT=3110` 跑最新完整 suite：**303 passed**。設計 hook 無 findings；spacing 的兩軸審閱 Standards 0、Spec 0。
+- 整合版本 `7f1ed28` 的 `npm run audit` 已完成五種代表頁各三次 Lighthouse：效能中位數皆 99%，其餘適用分類皆 100%。後續 spacing 提交的 GitHub release gate 另行執行。
