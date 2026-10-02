@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { selectByTwoTaps } from "./viewer-page";
+import { selectByTwoTaps, waitForViewerReady } from "./viewer-page";
 
 // 說明卡是使用者確認符號之後拿到的東西：這是什麼、要注意什麼，
 // **以及這個說法是從哪份文件來的**（PRD §6.5，本產品的核心差異化）。
@@ -15,7 +15,11 @@ for (const size of [{ width: 375, height: 812 }, { width: 320, height: 568 }]) {
   test(`${size.width} × ${size.height}：展開說明仍保留圖面可視帶，卡片底部與控制不被裁切`, async ({ page }) => {
     await page.setViewportSize(size);
     await page.emulateMedia({ reducedMotion: "reduce" });
+    // 放大冷啟動時序，確保較慢的 CI 不會在 client 接手前送出鍵盤操作。
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 8 });
     await page.goto(PLAN);
+    await waitForViewerReady(page);
     const canopy = page.locator("#hs-canopy-master");
     await canopy.focus();
     await page.keyboard.press("Enter");

@@ -28,6 +28,15 @@
         ],
         "createdAt": "2026-10-01T14:31:42.360Z",
         "reason": "Agent: DESIGN.md Motion and focus and M6 ticket 03 require the layout-row sheet and viewport to resize together, including entry and exit; structural height motion respects reduced-motion, commit 1a6ea78d."
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "components/FloorPlanViewer.module.css"
+        ],
+        "createdAt": "2026-10-02T15:14:52.634Z",
+        "reason": "Agent: intentional symbol-absence banner shares the warm highlight meaning; documented in .scratch/m3-symbol-pages/issues/09-beam-absent-from-plan-banner.md:56 and the banner CSS comment; this UX task did not alter that border."
       }
     ]
   }

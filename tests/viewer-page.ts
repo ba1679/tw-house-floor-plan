@@ -7,6 +7,11 @@ import { expect, type Page } from "@playwright/test";
 
 type Box = { x: number; y: number; width: number; height: number };
 
+/** SSG 熱區存在時 client 可能尚未接手；data-hint 出現表示 client 已完成首次引導判斷。 */
+export async function waitForViewerReady(page: Page) {
+  await expect(page.locator("#hotspot-layer")).toHaveAttribute("data-hint", /on|off/);
+}
+
 /**
  * 新圖上緣偏左的留白，避開北側餐廳平開窗與客廳雨遮的熱區。
  * 以落空／雙擊測試持續驗證這裡沒有候選，不能沿用舊格局的中央留白。
@@ -55,9 +60,7 @@ export async function dragLeft(page: Page, from: { x: number; y: number }, dx: n
  */
 export async function selectByTwoTaps(page: Page, hotspotId: string) {
   const target = page.locator(`#${hotspotId}`);
-  // page.goto() 等待靜態文件完成，不代表 client hydration 與第一個 ResizeObserver
-  // callback 已經完成；這個小等待讓兩段式測試從真實可互動的狀態開始。
-  await page.waitForTimeout(100);
+  await waitForViewerReady(page);
   const before = (await target.boundingBox())!;
   await page.mouse.click(before.x + before.width / 2, before.y + before.height / 2);
   // 等第一段 state commit 完成再量第二段座標；新增的 SVG 標記層讓立即連點更容易

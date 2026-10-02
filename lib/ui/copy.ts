@@ -147,6 +147,16 @@ export const TAP_HINT = "點圖上任何一個位置，我們會放大讓你看�
 /** 檢視器控制列的兩顆按鈕（M2 票 03、04）。平面圖頁與找找看共用同一個圖框，也共用這兩個字。 */
 export const VIEWER_CONTROLS = { reselect: "重選", resetView: "回到全圖" } as const;
 
+/** 自由看圖的常駐操作提示；不取代一次性提示，也不進入找找看的作答介面。 */
+export const FLOORPLAN_GUIDE = {
+  label: "平面圖操作提示",
+  browseTitle: "這張平面圖可以點",
+  confirmTitle: "放大了，再點藍框看說明",
+  locate: "點想了解的位置",
+  confirm: "再點藍框看說明",
+  tryOne: "試點一個符號",
+} as const;
+
 /**
  * 第一段圈出候選之後狀態列那一句。**只說數量、不說是哪些符號**：找找看作答前，
  * 畫面與讀螢幕軟體念得出來的東西都不得出現熱區的符號名字（PRD §6.3.1）。

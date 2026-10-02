@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
-import { blankSpot } from "./viewer-page";
+import { blankSpot, waitForViewerReady } from "./viewer-page";
 
 // 兩段式點擊升為全站的基礎操作之後，它是**所有人看圖的唯一方式**——所以鍵盤必須有一條
 // 完整的平行路徑，否則這個網站對鍵盤使用者等於不存在（票 06）。
@@ -101,6 +101,7 @@ const planOf = (page: Page) => page.getByRole("group", { name: /三房兩廳/ })
 
 test("Tab 一間房一間房走過所有符號，順序對上看屋的動線", async ({ page }) => {
   await page.goto(PLAN);
+  await waitForViewerReady(page);
 
   const stops = await tabThroughHotspots(page);
 
@@ -117,6 +118,7 @@ test("Tab 一間房一間房走過所有符號，順序對上看屋的動線", a
 
 test("同一間房裡依結構 → 門窗 → 家具，落在房間之外的排在最後", async ({ page }) => {
   await page.goto(PLAN);
+  await waitForViewerReady(page);
 
   const stops = await tabThroughHotspots(page);
   const byRoom = new Map<string, Hotspot[]>();
@@ -189,7 +191,11 @@ test("熱區歸到圖上實際所在的那一間房", async ({ page }) => {
 });
 
 test("Enter 開說明卡、Esc 關卡，焦點回到原本的熱區", async ({ page }) => {
+  // 保留較慢冷啟動，確保就緒等待能保護鍵盤開卡與焦點還原。
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 8 });
   await page.goto(PLAN);
+  await waitForViewerReady(page);
 
   const door = page.locator("#hs-door-entry");
   const sheet = page.locator("#info-sheet");
@@ -211,6 +217,7 @@ test("Enter 開說明卡、Esc 關卡，焦點回到原本的熱區", async ({ p
 
 test("鍵盤不走兩段式：一次 Enter 就開卡，不必先放大再確認", async ({ page }) => {
   await page.goto(PLAN);
+  await waitForViewerReady(page);
 
   const plan = planOf(page);
   const before = (await plan.boundingBox())!;
@@ -226,6 +233,7 @@ test("鍵盤不走兩段式：一次 Enter 就開卡，不必先放大再確認"
 
 test("焦點移到畫面外的熱區時，圖自動平移讓它看得見", async ({ page }) => {
   await page.goto(PLAN);
+  await waitForViewerReady(page);
 
   // 全圖時整張圖都在畫面上，沒有東西需要平移——先放大一級，把圖的一角推出畫面。
   const fit = (await planOf(page).boundingBox())!;
@@ -255,6 +263,7 @@ test("焦點移到畫面外的熱區時，圖自動平移讓它看得見", async
 
 test("焦點所在的熱區，畫面上看得出來", async ({ page }) => {
   await page.goto(PLAN);
+  await waitForViewerReady(page);
 
   // 用 Tab 走到第一個熱區，不直接 focus()：這條問的是鍵盤使用者看到的焦點。圖前面的東西（標題列）先 Tab 過去。
   const focused = page.locator("#hs-door-entry");
@@ -277,6 +286,7 @@ test("焦點所在的熱區，畫面上看得出來", async ({ page }) => {
 
 test("鍵盤開過卡片之後改用手指，卡片不再搶走焦點", async ({ page }) => {
   await page.goto(PLAN);
+  await waitForViewerReady(page);
   const sheet = page.locator("#info-sheet");
   const band = async () => Math.round((await viewportOf(page).boundingBox())!.height);
   const full = await band();

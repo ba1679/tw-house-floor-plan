@@ -1,6 +1,16 @@
 "use client";
 
-import { Suspense, useCallback, useReducer, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+  type MouseEvent,
+  type MouseEventHandler,
+} from "react";
+import { FloorPlanGuide } from "./FloorPlanGuide";
 import { FloorPlanViewport, initialViewerConfig } from "./FloorPlanViewport";
 import { HighlightFromQuery } from "./HighlightFromQuery";
 import { InfoSheet } from "./InfoSheet";
@@ -9,16 +19,26 @@ import { useFirstVisitHint } from "./useFirstVisitHint";
 import { ANALYTICS_EVENTS, track } from "@/lib/analytics";
 import { isSymbolAbsent } from "@/lib/floorplan/hotspots";
 import type { RoomHotspots } from "@/lib/floorplan/reading-order";
-import type { FloorPlan } from "@/lib/floorplan/types";
+import type { FloorPlan, Hotspot } from "@/lib/floorplan/types";
 import { symbolName } from "@/lib/symbols/name";
 import type { SymbolRecord } from "@/lib/symbols/types";
-import { SYMBOL_NOT_FOUND, TAP_HINT, absentSymbolBanner, highlightStatus } from "@/lib/ui/copy";
+import {
+  FLOORPLAN_GUIDE,
+  SYMBOL_NOT_FOUND,
+  TAP_HINT,
+  VIEWER_CONTROLS,
+  absentSymbolBanner,
+  highlightStatus,
+} from "@/lib/ui/copy";
 import {
   createViewerState,
   occurrencesOf,
   reduceViewer,
   selectedOccurrence,
+  type ViewerAction,
+  type ViewerState,
 } from "@/lib/viewer/interaction";
+import { isFitView } from "@/lib/viewer/view";
 import styles from "./FloorPlanViewer.module.css";
 
 // 平面圖頁的檢視器：**自由看圖**。圖框本身（手勢、畫布、熱區層）在 `FloorPlanViewport`，
@@ -31,6 +51,43 @@ type Props = {
   /** 熱區的閱讀順序，在 build 時算好（`lib/floorplan/reading-order.ts`）。見 `FloorPlanViewport`。 */
   readingOrder: RoomHotspots[];
 };
+
+/** 網址高亮優先，再找閱讀順序的門窗，最後取任一有效符號；座標始終來自真實熱區。 */
+function pickStarterHotspot(
+  { floorplan, symbols, readingOrder }: Props,
+  highlightedSymbol: string | null,
+): Hotspot | undefined {
+  if (highlightedSymbol !== null) {
+    const highlighted = floorplan.hotspots.find((hotspot) => hotspot.symbol_id === highlightedSymbol);
+    if (highlighted) return highlighted;
+  }
+
+  const doorOrWindow = readingOrder.flatMap((room) => room.hotspots).find((hotspot) =>
+    hotspot.symbol_id !== null && symbols[hotspot.symbol_id]?.category === "door_window",
+  );
+  if (doorOrWindow) return doorOrWindow;
+
+  return floorplan.hotspots.find((hotspot) =>
+    hotspot.symbol_id !== null && Object.hasOwn(symbols, hotspot.symbol_id),
+  );
+}
+
+/** 共用控制位置的優先順序：先結束候選，再回到全圖，全圖才提供試點。 */
+function getGuideAction(
+  state: ViewerState,
+  starterHotspot: Hotspot | undefined,
+  tryHotspot: MouseEventHandler<HTMLButtonElement>,
+  dispatchViewer: (action: ViewerAction) => void,
+) {
+  if (state.stage === "candidates") {
+    return { label: VIEWER_CONTROLS.reselect, onClick: () => dispatchViewer({ type: "RESELECT" }) };
+  }
+  if (!isFitView(state)) {
+    return { label: VIEWER_CONTROLS.resetView, onClick: () => dispatchViewer({ type: "RESET_VIEW" }) };
+  }
+  if (starterHotspot) return { label: FLOORPLAN_GUIDE.tryOne, onClick: tryHotspot };
+  return undefined;
+}
 
 export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
   // 初始尺寸是占位值，SSR 出來的靜態頁面就已經是正確的全圖（`initialViewerConfig`）。
@@ -47,7 +104,8 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
    * missed confirmation, and a real selection.
    */
   const dispatchViewer = useCallback(
-    (action: Parameters<typeof dispatch>[0]) => {
+    (action: ViewerAction, requestedInputMethod: "pointer" | "keyboard" = "pointer") => {
+      const inputMethod = action.type === "SELECT_HOTSPOT" ? "keyboard" : requestedInputMethod;
       const next = reduceViewer(state, action);
       if (next !== state) {
         if (state.stage !== "candidates" && next.stage === "candidates") {
@@ -57,7 +115,7 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
             layout_id: floorplan.id,
             action: "candidates_shown",
             candidate_count: next.candidates.length,
-            input_method: "pointer",
+            input_method: inputMethod,
           });
         }
         if (state.stage !== "confirmed" && next.stage === "confirmed" && next.selected?.symbol_id) {
@@ -65,7 +123,6 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
           // A selection is still one semantic confirmation and one readable card.
           if (trackedSelection.current !== next.selected.id) {
             trackedSelection.current = next.selected.id;
-            const inputMethod = action.type === "SELECT_HOTSPOT" ? "keyboard" : "pointer";
             track({
               name: ANALYTICS_EVENTS.layoutInteraction,
               layout_id: floorplan.id,
@@ -217,6 +274,30 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
   /** 說明卡此刻升起來了沒。掛上 `<InfoSheet>`、樑的橫幅讓位、房間變暗，問的是同一件事，所以只寫一次。 */
   const sheetOpen = selectedSymbol !== null && occurrence !== null;
 
+  const starterHotspot = pickStarterHotspot({ floorplan, symbols, readingOrder }, state.highlightedSymbol);
+  const pendingStarterFocusId = useRef<string | null>(null);
+  const tryHotspot = useCallback((event: MouseEvent<HTMLButtonElement>) => {
+    if (!starterHotspot) return;
+    hint.dismiss();
+    onTouch();
+    pendingStarterFocusId.current = starterHotspot.id;
+    const [x, y, width, height] = starterHotspot.coords;
+    dispatchViewer(
+      { type: "TAP", x: x + width / 2, y: y + height / 2 },
+      event.detail === 0 ? "keyboard" : "pointer",
+    );
+  }, [starterHotspot, hint.dismiss, onTouch, dispatchViewer]);
+
+  // 試點按鈕在下一段退場，把焦點接到真實熱區，鍵盤使用者能接著按 Enter 開啟說明。
+  useEffect(() => {
+    if (state.stage !== "candidates" || !pendingStarterFocusId.current) return;
+    document.getElementById(pendingStarterFocusId.current)?.focus();
+    pendingStarterFocusId.current = null;
+  }, [state.stage]);
+
+  // 控制和提示共用同一列：縮放後不再插入額外的 reset 列，fit 與使用者倍率因此不會跟著跳動。
+  const guideAction = getGuideAction(state, starterHotspot, tryHotspot, dispatchViewer);
+
   // Esc 關掉說明卡——與關閉鍵同一個 action。第二段進行中的 Esc 由圖框自己處理。
   useEscapeKey(sheetOpen, closeFromEscape);
 
@@ -274,6 +355,13 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
         </div>
       )}
 
+      {!sheetOpen && (
+        <FloorPlanGuide
+          confirming={state.stage === "candidates"}
+          action={guideAction}
+        />
+      )}
+
       <FloorPlanViewport
         floorplan={floorplan}
         symbols={symbols}
@@ -289,6 +377,7 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
         dimRooms={sheetOpen}
         restingStatus={restingStatus}
         hint={hint}
+        showControls={false}
         onTouch={onTouch}
         onKeyboardSelect={onKeyboardSelect}
       />
