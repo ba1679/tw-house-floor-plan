@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { selectByTwoTaps } from "./viewer-page";
+import { selectByTwoTaps, waitForViewerReady } from "./viewer-page";
 
 // 說明卡是使用者確認符號之後拿到的東西：這是什麼、要注意什麼，
 // **以及這個說法是從哪份文件來的**（PRD §6.5，本產品的核心差異化）。
@@ -19,8 +19,7 @@ for (const size of [{ width: 375, height: 812 }, { width: 320, height: 568 }]) {
     const cdp = await page.context().newCDPSession(page);
     await cdp.send("Emulation.setCPUThrottlingRate", { rate: 8 });
     await page.goto(PLAN);
-    // 靜態熱區已存在不代表可互動；沿用引導測試的 client 就緒閘門。
-    await expect(page.locator("#hotspot-layer")).toHaveAttribute("data-hint", /on|off/);
+    await waitForViewerReady(page);
     const canopy = page.locator("#hs-canopy-master");
     await canopy.focus();
     await page.keyboard.press("Enter");

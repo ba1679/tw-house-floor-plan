@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { blockLocalStorage } from "./storage";
-import { blankSpot, dragLeft } from "./viewer-page";
+import { blankSpot, dragLeft, waitForViewerReady } from "./viewer-page";
 
 const PLAN = "/layouts/3b2l_standard";
 
@@ -54,6 +54,7 @@ test("鍵盤試點後焦點接到候選，Enter 開說明並如實記錄輸入�
     (window as unknown as { __fpAnalyticsEvents: unknown[] }).__fpAnalyticsEvents = [];
   });
   await page.goto(PLAN);
+  await waitForViewerReady(page);
   const starter = page.getByRole("button", { name: "試點一個符號" });
   await starter.focus();
   await page.keyboard.press("Enter");
