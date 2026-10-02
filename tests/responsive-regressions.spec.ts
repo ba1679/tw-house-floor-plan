@@ -2,7 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { selectByTwoTaps } from "./viewer-page";
 
 const REPRESENTATIVE_PAGES = [
-  { label: "home", path: "/", heading: "一張平面圖，你真的看得懂嗎？" },
+  { label: "home", path: "/", heading: /^一張平面圖，\s*你真的\s*看得懂嗎？$/ },
   { label: "floorplan", path: "/layouts/3b2l_standard", heading: "三房兩廳" },
   { label: "symbol", path: "/symbols/window", heading: /窗/ },
   { label: "category", path: "/categories/door_window", heading: /門窗/ },

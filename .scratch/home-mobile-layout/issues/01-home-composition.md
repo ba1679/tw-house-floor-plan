@@ -49,3 +49,9 @@ production build、TypeScript、首頁／設計語言／導覽／搜尋／Analyt
 - 本次首頁變更獨立整理到 `codex/home-mobile-layout`，以遠端 `main` 的 `285c71e` 為基底；既有四筆未推送提交保留在原分支 `codex/install-impeccable-skill`。
 - PR diff 僅包含本票的七個檔案，沒有帶入既有找找看回饋、InfoSheet 或 State 調整。
 - 以 PR 基底重新 production build 成功；相同七組首頁／設計語言／導覽／metadata／Analytics／搜尋測試共 49 passed（main 與原實作基底的測試清單不同）。
+
+### 2026-10-02 — 修正跨頁標題回歸
+
+- PR #11 的完整 CI 中，三個代表頁測試仍以沒有空白的舊首頁標題尋找 h1；文案換行經 accessible name 正規化後包含空白，導致 locator 找不到元素。
+- 首頁標題改用完整、允許句間空白的 regex 比對，保留原本的文案及 CSS `pre-line`。
+- 在本工作目錄的 production preview 跑 `PORT=3110 npx playwright test tests/responsive-regressions.spec.ts --grep '五種代表頁' --workers=3`：3 passed，涵蓋 375 × 812、320px 與桌機的全部代表頁。
