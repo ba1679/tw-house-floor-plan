@@ -15,7 +15,12 @@ for (const size of [{ width: 375, height: 812 }, { width: 320, height: 568 }]) {
   test(`${size.width} × ${size.height}：展開說明仍保留圖面可視帶，卡片底部與控制不被裁切`, async ({ page }) => {
     await page.setViewportSize(size);
     await page.emulateMedia({ reducedMotion: "reduce" });
+    // 放大冷啟動時序，確保較慢的 CI 不會在 client 接手前送出鍵盤操作。
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 8 });
     await page.goto(PLAN);
+    // 靜態熱區已存在不代表可互動；沿用引導測試的 client 就緒閘門。
+    await expect(page.locator("#hotspot-layer")).toHaveAttribute("data-hint", /on|off/);
     const canopy = page.locator("#hs-canopy-master");
     await canopy.focus();
     await page.keyboard.press("Enter");
