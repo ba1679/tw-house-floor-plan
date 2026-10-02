@@ -1,6 +1,7 @@
 "use client";
 
-import { Suspense, useCallback, useReducer, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useReducer, useRef, useState, type MouseEvent } from "react";
+import { FloorPlanGuide } from "./FloorPlanGuide";
 import { FloorPlanViewport, initialViewerConfig } from "./FloorPlanViewport";
 import { HighlightFromQuery } from "./HighlightFromQuery";
 import { InfoSheet } from "./InfoSheet";
@@ -12,13 +13,14 @@ import type { RoomHotspots } from "@/lib/floorplan/reading-order";
 import type { FloorPlan } from "@/lib/floorplan/types";
 import { symbolName } from "@/lib/symbols/name";
 import type { SymbolRecord } from "@/lib/symbols/types";
-import { SYMBOL_NOT_FOUND, TAP_HINT, absentSymbolBanner, highlightStatus } from "@/lib/ui/copy";
+import { FLOORPLAN_GUIDE, SYMBOL_NOT_FOUND, TAP_HINT, VIEWER_CONTROLS, absentSymbolBanner, highlightStatus } from "@/lib/ui/copy";
 import {
   createViewerState,
   occurrencesOf,
   reduceViewer,
   selectedOccurrence,
 } from "@/lib/viewer/interaction";
+import { isFitView } from "@/lib/viewer/view";
 import styles from "./FloorPlanViewer.module.css";
 
 // 平面圖頁的檢視器：**自由看圖**。圖框本身（手勢、畫布、熱區層）在 `FloorPlanViewport`，
@@ -47,7 +49,7 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
    * missed confirmation, and a real selection.
    */
   const dispatchViewer = useCallback(
-    (action: Parameters<typeof dispatch>[0]) => {
+    (action: Parameters<typeof dispatch>[0], inputMethod: "pointer" | "keyboard" = "pointer") => {
       const next = reduceViewer(state, action);
       if (next !== state) {
         if (state.stage !== "candidates" && next.stage === "candidates") {
@@ -57,7 +59,7 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
             layout_id: floorplan.id,
             action: "candidates_shown",
             candidate_count: next.candidates.length,
-            input_method: "pointer",
+            input_method: inputMethod,
           });
         }
         if (state.stage !== "confirmed" && next.stage === "confirmed" && next.selected?.symbol_id) {
@@ -217,6 +219,40 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
   /** 說明卡此刻升起來了沒。掛上 `<InfoSheet>`、樑的橫幅讓位、房間變暗，問的是同一件事，所以只寫一次。 */
   const sheetOpen = selectedSymbol !== null && occurrence !== null;
 
+  // 試點沿用閱讀順序裡的門窗；有網址高亮時先接續它。熱區來自資料，不另外維護示範座標。
+  const starter =
+    floorplan.hotspots.find((h) => h.symbol_id !== null && h.symbol_id === state.highlightedSymbol) ??
+    readingOrder.flatMap((room) => room.hotspots).find((h) =>
+      h.symbol_id !== null && symbols[h.symbol_id]?.category === "door_window",
+    ) ??
+    floorplan.hotspots.find((h) => h.symbol_id !== null && Object.hasOwn(symbols, h.symbol_id));
+  const starterFocus = useRef<string | null>(null);
+  const tryHotspot = useCallback((event: MouseEvent<HTMLButtonElement>) => {
+    if (!starter) return;
+    hint.dismiss();
+    onTouch();
+    starterFocus.current = starter.id;
+    const [x, y, width, height] = starter.coords;
+    dispatchViewer(
+      { type: "TAP", x: x + width / 2, y: y + height / 2 },
+      event.detail === 0 ? "keyboard" : "pointer",
+    );
+  }, [starter, hint.dismiss, onTouch, dispatchViewer]);
+
+  // 試點按鈕在下一段退場，把焦點接到真實熱區，鍵盤使用者能接著按 Enter 開啟說明。
+  useEffect(() => {
+    if (state.stage !== "candidates" || !starterFocus.current) return;
+    document.getElementById(starterFocus.current)?.focus();
+    starterFocus.current = null;
+  }, [state.stage]);
+
+  // 控制和提示共用同一列：縮放後不再插入額外的 reset 列，fit 與使用者倍率因此不會跟著跳動。
+  const guideAction = state.stage === "candidates"
+    ? { label: VIEWER_CONTROLS.reselect, onClick: () => dispatchViewer({ type: "RESELECT" }) }
+    : !isFitView(state)
+      ? { label: VIEWER_CONTROLS.resetView, onClick: () => dispatchViewer({ type: "RESET_VIEW" }) }
+      : starter ? { label: FLOORPLAN_GUIDE.tryOne, onClick: tryHotspot } : undefined;
+
   // Esc 關掉說明卡——與關閉鍵同一個 action。第二段進行中的 Esc 由圖框自己處理。
   useEscapeKey(sheetOpen, closeFromEscape);
 
@@ -274,6 +310,13 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
         </div>
       )}
 
+      {!sheetOpen && (
+        <FloorPlanGuide
+          confirming={state.stage === "candidates"}
+          action={guideAction}
+        />
+      )}
+
       <FloorPlanViewport
         floorplan={floorplan}
         symbols={symbols}
@@ -289,6 +332,7 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
         dimRooms={sheetOpen}
         restingStatus={restingStatus}
         hint={hint}
+        showControls={false}
         onTouch={onTouch}
         onKeyboardSelect={onKeyboardSelect}
       />

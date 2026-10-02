@@ -104,6 +104,8 @@ type Props = {
   restingStatus: string;
   /** 「這張圖可以點」的一次性引導（票 05）。hook 由呼叫端呼叫——狀態列那一句要不要接上它，是呼叫端決定的。 */
   hint: FirstVisitHint;
+  /** 自由看圖將控制整合到操作提示列，避免縮放後新增一列而改變圖框；找找看保留內建控制列。 */
+  showControls?: boolean;
   /** 手指碰到圖了。呼叫端各自有要跟著收掉的東西。 */
   onTouch?: () => void;
   /** 鍵盤在這個熱區上按了 Enter／空白鍵（選定它的 action 已經派出去了）。 */
@@ -124,6 +126,7 @@ export function FloorPlanViewport({
   dimRooms,
   restingStatus,
   hint,
+  showControls = true,
   onTouch,
   onKeyboardSelect,
 }: Props) {
@@ -372,7 +375,7 @@ export function FloorPlanViewport({
           - browsing 且視野不是全圖：使用者自己放大或平移過，「回到全圖」才有事情做。
           - confirmed：「重選」由說明卡的關閉鍵擔任（關卡片＝回到 browsing，是同一個
             action，票 03），而卡片開著時可視帶本來就只剩一條，不再擺第二顆按鈕。 */}
-      {controls && <div className={styles.controls}>{controls}</div>}
+      {showControls && controls && <div className={styles.controls}>{controls}</div>}
 
       <p className={styles.status} role="status">
         {viewer.stage === "candidates"
