@@ -1,6 +1,6 @@
 # 拼厝（Phin-Chhù）品牌與讀圖桌設計更新
 
-Status: ready-for-agent
+Status: resolved
 
 ## Source of truth
 

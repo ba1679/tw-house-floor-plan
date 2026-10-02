@@ -6,5 +6,29 @@
       "maxFindings": 5,
       "maxChars": 8000
     }
+  },
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "components/InfoSheet.module.css"
+        ],
+        "createdAt": "2026-10-01T14:31:42.308Z",
+        "reason": "Agent: existing neutral ink note border groups picked-symbol explanation with confused-with comparisons; documented at InfoSheet.module.css note comment and M4 ticket 02, commit 0ede1d69."
+      },
+      {
+        "rule": "layout-transition",
+        "value": "*",
+        "files": [
+          "components/InfoSheet.module.css"
+        ],
+        "createdAt": "2026-10-01T14:31:42.360Z",
+        "reason": "Agent: DESIGN.md Motion and focus and M6 ticket 03 require the layout-row sheet and viewport to resize together, including entry and exit; structural height motion respects reduced-motion, commit 1a6ea78d."
+      }
+    ]
   }
 }
