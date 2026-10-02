@@ -186,9 +186,9 @@ export const BRAND_IMAGE_ALT = `${SITE_NAME}：由平面圖方格拼成的台灣
  * 首頁那一句主張，照 PRD §8 資訊架構圖上的原句。
  *
  * 一個問句而不是介紹：讀者多半以為自己看得懂平面圖，這一句先讓他懷疑一下，底下那個按鈕才有人按。
- * 「這裡在幹嘛」由緊接著的 `SITE_PURPOSE` 說。
+ * 「這裡在幹嘛」由緊接著的 `SITE_PURPOSE` 說。換行直接由文案指定，CSS pre-line 呈現。
  */
-export const HOME_CLAIM = "一張平面圖，你真的看得懂嗎？";
+export const HOME_CLAIM = "一張平面圖，\n你真的\n看得懂嗎？";
 
 /**
  * 這個網站替你做什麼的那一句。首頁、平面圖頁、根版面的 meta description 都由它組出來——
