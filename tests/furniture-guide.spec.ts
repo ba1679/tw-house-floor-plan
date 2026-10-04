@@ -142,3 +142,53 @@ test("第二步在文字放大與鍵盤操作下仍能讀取尺寸及返回格�
   await expect(page.getByRole("link", { name: "回到完整格局", exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
 });
+
+test("第三步把床、主臥門與衣櫃連到使用空間的缺口，且可用鍵盤前後閱讀", async ({ page }) => {
+  await page.goto(GUIDE);
+  await page.getByRole("button", { name: "下一步：尺寸依據" }).click();
+  const next = page.getByRole("button", { name: "下一步：使用空間" });
+  await next.focus();
+  await page.keyboard.press("Enter");
+
+  await expect(page.getByRole("heading", { level: 2, name: "床畫得下，走動、開門和用櫃子呢？" })).toBeFocused();
+  const figure = page.getByRole("figure");
+  const drawing = figure.locator("svg");
+  for (const id of ["f-bed-m", "f-wardrobe-m", "door-master"]) {
+    await expect(drawing.locator(`#${id}`)).toBeVisible();
+  }
+  await expect(drawing.locator("#door-master path")).toHaveCount(1);
+  await figure.getByText("圖面文字說明", { exact: true }).click();
+  await expect(figure.getByText(/床在圖面右下方，衣櫃在上方，主臥門在上方靠右/)).toBeVisible();
+  await expect(page.getByText(/還需要確認從房門走到床邊的可用通道/)).toBeVisible();
+  await expect(page.getByText(/向建商索取主臥淨尺寸、門扇開啟範圍與衣櫃的開門方式/)).toBeVisible();
+
+  await page.getByText("看這一步的依據", { exact: true }).click();
+  await expect(page.getByRole("heading", { name: "本站「三房兩廳」教學範例・主臥使用空間" })).toBeVisible();
+  await expect(page.getByText(/^同一張主臥局部圖畫出右下方的床/)).toContainText("沒有標出床邊通道寬度或衣櫃開啟所需空間");
+  await expect(page.getByRole("link", { name: "回到三房兩廳完整格局" })).toHaveAttribute("href", "/layouts/3b2l_standard");
+
+  await page.getByRole("button", { name: "上一步：尺寸依據" }).click();
+  await expect(page.getByRole("heading", { level: 2, name: "這兩條尺寸，量的是哪裡？" })).toBeFocused();
+  await page.getByRole("button", { name: "下一步：使用空間" }).click();
+  await expect(page.getByRole("heading", { level: 2, name: "床畫得下，走動、開門和用櫃子呢？" })).toBeFocused();
+});
+
+for (const viewport of [{ width: 375, height: 812 }, { width: 320, height: 568 }]) {
+  test(`${viewport.width} × ${viewport.height} 第三步局部圖和追問可閱讀，無橫向溢出`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.goto(GUIDE);
+    await page.getByRole("button", { name: "下一步：尺寸依據" }).click();
+    await page.getByRole("button", { name: "下一步：使用空間" }).click();
+    const drawing = page.getByRole("figure").locator("svg");
+    const frame = (await drawing.boundingBox())!;
+    for (const id of ["f-bed-m", "f-wardrobe-m", "door-master"]) {
+      const feature = (await drawing.locator(`#${id}`).boundingBox())!;
+      expect(feature.x).toBeGreaterThanOrEqual(frame.x);
+      expect(feature.y).toBeGreaterThanOrEqual(frame.y);
+      expect(feature.x + feature.width).toBeLessThanOrEqual(frame.x + frame.width);
+      expect(feature.y + feature.height).toBeLessThanOrEqual(frame.y + frame.height);
+    }
+    await expect(page.getByText(/向建商索取主臥淨尺寸、門扇開啟範圍與衣櫃的開門方式/)).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
+  });
+}

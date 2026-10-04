@@ -38,6 +38,25 @@
         "caption": "三房兩廳完整圖面・兩條外牆牆心線尺寸標註",
         "description": "三房兩廳完整圖面，上方與左側各有一條尺寸線。兩端的細線連到相對外牆厚度中間的牆心線，不是牆的最外緣；沒有標出主臥的淨長寬，也沒有床或衣櫃的長寬。"
       }
+    },
+    {
+      "id": "usable-space",
+      "topic": "使用空間",
+      "title": "床畫得下，走動、開門和用櫃子呢？",
+      "layout_action_label": "回到三房兩廳完整格局",
+      "paragraphs": [
+        "回到同一間主臥局部：圖面右下方是床，上方是衣櫃，上方靠右的主臥門畫有向房內開的門扇與弧線。這些只呈現這張示意圖的相對位置，沒有標出能走動或操作的淨空。",
+        "即使知道房間與床的長寬，還需要確認從房門走到床邊的可用通道、門扇開啟時會不會受家具妨礙，以及站在衣櫃前取物和開櫃門所需的空間。這張圖沒有標出床邊通道寬度或衣櫃開啟所需空間，不能據此判定能否順利使用。",
+        "向建商索取主臥淨尺寸、門扇開啟範圍與衣櫃的開門方式，確認示意家具的尺寸與擺位，再對照你自己的家具尺寸。還要問清楚這些位置是否留得出走動與使用空間；圖上的留白不是通用的舒適或法規標準。"
+      ],
+      "evidence_ids": ["master-bedroom-usable-space"],
+      "figure": {
+        "view": "room",
+        "room_id": "room-master",
+        "feature_ids": ["f-bed-m", "door-master", "f-wardrobe-m"],
+        "caption": "主臥局部・觀察床、主臥門與衣櫃的位置",
+        "description": "三房兩廳的主臥局部，床在圖面右下方，衣櫃在上方，主臥門在上方靠右，畫有向房內開啟的門扇與弧線。圖面沒有標出床邊通道寬度、衣櫃的開門方式或開啟所需空間。"
+      }
     }
   ],
   "evidence": [
@@ -71,6 +90,25 @@
         "date": "2026-10-04",
         "report": "docs/reference/phase2-dimension-evidence.md",
         "notes": "已核對 FloorPlan 的 bounds、annotations，以及 Renderer 尺寸線與端點短斜線的畫法；未從內部幾何推算房間淨尺寸。"
+      }
+    },
+    {
+      "id": "master-bedroom-usable-space",
+      "label": "本站「三房兩廳」教學範例・主臥使用空間",
+      "explanation": "同一張主臥局部圖畫出右下方的床、上方的衣櫃，以及上方靠右的主臥門和向房內的開啟弧。圖面支持這些相對位置的觀察，卻沒有標出床邊通道寬度或衣櫃開啟所需空間；圖上的門扇弧線也不是特定房屋的施工保證。",
+      "assumptions": [
+        "這是本站生成的教學範例，不是特定建案的實測圖，也沒有對應你的家具。",
+        "圖形背後的家具尺寸與生成器留空條件只用於示意，不是通用舒適度或法規門檻；未顯示的數值仍視為未知。"
+      ],
+      "basis": {
+        "document": "data/layouts/3b2l_standard.floorplan.json",
+        "locator": "rooms[id=room-master]；furniture[id=f-bed-m/f-wardrobe-m]；doors[id=door-master].opens_to/swing_arcs；annotations",
+        "reasoning": "主臥門的 opens_to 指向 room-master，swing_arcs 的開啟向量朝房內；床與衣櫃的圖形呈現相對位置。annotations 沒有床邊通道、櫃前距離或衣櫃開門方式的標註。"
+      },
+      "review": {
+        "date": "2026-10-04",
+        "report": "docs/reference/phase2-usable-space.md",
+        "notes": "已核對同一份 FloorPlan 的家具與主臥門資料、Renderer 的門扇弧線及家具畫法；未發佈內部幾何或留空數字。"
       }
     }
   ]

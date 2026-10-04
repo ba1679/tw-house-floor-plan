@@ -76,6 +76,30 @@ test("教學圖誤用另一間房的家具參照時，建置失敗", () => {
   expect(output).not.toContain("Traceback");
 });
 
+test("使用空間步驟參照不存在的主臥門時，建置失敗", () => {
+  const dir = sandbox();
+  const guide = JSON.parse(readFileSync(join(dir, FURNITURE_GUIDE), "utf8"));
+  guide.steps[2].figure.feature_ids[1] = "door-missing";
+  writeFileSync(join(dir, FURNITURE_GUIDE), JSON.stringify(guide));
+
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("door-missing");
+  expect(output).not.toContain("Traceback");
+});
+
+test("使用空間主張缺少查證定位時，建置失敗", () => {
+  const dir = sandbox();
+  const guide = JSON.parse(readFileSync(join(dir, FURNITURE_GUIDE), "utf8"));
+  guide.evidence[2].basis.locator = " ";
+  writeFileSync(join(dir, FURNITURE_GUIDE), JSON.stringify(guide));
+
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("master-bedroom-usable-space");
+  expect(output).toContain("locator");
+});
+
 test("尺寸步驟參照不存在的標註時，建置失敗", () => {
   const dir = sandbox();
   const guide = JSON.parse(readFileSync(join(dir, FURNITURE_GUIDE), "utf8"));
