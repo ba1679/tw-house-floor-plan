@@ -10,7 +10,7 @@ import { loadCategories, loadSymbolsForPages } from "@/lib/symbols/data";
 // 一類、一張圖，sitemap 自己變長；頁面不產生的網址（`plumbing_electric` 這種沒有符號的分類）這裡也列不出來。
 // 在這裡另外抄一份 id，就是 PRD §9「不得各自維護副本」要防的第二份名單。
 //
-// **有哪幾種頁則是這裡列的**：首頁、平面圖、符號、分類，網址前綴也在這裡再寫一次（各頁的連結同樣各自寫，
+// **有哪幾種頁則是這裡列的**：首頁、平面圖、符號、分類、導讀，網址前綴也在這裡再寫一次（各頁的連結同樣各自寫，
 // 站上沒有共用的路由表）。多一種頁面時要回頭加一行；忘了加，`tests/sitemap.spec.ts` 拿 `out/` 真的產出的頁來對，會紅。
 //
 // 先後照 PRD §8 的資訊架構：首頁、平面圖、符號頁、分類頁。
@@ -27,6 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...listLayoutIds().map((id) => `/layouts/${id}`),
     ...Object.keys(loadSymbolsForPages()).map((id) => `/symbols/${id}`),
     ...loadCategories().map((category) => `/categories/${category.id}`),
+    "/guides/furniture-dimensions",
   ];
   // `SITE_URL` 不是合法網址的話 `new URL` 直接丟錯，build 跟著斷——比印出一份壞的 sitemap 好。
   return paths.map((path) => ({ url: new URL(path, SITE_URL).href }));

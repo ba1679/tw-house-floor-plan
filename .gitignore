@@ -11,6 +11,17 @@ playwright-report/
 # Local agent settings
 .claude/settings.local.json
 
+# Impeccable session outputs. Keep approved design references with feature docs.
+.impeccable/config.local.json
+.impeccable/hook.cache.json
+.impeccable/live/annotations/
+.impeccable/live/sessions/
+.impeccable/live/roots.json
+.impeccable/mocks/
+.impeccable/questions/
+.impeccable/reference/
+.impeccable/review/
+
 # Vendored third-party reference — the NAID《室內設計裝修製圖規範》 (70pp, 15MB).
 # Not ours to redistribute. docs/reference/naid-symbols.md carries the page and
 # table references we actually work from.

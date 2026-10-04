@@ -57,6 +57,10 @@ test.describe("平面圖頁的入口", () => {
     await page.locator("#hs-door-entry").focus();
     await page.keyboard.press("Enter");
     await expect(sheet).toBeVisible();
+    // 初次開卡也有結構性過渡；可見不代表框的高度已停止變動。
+    await sheet.evaluate(async (element) => {
+      await Promise.all(element.getAnimations().map((animation) => animation.finished));
+    });
     const open = await withAndWithout();
     expect(open.shown, "卡片開著").toBeCloseTo(open.hidden, 1);
 

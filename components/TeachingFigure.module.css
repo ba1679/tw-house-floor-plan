@@ -1,0 +1,54 @@
+.figure {
+  margin: 0;
+  min-width: 0;
+}
+
+.drawing {
+  padding: var(--space-4);
+  border: 1px solid var(--rule-strong);
+  background: var(--fp-paper);
+}
+
+.caption {
+  margin-top: var(--space-3);
+  color: var(--text-secondary);
+  font-size: var(--text-label-size);
+  line-height: var(--text-label-leading);
+}
+
+.description {
+  margin-top: var(--space-2);
+  font-size: var(--text-secondary-size);
+  line-height: var(--text-secondary-leading);
+}
+
+.description summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: fit-content;
+  min-height: var(--touch-min);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+}
+
+.description summary::before {
+  content: "+";
+  text-decoration: none;
+}
+
+.description[open] summary::before {
+  content: "−";
+}
+
+.description summary:focus-visible {
+  outline: var(--focus-ring-dark-width) solid var(--focus-dark);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 var(--focus-ring-light-width) var(--focus-light);
+}
+
+.description p {
+  margin: var(--space-2) 0 0;
+  max-width: 65ch;
+}
