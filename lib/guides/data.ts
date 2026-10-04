@@ -38,6 +38,55 @@ export type GuideStep = {
   questions: GuideQuestion[];
 };
 
+export type InterpretationOption = { id: string; label: string; reason: string };
+
+export type InterpretationPracticeContent = {
+  title: string;
+  figure: TeachingFigure;
+  conditions: string[];
+  question: {
+    id: string;
+    prompt: string;
+    correctOptionId: string;
+    options: InterpretationOption[];
+  };
+};
+
+type PracticeRecord = {
+  title: string;
+  figure: { floorplan_id: string; room_id: string; caption: string; description: string };
+  conditions: string[];
+  question: {
+    id: string;
+    prompt: string;
+    correct_option_id: string;
+    options: (InterpretationOption & { evidence_ids: string[] })[];
+  };
+};
+
+export function loadFirstInterpretationPractice(): InterpretationPracticeContent {
+  const record = JSON.parse(readFileSync(join(process.cwd(), "data/practice/first-interpretation-question.json"), "utf8")) as PracticeRecord;
+  const floorplan = JSON.parse(readFileSync(join(process.cwd(), `data/practice/${record.figure.floorplan_id}.floorplan.json`), "utf8")) as FloorPlan;
+  return {
+    title: record.title,
+    // 全片段尺寸屬於生成資料，不是房間局部已標示的條件。
+    figure: {
+      view: "room",
+      floorplan: { ...floorplan, annotations: [] },
+      roomId: record.figure.room_id,
+      caption: record.figure.caption,
+      description: record.figure.description,
+    },
+    conditions: record.conditions,
+    question: {
+      id: record.question.id,
+      prompt: record.question.prompt,
+      correctOptionId: record.question.correct_option_id,
+      options: record.question.options.map(({ id, label, reason }) => ({ id, label, reason })),
+    },
+  };
+}
+
 type GuideRecord = {
   id: string;
   title: string;
@@ -93,6 +142,7 @@ export function loadFurnitureDimensionsGuide() {
     description: record.description,
     layoutHref: `/layouts/${floorplan.id}`,
     checklistHref: "/guides/furniture-dimensions/questions",
+    practiceHref: "/guides/furniture-dimensions/practice",
     steps: record.steps.map((step): GuideStep => ({
       id: step.id,
       topic: step.topic,

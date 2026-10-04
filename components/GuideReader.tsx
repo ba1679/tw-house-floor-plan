@@ -7,7 +7,7 @@ import { GuideQuestionList } from "./GuideQuestionList";
 import { TeachingFigure } from "./TeachingFigure";
 import styles from "./GuideReader.module.css";
 
-type Guide = { title: string; layoutHref: string; checklistHref: string; steps: GuideStep[] };
+type Guide = { title: string; layoutHref: string; checklistHref: string; practiceHref: string; steps: GuideStep[] };
 
 export function GuideReader({ guide }: { guide: Guide }) {
   const [index, setIndex] = useState(0);
@@ -52,8 +52,11 @@ export function GuideReader({ guide }: { guide: Guide }) {
               {index > 0 && <button type="button" onClick={() => showStep(index - 1)}>上一步：{guide.steps[index - 1].topic}</button>}
               {index < guide.steps.length - 1 && <button type="button" onClick={() => showStep(index + 1)}>下一步：{guide.steps[index + 1].topic}</button>}
             </nav>
+            {index === guide.steps.length - 1 && (
+              <Link className={styles.action} href={guide.practiceHref}>換圖練習第一題</Link>
+            )}
             {step.questions.length > 0 && (
-              <Link className={styles.action} href={guide.checklistHref}>取得可列印提問清單</Link>
+              <Link className={styles.layoutLink} href={guide.checklistHref}>取得可列印提問清單</Link>
             )}
             <Link className={step.questions.length > 0 ? styles.layoutLink : styles.action} href={guide.layoutHref}>
               {step.layoutActionLabel}
