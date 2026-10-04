@@ -77,3 +77,13 @@
   text-decoration: none;
   border-radius: var(--radius-m);
 }
+
+@media print {
+  .page:global([data-print-checklist]) {
+    padding: 0;
+  }
+
+  :global([data-print-checklist]) .column {
+    max-width: none;
+  }
+}

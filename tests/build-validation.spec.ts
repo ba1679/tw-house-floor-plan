@@ -10,6 +10,7 @@ function sandbox() {
   const dir = mkdtempSync(join(tmpdir(), "floorplan-validate-"));
   cpSync("data", join(dir, "data"), { recursive: true });
   cpSync("scripts", join(dir, "scripts"), { recursive: true });
+  cpSync("docs/reference", join(dir, "docs/reference"), { recursive: true });
   return dir;
 }
 
@@ -26,6 +27,53 @@ function runValidator(cwd: string): { code: number; output: string } {
 const FLOORPLAN = "data/layouts/3b2l_standard.floorplan.json";
 const SYMBOLS = "data/symbols.sample.json";
 const FURNITURE_GUIDE = "data/guides/furniture-dimensions.json";
+
+test("提問清單少於三題時，建置失敗", () => {
+  const dir = sandbox();
+  const path = join(dir, FURNITURE_GUIDE);
+  const guide = JSON.parse(readFileSync(path, "utf8"));
+  guide.checklist.questions = guide.checklist.questions.slice(0, 2);
+  guide.steps[3].question_ids = guide.steps[3].question_ids.slice(0, 2);
+  writeFileSync(path, JSON.stringify(guide));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("清單須有 3 至 5 題");
+});
+
+test("第四步參照不存在的問題時，建置失敗並指出問題", () => {
+  const dir = sandbox();
+  const path = join(dir, FURNITURE_GUIDE);
+  const guide = JSON.parse(readFileSync(path, "utf8"));
+  guide.steps[3].question_ids[0] = "missing-question";
+  writeFileSync(path, JSON.stringify(guide));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("missing-question");
+});
+
+test("提問缺少理由或有效依據時，建置失敗", () => {
+  const dir = sandbox();
+  const path = join(dir, FURNITURE_GUIDE);
+  const guide = JSON.parse(readFileSync(path, "utf8"));
+  guide.checklist.questions[0].reason = " ";
+  guide.checklist.questions[1].evidence_ids = ["missing-evidence"];
+  writeFileSync(path, JSON.stringify(guide));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("reason");
+  expect(output).toContain("missing-evidence");
+});
+
+test("第四步沒有引用完整清單時，建置失敗", () => {
+  const dir = sandbox();
+  const path = join(dir, FURNITURE_GUIDE);
+  const guide = JSON.parse(readFileSync(path, "utf8"));
+  guide.steps[3].question_ids.pop();
+  writeFileSync(path, JSON.stringify(guide));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("須與清單題目一致");
+});
 
 test("家具導讀參照不存在的房間時，建置失敗並指出參照", () => {
   const dir = sandbox();
@@ -73,6 +121,92 @@ test("教學圖誤用另一間房的家具參照時，建置失敗", () => {
   expect(code).not.toBe(0);
   expect(output).toContain("f-bed-2");
   expect(output).not.toContain("Traceback");
+});
+
+test("使用空間步驟參照不存在的主臥門時，建置失敗", () => {
+  const dir = sandbox();
+  const guide = JSON.parse(readFileSync(join(dir, FURNITURE_GUIDE), "utf8"));
+  guide.steps[2].figure.feature_ids[1] = "door-missing";
+  writeFileSync(join(dir, FURNITURE_GUIDE), JSON.stringify(guide));
+
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("door-missing");
+  expect(output).not.toContain("Traceback");
+});
+
+test("使用空間主張缺少查證定位時，建置失敗", () => {
+  const dir = sandbox();
+  const guide = JSON.parse(readFileSync(join(dir, FURNITURE_GUIDE), "utf8"));
+  guide.evidence[2].basis.locator = " ";
+  writeFileSync(join(dir, FURNITURE_GUIDE), JSON.stringify(guide));
+
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("master-bedroom-usable-space");
+  expect(output).toContain("locator");
+});
+
+test("尺寸步驟參照不存在的標註時，建置失敗", () => {
+  const dir = sandbox();
+  const guide = JSON.parse(readFileSync(join(dir, FURNITURE_GUIDE), "utf8"));
+  guide.steps[1].figure.dimension_ids[0] = "dim-missing";
+  writeFileSync(join(dir, FURNITURE_GUIDE), JSON.stringify(guide));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("dim-missing");
+});
+
+test("尺寸標註文字和端點距離不一致時，建置失敗", () => {
+  const dir = sandbox();
+  const plan = JSON.parse(readFileSync(join(dir, FLOORPLAN), "utf8"));
+  plan.annotations[0].label = "978 cm";
+  writeFileSync(join(dir, FLOORPLAN), JSON.stringify(plan));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("dim-overall-w");
+  expect(output).toContain("978 cm");
+});
+
+test("尺寸標註端點沒有落在外牆牆心線範圍時，建置失敗", () => {
+  const dir = sandbox();
+  const plan = JSON.parse(readFileSync(join(dir, FLOORPLAN), "utf8"));
+  plan.annotations[0].end.x = 900;
+  writeFileSync(join(dir, FLOORPLAN), JSON.stringify(plan));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("dim-overall-w");
+  expect(output).toContain("端點不是外牆牆心線範圍");
+});
+
+test("尺寸依據的查證報告不存在時，建置失敗", () => {
+  const dir = sandbox();
+  const guide = JSON.parse(readFileSync(join(dir, FURNITURE_GUIDE), "utf8"));
+  guide.evidence[1].review.report = "docs/reference/not-found.md";
+  writeFileSync(join(dir, FURNITURE_GUIDE), JSON.stringify(guide));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("not-found.md");
+});
+
+test("完整教學圖新增未納入導讀的尺寸標註時，建置失敗", () => {
+  const dir = sandbox();
+  const plan = JSON.parse(readFileSync(join(dir, FLOORPLAN), "utf8"));
+  plan.annotations.push({ id: "dim-unreviewed", type: "dimension", start: { x: 0, y: 100 }, end: { x: 100, y: 100 }, label: "100 cm" });
+  writeFileSync(join(dir, FLOORPLAN), JSON.stringify(plan));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("dim-unreviewed");
+});
+
+test("外牆牆心線偏離尺寸標註端點時，建置失敗", () => {
+  const dir = sandbox();
+  const plan = JSON.parse(readFileSync(join(dir, FLOORPLAN), "utf8"));
+  plan.walls.find((wall: { id: string }) => wall.id === "wall-001").start.y = 10;
+  writeFileSync(join(dir, FLOORPLAN), JSON.stringify(plan));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("外牆牆心線");
 });
 
 test.describe("build 時的資料驗證", () => {

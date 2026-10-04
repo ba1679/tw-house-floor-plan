@@ -1,9 +1,9 @@
 .page {
-  composes: page from "../../reading.module.css";
+  composes: page from "../app/reading.module.css";
 }
 
 .column {
-  composes: column from "../../reading.module.css";
+  composes: column from "../app/reading.module.css";
 }
 
 .back {
@@ -20,6 +20,14 @@
   line-height: var(--text-title-leading);
   font-weight: var(--text-title-weight);
   text-wrap: balance;
+}
+
+.checklistLink {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: var(--touch-min);
+  margin-bottom: var(--space-4);
 }
 
 .position {
@@ -111,7 +119,39 @@
 }
 
 .action {
-  composes: primaryAction from "../../reading.module.css";
+  composes: primaryAction from "../app/reading.module.css";
+}
+
+.layoutLink {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: var(--touch-min);
+  margin-top: var(--space-3);
+}
+
+.stepNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-5);
+}
+
+.stepNav button {
+  min-height: var(--touch-min);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-m);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.stepNav button:focus-visible {
+  outline: var(--focus-ring-dark-width) solid var(--focus-dark);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 var(--focus-ring-light-width) var(--focus-light);
 }
 
 @media (min-width: 860px) {

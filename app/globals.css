@@ -190,3 +190,19 @@ body {
   flex-direction: column;
   min-height: 100dvh;
 }
+@media print {
+  html:has([data-print-checklist]) {
+    background: white;
+  }
+
+  body:has([data-print-checklist]) > header,
+  body:has([data-print-checklist]) > footer {
+    display: none;
+  }
+
+  body:has([data-print-checklist]) {
+    display: block;
+    min-height: 0;
+    background: white;
+  }
+}

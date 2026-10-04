@@ -49,28 +49,101 @@ def validate_furniture_guide(floorplans):
         return ["%s: layout_id 無效：%s" % (path, guide.get("layout_id"))]
     rooms = {room["id"] for room in plan.get("rooms", [])}
     features = {item["id"]: item for group in ["furniture", "doors", "windows"] for item in plan.get(group, [])}
+    annotations = {item["id"]: item for item in plan.get("annotations", [])}
     evidence_records = records(guide.get("evidence"), "evidence")
     evidence_ids = {str(e.get("id")) for e in evidence_records}
-    for step in records(guide.get("steps"), "steps"):
+    checklist = guide.get("checklist")
+    question_records = []
+    if require_text(checklist, ["title", "scope"], "checklist"):
+        question_records = records(checklist.get("questions"), "checklist questions")
+        if not 3 <= len(question_records) <= 5:
+            errors.append("%s: 清單須有 3 至 5 題" % path)
+        for question in question_records:
+            label = "question %s" % question.get("id")
+            require_text(question, ["question", "reason"], label)
+            for ref in text_list(question.get("evidence_ids"), label + " evidence_ids"):
+                if ref not in evidence_ids:
+                    errors.append("%s: %s 的 evidence_ids 無效：%s" % (path, label, ref))
+    steps = records(guide.get("steps"), "steps")
+    if len(steps) != 4:
+        errors.append("%s: 家具導讀須有四步" % path)
+    question_ids = [question.get("id") for question in question_records]
+    if steps:
+        if steps[-1].get("question_ids") != question_ids:
+            errors.append("%s: 第四步 question_ids 須與清單題目一致" % path)
+        for step in steps[:-1]:
+            if step.get("question_ids"):
+                errors.append("%s: 只有第四步可列出清單問題" % path)
+    for step in steps:
         label = "step %s" % step.get("id")
-        require_text(step, ["topic", "title"], label)
+        require_text(step, ["topic", "title", "layout_action_label"], label)
         text_list(step.get("paragraphs"), label + " paragraphs")
         for ref in text_list(step.get("evidence_ids"), label + " evidence_ids"):
             if ref not in evidence_ids:
                 errors.append("%s: %s 的 evidence_ids 無效：%s" % (path, label, ref))
+        refs = step.get("question_ids", [])
+        if not isinstance(refs, list):
+            errors.append("%s: %s 的 question_ids 必須是問題參照清單" % (path, label))
+            refs = []
+        for ref in refs:
+            if ref not in question_ids:
+                errors.append("%s: %s 的 question_ids 無效：%s" % (path, label, ref))
         figure = step.get("figure", {})
-        if require_text(figure, ["room_id", "caption", "description"], label + " figure"):
-            if figure.get("room_id") not in rooms:
-                errors.append("%s: %s 的 room_id 無效：%s" % (path, label, figure.get("room_id")))
-            for ref in text_list(figure.get("feature_ids"), label + " feature_ids"):
-                if ref not in features:
-                    errors.append("%s: %s 的 feature_ids 無效：%s" % (path, label, ref))
+        if not require_text(figure, ["view", "caption", "description"], label + " figure"):
+            continue
+        if figure["view"] == "room":
+            if require_text(figure, ["room_id"], label + " figure"):
+                if figure.get("room_id") not in rooms:
+                    errors.append("%s: %s 的 room_id 無效：%s" % (path, label, figure.get("room_id")))
+                for ref in text_list(figure.get("feature_ids"), label + " feature_ids"):
+                    if ref not in features:
+                        errors.append("%s: %s 的 feature_ids 無效：%s" % (path, label, ref))
+                    else:
+                        feature = features[ref]
+                        room_ids = [feature.get("room_id"), feature.get("room"), feature.get("opens_to")]
+                        room_ids.extend(feature.get("connects", []))
+                        if figure["room_id"] not in room_ids:
+                            errors.append("%s: %s 的 feature_ids %s 不屬於房間 %s" % (path, label, ref, figure["room_id"]))
+        elif figure["view"] == "overall":
+            orientations = set()
+            bounds = plan["bounds"]
+            expected_walls = [
+                ({"x": 0, "y": 0}, {"x": bounds["width"], "y": 0}),
+                ({"x": 0, "y": bounds["height"]}, {"x": bounds["width"], "y": bounds["height"]}),
+                ({"x": 0, "y": 0}, {"x": 0, "y": bounds["height"]}),
+                ({"x": bounds["width"], "y": 0}, {"x": bounds["width"], "y": bounds["height"]}),
+            ]
+            for start_wall, end_wall in expected_walls:
+                if not any(wall.get("start") == start_wall and wall.get("end") == end_wall and wall.get("thickness", 0) > 0
+                           for wall in plan.get("walls", [])):
+                    errors.append("%s: %s 的外牆牆心線與尺寸標註端點不一致：%s → %s" %
+                                  (path, label, start_wall, end_wall))
+            dimension_ids = text_list(figure.get("dimension_ids"), label + " dimension_ids")
+            for ref in dimension_ids:
+                annotation = annotations.get(ref)
+                if not annotation or annotation.get("type") != "dimension":
+                    errors.append("%s: %s 的 dimension_ids 無效：%s" % (path, label, ref))
+                    continue
+                start, end = annotation.get("start", {}), annotation.get("end", {})
+                if start == {"x": 0, "y": 0} and end == {"x": bounds["width"], "y": 0}:
+                    orientation, distance = "horizontal", bounds["width"]
+                elif start == {"x": 0, "y": 0} and end == {"x": 0, "y": bounds["height"]}:
+                    orientation, distance = "vertical", bounds["height"]
                 else:
-                    feature = features[ref]
-                    room_ids = [feature.get("room_id"), feature.get("room"), feature.get("opens_to")]
-                    room_ids.extend(feature.get("connects", []))
-                    if figure["room_id"] not in room_ids:
-                        errors.append("%s: %s 的 feature_ids %s 不屬於房間 %s" % (path, label, ref, figure["room_id"]))
+                    errors.append("%s: %s 的 %s 端點不是外牆牆心線範圍" % (path, label, ref))
+                    continue
+                orientations.add(orientation)
+                expected = "%s cm" % distance
+                if annotation.get("label") != expected:
+                    errors.append("%s: %s 的 %s 標註文字 %s 與端點距離 %s 不一致" %
+                                  (path, label, ref, annotation.get("label"), expected))
+            if orientations != {"horizontal", "vertical"}:
+                errors.append("%s: %s 須有整戶外框橫向與縱向標註" % (path, label))
+            unreviewed = {item["id"] for item in plan.get("annotations", []) if item.get("type") == "dimension"} - set(dimension_ids)
+            if unreviewed:
+                errors.append("%s: %s 有未納入導讀的尺寸標註：%s" % (path, label, ", ".join(sorted(unreviewed))))
+        else:
+            errors.append("%s: %s 的 figure view 無效：%s" % (path, label, figure["view"]))
     for evidence in evidence_records:
         label = "evidence %s" % evidence.get("id")
         require_text(evidence, ["label", "explanation"], label)
@@ -79,5 +152,8 @@ def validate_furniture_guide(floorplans):
             expected_document = "data/layouts/%s.floorplan.json" % plan["id"]
             if evidence["basis"].get("document") != expected_document:
                 errors.append("%s: %s 的 document 必須對應教學圖 %s" % (path, label, expected_document))
-        require_text(evidence.get("review"), ["date", "report", "notes"], label + " review")
+        review = evidence.get("review")
+        if require_text(review, ["date", "report", "notes"], label + " review"):
+            if not Path(review["report"]).is_file():
+                errors.append("%s: %s 的查證報告不存在：%s" % (path, label, review["report"]))
     return errors

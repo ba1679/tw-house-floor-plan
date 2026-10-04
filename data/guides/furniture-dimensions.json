@@ -3,21 +3,108 @@
   "title": "學看家具與尺寸",
   "description": "從主臥局部圖分清家具示意與尺寸依據，知道還需要哪些資訊。",
   "layout_id": "3b2l_standard",
+  "checklist": {
+    "title": "看家具與尺寸時，向建商問這四件事",
+    "scope": "這份清單整理本站三房兩廳教學範例尚未提供的資訊。詢問實際建案時，請對照該案圖面與文件、自己的家具尺寸；本站範例不是該案的實測圖。",
+    "questions": [
+      {
+        "id": "room-clear-dimensions",
+        "question": "能否提供主臥的淨長與淨寬，並在圖上標示量測位置和單位？",
+        "reason": "圖上 977 cm 與 782 cm 量的是整戶外牆牆心線之間，不是主臥淨尺寸；3.0 坪也不能代替淨長寬。",
+        "evidence_ids": ["overall-dimensions"]
+      },
+      {
+        "id": "illustrated-furniture-dimensions",
+        "question": "圖中的床與衣櫃各用什麼長、寬和擺放位置示意？能否提供標示尺寸的配置圖？",
+        "reason": "本站範例只畫出家具的相對位置，沒有標出長寬；要與自己的家具比較，得先知道示意條件和自己的家具尺寸。",
+        "evidence_ids": ["master-bedroom-example"]
+      },
+      {
+        "id": "door-swing",
+        "question": "主臥門的開啟方向與範圍在哪裡？擺入預計使用的家具後，門扇能否照預期開啟？",
+        "reason": "教學圖畫有向房內的門扇弧線，卻不是實際建案的施工保證，也沒有證明家具放入後不會妨礙開門。",
+        "evidence_ids": ["master-bedroom-usable-space"]
+      },
+      {
+        "id": "passage-and-wardrobe-use",
+        "question": "從房門走到床邊、站在衣櫃前取物，各有多少可用空間？衣櫃預計如何開門？",
+        "reason": "教學圖沒有標出床邊通道寬度或衣櫃開啟所需空間；圖上留白不能證明實際可走動或使用衣櫃。",
+        "evidence_ids": ["master-bedroom-usable-space"]
+      }
+    ]
+  },
   "steps": [
     {
       "id": "furniture-illustration",
       "topic": "家具示意",
       "title": "畫有床，還不能判斷你的床放得下",
+      "layout_action_label": "回到格局，看看床的位置",
       "paragraphs": [
         "這個教學範例畫出了床、衣櫃與門窗的相對位置，主臥標示為 3.0 坪。",
         "局部圖沒有標出床的長寬或房間淨尺寸，也沒有提供你的床有多大，因此還不能判斷你的床是否放得下。"
       ],
       "evidence_ids": ["master-bedroom-example"],
       "figure": {
+        "view": "room",
         "room_id": "room-master",
         "feature_ids": ["f-bed-m", "f-wardrobe-m", "door-master", "win-master"],
         "caption": "主臥局部・教學示意圖",
         "description": "三房兩廳的主臥局部，房間內有床和衣櫃，周邊可見門與窗。圖上標示主臥及 3.0 坪，未標出床的長寬或房間淨尺寸。"
+      }
+    },
+    {
+      "id": "dimension-evidence",
+      "topic": "尺寸依據",
+      "title": "這兩條尺寸，量的是哪裡？",
+      "layout_action_label": "回到三房兩廳完整格局",
+      "paragraphs": [
+        "先看尺寸線兩端的短斜線，再看線上的數字和單位。兩端的細線連到外牆厚度中間的基準線，也叫牆心線；橫向量左、右外牆的牆心線之間，縱向量上、下外牆的牆心線之間，單位都是 cm（公分）。它們不是從牆的最外緣量起。",
+        "這是整戶外牆牆心線之間的橫向與縱向尺寸；圖上沒有標出主臥的淨長寬，也沒有床或衣櫃的長寬。主臥面積和目測距離都不能補上這些缺口。要比較你的床，還需要房間淨尺寸、家具實際尺寸及門與櫃子使用時所需的空間。"
+      ],
+      "evidence_ids": ["overall-dimensions"],
+      "figure": {
+        "view": "overall",
+        "dimension_ids": ["dim-overall-w", "dim-overall-h"],
+        "caption": "三房兩廳完整圖面・兩條外牆牆心線尺寸標註",
+        "description": "三房兩廳完整圖面，上方與左側各有一條尺寸線。兩端的細線連到相對外牆厚度中間的牆心線，不是牆的最外緣；沒有標出主臥的淨長寬，也沒有床或衣櫃的長寬。"
+      }
+    },
+    {
+      "id": "usable-space",
+      "topic": "使用空間",
+      "title": "床畫得下，走動、開門和用櫃子呢？",
+      "layout_action_label": "回到三房兩廳完整格局",
+      "paragraphs": [
+        "回到同一間主臥局部：圖面右下方是床，上方是衣櫃，上方靠右的主臥門畫有向房內開的門扇與弧線。這些只呈現這張示意圖的相對位置，沒有標出能走動或操作的淨空。",
+        "即使知道房間與床的長寬，還需要確認從房門走到床邊的可用通道、門扇開啟時會不會受家具妨礙，以及站在衣櫃前取物和開櫃門所需的空間。這張圖沒有標出床邊通道寬度或衣櫃開啟所需空間，不能據此判定能否順利使用。",
+        "向建商索取主臥淨尺寸、門扇開啟範圍與衣櫃的開門方式，確認示意家具的尺寸與擺位，再對照你自己的家具尺寸。還要問清楚這些位置是否留得出走動與使用空間；圖上的留白不是通用的舒適或法規標準。"
+      ],
+      "evidence_ids": ["master-bedroom-usable-space"],
+      "figure": {
+        "view": "room",
+        "room_id": "room-master",
+        "feature_ids": ["f-bed-m", "door-master", "f-wardrobe-m"],
+        "caption": "主臥局部・觀察床、主臥門與衣櫃的位置",
+        "description": "三房兩廳的主臥局部，床在圖面右下方，衣櫃在上方，主臥門在上方靠右，畫有向房內開啟的門扇與弧線。圖面沒有標出床邊通道寬度、衣櫃的開門方式或開啟所需空間。"
+      }
+    },
+    {
+      "id": "questions-to-ask",
+      "topic": "怎麼追問",
+      "title": "缺少資料時，怎麼向建商追問？",
+      "layout_action_label": "回到三房兩廳完整格局",
+      "paragraphs": [
+        "前三步能從圖上看到家具、主臥門及整戶外牆牆心線標註，卻沒有得到主臥淨尺寸、家具尺寸與走動或使用櫃子的淨空。把每個缺口變成可請建商指出位置、尺寸與條件的問題。",
+        "下面四題可直接帶去詢問；取得回答後，仍要對照實際建案資料和自己的家具。教學圖不能替你判定那間房是否適用。"
+      ],
+      "evidence_ids": ["question-gaps"],
+      "question_ids": ["room-clear-dimensions", "illustrated-furniture-dimensions", "door-swing", "passage-and-wardrobe-use"],
+      "figure": {
+        "view": "room",
+        "room_id": "room-master",
+        "feature_ids": ["f-bed-m", "f-wardrobe-m", "door-master"],
+        "caption": "主臥局部・用未標出的資訊練習追問",
+        "description": "三房兩廳的主臥局部，床在右下方、衣櫃在上方，主臥門在上方靠右並畫有向房內的開啟弧。圖上沒有標出主臥淨長寬、床與衣櫃長寬、床邊通道寬度或衣櫃開啟所需空間。"
       }
     }
   ],
@@ -36,6 +123,60 @@
         "date": "2026-10-04",
         "report": "docs/reference/phase2-furniture-guide-step1.md",
         "notes": "已核對 FloorPlan 原始資料及 Renderer 的 GenericFurniture、RoomLabels、Dimensions；內部幾何僅用於繪圖，不提供為已知教學條件。"
+      }
+    },
+    {
+      "id": "overall-dimensions",
+      "label": "本站「三房兩廳」教學範例・外牆牆心線標註",
+      "explanation": "尺寸線的端點與文字取自完整圖面的兩筆標註。橫向量左、右外牆牆心線之間，縱向量上、下外牆牆心線之間；牆心線是牆厚中間的基準線，不是牆外緣。這些標註不能替代主臥淨尺寸，也不能證明圖中的床等於你的床。",
+      "assumptions": ["這是本站生成的教學範例，不是特定建案的實測圖。", "cm 表示公分；未標出的房間與家具尺寸仍是未知，不以面積或目測推算。"],
+      "basis": {
+        "document": "data/layouts/3b2l_standard.floorplan.json",
+        "locator": "bounds；annotations[id=dim-overall-w/dim-overall-h]；rooms[id=room-master]",
+        "reasoning": "兩筆標註端點分別與 bounds 的整體寬高重合；四面外牆的牆心線落在相同座標。未提供主臥淨長寬或家具尺寸標註。"
+      },
+      "review": {
+        "date": "2026-10-04",
+        "report": "docs/reference/phase2-dimension-evidence.md",
+        "notes": "已核對 FloorPlan 的 bounds、annotations，以及 Renderer 尺寸線與端點短斜線的畫法；未從內部幾何推算房間淨尺寸。"
+      }
+    },
+    {
+      "id": "master-bedroom-usable-space",
+      "label": "本站「三房兩廳」教學範例・主臥使用空間",
+      "explanation": "同一張主臥局部圖畫出右下方的床、上方的衣櫃，以及上方靠右的主臥門和向房內的開啟弧。圖面支持這些相對位置的觀察，卻沒有標出床邊通道寬度或衣櫃開啟所需空間；圖上的門扇弧線也不是特定房屋的施工保證。",
+      "assumptions": [
+        "這是本站生成的教學範例，不是特定建案的實測圖，也沒有對應你的家具。",
+        "圖形背後的家具尺寸與生成器留空條件只用於示意，不是通用舒適度或法規門檻；未顯示的數值仍視為未知。"
+      ],
+      "basis": {
+        "document": "data/layouts/3b2l_standard.floorplan.json",
+        "locator": "rooms[id=room-master]；furniture[id=f-bed-m/f-wardrobe-m]；doors[id=door-master].opens_to/swing_arcs；annotations",
+        "reasoning": "主臥門的 opens_to 指向 room-master，swing_arcs 的開啟向量朝房內；床與衣櫃的圖形呈現相對位置。annotations 沒有床邊通道、櫃前距離或衣櫃開門方式的標註。"
+      },
+      "review": {
+        "date": "2026-10-04",
+        "report": "docs/reference/phase2-usable-space.md",
+        "notes": "已核對同一份 FloorPlan 的家具與主臥門資料、Renderer 的門扇弧線及家具畫法；未發佈內部幾何或留空數字。"
+      }
+    },
+    {
+      "id": "question-gaps",
+      "label": "本站「三房兩廳」教學範例・追問依據",
+      "explanation": "四題分別對應整戶標註無法代替的主臥淨尺寸、未標出的家具示意尺寸、門扇範圍，以及沒有標出的通道與衣櫃使用空間。問題要求對方提供資訊，沒有預設房間足夠、家具能放入或門櫃能正常使用。",
+      "assumptions": [
+        "這是本站生成的讀圖範例，沒有對應特定建案或讀者的家具。",
+        "問實際建案時，要用該案圖面、文件與自己的家具尺寸核對，不能把本站圖上的相對位置當成承諾。"
+      ],
+      "basis": {
+        "document": "data/layouts/3b2l_standard.floorplan.json",
+        "locator": "rooms[id=room-master]；furniture[id=f-bed-m/f-wardrobe-m]；doors[id=door-master]；annotations[id=dim-overall-w/dim-overall-h]",
+        "reasoning": "前兩筆標註只量整戶外牆牆心線；局部圖只顯示床、櫃、門的形狀與相對位置。沒有列出房間淨尺寸、家具尺寸或使用淨空標註，因此四題均指向明確缺口。"
+      },
+      "review": {
+        "date": "2026-10-04",
+        "report": "docs/reference/phase2-questions-and-print.md",
+        "notes": "逐題對照前三步原始 FloorPlan、正式教學內容與查證報告；未引入通用數值、法律承諾或房屋評分。"
       }
     }
   ]

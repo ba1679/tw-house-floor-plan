@@ -5,7 +5,7 @@ import { contentPages, isNoindex } from "./built-html";
 // 搜尋引擎抓得到這個網站的全部頁面，不必靠自己爬連結猜（spec user story 32、票 10）。
 //
 // 兩個問題，期望值都不是手寫的名單：
-// - **列了哪些**：從資料算，包含首頁、平面圖、符號、分類與已交付的導讀，不寫死總數——
+// - **列了哪些**：從資料算，包含首頁、平面圖、符號、分類、導讀與提問清單，不寫死總數——
 //   理由同 category-page.spec.ts 不寫死 3：寫死的話，測試自己就成了第二份會跟資料分岔的名單。
 // - **有沒有列錯**：對照 `out/` 裡真的產出了哪些頁。這一條不認得今天有哪些路由，所以明天多一種頁面
 //   而 sitemap 忘了它，這裡會紅，而不是安靜地少列一頁（同 site-footer.spec.ts 不列舉路由的理由）。
@@ -50,6 +50,7 @@ test.describe("sitemap", () => {
       ...symbols.map((symbol) => `/symbols/${symbol.id}`),
       ...categoriesInData.map((category) => `/categories/${category}`),
       `/guides/${furnitureGuide.id}`,
+      `/guides/${furnitureGuide.id}/questions`,
     ];
     const listed = builtLocs().map(pathOf);
 
