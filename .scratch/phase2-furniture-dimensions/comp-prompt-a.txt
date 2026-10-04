@@ -1,0 +1,28 @@
+Use case: ui-mockup.
+Create a high-fidelity portrait mobile web UI concept for 拼厝（Phin-Chhù）, a Traditional Chinese residential floor-plan learning tool. Render the webpage edge to edge at the aspect of a 375 × 812 phone viewport. No device, browser chrome, desk, poster, or presentation slide. This is a Read surface, not marketing or a dashboard.
+
+STRUCTURE A: EVIDENCE NOTEBOOK. This design's signature is a compact, carefully aligned evidence comparison immediately below its local plan, not a hero and card grid. Show a working reading page with these regions in order: the existing small brand header; an underlined return-to-plan link; compact title and a directly accessible question-list text link; a four-step navigator with current position; a modest chapter heading; a large white framed crop of the master-bedroom region; immediately below it, two text rows separated by hairlines titled 有依據 and 待確認, visually aligned to the plan; a short followup-question row; ordinary previous/next buttons. The first viewport must show the diagram and the beginning of the evidence rows. This is naturally scrollable: do not shrink text to cram everything into one screen. The primary focal relationship is plan → evidence row, rather than giant title.
+
+Input image 1 is the real current mobile homepage: preserve its compact header mark, warm neutral reading background, dark slate-carbon type, system sans / PingFang TC character, border weight and button shape; do NOT copy its homepage hero, Taiwan mark, commercial framing or sections. Input image 2 is the real current floor plan: use its actual master-bedroom crop as the teaching visual, retaining bed, cabinet, door swing, window, structural/furniture line hierarchy and oak-brown bedroom floor. It contributes diagram content only, NOT its page layout or hotspots. Remove developer badges. Do not invent new dimensions, extra rooms, or blue interactive hotspots in this non-interactive teaching figure. The drawing is a concept illustration, not construction evidence.
+
+Established identity: reading background #faedcd; text/strong rules #3d405b; room floor #d4a373; existing brick #dd8b67 and sage #a3b18a reserved for their existing room meanings, not learning status. Diagram paper white. One system sans family, crisp legible Traditional Chinese, readable body equivalent to 16–17 CSS px, touch targets equivalent to 44 px. Straight thin frames, restrained rounding on buttons only. No shadows, decorative grids in prose, serif, textures, mascots, glossy effects, badges, score, red/green feedback or progress colors.
+
+Exact visible text, arranged naturally:
+拼厝
+Phin-Chhù
+回到完整格局
+學看家具與尺寸
+提問清單
+第 1 步，共 4 步
+圖上的床，告訴了你什麼？
+主臥局部・教學示意圖
+有依據
+圖上畫了床的位置。
+待確認
+沒有標出床的長寬。
+可以怎麼問
+這張圖的床是以多大尺寸繪製？
+上一個
+下一個：找尺寸
+
+Use clean precise product typography, intentional visual hierarchy and ample but not loose spacing. All content is provisional design copy, not an assertion that sources are already verified. Show no timers, saved completion, account, course library, giant full brand mark, hidden instructions, or invented technical values. This is one single complete composition, not a multi-option board.

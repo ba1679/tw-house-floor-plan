@@ -145,6 +145,38 @@ _Avoid_: 點擊事件、曝光（容易把尚未成功呈現的互動誤算進�
 `symbol_view` 所記錄的使用者從哪一種產品入口開始理解 symbol：`layout`、`search`、`quiz` 或 `category`。它描述入口，不是 source tier，也不是使用者從哪個外部網站來。
 _Avoid_: 來源（單獨使用會與 source tier、source_refs 混淆）、流量來源、referrer
 
+### 導讀與判讀
+
+**導讀（Guide）**：
+圍繞一個讀圖問題、以圖面與白話說明帶讀者辨認依據、資訊缺口及可提出問題的內容。
+它不是符號條目，也不是一次找找看。
+_Avoid_: 課程、關卡、Round、把導讀當成 Symbol
+
+**導讀步驟（Guide Step）**：
+導讀中有順序、聚焦一個觀察的內容段落。
+它與檢視器的 Stage 無關；查看某一步不表示已理解或通過驗收。
+_Avoid_: Stage、互動階段、能力等級、完成率
+
+**教學圖（Teaching Figure）**：
+供導讀或判讀練習觀察的一張圖面或其局部，連同明示的標註、條件及示範假設構成讀者可取得的資訊。
+它不是完整 Layout，也不是指向 Symbol 的 Hotspot；未展示的內部尺寸不算已知條件。
+_Avoid_: 新格局、Hotspot、Symbol Art、把內部幾何當成已標示尺寸
+
+**判讀練習（Interpretation Practice）**：
+以陌生圖面練習區分有依據的結論、尚缺的資訊及有用追問的內容。
+它不是找找看的符號辨認，也不是讀者已通過陌生範例驗收的證明。
+_Avoid_: 找找看、Round、房屋評分、熟悉度
+
+**判讀作答（Interpretation Answer）**：
+判讀練習中，讀者確認一個選項所表達的判斷。
+它不是找找看中確認 Hotspot 的 Answer，也不代表對某個 Symbol 的熟悉度。
+_Avoid_: Answer（單獨使用會與找找看混淆）、點擊熱區、Familiarity
+
+**提問清單（Question Checklist）**：
+一組針對讀圖資訊缺口、附有詢問理由且可帶去向建商追問的問題。
+它不是房屋評分或個人需求適用性判定。
+_Avoid_: 房屋評分表、購屋推薦、個人適用檢核
+
 ### 符號層的爭議詞
 
 **樑**：

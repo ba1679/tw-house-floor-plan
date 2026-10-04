@@ -1,0 +1,43 @@
+{
+  "title": "學看家具與尺寸：設計方向",
+  "question": "三個方案都保留拼厝品牌、四步導讀、三題練習與可直達的提問清單。請選擇閱讀方式，或說明想調整的地方。概念圖只供設計討論；圖面、文字與標註仍需正式查證。",
+  "options": [
+    {
+      "id": "evidence-notebook",
+      "label": "A｜證據筆記",
+      "kicker": "THE ROLL",
+      "thesis": "每一步把圖面、能知道的事、還缺的資料與下一個問題並排連起來。",
+      "palette": ["#faedcd", "#3d405b", "#d4a373", "#dd8b67", "#a3b18a"],
+      "materials": ["既有系統 sans", "白色圖面", "細框與分隔線"],
+      "viewport": "手機先看當步的局部圖，再看有依據／待確認兩列；桌面圖在左、筆記在右，四步可前後切換。",
+      "risk": "資訊關係最明白，但每步有較多文字，必須嚴控內容密度。",
+      "comp": "assets/evidence-notebook-concept.png"
+    },
+    {
+      "id": "illustrated-chapters",
+      "label": "B｜圖文導讀",
+      "kicker": "四章連續閱讀",
+      "thesis": "沿著四段插圖文章慢慢讀完，不切換畫面，能回頭比較前後內容。",
+      "palette": ["#faedcd", "#3d405b", "#d4a373", "#dd8b67", "#a3b18a"],
+      "materials": ["既有系統 sans", "白色圖面", "細框與分隔線"],
+      "viewport": "手機以目錄、第一章的問題與局部圖開場，下方接續下一章；桌面是窄幅正文及章節導覽。",
+      "risk": "閱讀與回查自然，但頁面較長，需讓練習與清單入口始終容易找到。",
+      "comp": "assets/illustrated-chapters-concept.png"
+    },
+    {
+      "id": "guided-plan",
+      "label": "C｜逐步讀圖",
+      "kicker": "一張圖，四個觀察",
+      "thesis": "局部圖是主角，一次只處理一個觀察，再用上一個／下一個接續。",
+      "palette": ["#faedcd", "#3d405b", "#d4a373", "#dd8b67", "#a3b18a"],
+      "materials": ["既有系統 sans", "白色圖面", "細框與分隔線"],
+      "viewport": "手機由四步位置、大幅局部圖、一句觀察與短說明組成；桌面保留圖面，右側切換當步內容。",
+      "risk": "新手較容易專注，但不能把短說明擠進固定一屏；窄螢幕仍需自然捲動。",
+      "comp": "assets/guided-plan-concept.png"
+    }
+  ],
+  "reroll": true,
+  "steer": true,
+  "canon": false,
+  "buildPath": {"value": "comp", "toggle": true}
+}
