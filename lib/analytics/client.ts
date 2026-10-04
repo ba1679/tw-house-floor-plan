@@ -27,7 +27,9 @@ export function initializeAnalytics(): void {
   if (!target || !id || target.gtag || target.__fpAnalyticsEvents) return;
 
   target.dataLayer ??= [];
-  target.gtag = (command, name, params) => target.dataLayer?.push([command, name, params]);
+  target.gtag = function gtag(command, name, params) {
+    target.dataLayer?.push(arguments);
+  };
   target.gtag("js", new Date());
   target.gtag("config", id);
 
