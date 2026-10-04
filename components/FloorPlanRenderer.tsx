@@ -25,6 +25,7 @@ import type {
   FloorPlan,
   Furniture,
   PlanPoint,
+  PlanRect,
   Room,
   Wall,
   Window as PlanWindow,
@@ -61,12 +62,14 @@ type Props = {
   floorplan: FloorPlan;
   /** 房間 id → 此刻的畫法。沒列到的房間照常畫。 */
   roomStates?: Record<string, RoomState>;
+  /** 靜態局部教學圖的觀察範圍；省略時維持完整圖面，不參與 ViewerState。 */
+  region?: PlanRect;
   /** 疊在圖面上的東西（熱區層、容錯圈）。座標同為圖面公分。 */
   children?: ReactNode;
 };
 
-export function FloorPlanRenderer({ floorplan, roomStates, children }: Props) {
-  const viewBox = planViewBox(floorplan);
+export function FloorPlanRenderer({ floorplan, roomStates, region, children }: Props) {
+  const viewBox = region ?? planViewBox(floorplan);
 
   return (
     <svg

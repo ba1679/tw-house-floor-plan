@@ -1,0 +1,42 @@
+{
+  "id": "furniture-dimensions",
+  "title": "學看家具與尺寸",
+  "description": "從主臥局部圖分清家具示意與尺寸依據，知道還需要哪些資訊。",
+  "layout_id": "3b2l_standard",
+  "steps": [
+    {
+      "id": "furniture-illustration",
+      "topic": "家具示意",
+      "title": "畫有床，還不能判斷你的床放得下",
+      "paragraphs": [
+        "這個教學範例畫出了床、衣櫃與門窗的相對位置，主臥標示為 3.0 坪。",
+        "局部圖沒有標出床的長寬或房間淨尺寸，也沒有提供你的床有多大，因此還不能判斷你的床是否放得下。"
+      ],
+      "evidence_ids": ["master-bedroom-example"],
+      "figure": {
+        "room_id": "room-master",
+        "feature_ids": ["f-bed-m", "f-wardrobe-m", "door-master", "win-master"],
+        "caption": "主臥局部・教學示意圖",
+        "description": "三房兩廳的主臥局部，房間內有床和衣櫃，周邊可見門與窗。圖上標示主臥及 3.0 坪，未標出床的長寬或房間淨尺寸。"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "id": "master-bedroom-example",
+      "label": "本站「三房兩廳」教學範例・主臥局部",
+      "explanation": "本步依據同一張教學圖的可見資訊：床、衣櫃與門窗的位置，以及主臥 3.0 坪的標示。面積與家具圖形沒有提供床的長寬和房間淨尺寸，還不足以與你的床作尺寸比較。",
+      "assumptions": ["這是本站用來練習讀圖的示意範例，沒有對應特定建案或你的家具。", "本步未將圖形背後的幾何數值當作已標出的尺寸。"],
+      "basis": {
+        "document": "data/layouts/3b2l_standard.floorplan.json",
+        "locator": "rooms[id=room-master]；furniture[id=f-bed-m/f-wardrobe-m]；doors[id=door-master]；windows[id=win-master]；annotations",
+        "reasoning": "圖面只有家具與房名／面積文字，沒有床或房間淨尺寸標註，也未給定讀者自己的床尺寸，不能成立個人家具是否放得下的比較。"
+      },
+      "review": {
+        "date": "2026-10-04",
+        "report": "docs/reference/phase2-furniture-guide-step1.md",
+        "notes": "已核對 FloorPlan 原始資料及 Renderer 的 GenericFurniture、RoomLabels、Dimensions；內部幾何僅用於繪圖，不提供為已知教學條件。"
+      }
+    }
+  ]
+}

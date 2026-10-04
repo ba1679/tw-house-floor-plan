@@ -1,6 +1,6 @@
 # 01：讀懂家具示意的第一個完整步驟
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: none
 Spec: ../spec.md
 Design: ../design-brief.md

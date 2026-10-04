@@ -11,6 +11,7 @@ import json, io, sys, glob, os, math
 import xml.etree.ElementTree as ET
 from collections import Counter
 from urllib.parse import urlparse
+from validate_guides import validate_furniture_guide
 
 # verification_status 描述的是「**來源查證**做到哪」，所以這裡只擋查證這件事本身的紀錄。
 # caution（買房時要注意什麼）刻意不在清單裡：它要的是建築技術規則、防火門 A/B 分級、
@@ -367,6 +368,9 @@ check(verified >= required_verified,
       "不得用顯示用四捨五入把未達標資料送進 production"
       % (verified, len(symbols), rate * 100, required_verified))
 
+# --- 導讀：同一建置閘門，與 Symbol 的查證語意分開 ---
+errors.extend(validate_furniture_guide(floorplans))
+
 # --- 報告 ---
 print("\n資料驗證報告 (PRD v0.3.1)")
 print("=" * 46)
@@ -387,6 +391,7 @@ if not errors:
     print("  ✓ svg_ref 全部存在於 sprite")
     print("  ✓ related_layouts 指到的格局都存在（符號頁的轉換點不會通往 404）")
     print("  ✓ floorplan 的欄位齊全、傢俱朝向認得（檢視器畫得出來）")
+    print("  ✓ 家具導讀的圖面參照與依據完整")
 print("-" * 46)
 print("  %d symbols validated" % len(symbols))
 print("  %d sprite symbols" % len(sprite_ids))

@@ -20,6 +20,7 @@ playwright-report/
 .impeccable/mocks/
 .impeccable/questions/
 .impeccable/reference/
+.impeccable/review/
 
 # Vendored third-party reference — the NAID《室內設計裝修製圖規範》 (70pp, 15MB).
 # Not ours to redistribute. docs/reference/naid-symbols.md carries the page and

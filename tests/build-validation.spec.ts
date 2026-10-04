@@ -25,6 +25,55 @@ function runValidator(cwd: string): { code: number; output: string } {
 
 const FLOORPLAN = "data/layouts/3b2l_standard.floorplan.json";
 const SYMBOLS = "data/symbols.sample.json";
+const FURNITURE_GUIDE = "data/guides/furniture-dimensions.json";
+
+test("家具導讀參照不存在的房間時，建置失敗並指出參照", () => {
+  const dir = sandbox();
+  const guide = JSON.parse(readFileSync(join(dir, FURNITURE_GUIDE), "utf8"));
+  guide.steps[0].figure.room_id = "room-missing";
+  writeFileSync(join(dir, FURNITURE_GUIDE), JSON.stringify(guide));
+
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("room-missing");
+  expect(output).not.toContain("Traceback");
+});
+
+test("家具導讀主張缺少原始依據的定位時，建置失敗", () => {
+  const dir = sandbox();
+  const guide = JSON.parse(readFileSync(join(dir, FURNITURE_GUIDE), "utf8"));
+  guide.evidence[0].basis.locator = " ";
+  writeFileSync(join(dir, FURNITURE_GUIDE), JSON.stringify(guide));
+
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("master-bedroom-example");
+  expect(output).toContain("locator");
+});
+
+test("家具導讀主張沒有有效依據參照時，建置失敗", () => {
+  const dir = sandbox();
+  const guide = JSON.parse(readFileSync(join(dir, FURNITURE_GUIDE), "utf8"));
+  guide.steps[0].evidence_ids = ["missing-evidence"];
+  writeFileSync(join(dir, FURNITURE_GUIDE), JSON.stringify(guide));
+
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("missing-evidence");
+  expect(output).not.toContain("Traceback");
+});
+
+test("教學圖誤用另一間房的家具參照時，建置失敗", () => {
+  const dir = sandbox();
+  const guide = JSON.parse(readFileSync(join(dir, FURNITURE_GUIDE), "utf8"));
+  guide.steps[0].figure.feature_ids[0] = "f-bed-2";
+  writeFileSync(join(dir, FURNITURE_GUIDE), JSON.stringify(guide));
+
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("f-bed-2");
+  expect(output).not.toContain("Traceback");
+});
 
 test.describe("build 時的資料驗證", () => {
   test("資料完好時通過", () => {

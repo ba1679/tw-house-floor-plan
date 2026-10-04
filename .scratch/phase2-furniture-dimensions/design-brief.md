@@ -85,3 +85,17 @@ Status: confirmed
 各步實際文案、來源、範例尺寸、選項與清單仍需查證；概念稿中的文字只是示意，不因本次選定而自動成為可發佈教材。既有共用 Module 的回歸檢查、列印預覽、鍵盤流程及人工教學驗收仍依 spec 完成。
 
 此 brief 已確認，架構與 breakdown tasks 見同目錄文件及 `issues/`。此文件不表示產品已完成或驗收通過。
+
+## Direction contract
+
+THESIS：一張局部圖配一個可核對的觀察，讓讀者先分清家具示意與尺寸證據；逐步閱讀採已確認的 C「逐步讀圖」。
+
+OWN-WORLD：延續 DESIGN.md 的燕麥奶白閱讀面、白色圖面、深碳灰文字與細框、系統 sans。教學圖使用既有生成幾何與 Renderer，PNG 只供閱讀結構參考。
+
+STORY：讀者直接開啟家具與尺寸導讀，看主臥局部圖、理解目前可知道與尚缺的資訊，展開依據，再回完整格局核對。
+
+FIRST VIEWPORT：既有 header 下依序是返回全圖、精簡頁名與當步位置、大幅主臥圖。手機圖文上下閱讀，桌面圖在左、觀察在右；核心理由直接可見，依據就近展開。控制留在文件流。
+
+FORM：Read；採結構候選第六項，種子 64ce99aa。第 01 票只顯示已交付的家具步驟與返回全圖；後續票接續步驟導覽、練習與清單。沒有裝飾動效。
+
+FINISH：unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
