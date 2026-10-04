@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadFloorPlan } from "@/lib/floorplan/data";
-import type { FloorPlan } from "@/lib/floorplan/types";
+import type { Annotation, FloorPlan } from "@/lib/floorplan/types";
 
 export type GuideEvidence = {
   id: string;
@@ -10,17 +10,22 @@ export type GuideEvidence = {
   assumptions: string[];
 };
 
-export type TeachingFigure = {
+type TeachingFigureBase = {
   floorplan: FloorPlan;
-  roomId: string;
   caption: string;
   description: string;
 };
+
+export type TeachingFigure = TeachingFigureBase & (
+  | { view: "room"; roomId: string }
+  | { view: "overall"; dimensions: Annotation[] }
+);
 
 export type GuideStep = {
   id: string;
   topic: string;
   title: string;
+  layoutActionLabel: string;
   paragraphs: string[];
   figure: TeachingFigure;
   evidence: GuideEvidence[];
@@ -35,9 +40,10 @@ type GuideRecord = {
     id: string;
     topic: string;
     title: string;
+    layout_action_label: string;
     paragraphs: string[];
     evidence_ids: string[];
-    figure: { room_id: string; caption: string; description: string };
+    figure: { view: "room" | "overall"; room_id?: string; dimension_ids?: string[]; caption: string; description: string };
   }[];
   evidence: (GuideEvidence & {
     basis: { document: string; locator: string; reasoning: string };
@@ -60,13 +66,23 @@ export function loadFurnitureDimensionsGuide() {
       id: step.id,
       topic: step.topic,
       title: step.title,
+      layoutActionLabel: step.layout_action_label,
       paragraphs: step.paragraphs,
-      figure: {
-        floorplan,
-        roomId: step.figure.room_id,
-        caption: step.figure.caption,
-        description: step.figure.description,
-      },
+      figure: step.figure.view === "room"
+        ? {
+            view: "room",
+            floorplan,
+            roomId: step.figure.room_id!,
+            caption: step.figure.caption,
+            description: step.figure.description,
+          }
+        : {
+            view: "overall",
+            floorplan,
+            dimensions: step.figure.dimension_ids!.map((id) => floorplan.annotations!.find((item) => item.id === id)!),
+            caption: step.figure.caption,
+            description: step.figure.description,
+          },
       evidence: step.evidence_ids.map((id) => {
         const evidence = record.evidence.find((item) => item.id === id)!;
         return {

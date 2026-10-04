@@ -64,12 +64,21 @@ type Props = {
   roomStates?: Record<string, RoomState>;
   /** 靜態局部教學圖的觀察範圍；省略時維持完整圖面，不參與 ViewerState。 */
   region?: PlanRect;
+  /** 導讀整圖縮小時，只放大尺寸標註文字；完整檢視器維持原尺寸。 */
+  teachingDimensionScale?: number;
   /** 疊在圖面上的東西（熱區層、容錯圈）。座標同為圖面公分。 */
   children?: ReactNode;
 };
 
-export function FloorPlanRenderer({ floorplan, roomStates, region, children }: Props) {
-  const viewBox = region ?? planViewBox(floorplan);
+export function FloorPlanRenderer({ floorplan, roomStates, region, teachingDimensionScale, children }: Props) {
+  const baseViewBox = region ?? planViewBox(floorplan);
+  // 教學圖的放大標註仍留在原本尺寸線上，向上、向左補紙面留白。
+  const labelAllowance = teachingDimensionScale
+    ? Math.ceil(baseFontSize(floorplan.bounds) * 0.78 * (teachingDimensionScale - 1))
+    : 0;
+  const viewBox = labelAllowance
+    ? { ...baseViewBox, x: baseViewBox.x - labelAllowance, y: baseViewBox.y - labelAllowance, width: baseViewBox.width + labelAllowance, height: baseViewBox.height + labelAllowance }
+    : baseViewBox;
 
   return (
     <svg
@@ -81,7 +90,7 @@ export function FloorPlanRenderer({ floorplan, roomStates, region, children }: P
       role="group"
       aria-label={`${floorplan.name} 平面配置圖`}
     >
-      <PlanArtwork floorplan={floorplan} roomStates={roomStates} />
+      <PlanArtwork floorplan={floorplan} roomStates={roomStates} teachingDimensionScale={teachingDimensionScale} />
       {children}
     </svg>
   );
@@ -100,9 +109,11 @@ export function FloorPlanRenderer({ floorplan, roomStates, region, children }: P
 const PlanArtwork = memo(function PlanArtwork({
   floorplan,
   roomStates,
+  teachingDimensionScale,
 }: {
   floorplan: FloorPlan;
   roomStates?: Record<string, RoomState>;
+  teachingDimensionScale?: number;
 }) {
   const frame = planFrame(floorplan);
   const { viewBox } = frame;
@@ -162,7 +173,7 @@ const PlanArtwork = memo(function PlanArtwork({
       <Windows floorplan={floorplan} wallById={wallById} />
       <FurnitureLayer floorplan={floorplan} />
       <RoomLabels floorplan={floorplan} fontSize={fontSize} />
-      <Dimensions floorplan={floorplan} frame={frame} fontSize={fontSize} />
+      <Dimensions floorplan={floorplan} frame={frame} fontSize={fontSize} teachingDimensionScale={teachingDimensionScale} />
       <NorthArrow frame={frame} fontSize={fontSize} />
       <TitleBlock floorplan={floorplan} frame={frame} fontSize={fontSize} />
     </g>
@@ -833,10 +844,12 @@ function Dimensions({
   floorplan,
   frame,
   fontSize,
+  teachingDimensionScale = 1,
 }: {
   floorplan: FloorPlan;
   frame: PlanFrame;
   fontSize: number;
+  teachingDimensionScale?: number;
 }) {
   const dimensions = (floorplan.annotations ?? []).filter((a) => a.type === "dimension");
   return (
@@ -851,7 +864,7 @@ function Dimensions({
           key={dimension.id}
           dimension={dimension}
           frame={frame}
-          fontSize={Math.trunc(fontSize * 0.78)}
+          fontSize={Math.trunc(fontSize * 0.78 * teachingDimensionScale)}
         />
       ))}
     </g>
@@ -879,6 +892,9 @@ function Dimension({
     return (
       <g id={dimension.id}>
         <line x1={start.x} y1={r(y)} x2={end.x} y2={r(y)} />
+        {[start, end].map((point) => (
+          <line key={point.x} x1={point.x} y1={point.y} x2={point.x} y2={r(y)} />
+        ))}
         {[start.x, end.x].map((x) => (
           <line key={x} x1={x - TICK} y1={r(y + TICK)} x2={x + TICK} y2={r(y - TICK)} />
         ))}
@@ -901,6 +917,9 @@ function Dimension({
   return (
     <g id={dimension.id}>
       <line x1={r(x)} y1={start.y} x2={r(x)} y2={end.y} />
+      {[start, end].map((point) => (
+        <line key={point.y} x1={point.x} y1={point.y} x2={r(x)} y2={point.y} />
+      ))}
       {[start.y, end.y].map((y) => (
         <line key={y} x1={r(x - TICK)} y1={y + TICK} x2={r(x + TICK)} y2={y - TICK} />
       ))}

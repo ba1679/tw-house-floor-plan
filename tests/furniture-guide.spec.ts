@@ -93,3 +93,52 @@ test("放大兩倍仍可閱讀理由與展開依據，沒有水平溢出", async
   const width = await page.evaluate(() => document.documentElement.scrollWidth);
   expect(width).toBeLessThanOrEqual(375);
 });
+
+test("第二步指出外牆牆心線標註的端點與單位，並可回到第一步", async ({ page }) => {
+  await page.goto(GUIDE);
+  await page.getByRole("button", { name: "下一步：尺寸依據" }).click();
+  const heading = page.getByRole("heading", { level: 2, name: "這兩條尺寸，量的是哪裡？" });
+  await expect(heading).toBeFocused();
+  await expect(page.locator("#dim-overall-w")).toContainText("977 cm");
+  await expect(page.locator("#dim-overall-h")).toContainText("782 cm");
+  await expect(page.getByText("橫向 977 cm：從左側外牆的牆心線到右側外牆的牆心線。", { exact: true })).toBeVisible();
+  await expect(page.getByText("縱向 782 cm：從上側外牆的牆心線到下側外牆的牆心線。", { exact: true })).toBeVisible();
+  await expect(page.getByText(/這是整戶外牆牆心線之間的橫向與縱向尺寸；圖上沒有標出主臥的淨長寬/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "回到三房兩廳完整格局" })).toHaveAttribute("href", "/layouts/3b2l_standard");
+  await page.getByRole("button", { name: "上一步：家具示意" }).click();
+  await expect(page.getByRole("heading", { level: 2, name: "畫有床，還不能判斷你的床放得下" })).toBeFocused();
+});
+
+for (const viewport of [{ width: 375, height: 812 }, { width: 320, height: 568 }]) {
+  test(`${viewport.width} × ${viewport.height} 第二步尺寸文字可讀且頁面不橫向溢出`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.goto(GUIDE);
+    await page.getByRole("button", { name: "下一步：尺寸依據" }).click();
+    const drawing = page.getByRole("figure").locator("svg");
+    const size = await drawing.locator("#dim-overall-w text").evaluate((node) => {
+      const text = node as SVGTextElement;
+      return parseFloat(getComputedStyle(text).fontSize) * text.getScreenCTM()!.a;
+    });
+    expect(size).toBeGreaterThanOrEqual(12);
+    const frame = (await drawing.boundingBox())!;
+    for (const id of ["dim-overall-w", "dim-overall-h"]) {
+      const label = (await drawing.locator(`#${id} text`).boundingBox())!;
+      expect(label.x).toBeGreaterThanOrEqual(frame.x);
+      expect(label.y).toBeGreaterThanOrEqual(frame.y);
+      expect(label.x + label.width).toBeLessThanOrEqual(frame.x + frame.width);
+      expect(label.y + label.height).toBeLessThanOrEqual(frame.y + frame.height);
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
+  });
+}
+
+test("第二步在文字放大與鍵盤操作下仍能讀取尺寸及返回格局", async ({ page }) => {
+  await page.goto(GUIDE);
+  await page.getByRole("button", { name: "下一步：尺寸依據" }).click();
+  await page.evaluate(() => { document.documentElement.style.zoom = "2"; });
+  await expect(page.locator("#dim-overall-w")).toContainText("977 cm");
+  await expect(page.locator("#dim-overall-h")).toContainText("782 cm");
+  await expect(page.getByText("橫向 977 cm：從左側外牆的牆心線到右側外牆的牆心線。", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "回到完整格局", exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+});

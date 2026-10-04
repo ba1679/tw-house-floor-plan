@@ -10,6 +10,7 @@ function sandbox() {
   const dir = mkdtempSync(join(tmpdir(), "floorplan-validate-"));
   cpSync("data", join(dir, "data"), { recursive: true });
   cpSync("scripts", join(dir, "scripts"), { recursive: true });
+  cpSync("docs/reference", join(dir, "docs/reference"), { recursive: true });
   return dir;
 }
 
@@ -73,6 +74,68 @@ test("教學圖誤用另一間房的家具參照時，建置失敗", () => {
   expect(code).not.toBe(0);
   expect(output).toContain("f-bed-2");
   expect(output).not.toContain("Traceback");
+});
+
+test("尺寸步驟參照不存在的標註時，建置失敗", () => {
+  const dir = sandbox();
+  const guide = JSON.parse(readFileSync(join(dir, FURNITURE_GUIDE), "utf8"));
+  guide.steps[1].figure.dimension_ids[0] = "dim-missing";
+  writeFileSync(join(dir, FURNITURE_GUIDE), JSON.stringify(guide));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("dim-missing");
+});
+
+test("尺寸標註文字和端點距離不一致時，建置失敗", () => {
+  const dir = sandbox();
+  const plan = JSON.parse(readFileSync(join(dir, FLOORPLAN), "utf8"));
+  plan.annotations[0].label = "978 cm";
+  writeFileSync(join(dir, FLOORPLAN), JSON.stringify(plan));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("dim-overall-w");
+  expect(output).toContain("978 cm");
+});
+
+test("尺寸標註端點沒有落在外牆牆心線範圍時，建置失敗", () => {
+  const dir = sandbox();
+  const plan = JSON.parse(readFileSync(join(dir, FLOORPLAN), "utf8"));
+  plan.annotations[0].end.x = 900;
+  writeFileSync(join(dir, FLOORPLAN), JSON.stringify(plan));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("dim-overall-w");
+  expect(output).toContain("端點不是外牆牆心線範圍");
+});
+
+test("尺寸依據的查證報告不存在時，建置失敗", () => {
+  const dir = sandbox();
+  const guide = JSON.parse(readFileSync(join(dir, FURNITURE_GUIDE), "utf8"));
+  guide.evidence[1].review.report = "docs/reference/not-found.md";
+  writeFileSync(join(dir, FURNITURE_GUIDE), JSON.stringify(guide));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("not-found.md");
+});
+
+test("完整教學圖新增未納入導讀的尺寸標註時，建置失敗", () => {
+  const dir = sandbox();
+  const plan = JSON.parse(readFileSync(join(dir, FLOORPLAN), "utf8"));
+  plan.annotations.push({ id: "dim-unreviewed", type: "dimension", start: { x: 0, y: 100 }, end: { x: 100, y: 100 }, label: "100 cm" });
+  writeFileSync(join(dir, FLOORPLAN), JSON.stringify(plan));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("dim-unreviewed");
+});
+
+test("外牆牆心線偏離尺寸標註端點時，建置失敗", () => {
+  const dir = sandbox();
+  const plan = JSON.parse(readFileSync(join(dir, FLOORPLAN), "utf8"));
+  plan.walls.find((wall: { id: string }) => wall.id === "wall-001").start.y = 10;
+  writeFileSync(join(dir, FLOORPLAN), JSON.stringify(plan));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("外牆牆心線");
 });
 
 test.describe("build 時的資料驗證", () => {

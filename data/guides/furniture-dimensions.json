@@ -8,16 +8,35 @@
       "id": "furniture-illustration",
       "topic": "家具示意",
       "title": "畫有床，還不能判斷你的床放得下",
+      "layout_action_label": "回到格局，看看床的位置",
       "paragraphs": [
         "這個教學範例畫出了床、衣櫃與門窗的相對位置，主臥標示為 3.0 坪。",
         "局部圖沒有標出床的長寬或房間淨尺寸，也沒有提供你的床有多大，因此還不能判斷你的床是否放得下。"
       ],
       "evidence_ids": ["master-bedroom-example"],
       "figure": {
+        "view": "room",
         "room_id": "room-master",
         "feature_ids": ["f-bed-m", "f-wardrobe-m", "door-master", "win-master"],
         "caption": "主臥局部・教學示意圖",
         "description": "三房兩廳的主臥局部，房間內有床和衣櫃，周邊可見門與窗。圖上標示主臥及 3.0 坪，未標出床的長寬或房間淨尺寸。"
+      }
+    },
+    {
+      "id": "dimension-evidence",
+      "topic": "尺寸依據",
+      "title": "這兩條尺寸，量的是哪裡？",
+      "layout_action_label": "回到三房兩廳完整格局",
+      "paragraphs": [
+        "先看尺寸線兩端的短斜線，再看線上的數字和單位。兩端的細線連到外牆厚度中間的基準線，也叫牆心線；橫向量左、右外牆的牆心線之間，縱向量上、下外牆的牆心線之間，單位都是 cm（公分）。它們不是從牆的最外緣量起。",
+        "這是整戶外牆牆心線之間的橫向與縱向尺寸；圖上沒有標出主臥的淨長寬，也沒有床或衣櫃的長寬。主臥面積和目測距離都不能補上這些缺口。要比較你的床，還需要房間淨尺寸、家具實際尺寸及門與櫃子使用時所需的空間。"
+      ],
+      "evidence_ids": ["overall-dimensions"],
+      "figure": {
+        "view": "overall",
+        "dimension_ids": ["dim-overall-w", "dim-overall-h"],
+        "caption": "三房兩廳完整圖面・兩條外牆牆心線尺寸標註",
+        "description": "三房兩廳完整圖面，上方與左側各有一條尺寸線。兩端的細線連到相對外牆厚度中間的牆心線，不是牆的最外緣；沒有標出主臥的淨長寬，也沒有床或衣櫃的長寬。"
       }
     }
   ],
@@ -36,6 +55,22 @@
         "date": "2026-10-04",
         "report": "docs/reference/phase2-furniture-guide-step1.md",
         "notes": "已核對 FloorPlan 原始資料及 Renderer 的 GenericFurniture、RoomLabels、Dimensions；內部幾何僅用於繪圖，不提供為已知教學條件。"
+      }
+    },
+    {
+      "id": "overall-dimensions",
+      "label": "本站「三房兩廳」教學範例・外牆牆心線標註",
+      "explanation": "尺寸線的端點與文字取自完整圖面的兩筆標註。橫向量左、右外牆牆心線之間，縱向量上、下外牆牆心線之間；牆心線是牆厚中間的基準線，不是牆外緣。這些標註不能替代主臥淨尺寸，也不能證明圖中的床等於你的床。",
+      "assumptions": ["這是本站生成的教學範例，不是特定建案的實測圖。", "cm 表示公分；未標出的房間與家具尺寸仍是未知，不以面積或目測推算。"],
+      "basis": {
+        "document": "data/layouts/3b2l_standard.floorplan.json",
+        "locator": "bounds；annotations[id=dim-overall-w/dim-overall-h]；rooms[id=room-master]",
+        "reasoning": "兩筆標註端點分別與 bounds 的整體寬高重合；四面外牆的牆心線落在相同座標。未提供主臥淨長寬或家具尺寸標註。"
+      },
+      "review": {
+        "date": "2026-10-04",
+        "report": "docs/reference/phase2-dimension-evidence.md",
+        "notes": "已核對 FloorPlan 的 bounds、annotations，以及 Renderer 尺寸線與端點短斜線的畫法；未從內部幾何推算房間淨尺寸。"
       }
     }
   ]
