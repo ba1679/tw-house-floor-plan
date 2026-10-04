@@ -1,0 +1,38 @@
+.questions {
+  margin: 0;
+  padding-left: var(--space-6);
+  max-width: 68ch;
+}
+
+.question {
+  padding: 0 0 var(--space-4) var(--space-2);
+  break-inside: avoid;
+}
+
+.question + .question {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--rule-soft);
+}
+
+.question::marker {
+  font-weight: 700;
+}
+
+.ask {
+  margin: 0 0 var(--space-2);
+  font-weight: 700;
+}
+
+.reason {
+  margin: 0;
+}
+
+@media print {
+  .question {
+    padding-bottom: 12pt;
+  }
+
+  .question + .question {
+    padding-top: 12pt;
+  }
+}

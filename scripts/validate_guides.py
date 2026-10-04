@@ -52,13 +52,42 @@ def validate_furniture_guide(floorplans):
     annotations = {item["id"]: item for item in plan.get("annotations", [])}
     evidence_records = records(guide.get("evidence"), "evidence")
     evidence_ids = {str(e.get("id")) for e in evidence_records}
-    for step in records(guide.get("steps"), "steps"):
+    checklist = guide.get("checklist")
+    question_records = []
+    if require_text(checklist, ["title", "scope"], "checklist"):
+        question_records = records(checklist.get("questions"), "checklist questions")
+        if not 3 <= len(question_records) <= 5:
+            errors.append("%s: 清單須有 3 至 5 題" % path)
+        for question in question_records:
+            label = "question %s" % question.get("id")
+            require_text(question, ["question", "reason"], label)
+            for ref in text_list(question.get("evidence_ids"), label + " evidence_ids"):
+                if ref not in evidence_ids:
+                    errors.append("%s: %s 的 evidence_ids 無效：%s" % (path, label, ref))
+    steps = records(guide.get("steps"), "steps")
+    if len(steps) != 4:
+        errors.append("%s: 家具導讀須有四步" % path)
+    question_ids = [question.get("id") for question in question_records]
+    if steps:
+        if steps[-1].get("question_ids") != question_ids:
+            errors.append("%s: 第四步 question_ids 須與清單題目一致" % path)
+        for step in steps[:-1]:
+            if step.get("question_ids"):
+                errors.append("%s: 只有第四步可列出清單問題" % path)
+    for step in steps:
         label = "step %s" % step.get("id")
         require_text(step, ["topic", "title", "layout_action_label"], label)
         text_list(step.get("paragraphs"), label + " paragraphs")
         for ref in text_list(step.get("evidence_ids"), label + " evidence_ids"):
             if ref not in evidence_ids:
                 errors.append("%s: %s 的 evidence_ids 無效：%s" % (path, label, ref))
+        refs = step.get("question_ids", [])
+        if not isinstance(refs, list):
+            errors.append("%s: %s 的 question_ids 必須是問題參照清單" % (path, label))
+            refs = []
+        for ref in refs:
+            if ref not in question_ids:
+                errors.append("%s: %s 的 question_ids 無效：%s" % (path, label, ref))
         figure = step.get("figure", {})
         if not require_text(figure, ["view", "caption", "description"], label + " figure"):
             continue

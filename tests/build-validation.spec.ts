@@ -28,6 +28,53 @@ const FLOORPLAN = "data/layouts/3b2l_standard.floorplan.json";
 const SYMBOLS = "data/symbols.sample.json";
 const FURNITURE_GUIDE = "data/guides/furniture-dimensions.json";
 
+test("提問清單少於三題時，建置失敗", () => {
+  const dir = sandbox();
+  const path = join(dir, FURNITURE_GUIDE);
+  const guide = JSON.parse(readFileSync(path, "utf8"));
+  guide.checklist.questions = guide.checklist.questions.slice(0, 2);
+  guide.steps[3].question_ids = guide.steps[3].question_ids.slice(0, 2);
+  writeFileSync(path, JSON.stringify(guide));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("清單須有 3 至 5 題");
+});
+
+test("第四步參照不存在的問題時，建置失敗並指出問題", () => {
+  const dir = sandbox();
+  const path = join(dir, FURNITURE_GUIDE);
+  const guide = JSON.parse(readFileSync(path, "utf8"));
+  guide.steps[3].question_ids[0] = "missing-question";
+  writeFileSync(path, JSON.stringify(guide));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("missing-question");
+});
+
+test("提問缺少理由或有效依據時，建置失敗", () => {
+  const dir = sandbox();
+  const path = join(dir, FURNITURE_GUIDE);
+  const guide = JSON.parse(readFileSync(path, "utf8"));
+  guide.checklist.questions[0].reason = " ";
+  guide.checklist.questions[1].evidence_ids = ["missing-evidence"];
+  writeFileSync(path, JSON.stringify(guide));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("reason");
+  expect(output).toContain("missing-evidence");
+});
+
+test("第四步沒有引用完整清單時，建置失敗", () => {
+  const dir = sandbox();
+  const path = join(dir, FURNITURE_GUIDE);
+  const guide = JSON.parse(readFileSync(path, "utf8"));
+  guide.steps[3].question_ids.pop();
+  writeFileSync(path, JSON.stringify(guide));
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("須與清單題目一致");
+});
+
 test("家具導讀參照不存在的房間時，建置失敗並指出參照", () => {
   const dir = sandbox();
   const guide = JSON.parse(readFileSync(join(dir, FURNITURE_GUIDE), "utf8"));

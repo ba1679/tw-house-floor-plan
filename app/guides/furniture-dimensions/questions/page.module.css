@@ -1,0 +1,72 @@
+.page {
+  composes: page from "../../../reading.module.css";
+}
+
+.column {
+  composes: column from "../../../reading.module.css";
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.actions a,
+.printButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+}
+
+.printButton {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-m);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.printButton:focus-visible {
+  outline: var(--focus-ring-dark-width) solid var(--focus-dark);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 var(--focus-ring-light-width) var(--focus-light);
+}
+
+.title {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-title-size);
+  line-height: var(--text-title-leading);
+  text-wrap: balance;
+}
+
+.scope {
+  max-width: 68ch;
+  margin: 0 0 var(--space-6);
+  font-size: var(--text-reading-size);
+  line-height: var(--text-reading-leading);
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
+
+  .actions {
+    display: none;
+  }
+
+  .title {
+    margin-bottom: 12pt;
+  }
+
+  .scope {
+    margin-bottom: 18pt;
+  }
+}

@@ -10,6 +10,12 @@ export type GuideEvidence = {
   assumptions: string[];
 };
 
+export type GuideQuestion = {
+  id: string;
+  question: string;
+  reason: string;
+};
+
 type TeachingFigureBase = {
   floorplan: FloorPlan;
   caption: string;
@@ -29,6 +35,7 @@ export type GuideStep = {
   paragraphs: string[];
   figure: TeachingFigure;
   evidence: GuideEvidence[];
+  questions: GuideQuestion[];
 };
 
 type GuideRecord = {
@@ -36,6 +43,11 @@ type GuideRecord = {
   title: string;
   description: string;
   layout_id: string;
+  checklist: {
+    title: string;
+    scope: string;
+    questions: (GuideQuestion & { evidence_ids: string[] })[];
+  };
   steps: {
     id: string;
     topic: string;
@@ -43,6 +55,7 @@ type GuideRecord = {
     layout_action_label: string;
     paragraphs: string[];
     evidence_ids: string[];
+    question_ids?: string[];
     figure: { view: "room" | "overall"; room_id?: string; dimension_ids?: string[]; caption: string; description: string };
   }[];
   evidence: (GuideEvidence & {
@@ -51,17 +64,35 @@ type GuideRecord = {
   })[];
 };
 
-// 建置時投影；查證定位及工作備註留在內容資料，不傳給頁面或 client 元件。
-export function loadFurnitureDimensionsGuide() {
-  const record = JSON.parse(
+function readGuideRecord(): GuideRecord {
+  return JSON.parse(
     readFileSync(join(process.cwd(), "data/guides/furniture-dimensions.json"), "utf8"),
   ) as GuideRecord;
+}
+
+function readerQuestion(question: GuideQuestion): GuideQuestion {
+  return { id: question.id, question: question.question, reason: question.reason };
+}
+
+export function loadFurnitureDimensionsChecklist() {
+  const { checklist } = readGuideRecord();
+  return {
+    title: checklist.title,
+    scope: checklist.scope,
+    questions: checklist.questions.map(readerQuestion),
+  };
+}
+
+// 建置時投影；查證定位及工作備註留在內容資料，不傳給頁面或 client 元件。
+export function loadFurnitureDimensionsGuide() {
+  const record = readGuideRecord();
   const floorplan = loadFloorPlan(record.layout_id);
 
   return {
     title: record.title,
     description: record.description,
     layoutHref: `/layouts/${floorplan.id}`,
+    checklistHref: "/guides/furniture-dimensions/questions",
     steps: record.steps.map((step): GuideStep => ({
       id: step.id,
       topic: step.topic,
@@ -92,6 +123,7 @@ export function loadFurnitureDimensionsGuide() {
           assumptions: evidence.assumptions,
         };
       }),
+      questions: (step.question_ids ?? []).map((id) => readerQuestion(record.checklist.questions.find((item) => item.id === id)!)),
     })),
   };
 }
