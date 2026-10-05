@@ -1,0 +1,81 @@
+.page {
+  width: 100%;
+  padding: var(--space-5) var(--space-4) var(--space-6);
+}
+
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--text-eyebrow-size);
+  line-height: var(--text-eyebrow-leading);
+}
+
+.content h1 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-display-size);
+  line-height: var(--text-display-leading);
+}
+
+.intro {
+  max-width: 65ch;
+  margin: 0 0 var(--space-5);
+  font-size: var(--text-reading-size);
+  line-height: var(--text-reading-leading);
+}
+
+.figure {
+  max-width: 650px;
+  margin: 0 auto var(--space-6);
+}
+
+/* 局部圖沒有檢視器的第一段自動放大；在 320px 寬度也要讀得到房名與坪數。 */
+.figure :global(#room-labels > g) {
+  transform: translateX(36px);
+}
+
+.figure :global(#room-labels > g > text) {
+  font-size: 26px;
+}
+
+.figure :global(#room-labels > g > text:nth-child(2)) {
+  transform: translateY(10px);
+}
+
+.tasks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: tasks;
+  border-top: 1px solid var(--rule-strong);
+}
+
+.tasks li {
+  counter-increment: tasks;
+  display: grid;
+  grid-template-columns: var(--touch-min) 1fr;
+  gap: 0 var(--space-3);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--rule-soft);
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-leading);
+}
+
+.tasks li::before {
+  content: counter(tasks, decimal-leading-zero);
+  grid-row: span 2;
+  font-weight: 700;
+}
+
+.tasks strong { font-weight: 700; }
+.tasks span { grid-column: 2; }
+
+@media (min-width: 720px) {
+  .page { padding-top: var(--space-6); }
+
+  .figure :global(#room-labels > g > text) { font-size: 20px; }
+}

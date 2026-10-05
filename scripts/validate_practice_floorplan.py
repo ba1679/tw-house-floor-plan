@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Keep the teaching fragment reproducible and geometrically valid at build time."""
+"""Keep practice and study fragments reproducible and geometrically valid at build time."""
 import json
 import subprocess
 import sys
@@ -8,8 +8,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 GENERATOR = ROOT / ".claude/skills/floorplan-generator/scripts"
-SOURCE = ROOT / "data/practice/bedroom-fragment.layout.json"
-PRODUCT = ROOT / "data/practice/bedroom-fragment.floorplan.json"
+FIGURES = (
+    ("判讀練習", ROOT / "data/practice/bedroom-fragment.layout.json", ROOT / "data/practice/bedroom-fragment.floorplan.json"),
+    ("教學試用", ROOT / "data/study/bedroom-transfer.layout.json", ROOT / "data/study/bedroom-transfer.floorplan.json"),
+)
 SYMBOLS = ROOT / "data/symbols.sample.json"
 
 
@@ -21,26 +23,29 @@ def run(*args):
 
 
 def main():
-    if not SOURCE.is_file() or not PRODUCT.is_file():
-        print("判讀練習缺少原始描述或生成圖面", file=sys.stderr)
-        return 1
-    with tempfile.TemporaryDirectory() as folder:
-        regenerated = Path(folder) / "bedroom-fragment.floorplan.json"
-        if run(GENERATOR / "expand_layout.py", SOURCE, "-o", regenerated):
+    for label, source, product in FIGURES:
+        if not source.is_file() or not product.is_file():
+            print("%s缺少原始描述或生成圖面" % label, file=sys.stderr)
             return 1
-        try:
-            expected = json.loads(regenerated.read_text(encoding="utf-8"))
-            actual = json.loads(PRODUCT.read_text(encoding="utf-8"))
-        except (OSError, ValueError) as exc:
-            print("判讀練習圖面無法讀取：%s" % exc, file=sys.stderr)
+        with tempfile.TemporaryDirectory() as folder:
+            regenerated = Path(folder) / product.name
+            if run(GENERATOR / "expand_layout.py", source, "-o", regenerated):
+                return 1
+            try:
+                expected = json.loads(regenerated.read_text(encoding="utf-8"))
+                actual = json.loads(product.read_text(encoding="utf-8"))
+            except (OSError, ValueError) as exc:
+                print("%s圖面無法讀取：%s" % (label, exc), file=sys.stderr)
+                return 1
+            # Only this timestamp is intentionally different on every generation.
+            expected.pop("generated_at", None)
+            actual.pop("generated_at", None)
+            if actual != expected:
+                print("%s圖面與原始描述不一致；請重新執行 expand_layout.py" % label, file=sys.stderr)
+                return 1
+        if run(GENERATOR / "validate_floorplan.py", product, "--symbols", SYMBOLS):
             return 1
-        # Only this timestamp is intentionally different on every generation.
-        expected.pop("generated_at", None)
-        actual.pop("generated_at", None)
-        if actual != expected:
-            print("判讀練習圖面與原始描述不一致；請重新執行 expand_layout.py", file=sys.stderr)
-            return 1
-    return run(GENERATOR / "validate_floorplan.py", PRODUCT, "--symbols", SYMBOLS)
+    return 0
 
 
 if __name__ == "__main__":

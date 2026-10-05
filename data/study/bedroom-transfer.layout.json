@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "id": "bedroom-transfer",
+  "name": "陌生範例臥室乙",
+  "note": "五人教學試用的第二張局部範例；臥室與相鄰走道的示意，不代表完整格局或實際建案。bounds 是生成幾何，局部圖不展示其尺寸。",
+  "area": { "bounds": { "width": 500, "height": 420 } },
+  "tree": {
+    "stack": "rows",
+    "ratios": [105, 315],
+    "children": [
+      { "id": "study-hall", "room": "hallway", "name": "走道" },
+      { "id": "study-bedroom", "room": "bedroom", "name": "臥室乙" }
+    ]
+  },
+  "doors": [
+    { "id": "study-entry", "type": "single", "exterior": { "room": "study-hall", "side": "e" }, "width": 80, "role": "entrance", "opens_to": "study-hall" },
+    { "id": "study-bedroom-door", "type": "single", "between": ["study-hall", "study-bedroom"], "width": 80, "at": 0.2, "opens_to": "study-bedroom" }
+  ],
+  "windows": [
+    { "id": "study-window", "room": "study-bedroom", "side": "s", "type": "sliding", "width": 130, "at": 0.68 }
+  ],
+  "furniture": [
+    { "id": "study-bed", "type": "single_bed", "room": "study-bedroom", "anchor": "w", "at": 0.58 },
+    { "id": "study-desk", "type": "desk", "room": "study-bedroom", "anchor": "e", "at": 0.46 }
+  ]
+}
