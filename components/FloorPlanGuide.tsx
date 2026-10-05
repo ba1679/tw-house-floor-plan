@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { MouseEventHandler } from "react";
 import { FLOORPLAN_GUIDE } from "@/lib/ui/copy";
 import styles from "./FloorPlanGuide.module.css";
@@ -6,9 +7,11 @@ import styles from "./FloorPlanGuide.module.css";
 export function FloorPlanGuide({
   confirming,
   action,
+  learningLink,
 }: {
   confirming: boolean;
   action?: { label: string; onClick: MouseEventHandler<HTMLButtonElement> };
+  learningLink?: { href: string; label: string; shortLabel?: string };
 }) {
   return (
     <section className={styles.guide} aria-label={FLOORPLAN_GUIDE.label}>
@@ -32,10 +35,23 @@ export function FloorPlanGuide({
           {FLOORPLAN_GUIDE.confirm}
         </li>
       </ol>
-      {action && (
-        <button type="button" className={styles.actionButton} onClick={action.onClick}>
-          {action.label}
-        </button>
+      {(action || learningLink) && (
+        <div className={styles.actions}>
+          {action && (
+            <button type="button" className={styles.actionButton} onClick={action.onClick}>
+              {action.label}
+            </button>
+          )}
+          {learningLink && (
+            <Link
+              className={styles.learningLink}
+              href={learningLink.href}
+              aria-label={learningLink.label}
+            >
+              {learningLink.shortLabel ?? learningLink.label}
+            </Link>
+          )}
+        </div>
       )}
     </section>
   );

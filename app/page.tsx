@@ -6,6 +6,7 @@ import { FloorPlanRenderer } from "@/components/FloorPlanRenderer";
 import { SearchBox } from "@/components/SearchBox";
 import { ANALYTICS_EVENTS } from "@/lib/analytics";
 import { listLayoutIds, loadFloorPlan } from "@/lib/floorplan/data";
+import { loadFurnitureDimensionsGuide } from "@/lib/guides/data";
 import { hasQuiz } from "@/lib/quiz/questions";
 import { homeMetadata, homeWebsiteJsonLd, jsonLd } from "@/lib/site-metadata";
 import { loadCategories, loadSearchIndex } from "@/lib/symbols/data";
@@ -27,6 +28,7 @@ export default function HomePage() {
   // 格局與入口仍由同一份資料列出，不另選主打、不維護縮圖資料。
   const layouts = listLayoutIds().map(loadFloorPlan);
   const quizLayouts = layouts.filter((layout) => hasQuiz(layout.hotspots));
+  const furnitureGuide = loadFurnitureDimensionsGuide();
 
   return (
     <main className={styles.page}>
@@ -80,6 +82,15 @@ export default function HomePage() {
           </section>
 
           <div className={styles.tools}>
+            <section className={styles.guide} aria-labelledby="home-guide">
+              <h2 id="home-guide" className={styles.sectionTitle}>{furnitureGuide.title}</h2>
+              <p className={styles.sectionNote}>{furnitureGuide.description}</p>
+              <Link className={styles.learningButton} href="/guides/furniture-dimensions">
+                <span>開始學看家具與尺寸</span>
+                <span aria-hidden="true">→</span>
+              </Link>
+            </section>
+
             <section className={styles.lookup} aria-labelledby="home-lookup">
               <h2 id="home-lookup" className={styles.sectionTitle}>有個符號看不懂？</h2>
               <p className={styles.sectionNote}>查名字，或從分類慢慢找。</p>
@@ -110,7 +121,7 @@ export default function HomePage() {
                 {quizLayouts.map((layout) => (
                   <AnalyticsLink
                     key={layout.id}
-                    className={styles.quizButton}
+                    className={styles.learningButton}
                     href={`/layouts/${layout.id}/quiz`}
                     prefetch={false}
                     event={{

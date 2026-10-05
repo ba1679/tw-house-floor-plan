@@ -53,7 +53,7 @@ export function GuideReader({ guide }: { guide: Guide }) {
               {index < guide.steps.length - 1 && <button type="button" onClick={() => showStep(index + 1)}>下一步：{guide.steps[index + 1].topic}</button>}
             </nav>
             {index === guide.steps.length - 1 && (
-              <Link className={styles.action} href={guide.practiceHref}>換圖練習第一題</Link>
+              <Link className={styles.action} href={guide.practiceHref}>換圖完成三題練習</Link>
             )}
             {step.questions.length > 0 && (
               <Link className={styles.layoutLink} href={guide.checklistHref}>取得可列印提問清單</Link>

@@ -27,16 +27,16 @@ function runValidator(cwd: string): { code: number; output: string } {
 const FLOORPLAN = "data/layouts/3b2l_standard.floorplan.json";
 const SYMBOLS = "data/symbols.sample.json";
 const FURNITURE_GUIDE = "data/guides/furniture-dimensions.json";
-const INTERPRETATION = "data/practice/first-interpretation-question.json";
+const INTERPRETATION = "data/practice/interpretation-practice.json";
 
 test("判讀題的圖面、答案及理由參照錯誤時，建置指出資料缺口", () => {
   const dir = sandbox();
   const path = join(dir, INTERPRETATION);
   const practice = JSON.parse(readFileSync(path, "utf8"));
   practice.figure.feature_ids[0] = "missing-bed";
-  practice.question.correct_option_id = "missing-answer";
-  practice.question.options[0].reason = " ";
-  practice.question.options[1].evidence_ids = ["missing-evidence"];
+  practice.questions[0].correct_option_id = "missing-answer";
+  practice.questions[0].options[0].reason = " ";
+  practice.questions[0].options[1].evidence_ids = ["missing-evidence"];
   writeFileSync(path, JSON.stringify(practice));
 
   const { code, output } = runValidator(dir);
@@ -44,6 +44,24 @@ test("判讀題的圖面、答案及理由參照錯誤時，建置指出資料�
   for (const missing of ["missing-bed", "missing-answer", "reason", "missing-evidence"]) {
     expect(output).toContain(missing);
   }
+  expect(output).not.toContain("Traceback");
+});
+
+test("判讀練習少題、順序錯誤或追問未連到清單時，建置失敗", () => {
+  const dir = sandbox();
+  const path = join(dir, INTERPRETATION);
+  const practice = JSON.parse(readFileSync(path, "utf8"));
+  practice.questions.pop();
+  practice.questions[1].topic = "有效追問";
+  practice.questions[1].options[0].checklist_question_id = "missing-checklist-question";
+  delete practice.questions[1].options[0].label;
+  writeFileSync(path, JSON.stringify(practice));
+
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  expect(output).toContain("判讀練習須有三題");
+  expect(output).toContain("依序檢查");
+  expect(output).toContain("missing-checklist-question");
   expect(output).not.toContain("Traceback");
 });
 

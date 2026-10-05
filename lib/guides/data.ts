@@ -40,33 +40,44 @@ export type GuideStep = {
 
 export type InterpretationOption = { id: string; label: string; reason: string };
 
+export type InterpretationQuestion = {
+  id: string;
+  topic: string;
+  prompt: string;
+  correctOptionId: string;
+  options: InterpretationOption[];
+};
+
 export type InterpretationPracticeContent = {
   title: string;
   figure: TeachingFigure;
   conditions: string[];
-  question: {
-    id: string;
-    prompt: string;
-    correctOptionId: string;
-    options: InterpretationOption[];
-  };
+  questions: InterpretationQuestion[];
 };
 
 type PracticeRecord = {
   title: string;
   figure: { floorplan_id: string; room_id: string; caption: string; description: string };
   conditions: string[];
-  question: {
+  questions: {
     id: string;
+    topic: string;
     prompt: string;
     correct_option_id: string;
-    options: (InterpretationOption & { evidence_ids: string[] })[];
-  };
+    options: ({
+      id: string;
+      label?: string;
+      checklist_question_id?: string;
+      reason: string;
+      evidence_ids: string[];
+    })[];
+  }[];
 };
 
-export function loadFirstInterpretationPractice(): InterpretationPracticeContent {
-  const record = JSON.parse(readFileSync(join(process.cwd(), "data/practice/first-interpretation-question.json"), "utf8")) as PracticeRecord;
+export function loadInterpretationPractice(): InterpretationPracticeContent {
+  const record = JSON.parse(readFileSync(join(process.cwd(), "data/practice/interpretation-practice.json"), "utf8")) as PracticeRecord;
   const floorplan = JSON.parse(readFileSync(join(process.cwd(), `data/practice/${record.figure.floorplan_id}.floorplan.json`), "utf8")) as FloorPlan;
+  const checklist = readGuideRecord().checklist.questions;
   return {
     title: record.title,
     // 全片段尺寸屬於生成資料，不是房間局部已標示的條件。
@@ -78,12 +89,17 @@ export function loadFirstInterpretationPractice(): InterpretationPracticeContent
       description: record.figure.description,
     },
     conditions: record.conditions,
-    question: {
-      id: record.question.id,
-      prompt: record.question.prompt,
-      correctOptionId: record.question.correct_option_id,
-      options: record.question.options.map(({ id, label, reason }) => ({ id, label, reason })),
-    },
+    questions: record.questions.map((question) => ({
+      id: question.id,
+      topic: question.topic,
+      prompt: question.prompt,
+      correctOptionId: question.correct_option_id,
+      options: question.options.map(({ id, label, checklist_question_id: checklistQuestionId, reason }) => {
+        const resolvedLabel = label ?? checklist.find((item) => item.id === checklistQuestionId)?.practice_question;
+        if (!resolvedLabel) throw new Error(`判讀選項 ${id} 缺少可顯示文字`);
+        return { id, label: resolvedLabel, reason };
+      }),
+    })),
   };
 }
 
@@ -95,7 +111,7 @@ type GuideRecord = {
   checklist: {
     title: string;
     scope: string;
-    questions: (GuideQuestion & { evidence_ids: string[] })[];
+    questions: (GuideQuestion & { practice_question?: string; evidence_ids: string[] })[];
   };
   steps: {
     id: string;

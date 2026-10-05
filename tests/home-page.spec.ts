@@ -53,6 +53,14 @@ test.describe("/ 首頁", () => {
     await expect(page.getByRole("group", { name: target.name })).toBeVisible();
   });
 
+  test("首頁保留讀圖主要入口，另有名稱明確的家具尺寸導讀入口", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("link", { name: "讀這張圖：三房兩廳", exact: true })).toBeVisible();
+    const guide = page.getByRole("link", { name: "開始學看家具與尺寸", exact: true });
+    await expect(guide).toBeVisible();
+    await expect(guide).toHaveAttribute("href", "/guides/furniture-dimensions");
+  });
+
   // 搜尋框與分類頁上那個是**同一個元件**（票 07「不是第二份實作」）：比對規則、注音、鍵盤、
   // 找不到時的回饋，search-box.spec.ts 已經在分類頁上測過，這裡不重測一遍。
   // 這裡只問首頁上它在不在、打字之後是不是當場出結果（spec Testing Decisions 第 13 條）。
@@ -102,6 +110,7 @@ test.describe("/ 首頁", () => {
     const stops = [
       page.getByRole("link", { name: "回首頁：拼厝" }),
       ...floorplans.map((floorplan) => page.getByRole("link", { name: `讀這張圖：${floorplan.name}`, exact: true })),
+      page.getByRole("link", { name: "開始學看家具與尺寸", exact: true }),
       page.getByRole("searchbox"),
       ...categoriesInData.map((category) => page.getByRole("link", { name: CATEGORY_LABELS[category as SymbolCategory].zh, exact: true })),
       page.locator(`main a[href="/layouts/${firstLayout.id}/quiz"]`),
