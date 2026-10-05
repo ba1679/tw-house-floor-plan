@@ -1,0 +1,352 @@
+{
+  "schema_version": 1,
+  "id": "bedroom-fragment",
+  "name": "陌生臥室局部",
+  "unit": "cm",
+  "generated_by": "floorplan-generator/expand_layout.py",
+  "generated_at": "2026-10-04",
+  "area_meta": {
+    "deed_ping": null,
+    "public_ratio": null,
+    "interior_ping": 5.66,
+    "interior_m2": 18.72,
+    "assumption": "輸入坪數視為權狀坪數（含公設）；扣除公設比 未指定 後為室內面積。本圖 bounds 為室內外框（含外牆中心線內），不含公設與雨遮。"
+  },
+  "bounds": {
+    "width": 520,
+    "height": 360
+  },
+  "party_walls": [],
+  "rooms": [
+    {
+      "id": "practice-bedroom",
+      "type": "bedroom",
+      "name": "臥室甲",
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 400,
+        "height": 360
+      },
+      "inner": {
+        "x": 12,
+        "y": 12,
+        "width": 382,
+        "height": 336
+      },
+      "area_m2": 14.4,
+      "area_ping": 4.36
+    },
+    {
+      "id": "practice-hall",
+      "type": "hallway",
+      "name": "走道",
+      "geometry": {
+        "x": 400,
+        "y": 0,
+        "width": 120,
+        "height": 360
+      },
+      "inner": {
+        "x": 406,
+        "y": 12,
+        "width": 102,
+        "height": 336
+      },
+      "area_m2": 4.32,
+      "area_ping": 1.31
+    }
+  ],
+  "walls": [
+    {
+      "id": "wall-001",
+      "start": {
+        "x": 0,
+        "y": 0
+      },
+      "end": {
+        "x": 520,
+        "y": 0
+      },
+      "orientation": "horizontal",
+      "length": 520,
+      "thickness": 24,
+      "type": "exterior",
+      "rooms_a": [],
+      "rooms_b": [
+        "practice-bedroom",
+        "practice-hall"
+      ]
+    },
+    {
+      "id": "wall-002",
+      "start": {
+        "x": 0,
+        "y": 360
+      },
+      "end": {
+        "x": 520,
+        "y": 360
+      },
+      "orientation": "horizontal",
+      "length": 520,
+      "thickness": 24,
+      "type": "exterior",
+      "rooms_a": [
+        "practice-bedroom",
+        "practice-hall"
+      ],
+      "rooms_b": []
+    },
+    {
+      "id": "wall-003",
+      "start": {
+        "x": 0,
+        "y": 0
+      },
+      "end": {
+        "x": 0,
+        "y": 360
+      },
+      "orientation": "vertical",
+      "length": 360,
+      "thickness": 24,
+      "type": "exterior",
+      "rooms_a": [],
+      "rooms_b": [
+        "practice-bedroom"
+      ]
+    },
+    {
+      "id": "wall-004",
+      "start": {
+        "x": 520,
+        "y": 0
+      },
+      "end": {
+        "x": 520,
+        "y": 360
+      },
+      "orientation": "vertical",
+      "length": 360,
+      "thickness": 24,
+      "type": "exterior",
+      "rooms_a": [
+        "practice-hall"
+      ],
+      "rooms_b": []
+    },
+    {
+      "id": "wall-005",
+      "start": {
+        "x": 400,
+        "y": 0
+      },
+      "end": {
+        "x": 400,
+        "y": 360
+      },
+      "orientation": "vertical",
+      "length": 360,
+      "thickness": 12,
+      "type": "interior",
+      "rooms_a": [
+        "practice-bedroom"
+      ],
+      "rooms_b": [
+        "practice-hall"
+      ]
+    }
+  ],
+  "doors": [
+    {
+      "id": "practice-fragment-entry",
+      "type": "single",
+      "wall_id": "wall-004",
+      "offset": 140,
+      "width": 80,
+      "position": {
+        "x": 520,
+        "y": 180
+      },
+      "rotation": 90,
+      "swing": "right",
+      "opens_to": "practice-hall",
+      "connects": [
+        null,
+        "practice-hall"
+      ],
+      "role": "entrance",
+      "swing_arcs": [
+        {
+          "hinge": {
+            "x": 520,
+            "y": 220
+          },
+          "radius": 80,
+          "along": {
+            "x": 0.0,
+            "y": -1.0
+          },
+          "open": {
+            "x": -1.0,
+            "y": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "practice-door",
+      "type": "single",
+      "wall_id": "wall-005",
+      "offset": 25,
+      "width": 80,
+      "position": {
+        "x": 400,
+        "y": 65
+      },
+      "rotation": 90,
+      "swing": "right",
+      "opens_to": "practice-bedroom",
+      "connects": [
+        "practice-hall",
+        "practice-bedroom"
+      ],
+      "role": "interior",
+      "swing_arcs": [
+        {
+          "hinge": {
+            "x": 400,
+            "y": 105
+          },
+          "radius": 80,
+          "along": {
+            "x": 0.0,
+            "y": -1.0
+          },
+          "open": {
+            "x": -1.0,
+            "y": 0.0
+          }
+        }
+      ]
+    }
+  ],
+  "windows": [
+    {
+      "id": "practice-window",
+      "type": "sliding",
+      "wall_id": "wall-003",
+      "offset": 127,
+      "width": 120,
+      "position": {
+        "x": 0,
+        "y": 187
+      },
+      "rotation": 90,
+      "room": "practice-bedroom"
+    }
+  ],
+  "furniture": [
+    {
+      "id": "practice-bed",
+      "type": "bed",
+      "room_id": "practice-bedroom",
+      "geometry": {
+        "x": 173,
+        "y": 160,
+        "width": 152,
+        "height": 188
+      },
+      "rotation": 180,
+      "facing": "n"
+    },
+    {
+      "id": "practice-wardrobe",
+      "type": "wardrobe",
+      "room_id": "practice-bedroom",
+      "geometry": {
+        "x": 144,
+        "y": 12,
+        "width": 180,
+        "height": 60
+      },
+      "rotation": 0,
+      "facing": "s"
+    }
+  ],
+  "columns": [],
+  "canopies": [],
+  "annotations": [
+    {
+      "id": "dim-overall-w",
+      "type": "dimension",
+      "start": {
+        "x": 0,
+        "y": 0
+      },
+      "end": {
+        "x": 520,
+        "y": 0
+      },
+      "label": "520 cm"
+    },
+    {
+      "id": "dim-overall-h",
+      "type": "dimension",
+      "start": {
+        "x": 0,
+        "y": 0
+      },
+      "end": {
+        "x": 0,
+        "y": 360
+      },
+      "label": "360 cm"
+    }
+  ],
+  "hotspots": [
+    {
+      "id": "hs-practice-fragment-entry",
+      "symbol_id": "door_single_swing",
+      "shape": "rect",
+      "coords": [
+        508,
+        140,
+        24,
+        80
+      ],
+      "label_position": "below",
+      "source": "auto_door",
+      "ref": "practice-fragment-entry"
+    },
+    {
+      "id": "hs-practice-door",
+      "symbol_id": "door_single_swing",
+      "shape": "rect",
+      "coords": [
+        388,
+        25,
+        24,
+        80
+      ],
+      "label_position": "below",
+      "source": "auto_door",
+      "ref": "practice-door"
+    },
+    {
+      "id": "hs-practice-window",
+      "symbol_id": "window",
+      "shape": "rect",
+      "coords": [
+        -12,
+        127,
+        24,
+        120
+      ],
+      "label_position": "above",
+      "source": "auto_window",
+      "ref": "practice-window"
+    }
+  ]
+}

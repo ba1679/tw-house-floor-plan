@@ -1,5 +1,6 @@
 """家具與尺寸導讀的建置檢查；語意查證仍由內容維護流程完成。"""
 import json
+import re
 from pathlib import Path
 
 
@@ -156,4 +157,111 @@ def validate_furniture_guide(floorplans):
         if require_text(review, ["date", "report", "notes"], label + " review"):
             if not Path(review["report"]).is_file():
                 errors.append("%s: %s 的查證報告不存在：%s" % (path, label, review["report"]))
+    return errors
+
+
+def validate_first_interpretation_practice(public_floorplans):
+    """Check the practice content at its build seam; editorial truth is reviewed separately."""
+    path = Path("data/practice/first-interpretation-question.json")
+    errors = []
+
+    def require_text(value, label):
+        if not isinstance(value, str) or not value.strip():
+            errors.append("%s: 缺少 %s" % (path, label))
+            return False
+        return True
+
+    def text_list(value, label):
+        if not isinstance(value, list) or not value or any(not isinstance(item, str) or not item.strip() for item in value):
+            errors.append("%s: %s 必須是非空文字清單" % (path, label))
+            return []
+        return value
+
+    try:
+        record = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        return ["%s: 無法讀取判讀題：%s" % (path, exc)]
+    if not isinstance(record, dict):
+        return ["%s: 判讀題必須是物件" % path]
+    if record.get("id") != path.stem:
+        errors.append("%s: id 必須與檔名一致" % path)
+    require_text(record.get("title"), "title")
+    text_list(record.get("conditions"), "conditions")
+
+    figure = record.get("figure")
+    if not isinstance(figure, dict):
+        return errors + ["%s: 缺少 figure" % path]
+    for field in ("floorplan_id", "room_id", "caption", "description"):
+        require_text(figure.get(field), "figure.%s" % field)
+    plan_id = figure.get("floorplan_id")
+    plan = None
+    if isinstance(plan_id, str) and re.fullmatch(r"[a-z0-9_-]+", plan_id):
+        plan_path = Path("data/practice/%s.floorplan.json" % plan_id)
+        try:
+            plan = json.loads(plan_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            errors.append("%s: 圖面 %s 無法讀取：%s" % (path, plan_path, exc))
+        if not Path("data/practice/%s.layout.json" % plan_id).is_file():
+            errors.append("%s: 圖面 %s 缺少可維護原始描述" % (path, plan_id))
+        if plan_id in {item.get("id") for item in public_floorplans}:
+            errors.append("%s: 局部圖 %s 不可加入公開完整 Layout" % (path, plan_id))
+    else:
+        errors.append("%s: figure.floorplan_id 無效：%s" % (path, plan_id))
+
+    if isinstance(plan, dict):
+        if plan.get("id") != plan_id:
+            errors.append("%s: 圖面 id 與 %s 不一致" % (path, plan_id))
+        room_id = figure.get("room_id")
+        if room_id not in {room.get("id") for room in plan.get("rooms", []) if isinstance(room, dict)}:
+            errors.append("%s: figure.room_id 無效：%s" % (path, room_id))
+        features = {item.get("id"): item for group in ("furniture", "doors", "windows") for item in plan.get(group, []) if isinstance(item, dict)}
+        for ref in text_list(figure.get("feature_ids"), "figure.feature_ids"):
+            feature = features.get(ref)
+            if feature is None:
+                errors.append("%s: figure.feature_ids 無效：%s" % (path, ref))
+            elif room_id not in (feature.get("room_id"), feature.get("room"), feature.get("opens_to"), *(feature.get("connects") or [])):
+                errors.append("%s: figure.feature_ids %s 不屬於 %s" % (path, ref, room_id))
+
+    evidence = record.get("evidence")
+    if not isinstance(evidence, list) or not evidence or any(not isinstance(item, dict) for item in evidence):
+        errors.append("%s: evidence 必須是非空物件清單" % path)
+        evidence = []
+    evidence_ids = [item.get("id") for item in evidence]
+    if any(not isinstance(ref, str) or not ref.strip() for ref in evidence_ids) or len(evidence_ids) != len(set(str(ref) for ref in evidence_ids)):
+        errors.append("%s: evidence id 必須非空且不重複" % path)
+    for item in evidence:
+        label = "evidence %s" % item.get("id")
+        require_text(item.get("label"), label + ".label")
+        basis = item.get("basis") if isinstance(item.get("basis"), dict) else {}
+        for field in ("document", "locator", "reasoning"):
+            require_text(basis.get(field), label + ".basis." + field)
+        if plan_id and basis.get("document") != "data/practice/%s.floorplan.json" % plan_id:
+            errors.append("%s: %s 的 document 必須指向本題圖面" % (path, label))
+        review = item.get("review") if isinstance(item.get("review"), dict) else {}
+        for field in ("date", "report", "notes"):
+            require_text(review.get(field), label + ".review." + field)
+        if isinstance(review.get("report"), str) and not Path(review["report"]).is_file():
+            errors.append("%s: %s 的查證報告不存在：%s" % (path, label, review["report"]))
+
+    question = record.get("question")
+    if not isinstance(question, dict):
+        return errors + ["%s: 缺少 question" % path]
+    for field in ("id", "prompt", "correct_option_id"):
+        require_text(question.get(field), "question.%s" % field)
+    options = question.get("options")
+    if not isinstance(options, list) or any(not isinstance(item, dict) for item in options) or len(options) < 3:
+        errors.append("%s: question.options 至少需要三個物件" % path)
+        options = []
+    option_ids = [item.get("id") for item in options]
+    if any(not isinstance(ref, str) or not ref.strip() for ref in option_ids) or len(option_ids) != len(set(str(ref) for ref in option_ids)):
+        errors.append("%s: option id 必須非空且不重複" % path)
+    if question.get("correct_option_id") not in option_ids:
+        errors.append("%s: correct_option_id 無效：%s" % (path, question.get("correct_option_id")))
+    for option in options:
+        label = "option %s" % option.get("id")
+        require_text(option.get("label"), label + ".label")
+        require_text(option.get("reason"), label + ".reason")
+        for ref in text_list(option.get("evidence_ids"), label + ".evidence_ids"):
+            if ref not in evidence_ids:
+                errors.append("%s: %s 的 evidence_ids 無效：%s" % (path, label, ref))
     return errors

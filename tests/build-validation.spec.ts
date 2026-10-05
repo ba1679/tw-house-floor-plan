@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { execFileSync } from "node:child_process";
-import { cpSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
@@ -27,6 +27,44 @@ function runValidator(cwd: string): { code: number; output: string } {
 const FLOORPLAN = "data/layouts/3b2l_standard.floorplan.json";
 const SYMBOLS = "data/symbols.sample.json";
 const FURNITURE_GUIDE = "data/guides/furniture-dimensions.json";
+const INTERPRETATION = "data/practice/first-interpretation-question.json";
+
+test("判讀題的圖面、答案及理由參照錯誤時，建置指出資料缺口", () => {
+  const dir = sandbox();
+  const path = join(dir, INTERPRETATION);
+  const practice = JSON.parse(readFileSync(path, "utf8"));
+  practice.figure.feature_ids[0] = "missing-bed";
+  practice.question.correct_option_id = "missing-answer";
+  practice.question.options[0].reason = " ";
+  practice.question.options[1].evidence_ids = ["missing-evidence"];
+  writeFileSync(path, JSON.stringify(practice));
+
+  const { code, output } = runValidator(dir);
+  expect(code).not.toBe(0);
+  for (const missing of ["missing-bed", "missing-answer", "reason", "missing-evidence"]) {
+    expect(output).toContain(missing);
+  }
+  expect(output).not.toContain("Traceback");
+});
+
+test("判讀圖面產物與原始描述不一致時，建置失敗", () => {
+  const dir = sandbox();
+  mkdirSync(join(dir, ".claude/skills"), { recursive: true });
+  cpSync(".claude/skills/floorplan-generator", join(dir, ".claude/skills/floorplan-generator"), { recursive: true });
+  const path = join(dir, "data/practice/bedroom-fragment.floorplan.json");
+  const plan = JSON.parse(readFileSync(path, "utf8"));
+  plan.furniture[0].geometry.x += 1;
+  writeFileSync(path, JSON.stringify(plan));
+
+  let output = "";
+  try {
+    execFileSync("python3", ["scripts/validate_practice_floorplan.py"], { cwd: dir, encoding: "utf8" });
+  } catch (error) {
+    const failure = error as { stdout?: string; stderr?: string };
+    output = `${failure.stdout ?? ""}${failure.stderr ?? ""}`;
+  }
+  expect(output).toContain("圖面與原始描述不一致");
+});
 
 test("提問清單少於三題時，建置失敗", () => {
   const dir = sandbox();

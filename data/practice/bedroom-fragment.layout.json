@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "id": "bedroom-fragment",
+  "name": "陌生臥室局部",
+  "note": "教學用的臥室與一小段相鄰走道，不代表一戶完整格局或任何實際建案。bounds 只供生成圖形，作答時不當成已標示的房間尺寸。",
+  "area": { "bounds": { "width": 520, "height": 360 } },
+  "tree": {
+    "stack": "cols",
+    "ratios": [400, 120],
+    "children": [
+      { "id": "practice-bedroom", "room": "bedroom", "name": "臥室甲" },
+      { "id": "practice-hall", "room": "hallway", "name": "走道" }
+    ]
+  },
+  "doors": [
+    { "id": "practice-fragment-entry", "type": "single", "exterior": { "room": "practice-hall", "side": "e" }, "width": 80, "role": "entrance", "opens_to": "practice-hall" },
+    { "id": "practice-door", "type": "single", "between": ["practice-hall", "practice-bedroom"], "width": 80, "at": 0.18, "opens_to": "practice-bedroom" }
+  ],
+  "windows": [
+    { "id": "practice-window", "room": "practice-bedroom", "side": "w", "type": "sliding", "width": 120, "at": 0.52 }
+  ],
+  "furniture": [
+    { "id": "practice-bed", "type": "bed", "room": "practice-bedroom", "anchor": "s", "at": 0.62 },
+    { "id": "practice-wardrobe", "type": "wardrobe", "room": "practice-bedroom", "anchor": "n", "at": 0.85 }
+  ]
+}
