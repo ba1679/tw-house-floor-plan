@@ -144,7 +144,6 @@
 
 .retry {
   min-height: var(--touch-min);
-  margin-top: var(--space-4);
   padding: var(--space-2) var(--space-4);
   border: 1px solid var(--rule-strong);
   border-radius: var(--radius-m);
@@ -154,8 +153,49 @@
   cursor: pointer;
 }
 
+.answerActions,
+.completionActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.next,
+.primaryLink {
+  composes: primaryAction from "../app/reading.module.css";
+}
+
+.next {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.completion {
+  max-width: 680px;
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--rule-soft);
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-leading);
+}
+
+.completion h2,
+.completion p {
+  margin: 0;
+}
+
+.completion h2 {
+  font-size: var(--text-reading-size);
+}
+
+.completion p {
+  margin-top: var(--space-3);
+}
+
 .retry:focus-visible,
-.confirm:focus-visible {
+.confirm:focus-visible,
+.next:focus-visible {
   outline: var(--focus-ring-dark-width) solid var(--focus-dark);
   outline-offset: 2px;
   box-shadow: 0 0 0 var(--focus-ring-light-width) var(--focus-light);

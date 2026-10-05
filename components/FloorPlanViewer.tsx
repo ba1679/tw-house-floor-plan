@@ -50,6 +50,8 @@ type Props = {
   symbols: Record<string, SymbolRecord>;
   /** 熱區的閱讀順序，在 build 時算好（`lib/floorplan/reading-order.ts`）。見 `FloorPlanViewport`。 */
   readingOrder: RoomHotspots[];
+  /** 與操作提示共列的延伸學習入口；不參與自由看圖的互動狀態。 */
+  learningLink?: { href: string; label: string; shortLabel?: string };
 };
 
 /** 網址高亮優先，再找閱讀順序的門窗，最後取任一有效符號；座標始終來自真實熱區。 */
@@ -89,7 +91,7 @@ function getGuideAction(
   return undefined;
 }
 
-export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
+export function FloorPlanViewer({ floorplan, symbols, readingOrder, learningLink }: Props) {
   // 初始尺寸是占位值，SSR 出來的靜態頁面就已經是正確的全圖（`initialViewerConfig`）。
   const [state, dispatch] = useReducer(reduceViewer, floorplan, (fp: FloorPlan) =>
     createViewerState(initialViewerConfig(fp)),
@@ -359,6 +361,7 @@ export function FloorPlanViewer({ floorplan, symbols, readingOrder }: Props) {
         <FloorPlanGuide
           confirming={state.stage === "candidates"}
           action={guideAction}
+          learningLink={learningLink}
         />
       )}
 

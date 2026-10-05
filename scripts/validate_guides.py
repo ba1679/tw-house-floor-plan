@@ -160,9 +160,9 @@ def validate_furniture_guide(floorplans):
     return errors
 
 
-def validate_first_interpretation_practice(public_floorplans):
+def validate_interpretation_practice(public_floorplans):
     """Check the practice content at its build seam; editorial truth is reviewed separately."""
-    path = Path("data/practice/first-interpretation-question.json")
+    path = Path("data/practice/interpretation-practice.json")
     errors = []
 
     def require_text(value, label):
@@ -243,25 +243,56 @@ def validate_first_interpretation_practice(public_floorplans):
         if isinstance(review.get("report"), str) and not Path(review["report"]).is_file():
             errors.append("%s: %s 的查證報告不存在：%s" % (path, label, review["report"]))
 
-    question = record.get("question")
-    if not isinstance(question, dict):
-        return errors + ["%s: 缺少 question" % path]
-    for field in ("id", "prompt", "correct_option_id"):
-        require_text(question.get(field), "question.%s" % field)
-    options = question.get("options")
-    if not isinstance(options, list) or any(not isinstance(item, dict) for item in options) or len(options) < 3:
-        errors.append("%s: question.options 至少需要三個物件" % path)
-        options = []
-    option_ids = [item.get("id") for item in options]
-    if any(not isinstance(ref, str) or not ref.strip() for ref in option_ids) or len(option_ids) != len(set(str(ref) for ref in option_ids)):
-        errors.append("%s: option id 必須非空且不重複" % path)
-    if question.get("correct_option_id") not in option_ids:
-        errors.append("%s: correct_option_id 無效：%s" % (path, question.get("correct_option_id")))
-    for option in options:
-        label = "option %s" % option.get("id")
-        require_text(option.get("label"), label + ".label")
-        require_text(option.get("reason"), label + ".reason")
-        for ref in text_list(option.get("evidence_ids"), label + ".evidence_ids"):
-            if ref not in evidence_ids:
-                errors.append("%s: %s 的 evidence_ids 無效：%s" % (path, label, ref))
+    checklist_path = Path("data/guides/furniture-dimensions.json")
+    try:
+        checklist_questions = {
+            item.get("id"): item
+            for item in json.loads(checklist_path.read_text(encoding="utf-8")).get("checklist", {}).get("questions", [])
+            if isinstance(item, dict)
+        }
+    except (OSError, ValueError):
+        checklist_questions = {}
+
+    questions = record.get("questions")
+    if not isinstance(questions, list) or any(not isinstance(item, dict) for item in questions):
+        return errors + ["%s: questions 必須是物件清單" % path]
+    if len(questions) != 3:
+        errors.append("%s: 判讀練習須有三題" % path)
+    topics = [question.get("topic") for question in questions]
+    if topics != ["有依據的結論", "尚缺的資訊", "有效追問"]:
+        errors.append("%s: 三題須依序檢查有依據的結論、尚缺的資訊及有效追問" % path)
+    question_ids = [question.get("id") for question in questions]
+    if any(not isinstance(ref, str) or not ref.strip() for ref in question_ids) or len(question_ids) != len(set(str(ref) for ref in question_ids)):
+        errors.append("%s: question id 必須非空且不重複" % path)
+    for question in questions:
+        question_label = "question %s" % question.get("id")
+        for field in ("id", "topic", "prompt", "correct_option_id"):
+            require_text(question.get(field), "%s.%s" % (question_label, field))
+        options = question.get("options")
+        if not isinstance(options, list) or any(not isinstance(item, dict) for item in options) or len(options) < 3:
+            errors.append("%s: %s.options 至少需要三個物件" % (path, question_label))
+            options = []
+        option_ids = [item.get("id") for item in options]
+        if any(not isinstance(ref, str) or not ref.strip() for ref in option_ids) or len(option_ids) != len(set(str(ref) for ref in option_ids)):
+            errors.append("%s: %s option id 必須非空且不重複" % (path, question_label))
+        if question.get("correct_option_id") not in option_ids:
+            errors.append("%s: %s correct_option_id 無效：%s" % (path, question_label, question.get("correct_option_id")))
+        for option in options:
+            label = "%s option %s" % (question_label, option.get("id"))
+            require_text(option.get("id"), label + ".id")
+            require_text(option.get("reason"), label + ".reason")
+            has_label = isinstance(option.get("label"), str) and bool(option["label"].strip())
+            checklist_ref = option.get("checklist_question_id")
+            has_checklist_ref = isinstance(checklist_ref, str) and bool(checklist_ref.strip())
+            if has_label == has_checklist_ref:
+                errors.append("%s: %s 須且只能提供 label 或 checklist_question_id" % (path, label))
+            if has_checklist_ref:
+                checklist_question = checklist_questions.get(checklist_ref)
+                if checklist_question is None:
+                    errors.append("%s: %s 的 checklist_question_id 無效：%s" % (path, label, checklist_ref))
+                elif not isinstance(checklist_question.get("practice_question"), str) or not checklist_question["practice_question"].strip():
+                    errors.append("%s: %s 缺少 practice_question：%s" % (path, label, checklist_ref))
+            for ref in text_list(option.get("evidence_ids"), label + ".evidence_ids"):
+                if ref not in evidence_ids:
+                    errors.append("%s: %s 的 evidence_ids 無效：%s" % (path, label, ref))
     return errors

@@ -98,4 +98,5 @@
   color: var(--ink);
   text-decoration: underline;
   text-underline-offset: 3px;
+  white-space: nowrap;
 }

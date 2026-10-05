@@ -129,6 +129,7 @@
 }
 
 .lookup,
+.guide,
 .practice {
   min-width: 0;
   padding-top: var(--space-5);
@@ -149,7 +150,7 @@
   color: var(--text-secondary);
 }
 
-.quizButton {
+.learningButton {
   display: flex;
   align-items: center;
   justify-content: space-between;

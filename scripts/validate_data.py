@@ -11,7 +11,7 @@ import json, io, sys, glob, os, math
 import xml.etree.ElementTree as ET
 from collections import Counter
 from urllib.parse import urlparse
-from validate_guides import validate_furniture_guide, validate_first_interpretation_practice
+from validate_guides import validate_furniture_guide, validate_interpretation_practice
 
 # verification_status 描述的是「**來源查證**做到哪」，所以這裡只擋查證這件事本身的紀錄。
 # caution（買房時要注意什麼）刻意不在清單裡：它要的是建築技術規則、防火門 A/B 分級、
@@ -370,7 +370,7 @@ check(verified >= required_verified,
 
 # --- 導讀：同一建置閘門，與 Symbol 的查證語意分開 ---
 errors.extend(validate_furniture_guide(floorplans))
-errors.extend(validate_first_interpretation_practice(floorplans))
+errors.extend(validate_interpretation_practice(floorplans))
 
 # --- 報告 ---
 print("\n資料驗證報告 (PRD v0.3.1)")

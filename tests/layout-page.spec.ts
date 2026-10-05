@@ -47,6 +47,12 @@ test.describe("/layouts/[id] 靜態平面圖", () => {
       await expect(quiz).toBeInViewport({ ratio: 1 });
       const linkBox = (await quiz.boundingBox())!;
       expect(linkBox.height).toBeGreaterThanOrEqual(44);
+      const guide = page.getByRole("link", { name: "家具尺寸導讀", exact: true });
+      await expect(guide).toBeInViewport({ ratio: 1 });
+      expect((await guide.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+
+      const operationGuide = page.getByRole("region", { name: "平面圖操作提示" });
+      await expect(operationGuide.getByRole("link", { name: "家具尺寸導讀", exact: true })).toBeVisible();
 
       const overflows = await page.evaluate(
         () => document.documentElement.scrollWidth > document.documentElement.clientWidth

@@ -10,6 +10,7 @@
       {
         "id": "room-clear-dimensions",
         "question": "能否提供主臥的淨長與淨寬，並在圖上標示量測位置和單位？",
+        "practice_question": "能否提供臥室甲的淨長與淨寬，並在圖上標示量測位置和單位？",
         "reason": "圖上 977 cm 與 782 cm 量的是整戶外牆牆心線之間，不是主臥淨尺寸；3.0 坪也不能代替淨長寬。",
         "evidence_ids": ["overall-dimensions"]
       },

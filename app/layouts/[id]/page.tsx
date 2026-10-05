@@ -5,6 +5,7 @@ import { FloorPlanViewer } from "@/components/FloorPlanViewer";
 import { ANALYTICS_EVENTS } from "@/lib/analytics";
 import { listLayoutIds, loadFloorPlan } from "@/lib/floorplan/data";
 import { readingOrder } from "@/lib/floorplan/reading-order";
+import { loadFurnitureDimensionsGuide } from "@/lib/guides/data";
 import { hasQuiz } from "@/lib/quiz/questions";
 import { jsonLd, layoutLearningResourceJsonLd, layoutMetadata } from "@/lib/site-metadata";
 import { loadSymbolsForViewer } from "@/lib/symbols/data";
@@ -35,6 +36,8 @@ export default async function LayoutPage({ params }: { params: Promise<{ id: str
 
   const floorplan = loadFloorPlan(id);
   const symbols = loadSymbolsForViewer();
+  const furnitureGuide = loadFurnitureDimensionsGuide();
+  const hasFurnitureGuide = furnitureGuide.layoutHref === `/layouts/${id}`;
 
   return (
     <main className={styles.exploration}>
@@ -42,8 +45,6 @@ export default async function LayoutPage({ params }: { params: Promise<{ id: str
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd(layoutLearningResourceJsonLd(floorplan, symbols)) }}
       />
-      {/* 找找看的入口與 `<h1>` 同一列（M4 票 06），**不另起一列**：同一個 ADR-0003 的理由，每多一列就從圖框挖一列。
-          入口只替有找找看頁的圖放——與找找看頁產不產生問的是同一句 `hasQuiz`。 */}
       <div className={styles.titleRow}>
         <h1 className={styles.title}>{floorplan.name}</h1>
         {hasQuiz(floorplan.hotspots) && (
@@ -67,6 +68,13 @@ export default async function LayoutPage({ params }: { params: Promise<{ id: str
         floorplan={floorplan}
         symbols={symbols}
         readingOrder={readingOrder(floorplan, symbols)}
+        learningLink={hasFurnitureGuide
+          ? {
+              href: "/guides/furniture-dimensions",
+              label: "家具尺寸導讀",
+              shortLabel: "家具尺寸",
+            }
+          : undefined}
       />
     </main>
   );

@@ -68,20 +68,33 @@
   color: var(--surface-reading);
 }
 
-.actionButton {
+.actions {
   align-self: center;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.actionButton,
+.learningLink {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-1);
   min-height: var(--touch-min);
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--text-link-chip-size);
+  padding: var(--space-2) var(--space-1);
+  font-size: var(--text-small-size);
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .actionButton:hover {
   background: var(--text-secondary);
+}
+
+.learningLink {
+  color: var(--text-primary);
+  text-underline-offset: 3px;
 }
 
 @media (min-width: 640px) {
@@ -99,9 +112,15 @@
     gap: var(--space-6);
   }
 
-  .actionButton {
+  .actions {
     grid-column: 2;
     grid-row: 1 / 3;
+  }
+
+  .actionButton,
+  .learningLink {
+    padding-inline: var(--space-3);
+    font-size: var(--text-link-chip-size);
   }
 }
 
