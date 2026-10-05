@@ -1,5 +1,7 @@
 # 家具與尺寸：第 07 票整合核對
 
+> 本文記錄 2026-10-05 第 07 票完成時的核對結果。當日稍後使用者決定改採[公開自填試用](../../.scratch/phase2-furniture-dimensions/study/README.md)；以下原定五人受主持「下一步」保留作歷史背景，不是目前待執行門檻。
+
 核對日期：2026-10-05（Asia/Taipei）。範圍為 [第 07 票](../../.scratch/phase2-furniture-dimensions/issues/07-usable-study-materials.md)及第 08 票可直接使用的[試用材料](../../.scratch/phase2-furniture-dimensions/study/README.md)。此紀錄只證明程式與內容**可試用**；尚未進行真實讀者教學驗收。
 
 ## 原始資料、定位與示範計算
@@ -35,6 +37,6 @@
 - `PORT=3107 npm test`：**362 passed**。其中新增的四項真瀏覽器檢查涵蓋第二張圖與 320 × 568、375 × 812、1280 × 900；既有的導讀、練習、清單列印、全圖、找找看、兩段式點擊、尺寸及 pan/zoom 回歸均包含於完整套件。Review 指出新圖的房名／面積在窄螢幕字級不足後，只調整試用頁的標籤：瀏覽器實測 320px 為 **12.5px**、375px 為 **15.2px**，並核對文字未遮住床的輪廓；共用圖面預設值未更動。
 - Chromium A4 列印預覽為**一頁**；標題、適用範圍、四題及各題理由完整，頁首操作、header、footer 不在紙面。人工檢視[列印預覽](../../.scratch/phase2-furniture-dimensions/study/verification/checklist-print.png)，以及[320px 讀者頁](../../.scratch/phase2-furniture-dimensions/study/verification/reader-narrow.jpg)、[375px 讀者頁](../../.scratch/phase2-furniture-dimensions/study/verification/reader-mobile.jpg)與[桌面讀者頁](../../.scratch/phase2-furniture-dimensions/study/verification/reader-desktop.jpg)。
 
-## 下一步
+## 原定下一步（已由公開自填試用取代）
 
 按[主持流程](../../.scratch/phase2-furniture-dimensions/study/moderator.md)為五位目標情境讀者各建一份[逐人紀錄](../../.scratch/phase2-furniture-dimensions/study/participant-record-template.md)，再填[五人彙總](../../.scratch/phase2-furniture-dimensions/study/cohort-summary-template.md)。同一位須在第二張未解過的圖上獨立完成觀察、未知資訊與對應追問；至少四位達標，且反覆誤解修正重測後，才可判定人工教學驗收通過。現在沒有這五份真實結果或招募日期。
