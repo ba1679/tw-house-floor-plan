@@ -37,7 +37,7 @@ Use the existing public Vercel production URL as the canonical host for phase on
 - [ ] Representative quiz page loads: `/layouts/3b2l_standard/quiz`.
 - [ ] `/robots.txt` is reachable.
 - [ ] `/sitemap.xml` is reachable and excludes quiz pages.
-- [ ] Shared Open Graph image is reachable: `/brand/og-home.svg`.
+- [ ] Shared Open Graph image is reachable: `/brand/og-home.png` (HTTP 200, `image/png`, decodes to 1200 × 630). The SVG remains the editable source asset.
 - [ ] Favicon is reachable: `/brand/favicon.svg`.
 - [ ] Apple touch icon is reachable: `/brand/apple-touch-icon.png`.
 - [ ] JSON-LD appears where expected: WebSite on home, DefinedTerm on symbol pages, CollectionPage on category pages, and LearningResource on floorplan pages.

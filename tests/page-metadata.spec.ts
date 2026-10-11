@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { isNoindex } from "./built-html";
 
 const BASE_URL = "https://floorplan.example.test";
-const OG_IMAGE = `${BASE_URL}/brand/og-home.svg`;
+const OG_IMAGE = `${BASE_URL}/brand/og-home.png`;
 
 type RawSymbol = {
   id: string;
@@ -93,6 +93,7 @@ function expectSharedOpenGraph(html: string, title: string, description: string,
   expect(metaContent(html, "og:site_name"), url).toBe("拼厝");
   expect(metaContent(html, "og:locale"), url).toBe("zh_TW");
   expect(metaContent(html, "og:image"), url).toBe(OG_IMAGE);
+  expect(metaContent(html, "og:image:type"), url).toBe("image/png");
   expect(metaContent(html, "og:image:width"), url).toBe("1200");
   expect(metaContent(html, "og:image:height"), url).toBe("630");
 }

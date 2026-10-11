@@ -1,13 +1,36 @@
 import { readFile, mkdir, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
+import { dirname, resolve } from "node:path";
 import type { ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import sharp from "sharp";
 import { BrandMark } from "../components/BrandMark";
-import { APPLE_TOUCH_ICON_PATH, FAVICON_PATH, OG_IMAGE_PATH } from "../lib/site-metadata";
+import { APPLE_TOUCH_ICON_PATH, FAVICON_PATH, OG_IMAGE_PATH, OG_IMAGE_SOURCE_PATH } from "../lib/site-metadata";
 import { BRAND_IMAGE_ALT, BRAND_PROMISE, SITE_NAME, SITE_PURPOSE, SITE_ROMANIZATION } from "../lib/ui/copy";
 
 async function generateBrandAssets() {
+  // PNG 在建置時定字形；Vercel／Linux 不一定有繁中字型，使用隨 repo 攜帶的字集。
+  // 只影響本程序的 raster 輸出，頁面與來源 SVG 仍使用既有系統字體堆疊。
+  const fontDirectory = resolve("scripts/brand-fonts");
+  const characters = [...new Set(SITE_NAME + SITE_ROMANIZATION + BRAND_PROMISE + SITE_PURPOSE)].sort().join("");
+  if (process.argv.includes("--refresh-fonts")) {
+    await mkdir(fontDirectory, { recursive: true });
+    for (const weight of [400, 700]) {
+      const cssResponse = await fetch(`https://fonts.googleapis.com/css?family=Noto+Sans+TC:${weight}&text=${encodeURIComponent(characters)}`);
+      if (!cssResponse.ok) throw new Error(`Brand font stylesheet: HTTP ${cssResponse.status}`);
+      const fontUrl = /url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)/.exec(await cssResponse.text())?.[1];
+      if (!fontUrl) throw new Error("Brand font download URL missing");
+      const fontResponse = await fetch(fontUrl);
+      if (!fontResponse.ok) throw new Error(`Brand font file: HTTP ${fontResponse.status}`);
+      await writeFile(`${fontDirectory}/noto-sans-tc-${weight}.ttf`, Buffer.from(await fontResponse.arrayBuffer()));
+    }
+    await writeFile(`${fontDirectory}/characters.txt`, characters + "\n");
+  }
+  const availableCharacters = await readFile(`${fontDirectory}/characters.txt`, "utf8");
+  if ([...characters].some((character) => !availableCharacters.includes(character))) {
+    throw new Error("Brand copy needs new glyphs. Run npm run generate:brand -- --refresh-fonts and commit scripts/brand-fonts.");
+  }
+  process.env.FONTCONFIG_FILE = `${fontDirectory}/fonts.conf`;
+  const { default: sharp } = await import("sharp");
+
   const css = await readFile("app/brand-tokens.css", "utf8") + await readFile("app/globals.css", "utf8");
   const tokens = new Map([...css.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map((match) => [match[1], match[2].trim()]));
 
@@ -48,7 +71,8 @@ async function generateBrandAssets() {
       <g transform="translate(825 95)" aria-hidden="true"><BrandMark variant="full" width={230} height={440} /></g>
     </svg>,
   );
-  await writeAsset(OG_IMAGE_PATH, share);
+  await writeAsset(OG_IMAGE_SOURCE_PATH, share);
+  await writeAsset(OG_IMAGE_PATH, await sharp(Buffer.from(share)).removeAlpha().png().toBuffer());
 }
 
 generateBrandAssets().catch((error: unknown) => {

@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { existsSync, readFileSync } from "node:fs";
+import sharp from "sharp";
 
 const BASE_URL = "https://floorplan.example.test";
 const HOME = "out/index.html";
@@ -31,10 +32,32 @@ function outPathFromUrl(url: string) {
 }
 
 test.describe("home metadata", () => {
+  test("分享爬蟲可從 HTML 取得可解碼的 PNG 圖片", async ({ request }) => {
+    const headers = { "User-Agent": "facebookexternalhit/1.1" };
+    const response = await request.get("/", { headers });
+    expect(response.status()).toBe(200);
+    const html = await response.text();
+    const imageUrl = metaContent(html, "og:image");
+    expect(imageUrl).toBe(`${BASE_URL}/brand/og-home.png`);
+    expect(metaContent(html, "og:image:type")).toBe("image/png");
+    expect(metaContent(html, "og:image:alt")).toBe("拼厝：由平面圖方格拼成的台灣意象");
+
+    const image = await request.get(new URL(imageUrl!).pathname, { headers });
+    expect(image.status()).toBe(200);
+    expect(image.headers()["content-type"]).toBe("image/png");
+    const buffer = await image.body();
+    const metadata = await sharp(buffer).metadata();
+    expect(metadata.format).toBe("png");
+    expect([metadata.width, metadata.height]).toEqual([1200, 630]);
+    const decoded = await sharp(buffer).raw().toBuffer({ resolveWithObject: true });
+    expect(decoded.data.byteLength).toBe(1200 * 630 * decoded.info.channels);
+    expect(buffer.byteLength).toBeLessThan(8 * 1024 * 1024);
+  });
+
   test("首頁輸出 canonical、Open Graph、JSON-LD 與圖示資產", () => {
     const html = readFileSync(HOME, "utf8");
     const canonical = BASE_URL;
-    const image = `${BASE_URL}/brand/og-home.svg`;
+    const image = `${BASE_URL}/brand/og-home.png`;
 
     expect(linkHref(html, "canonical")).toBe(canonical);
 

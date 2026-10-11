@@ -22,7 +22,8 @@ import {
   symbolPageTitle,
 } from "@/lib/ui/copy";
 
-export const OG_IMAGE_PATH = "/brand/og-home.svg";
+export const OG_IMAGE_PATH = "/brand/og-home.png";
+export const OG_IMAGE_SOURCE_PATH = "/brand/og-home.svg";
 export const FAVICON_PATH = "/brand/favicon.svg";
 export const APPLE_TOUCH_ICON_PATH = "/brand/apple-touch-icon.png";
 
@@ -55,6 +56,7 @@ export function pageMetadata({ title, description, path }: PageMetadataInput): M
       images: [
         {
           url: absoluteSiteUrl(OG_IMAGE_PATH),
+          type: "image/png",
           width: 1200,
           height: 630,
           alt: BRAND_IMAGE_ALT,
