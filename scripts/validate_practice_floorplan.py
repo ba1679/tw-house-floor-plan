@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Keep practice and study fragments reproducible and geometrically valid at build time."""
+"""Keep practice fragments reproducible and geometrically valid at build time."""
 import json
 import subprocess
 import sys
@@ -10,7 +10,6 @@ ROOT = Path(__file__).resolve().parents[1]
 GENERATOR = ROOT / ".claude/skills/floorplan-generator/scripts"
 FIGURES = (
     ("判讀練習", ROOT / "data/practice/bedroom-fragment.layout.json", ROOT / "data/practice/bedroom-fragment.floorplan.json"),
-    ("教學試用", ROOT / "data/study/bedroom-transfer.layout.json", ROOT / "data/study/bedroom-transfer.floorplan.json"),
 )
 SYMBOLS = ROOT / "data/symbols.sample.json"
 
